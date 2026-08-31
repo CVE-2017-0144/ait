@@ -1,7 +1,6 @@
 package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,8 +18,9 @@ import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.item.SonicItem;
 import dev.amble.ait.core.util.ItemNbt;
+import dev.amble.lib.platform.render.HudRenderEvents;
 
-public class SonicOverlay implements HudRenderCallback {
+public class SonicOverlay implements HudRenderEvents.HudRender {
 
     public static final ResourceLocation OVERLAY = AITMod.id("textures/gui/overlay/sonic_can_interact.png");
 

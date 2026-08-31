@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
@@ -48,6 +47,7 @@ import dev.amble.lib.container.impl.ItemContainer;
 import dev.amble.lib.datagen.lang.AmbleLanguageProvider;
 import dev.amble.lib.datagen.model.AmbleModelProvider;
 import dev.amble.lib.itemgroup.AItemGroup;
+import dev.amble.lib.platform.render.HudRenderEvents;
 import dev.amble.lib.register.AmbleRegistries;
 
 public class PlanetModule extends Module {
@@ -75,7 +75,7 @@ public class PlanetModule extends Module {
     @Environment(EnvType.CLIENT)
     @Override
     public void initClient() {
-        HudRenderCallback.EVENT.register(new SpaceSuitOverlay());
+        HudRenderEvents.HUD.register(new SpaceSuitOverlay());
     }
 
     @Override

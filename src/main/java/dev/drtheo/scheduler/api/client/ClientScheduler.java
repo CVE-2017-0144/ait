@@ -1,10 +1,10 @@
 package dev.drtheo.scheduler.api.client;
 
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.task.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.Util;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -21,7 +21,7 @@ public class ClientScheduler {
     private final Deque<Task<?>> tasks = new ConcurrentLinkedDeque<>();
 
     private ClientScheduler() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> tasks.removeIf(Task::tick));
+        ClientEvents.END_CLIENT_TICK.register(client -> tasks.removeIf(Task::tick));
     }
 
     public static void init() {

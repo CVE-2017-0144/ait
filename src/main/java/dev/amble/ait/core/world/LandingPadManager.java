@@ -1,10 +1,5 @@
 package dev.amble.ait.core.world;
 
-import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,11 +16,15 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.landing.LandingPadRegion;
+import dev.amble.lib.platform.PlayerLookup;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.lifecycle.ServerPlayerEvents;
+import dev.amble.lib.platform.registry.Attachments;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LandingPadManager {
 
-    private static final AttachmentType<LandingPadRegion> PERSISTENT = AttachmentRegistry.createPersistent(
+    private static final Attachments.Type<LandingPadRegion> PERSISTENT = Attachments.createPersistent(
             AITMod.id("landing_pads"), LandingPadRegion.CODEC
     );
 
@@ -45,7 +44,7 @@ public class LandingPadManager {
         if (chunk == null)
             return null;
 
-        return chunk.getAttached(PERSISTENT);
+        return Attachments.get(chunk, PERSISTENT);
     }
 
     @Nullable public LandingPadRegion getRegion(long pos) {
@@ -59,11 +58,11 @@ public class LandingPadManager {
     private LandingPadRegion claim(ChunkPos pos, int y) {
         LevelChunk chunk = this.world.getChunk(pos.x, pos.z);
 
-        if (chunk.hasAttached(PERSISTENT))
+        if (Attachments.has(chunk, PERSISTENT))
             throw new IllegalStateException("Region already occupied");
 
         LandingPadRegion created = new LandingPadRegion(pos, y, "");
-        chunk.setAttached(PERSISTENT, created);
+        Attachments.set(chunk, PERSISTENT, created);
 
         Network.syncTracked(Network.Action.ADD, this.world, pos);
         return created;
@@ -75,7 +74,7 @@ public class LandingPadManager {
     }
 
     private @Nullable LandingPadRegion release(ChunkPos pos) {
-        LandingPadRegion result = this.world.getChunk(pos.x, pos.z).removeAttached(PERSISTENT);
+        LandingPadRegion result = Attachments.remove(this.world.getChunk(pos.x, pos.z), PERSISTENT);
 
         Network.syncTracked(Network.Action.REMOVE, this.world, pos);
         return result;
@@ -145,11 +144,11 @@ public class LandingPadManager {
         }
 
         static {
-            ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-                syncForPlayer(Action.ADD, handler.getPlayer());
+            ServerConnectionEvents.JOIN.register((player, server) -> {
+                syncForPlayer(Action.ADD, player);
             });
 
-            ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
+            ServerPlayerEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
                 syncForPlayer(Action.CLEAR, player);
                 syncForPlayer(Action.ADD, player);
             });

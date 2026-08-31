@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +12,7 @@ import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.item.AItem;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public abstract class ItemContainer implements RegistryContainer<Item> {
 

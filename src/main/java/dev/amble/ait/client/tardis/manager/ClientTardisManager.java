@@ -7,12 +7,6 @@ import java.util.function.Consumer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.GsonBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +20,9 @@ import dev.amble.ait.core.tardis.TardisManager;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.TardisMap;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 
 public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> {
 
@@ -35,7 +32,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
     public final Multimap<UUID, Consumer<ClientTardis>> subscribers = ArrayListMultimap.create();
 
     public static void init() {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+        if (!Platform.isClient())
             throw new UnsupportedOperationException("Tried to initialize ClientTardisManager on the server!");
 
         instance = new ClientTardisManager();
@@ -51,7 +48,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
 
         AitNetworking.registerClientReceiver(SEND_COMPONENT, (client, handler, buf, responseSender) -> this.syncDelta(buf));
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        ClientEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null || client.level == null)
                 return;
 
@@ -63,8 +60,8 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.reset());
-        ClientLoginConnectionEvents.DISCONNECT.register((client, reason) -> this.reset());
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> this.reset());
+        ClientEvents.DISCONNECT.register((reason) -> this.reset());
+        ClientEvents.DISCONNECT.register((client) -> this.reset());
     }
 
     private void remove(RegistryFriendlyByteBuf buf) {

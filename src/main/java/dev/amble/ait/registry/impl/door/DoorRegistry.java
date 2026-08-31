@@ -1,7 +1,6 @@
 package dev.amble.ait.registry.impl.door;
 
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;

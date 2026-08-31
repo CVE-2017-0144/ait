@@ -7,12 +7,12 @@ import dev.amble.lib.command.PlayAnimationCommand;
 import dev.amble.lib.command.SetSkinCommand;
 import dev.amble.lib.skin.SkinTracker;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import dev.amble.lib.api.AmbleKitInitializer;
+import dev.amble.lib.platform.Entrypoints;
+import dev.amble.lib.platform.command.Commands;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
@@ -29,13 +29,12 @@ public class AmbleKit implements ModInitializer {
 		SkinTracker.init();
 		AnimationTracker.init();
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> {
+		Commands.register((dispatcher, access, env) -> {
 			SetSkinCommand.register(dispatcher);
 			PlayAnimationCommand.register(dispatcher);
 		});
 
-        FabricLoader.getInstance().invokeEntrypoints("amblekit-main", AmbleKitInitializer.class,
-                AmbleKitInitializer::onInitialize);
+        Entrypoints.invoke(AmbleKitInitializer.class, AmbleKitInitializer::onInitialize);
     }
 
     public static ResourceLocation id(String path) {

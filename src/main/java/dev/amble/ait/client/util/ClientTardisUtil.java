@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -31,6 +30,7 @@ import dev.amble.ait.core.tardis.TardisExterior;
 import dev.amble.ait.core.tardis.handler.SonicHandler;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 
 @Environment(EnvType.CLIENT)
 public class ClientTardisUtil {
@@ -61,7 +61,7 @@ public class ClientTardisUtil {
                 TardisClientEvents.ENTER_CLIENT_TARDIS.invoker().enterClientTardis(currentTardis.get().asClient());
             }
         });
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+        ClientEvents.DISCONNECT.register((client) -> {
             currentTardis = null;
         });
     }

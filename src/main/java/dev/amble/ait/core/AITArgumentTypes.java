@@ -3,10 +3,10 @@ package dev.amble.ait.core;
 import java.util.function.Supplier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.commands.argument.*;
+import dev.amble.lib.platform.command.Commands;
 
 public class AITArgumentTypes {
 
@@ -20,7 +20,7 @@ public class AITArgumentTypes {
     }
 
     private static <T extends ArgumentType<?>> void register(String name, Class<T> t, Supplier<T> supplier) {
-        ArgumentTypeRegistry.registerArgumentType(AITMod.id(name), t,
+        Commands.argumentType(AITMod.id(name), t,
                 SingletonArgumentInfo.contextFree(supplier));
     }
 }

@@ -1,7 +1,6 @@
 package dev.amble.ait.registry.impl;
 
 
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.sounds.SoundEvents;
@@ -10,6 +9,7 @@ import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.hum.DatapackHum;
 import dev.amble.ait.data.hum.Hum;
+import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class HumRegistry extends SimpleDatapackRegistry<Hum> {
@@ -31,7 +31,7 @@ public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

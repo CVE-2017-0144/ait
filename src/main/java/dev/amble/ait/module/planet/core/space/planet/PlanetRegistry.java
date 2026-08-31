@@ -1,10 +1,10 @@
 package dev.amble.ait.module.planet.core.space.planet;
 
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class PlanetRegistry extends SimpleDatapackRegistry<Planet> {
@@ -29,7 +29,7 @@ public class PlanetRegistry extends SimpleDatapackRegistry<Planet> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

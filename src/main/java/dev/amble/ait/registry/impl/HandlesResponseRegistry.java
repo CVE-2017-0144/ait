@@ -3,8 +3,6 @@ package dev.amble.ait.registry.impl;
 import java.util.HashMap;
 import java.util.List;
 
-import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ChatType;
@@ -25,6 +23,8 @@ import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.lib.platform.lifecycle.ServerPlayerEvents;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 
 /**
  * Registry for Handles responses.
@@ -32,9 +32,7 @@ import dev.amble.ait.core.world.TardisServerWorld;
  * @author james
  */
 public class HandlesResponseRegistry {
-    public static final MappedRegistry<HandlesResponse> REGISTRY = FabricRegistryBuilder
-            .createSimple(ResourceKey.<HandlesResponse>createRegistryKey(AITMod.id("handles")))
-            .buildAndRegister();
+    public static final MappedRegistry<HandlesResponse> REGISTRY = PlatformRegistries.createRegistry(ResourceKey.<HandlesResponse>createRegistryKey(AITMod.id("handles")));
     private static HashMap<String, HandlesResponse> COMMANDS_CACHE;
     public static HandlesResponse DEFAULT;
 
@@ -81,7 +79,7 @@ public class HandlesResponseRegistry {
     }
 
     public static void init() {
-        ServerMessageEvents.ALLOW_CHAT_MESSAGE.register(HandlesResponseRegistry::onChatMessage);
+        ServerPlayerEvents.ALLOW_CHAT_MESSAGE.register(HandlesResponseRegistry::onChatMessage);
 
         DEFAULT = register(new HandlesResponse() {
             @Override

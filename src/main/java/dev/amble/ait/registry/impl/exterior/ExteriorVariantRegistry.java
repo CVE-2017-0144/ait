@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -50,6 +48,7 @@ import dev.amble.ait.data.schema.exterior.variant.stallion.StallionSteelVariant;
 import dev.amble.ait.data.schema.exterior.variant.tardim.TardimDefaultVariant;
 import dev.amble.ait.data.schema.exterior.variant.tardim.TardimFireVariant;
 import dev.amble.ait.data.schema.exterior.variant.tardim.TardimSoulVariant;
+import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.DatapackRegistry;
 import dev.amble.lib.register.unlockable.UnlockableRegistry;
 
@@ -69,7 +68,7 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

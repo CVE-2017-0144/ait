@@ -5,19 +5,17 @@ import static net.minecraft.commands.Commands.literal;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.Platform;
 
 public class VersionCommand {
 
-    private static final ModContainer AIT = FabricLoader.getInstance().getModContainer(AITMod.MOD_ID).get();
-    private static final String VERSION = AIT.getMetadata().getVersion().getFriendlyString();
+    private static final String VERSION = Platform.modVersion(AITMod.MOD_ID).orElse("unknown");
 
     private static final Component LOGO = Component.literal("""
                 ::::::\\\\     ::::::::::::|| ::::::::::::::::||

@@ -5,8 +5,8 @@ import com.mojang.math.Axis;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
+import dev.amble.lib.platform.render.ClientRegistries;
 import dev.amble.plushies.MarketablePlushieBlock;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -15,7 +15,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public class PlushieDynamicItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+public class PlushieDynamicItemRenderer implements ClientRegistries.DynamicItemRenderer {
 
     @Override
     public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {

@@ -6,11 +6,11 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.KitEvents;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 
 
 // TODO: move all registries over to here
@@ -26,14 +26,14 @@ public class AmbleRegistries {
             AmbleRegistries.getInstance().subscribe(InitType.SERVER);
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (Platform.isClient()) {
             registerClientStart();
         }
     }
 
     @Environment(EnvType.CLIENT)
     private static void registerClientStart() {
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+        ClientEvents.CLIENT_STARTED.register(client -> {
             AmbleRegistries.getInstance().subscribe(InitType.CLIENT);
         });
     }
@@ -44,7 +44,7 @@ public class AmbleRegistries {
 
 
     protected void subscribe(InitType env) {
-        if (env == InitType.CLIENT && FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+        if (env == InitType.CLIENT && !Platform.isClient())
             throw new UnsupportedOperationException("Cannot call onInitializeClient while not running a client!");
 
         if (initialized.contains(env))

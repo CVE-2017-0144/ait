@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -15,13 +14,14 @@ import dev.amble.ait.core.bind.KeyBind;
 import dev.amble.ait.core.entities.FlightTardisEntity;
 import dev.amble.ait.core.item.KeyItem;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 
 public class AITKeyBinds {
 
     private static final List<KeyBind> BINDS = new ArrayList<>();
 
     public static void init() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        ClientEvents.END_CLIENT_TICK.register(client -> {
             for (KeyBind bind : BINDS)
                 bind.tick(client);
         });

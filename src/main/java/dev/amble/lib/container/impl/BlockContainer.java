@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +15,7 @@ import dev.amble.lib.block.ABlockSettings;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.item.AItem;
 import dev.amble.lib.mixin.AbstractBlockAccessor;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public abstract class BlockContainer implements RegistryContainer<Block> {
 

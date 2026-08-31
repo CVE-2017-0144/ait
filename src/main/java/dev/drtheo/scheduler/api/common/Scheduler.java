@@ -1,9 +1,9 @@
 package dev.drtheo.scheduler.api.common;
 
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.lifecycle.ServerTickEvents;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.task.*;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.Util;
 import net.minecraft.server.level.ServerLevel;
 import java.util.Deque;

@@ -3,8 +3,6 @@ package dev.amble.ait.client.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,19 +15,20 @@ import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.core.world.LandingPadManager;
 import dev.amble.ait.data.landing.LandingPadRegion;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 
 public class ClientLandingManager {
 
     private static ClientLandingManager instance;
 
     public static void init() {
-        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client)
+        ClientEvents.DISCONNECT.register(((client)
                 -> ClientLandingManager.getInstance().invalidate()));
 
-        ClientChunkEvents.CHUNK_LOAD.register((world, chunk)
+        ClientEvents.CHUNK_LOAD.register((world, chunk)
                 -> ClientLandingManager.getInstance().request(world, chunk));
 
-        ClientChunkEvents.CHUNK_UNLOAD.register((world, chunk)
+        ClientEvents.CHUNK_UNLOAD.register((world, chunk)
                 -> ClientLandingManager.getInstance().remove(chunk.getPos()));
 
         AitNetworking.registerClientReceiver(LandingPadManager.Network.SYNC, (client, handler, buf, responseSender) -> {

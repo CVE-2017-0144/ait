@@ -1,7 +1,6 @@
 package dev.amble.lib.util;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 
 public class ServerLifecycleHooks {

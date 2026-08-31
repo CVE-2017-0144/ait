@@ -10,9 +10,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.client.rendering.v1.DimensionRenderingRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -44,6 +41,9 @@ import dev.amble.ait.client.util.SkyboxUtil;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.lib.platform.render.ClientRegistries;
+import dev.amble.lib.platform.render.WorldRenderContext;
+import dev.amble.lib.platform.render.WorldRenderEvents;
 
 @Mixin(LevelRenderer.class)
 public abstract class SkyboxMixin {
@@ -230,12 +230,8 @@ public abstract class SkyboxMixin {
             return;
         }
 
-        DimensionRenderingRegistry.SkyRenderer renderer = DimensionRenderingRegistry.getSkyRenderer(skyboxWorld);
-
-        if (renderer != null) {
-            renderer.render(context);
+        if (ClientRegistries.renderCustomSky(skyboxWorld, context))
             ci.cancel();
-        }
     }
 
     @Unique private void renderOverworldSky(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera,

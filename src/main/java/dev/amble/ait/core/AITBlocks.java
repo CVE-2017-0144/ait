@@ -1,6 +1,5 @@
 package dev.amble.ait.core;
 
-
 import static dev.amble.ait.core.AITItems.*;
 
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import net.minecraft.world.level.block.*;
@@ -44,7 +42,7 @@ import dev.amble.lib.datagen.util.NoBlockDrop;
 import dev.amble.lib.datagen.util.NoEnglish;
 import dev.amble.lib.datagen.util.PickaxeMineable;
 import dev.amble.lib.item.AItemSettings;
-
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public class AITBlocks extends BlockContainer {
     public static Block SNOW_GLOBE;

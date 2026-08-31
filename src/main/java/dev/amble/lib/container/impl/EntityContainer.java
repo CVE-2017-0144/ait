@@ -6,21 +6,18 @@ import dev.amble.lib.animation.AnimatedInstance;
 import dev.amble.lib.animation.client.BedrockEntityRenderer;
 import dev.amble.lib.animation.HasBedrockModel;
 import dev.amble.lib.util.RegistrationUtil;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import dev.amble.lib.container.RegistryContainer;
+import dev.amble.lib.platform.Platform;
 import java.lang.reflect.Field;
 
 public interface EntityContainer extends RegistryContainer<EntityType<?>> {
 	@Override
 	default void postProcessField(ResourceLocation identifier, EntityType<?> value, Field field) {
-		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) return;
+		if (!Platform.isClient()) return;
 
 		// automagically register bedrock renderer
 		if (!field.isAnnotationPresent(HasBedrockModel.class)) return;

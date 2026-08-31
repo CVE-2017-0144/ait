@@ -2,12 +2,12 @@ package dev.amble.ait.core.bind;
 
 import java.util.function.Consumer;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.render.ClientRegistries;
 
 public class KeyBind {
 
@@ -36,7 +36,7 @@ public class KeyBind {
     }
 
     public void register() {
-        this.self = KeyBindingHelper.registerKeyBinding(new KeyMapping("key." + AITMod.MOD_ID + "." + name, this.type,
+        this.self = ClientRegistries.keyBinding(new KeyMapping("key." + AITMod.MOD_ID + "." + name, this.type,
                 this.code, "category." + AITMod.MOD_ID + "." + category));
     }
 

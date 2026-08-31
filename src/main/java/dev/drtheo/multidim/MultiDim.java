@@ -1,6 +1,8 @@
 package dev.drtheo.multidim;
 
 import com.mojang.serialization.Lifecycle;
+import dev.amble.lib.platform.lifecycle.ServerTickEvents;
+import dev.amble.lib.platform.lifecycle.ServerWorldEvents;
 import dev.drtheo.multidim.api.MultiDimServer;
 import dev.drtheo.multidim.api.MultiDimServerWorld;
 import dev.drtheo.multidim.api.MutableRegistry;
@@ -8,8 +10,6 @@ import dev.drtheo.multidim.api.WorldBlueprint;
 import dev.drtheo.multidim.impl.SimpleWorldProgressListener;
 import dev.drtheo.multidim.util.MultiDimUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;

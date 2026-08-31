@@ -2,11 +2,11 @@ package dev.amble.ait.api.tardis;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
 
 import dev.amble.ait.client.screens.interior.InteriorSettingsScreen;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 
 @Environment(EnvType.CLIENT)
 public class TardisClientEvents {

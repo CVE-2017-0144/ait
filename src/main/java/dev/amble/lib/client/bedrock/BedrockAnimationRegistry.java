@@ -14,11 +14,11 @@ package dev.amble.lib.client.bedrock;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.Registry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -30,13 +30,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
-public class BedrockAnimationRegistry implements SimpleSynchronousResourceReloadListener, Registry {
+public class BedrockAnimationRegistry implements SimpleReloadListener, Registry {
 	private static final BedrockAnimationRegistry INSTANCE = new BedrockAnimationRegistry();
 
 	private final Map<String, BedrockAnimation.Group> groups = new HashMap<>();
 
 	public BedrockAnimationRegistry() {
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+		ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
 	}
 
 	public BedrockAnimation get(String fileName, String animationName) {
@@ -52,7 +52,7 @@ public class BedrockAnimationRegistry implements SimpleSynchronousResourceReload
 	}
 
 	@Override
-	public ResourceLocation getFabricId() {
+	public ResourceLocation getReloadId() {
 		return AmbleKit.id("bedrock_animation");
 	}
 

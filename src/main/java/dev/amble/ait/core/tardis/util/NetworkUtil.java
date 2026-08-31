@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -30,6 +29,7 @@ import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.PlayerLookup;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class NetworkUtil {

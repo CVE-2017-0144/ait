@@ -3,8 +3,6 @@ package dev.amble.ait.core.tardis.manager;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,6 +17,8 @@ import dev.amble.ait.core.tardis.manager.old.DeprecatedServerTardisManager;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.lifecycle.ServerTickEvents;
 
 public class ServerTardisManager extends DeprecatedServerTardisManager {
 
@@ -43,8 +43,8 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
             this.sendTardisAll(player, tardisSet);
         }));
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server)
-                -> this.sendTardisAll(handler.getPlayer(), NetworkUtil.findLinkedItems(handler.getPlayer())));
+        ServerConnectionEvents.JOIN.register((player, server)
+                -> this.sendTardisAll(player, NetworkUtil.findLinkedItems(player)));
 
         if (DEMENTIA) {
             TardisEvents.UNLOAD_TARDIS.register(WorldWithTardis.forDesync((player, tardisSet) -> {

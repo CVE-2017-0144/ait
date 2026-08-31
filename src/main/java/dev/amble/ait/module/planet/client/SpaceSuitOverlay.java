@@ -1,6 +1,5 @@
 package dev.amble.ait.module.planet.client;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -15,8 +14,9 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
+import dev.amble.lib.platform.render.HudRenderEvents;
 
-public class SpaceSuitOverlay implements HudRenderCallback {
+public class SpaceSuitOverlay implements HudRenderEvents.HudRender {
 
     @Override
     public void onHudRender(GuiGraphics drawContext, DeltaTracker v) {

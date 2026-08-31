@@ -1,6 +1,5 @@
 package dev.amble.ait.module.planet.core;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.item.*;
@@ -23,6 +22,7 @@ import dev.amble.ait.module.planet.core.item.PlanetToolMaterial;
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 import dev.amble.lib.container.impl.ItemContainer;
 import dev.amble.lib.item.AItemSettings;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public class PlanetItems extends ItemContainer {
 

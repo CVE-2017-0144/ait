@@ -4,9 +4,6 @@ import java.util.*;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -34,6 +31,9 @@ import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.mixin.server.EnderDragonFightAccessor;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.lifecycle.ServerWorldEvents;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class WorldUtil {
@@ -192,7 +192,7 @@ public class WorldUtil {
     public static Component worldText(ResourceKey<Level> key) {
         Component translated = Component.translatableWithFallback(key.location().toLanguageKey("dimension"), fakeTranslate(key));
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
+        if (Platform.isClient())
             return hackWorldText(translated);
 
         return translated;

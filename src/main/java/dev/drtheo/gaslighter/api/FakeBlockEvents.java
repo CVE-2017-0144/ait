@@ -1,7 +1,7 @@
 package dev.drtheo.gaslighter.api;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

@@ -5,7 +5,6 @@ import java.util.UUID;
 import dev.drtheo.queue.api.ActionQueue;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import org.joml.Math;
 import org.joml.Vector3f;
 import net.minecraft.client.Minecraft;
@@ -31,6 +30,7 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.Loyalty;
+import dev.amble.lib.platform.Platform;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class AnimationHolder implements TardisTickable, Disposable, Linkable {
@@ -215,7 +215,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
     }
 
     private float cloakAlpha(Tardis tardis) {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+        if (!Platform.isClient())
             return 0f;
 
         return getCloakAlpha(tardis);
@@ -254,7 +254,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
      * The alpha when the handbrake & throttle is down, making the groaning noise and such.
      */
     private float handbrakeAlpha(Tardis tardis) {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+        if (!Platform.isClient())
             return 0.5f;
 
         return getHandbrakeAlpha(tardis);

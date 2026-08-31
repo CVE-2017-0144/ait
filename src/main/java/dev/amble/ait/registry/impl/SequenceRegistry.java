@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.amble.plushies.PlushieBlocks;
-import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
@@ -34,11 +33,10 @@ import dev.amble.ait.core.tardis.control.impl.waypoint.LoadWaypointControl;
 import dev.amble.ait.core.tardis.control.sequences.Sequence;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.data.DirectedBlockPos;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 
 public class SequenceRegistry {
-    public static final MappedRegistry<Sequence> REGISTRY = FabricRegistryBuilder
-            .createSimple(ResourceKey.<Sequence>createRegistryKey(AITMod.id("sequence")))
-            .buildAndRegister();
+    public static final MappedRegistry<Sequence> REGISTRY = PlatformRegistries.createRegistry(ResourceKey.<Sequence>createRegistryKey(AITMod.id("sequence")));
     private static final RandomSource random = RandomSource.create();
 
     public static Sequence register(Sequence schema) {

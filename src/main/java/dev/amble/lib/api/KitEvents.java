@@ -1,7 +1,7 @@
 package dev.amble.lib.api;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 
 public class KitEvents {
     public static final Event<PreDatapackLoad> PRE_DATAPACK_LOAD = EventFactory.createArrayBacked(PreDatapackLoad.class, callbacks -> () -> {

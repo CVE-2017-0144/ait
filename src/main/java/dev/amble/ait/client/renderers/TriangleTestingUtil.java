@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import dev.amble.lib.platform.render.WorldRenderContext;
 import org.joml.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;

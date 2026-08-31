@@ -3,11 +3,11 @@ package dev.amble.lib.client.bedrock;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.datapack.DatapackRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,11 +19,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Environment(EnvType.CLIENT)
-public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> implements SimpleSynchronousResourceReloadListener {
+public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> implements SimpleReloadListener {
 	private static final BedrockModelRegistry INSTANCE = new BedrockModelRegistry();
 
 	private BedrockModelRegistry() {
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+		ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> impleme
 	}
 
 	@Override
-	public ResourceLocation getFabricId() {
+	public ResourceLocation getReloadId() {
 		return AmbleKit.id("bedrock_model");
 	}
 

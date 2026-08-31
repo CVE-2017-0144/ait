@@ -4,13 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.util.ServerLifecycleHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -40,8 +40,8 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 	public static void init() {
 		INSTANCE = new SkinTracker();
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			getInstance().sync(handler.getPlayer());
+		ServerConnectionEvents.JOIN.register((player, server) -> {
+			getInstance().sync(player);
 		});
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -50,14 +50,14 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 
 		ServerLifecycleEvents.SERVER_STARTED.register(SkinTracker::read);
 
-		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+		if (Platform.isClient()) {
 			initClient();
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	private static void initClient() {
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+		ClientEvents.DISCONNECT.register((client) -> {
 			getInstance().clear();
 		});
 

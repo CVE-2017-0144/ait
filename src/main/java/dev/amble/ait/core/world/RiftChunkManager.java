@@ -1,8 +1,6 @@
 package dev.amble.ait.core.world;
 
 import com.mojang.serialization.Codec;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -15,6 +13,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.events.ServerChunkEvents;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.registry.Attachments;
 
 @SuppressWarnings("UnstableApiUsage")
 public record RiftChunkManager(ServerLevel world) {
@@ -22,11 +21,11 @@ public record RiftChunkManager(ServerLevel world) {
     private static final int MIN_ARTRON_AMOUNT = 2000;
     private static final int MAX_ARTRON_AMOUNT = 4000;
 
-    private static final AttachmentType<Double> ARTRON = AttachmentRegistry.createPersistent(
+    private static final Attachments.Type<Double> ARTRON = Attachments.createPersistent(
             AITMod.id("artron"), Codec.DOUBLE
     );
 
-    private static final AttachmentType<Double> MAX_ARTRON = AttachmentRegistry.createPersistent(
+    private static final Attachments.Type<Double> MAX_ARTRON = Attachments.createPersistent(
             AITMod.id("max_artron"), Codec.DOUBLE
     );
 
@@ -59,7 +58,7 @@ public record RiftChunkManager(ServerLevel world) {
         if (!(shouldBeProtoChunk instanceof ProtoChunk protoChunk))
             return 0;
 
-        return protoChunk.getAttachedOrCreate(ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
+        return Attachments.getOrCreate(protoChunk, ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
     }
 
     public double getMaxArtron(ChunkPos pos) {
@@ -71,7 +70,7 @@ public record RiftChunkManager(ServerLevel world) {
         if (!(shouldBeProtoChunk instanceof ProtoChunk protoChunk))
             return 0;
 
-        return protoChunk.getAttachedOrCreate(ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
+        return Attachments.getOrCreate(protoChunk, ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
     }
 
     public double removeFuel(ChunkPos pos, double amount) {
@@ -83,7 +82,7 @@ public record RiftChunkManager(ServerLevel world) {
 
         ChunkAccess shouldBeProtoChunk = this.world.getChunkSource().getChunk(pos.x, pos.z, ChunkStatus.STRUCTURE_STARTS, true);
         if (shouldBeProtoChunk instanceof ProtoChunk protoChunk) {
-            protoChunk.setAttached(ARTRON, artron);
+            Attachments.set(protoChunk, ARTRON, artron);
         }
         return artron - amount;
     }
@@ -99,7 +98,7 @@ public record RiftChunkManager(ServerLevel world) {
         ChunkAccess shouldBeProtoChunk = this.world.getChunkSource().getChunk(pos.x, pos.z, ChunkStatus.STRUCTURE_STARTS, true);
 
         if (shouldBeProtoChunk instanceof ProtoChunk protoChunk) {
-            protoChunk.modifyAttached(ARTRON, d -> amount);
+            Attachments.modify(protoChunk, ARTRON, d -> amount);
         }
     }
 
@@ -130,7 +129,7 @@ public record RiftChunkManager(ServerLevel world) {
         ChunkAccess shouldBeProtoChunk = world.getChunkSource().getChunk(pos.x, pos.z, ChunkStatus.STRUCTURE_STARTS, true);
 
         if (shouldBeProtoChunk instanceof ProtoChunk protoChunk) {
-            protoChunk.modifyAttached(ARTRON, d -> d + amount);
+            Attachments.modify(protoChunk, ARTRON, d -> d + amount);
         }
     }
 
@@ -143,7 +142,7 @@ public record RiftChunkManager(ServerLevel world) {
         if (!(shouldBeProtoChunk instanceof ProtoChunk protoChunk))
             return 0;
 
-        return protoChunk.getAttachedOrCreate(ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
+        return Attachments.getOrCreate(protoChunk, ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
     }
 
     public static double getMaxFuel(ServerLevel world, ChunkPos pos) {
@@ -155,6 +154,6 @@ public record RiftChunkManager(ServerLevel world) {
         if (!(shouldBeProtoChunk instanceof ProtoChunk protoChunk))
             return 0;
 
-        return protoChunk.getAttachedOrCreate(MAX_ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
+        return Attachments.getOrCreate(protoChunk, MAX_ARTRON, () -> (double) world.getRandom().nextIntBetweenInclusive(MIN_ARTRON_AMOUNT, MAX_ARTRON_AMOUNT));
     }
 }

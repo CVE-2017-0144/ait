@@ -1,7 +1,7 @@
 package dev.amble.ait.api;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 
 public class AITRegistryEvents {
     public static final Event<Defaults> EXTERIOR_DEFAULTS = EventFactory.createArrayBacked(Defaults.class, callbacks -> () -> {

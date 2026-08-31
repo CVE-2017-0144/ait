@@ -4,7 +4,6 @@ import java.util.*;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,6 +22,7 @@ import dev.amble.ait.client.screens.widget.CallbackCheckboxWidget;
 import dev.amble.ait.core.blocks.AstralMapBlock;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.util.WorldUtil;
+import dev.amble.lib.platform.Platform;
 
 @Environment(EnvType.CLIENT)
 public class AstralMapScreen extends Screen {
@@ -171,8 +171,7 @@ public class AstralMapScreen extends Screen {
         }
 
         public String getModName(String modId) {
-            return mods.computeIfAbsent(modId, id -> FabricLoader.getInstance().getModContainer(id)
-                    .map(mod -> mod.getMetadata().getName()).orElse(id));
+            return mods.computeIfAbsent(modId, id -> Platform.modName(id).orElse(id));
         }
 
         public void refreshEntries() {

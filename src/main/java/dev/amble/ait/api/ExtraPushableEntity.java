@@ -1,6 +1,6 @@
 package dev.amble.ait.api;
 
-import net.fabricmc.fabric.api.util.TriState;
+import dev.amble.lib.platform.util.TriState;
 
 public interface ExtraPushableEntity {
     void ait$setPushBehaviour(TriState pushable);

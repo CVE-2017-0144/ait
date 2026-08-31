@@ -2,19 +2,18 @@ package dev.amble.plushies;
 
 import dev.amble.lib.animation.HasBedrockModel;
 import dev.amble.lib.container.impl.BlockEntityContainer;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class PlushieBlockEntities implements BlockEntityContainer {
 
     public static final BlockEntityType<MarketablePlushieBlockEntity> MARKETABLE_PLUSHIE_BLOCK_ENTITY_TYPE =
-            FabricBlockEntityTypeBuilder.create(MarketablePlushieBlockEntity::new,
+            BlockEntityType.Builder.of(MarketablePlushieBlockEntity::new,
                     PlushieBlocks.getAllMarketablePlushies()
-            ).build();
+            ).build(null);
 
     @HasBedrockModel
     public static final BlockEntityType<GiftBoxBlockEntity> GIFT_BOX_BLOCK_ENTITY_TYPE =
-            FabricBlockEntityTypeBuilder.create(GiftBoxBlockEntity::new,
+            BlockEntityType.Builder.of(GiftBoxBlockEntity::new,
                     PlushieBlocks.GIFT_BOX
-            ).build();
+            ).build(null);
 }

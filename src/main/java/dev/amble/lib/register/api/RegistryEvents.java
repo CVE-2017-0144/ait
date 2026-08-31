@@ -1,8 +1,7 @@
 package dev.amble.lib.register.api;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
-
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.register.Registry;
 

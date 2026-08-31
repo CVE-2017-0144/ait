@@ -2,7 +2,6 @@ package dev.amble.ait.registry.impl;
 
 import java.util.List;
 
-import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -12,11 +11,10 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.handler.mood.MoodDictatedEvent;
 import dev.amble.ait.core.tardis.handler.mood.TardisMood;
 import dev.amble.ait.core.util.WorldUtil;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 
 public class MoodEventPoolRegistry {
-    public static final MappedRegistry<MoodDictatedEvent> REGISTRY = FabricRegistryBuilder
-            .createSimple(ResourceKey.<MoodDictatedEvent>createRegistryKey(AITMod.id("mood_event_pool")))
-            .buildAndRegister();
+    public static final MappedRegistry<MoodDictatedEvent> REGISTRY = PlatformRegistries.createRegistry(ResourceKey.<MoodDictatedEvent>createRegistryKey(AITMod.id("mood_event_pool")));
 
     private static final RandomSource random = RandomSource.create();
 

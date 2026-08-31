@@ -1,6 +1,5 @@
 package dev.amble.ait.core.tardis.handler;
 
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBiomeTags;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +15,7 @@ import dev.amble.ait.data.enummap.Ordered;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.worldgen.BiomeTags;
 
 /**
  * @author Loqor
@@ -72,24 +72,24 @@ public class BiomeHandler extends KeyedTardisComponent {
 
     // FIXME(PERFORMANCE)
     private static BiomeType getTagForBiome(Holder<Biome> biome) {
-        if (biome.is(ConventionalBiomeTags.SNOWY) || biome.is(ConventionalBiomeTags.SNOWY_PLAINS)
-                || biome.is(ConventionalBiomeTags.ICY))
+        if (biome.is(BiomeTags.SNOWY) || biome.is(BiomeTags.SNOWY_PLAINS)
+                || biome.is(BiomeTags.ICY))
             return BiomeType.SNOWY;
 
-        if (biome.is(ConventionalBiomeTags.DESERT) || biome.is(ConventionalBiomeTags.BEACH)
-                || biome.is(ConventionalBiomeTags.DEAD))
+        if (biome.is(BiomeTags.DESERT) || biome.is(BiomeTags.BEACH)
+                || biome.is(BiomeTags.DEAD))
             return BiomeType.SANDY;
 
-        if (biome.is(ConventionalBiomeTags.BADLANDS))
+        if (biome.is(BiomeTags.BADLANDS))
             return BiomeType.RED_SANDY;
 
-        if (biome.is(ConventionalBiomeTags.SWAMP))
+        if (biome.is(BiomeTags.SWAMP))
             return BiomeType.MUDDY;
 
-        if (biome.is(ConventionalBiomeTags.IN_THE_END))
+        if (biome.is(BiomeTags.IN_THE_END))
             return BiomeType.CHORUS;
 
-        if (biome.is(ConventionalBiomeTags.FLORAL))
+        if (biome.is(BiomeTags.FLORAL))
             return BiomeType.CHERRY;
 
         ResourceKey<Biome> biomeKey = biome.unwrapKey().orElse(null);

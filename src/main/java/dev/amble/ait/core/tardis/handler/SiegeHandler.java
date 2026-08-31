@@ -3,7 +3,6 @@ package dev.amble.ait.core.tardis.handler;
 import java.util.Objects;
 import java.util.UUID;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,6 +25,7 @@ import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.data.properties.bool.BoolProperty;
 import dev.amble.ait.data.properties.bool.BoolValue;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
 
 public class SiegeHandler extends KeyedTardisComponent implements TardisTickable {
 
@@ -56,8 +56,7 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
     static {
         TardisEvents.DEMAT.register(tardis -> tardis.siege().isActive() ? TardisEvents.Interaction.FAIL : TardisEvents.Interaction.PASS);
 
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            ServerPlayer player = handler.getPlayer();
+        ServerConnectionEvents.DISCONNECT.register((player, server) -> {
 
             ServerTardisManager.getInstance().forEach(tardis -> {
                 if (!tardis.siege().isActive())

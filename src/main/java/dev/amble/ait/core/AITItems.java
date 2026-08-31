@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.*;
@@ -39,6 +37,8 @@ import dev.amble.ait.core.item.part.MachinePartItem;
 import dev.amble.lib.container.impl.ItemContainer;
 import dev.amble.lib.datagen.util.NoEnglish;
 import dev.amble.lib.item.AItemSettings;
+import dev.amble.lib.platform.itemgroup.ItemGroupEntries;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public class AITItems extends ItemContainer {
 
@@ -247,7 +247,7 @@ public class AITItems extends ItemContainer {
         return getAdventDates(month, Calendar.JANUARY, day, 6);
     }
 
-    private static void addDrinks(FabricItemGroupEntries entries) {
+    private static void addDrinks(ItemGroupEntries entries) {
         DrinkRegistry.getInstance().toList().stream()/*.filter(entry -> entry != DrinkRegistry.EMPTY_MUG)*/
                 .map(entry -> DrinkUtil.setDrink(new ItemStack(AITItems.MUG),
                         entry)).forEach(stack -> entries.accept(stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));

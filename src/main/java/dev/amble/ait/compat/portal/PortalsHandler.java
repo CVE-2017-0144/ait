@@ -2,8 +2,6 @@ package dev.amble.ait.compat.portal;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.Packet;
@@ -31,6 +29,8 @@ import dev.amble.ait.registry.impl.TardisComponentRegistry;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedBlockPos;
 import dev.amble.lib.data.DirectedGlobalPos;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.render.ClientRegistries;
 
 public class PortalsHandler extends KeyedTardisComponent {
 
@@ -84,8 +84,8 @@ public class PortalsHandler extends KeyedTardisComponent {
             if (tdis.door().isOpen()) handler.generatePortals();
         });
 
-        ServerPlayConnectionEvents.JOIN.register((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
-            serverPlayNetworkHandler.send(MiscNetworking.DimIdSyncPacket.createPacket(minecraftServer));
+        ServerConnectionEvents.JOIN.register((player, server) -> {
+            player.connection.send(MiscNetworking.DimIdSyncPacket.createPacket(server));
         });
 
         PortalVisualizerUtil.init();
@@ -100,7 +100,7 @@ public class PortalsHandler extends KeyedTardisComponent {
         PortalVisualizerUtil.clientInit();
 
         if (TardisPortal.ENTITY_TYPE != null)
-            EntityRendererRegistry.register(TardisPortal.ENTITY_TYPE, PortalEntityRenderer::new);
+            ClientRegistries.entityRenderer(TardisPortal.ENTITY_TYPE, PortalEntityRenderer::new);
     }
 
     public TardisPortal getInterior() {

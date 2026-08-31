@@ -13,7 +13,6 @@ import dev.drtheo.scheduler.api.common.TaskStage;
 import dev.drtheo.scheduler.api.task.Task;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -48,6 +47,7 @@ import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.core.world.RiftChunkManager;
 import dev.amble.ait.data.Exclude;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.Platform;
 
 public final class TravelHandler extends AnimatedTravelHandler implements CrashableTardisTravel {
 
@@ -148,7 +148,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
             tardis.travel().setAnimationFor(state, id);
         })));
 
-        if (EnvType.CLIENT == FabricLoader.getInstance().getEnvironmentType()) initializeClient();
+        if (Platform.isClient()) initializeClient();
     }
 
     @Environment(EnvType.CLIENT)

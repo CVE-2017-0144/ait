@@ -1,6 +1,5 @@
 package dev.amble.ait.mixin;
 
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -25,6 +24,7 @@ import dev.amble.ait.core.util.SafePosSearch;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.util.TriState;
 import dev.amble.lib.util.TeleportUtil;
 
 @Mixin(LivingEntity.class)

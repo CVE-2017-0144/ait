@@ -1,7 +1,5 @@
 package dev.amble.ait.registry.impl.exterior;
 
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,10 +49,12 @@ import dev.amble.ait.data.schema.exterior.variant.tardim.client.ClientTardimDefa
 import dev.amble.ait.data.schema.exterior.variant.tardim.client.ClientTardimFireVariant;
 import dev.amble.ait.data.schema.exterior.variant.tardim.client.ClientTardimSoulVariant;
 import dev.amble.lib.client.bedrock.BedrockModelRegistry;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.datapack.DatapackRegistry;
 
 public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteriorVariantSchema> implements
-        SimpleSynchronousResourceReloadListener {
+        SimpleReloadListener {
 
     private static final ClientExteriorVariantRegistry INSTANCE = new ClientExteriorVariantRegistry();
 
@@ -316,14 +316,14 @@ public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteri
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public ResourceLocation getReloadId() {
         return AITMod.id("client_exterior");
     }
 
     @Override
     public void onCommonInit() {
         super.onCommonInit();
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

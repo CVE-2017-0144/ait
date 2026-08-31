@@ -8,7 +8,7 @@ import dev.amble.ait.core.blockentities.UntemperedSchismBlockEntity;
 import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.blocks.UntemperedSchismBlock;
 import dev.amble.ait.core.tardis.Tardis;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import dev.amble.lib.platform.render.HudRenderEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import java.awt.*;
 
-public class UntemperedSchismOverlay implements HudRenderCallback {
+public class UntemperedSchismOverlay implements HudRenderEvents.HudRender {
 
     @Override
     public void onHudRender(GuiGraphics drawContext, DeltaTracker delta) {

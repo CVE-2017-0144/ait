@@ -11,10 +11,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,12 +25,16 @@ import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.AnimationKeyframe;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.KeyframeTracker;
 import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 
 // TODO - replace this with the better BedrockAnimation stuff when i can be bothered.
 public class BlockbenchParser implements
-        SimpleSynchronousResourceReloadListener {
+        SimpleReloadListener {
     private static final ResourceLocation SYNC = AITMod.id("blockbench_sync");
 
     private final HashMap<ResourceLocation, Result> tardisAnimations = new HashMap<>();
@@ -42,7 +42,7 @@ public class BlockbenchParser implements
     private static final BlockbenchParser instance = new BlockbenchParser();
 
     private BlockbenchParser() {
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
+        ReloadListeners.register(PackType.SERVER_DATA, this);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> this.sync(player));
     }
 
@@ -51,7 +51,7 @@ public class BlockbenchParser implements
     }
 
     public static void init() {
-        if (EnvType.CLIENT == FabricLoader.getInstance().getEnvironmentType()) initClient();
+        if (Platform.isClient()) initClient();
     }
 
     @Environment(EnvType.CLIENT)
@@ -119,7 +119,7 @@ public class BlockbenchParser implements
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public ResourceLocation getReloadId() {
         return AITMod.id("blockbench_parser");
     }
 

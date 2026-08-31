@@ -1,7 +1,6 @@
 package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -14,8 +13,9 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import dev.amble.ait.core.entities.FlightTardisEntity;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.lib.platform.render.HudRenderEvents;
 
-public class RWFOverlay implements HudRenderCallback {
+public class RWFOverlay implements HudRenderEvents.HudRender {
     private static final int ALPHA_GRAY = FastColor.ARGB32.color(125, 255, 255, 255);
     @Override
     public void onHudRender(GuiGraphics drawContext, DeltaTracker tickDelta) {

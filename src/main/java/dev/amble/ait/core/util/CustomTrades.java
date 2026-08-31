@@ -1,6 +1,5 @@
 package dev.amble.ait.core.util;
 
-import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.ItemCost;
@@ -9,12 +8,13 @@ import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITVillagers;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 import java.util.Optional;
 
 public class CustomTrades {
     public static void register() {
         // Level 1
-        TradeOfferHelper.registerVillagerOffers(AITVillagers.FABRICATOR_ENGINEER, 1, factories -> {
+        PlatformRegistries.villagerTrades(AITVillagers.FABRICATOR_ENGINEER, 1, factories -> {
             factories.add((entity, random) -> new MerchantOffer(
                     new ItemCost(Items.EMERALD, 3 + random.nextInt(3)),
                     new ItemStack(AITItems.RIFT_SCANNER, 1),
@@ -32,7 +32,7 @@ public class CustomTrades {
         });
 
         // Level 2
-        TradeOfferHelper.registerVillagerOffers(AITVillagers.FABRICATOR_ENGINEER, 2, factories -> {
+        PlatformRegistries.villagerTrades(AITVillagers.FABRICATOR_ENGINEER, 2, factories -> {
             factories.add((entity, random) -> new MerchantOffer(
                     new ItemCost(Items.EMERALD, 4),
                     new ItemStack(AITItems.ARTRON_FLUID_LINK, 1),
@@ -55,7 +55,7 @@ public class CustomTrades {
         });
 
         // Level 3
-        TradeOfferHelper.registerVillagerOffers(AITVillagers.FABRICATOR_ENGINEER, 3, factories -> {
+        PlatformRegistries.villagerTrades(AITVillagers.FABRICATOR_ENGINEER, 3, factories -> {
             factories.add((entity, random) -> new MerchantOffer(
                     new ItemCost(Items.EMERALD, 2 + random.nextInt(2)),
                     Optional.of(new ItemCost(AITItems.SUPERHEATED_ZEITON, 1)),
@@ -80,7 +80,7 @@ public class CustomTrades {
         });
 
         // Level 4
-        TradeOfferHelper.registerVillagerOffers(AITVillagers.FABRICATOR_ENGINEER, 4, factories -> {
+        PlatformRegistries.villagerTrades(AITVillagers.FABRICATOR_ENGINEER, 4, factories -> {
             factories.add((entity, random) -> new MerchantOffer(
                     new ItemCost(Items.EMERALD, 5 + random.nextInt(2)),
                     Optional.of(new ItemCost(AITItems.ZEITON_SHARD, 1)),
@@ -110,7 +110,7 @@ public class CustomTrades {
         });
 
         // Level 5
-        TradeOfferHelper.registerVillagerOffers(AITVillagers.FABRICATOR_ENGINEER, 5, factories -> {
+        PlatformRegistries.villagerTrades(AITVillagers.FABRICATOR_ENGINEER, 5, factories -> {
             factories.add((entity, random) -> new MerchantOffer(
                     new ItemCost(Items.EMERALD, 17),
                     new ItemStack(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE, 1),

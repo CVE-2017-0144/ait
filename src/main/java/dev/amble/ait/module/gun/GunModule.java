@@ -3,8 +3,6 @@ package dev.amble.ait.module.gun;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
@@ -28,6 +26,8 @@ import dev.amble.lib.container.impl.ItemContainer;
 import dev.amble.lib.datagen.lang.AmbleLanguageProvider;
 import dev.amble.lib.datagen.model.AmbleModelProvider;
 import dev.amble.lib.itemgroup.AItemGroup;
+import dev.amble.lib.platform.render.ClientRegistries;
+import dev.amble.lib.platform.render.HudRenderEvents;
 
 public class GunModule extends Module {
     private static final GunModule INSTANCE = new GunModule();
@@ -43,8 +43,8 @@ public class GunModule extends Module {
 
     @Override
     public void initClient() {
-        HudRenderCallback.EVENT.register(new ScopeOverlay());
-        EntityRendererRegistry.register(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, StaserBoltEntityRenderer::new);
+        HudRenderEvents.HUD.register(new ScopeOverlay());
+        ClientRegistries.entityRenderer(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, StaserBoltEntityRenderer::new);
 
         ItemProperties.register(GunItems.CULT_STASER_RIFLE, ResourceLocation.parse("ads"),
                 (itemStack, clientWorld, livingEntity, integer) -> {

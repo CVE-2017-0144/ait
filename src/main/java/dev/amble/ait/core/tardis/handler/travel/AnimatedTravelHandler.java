@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import net.minecraft.client.Minecraft;
@@ -19,6 +18,7 @@ import dev.amble.ait.core.tardis.animation.v2.datapack.TardisAnimationRegistry;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
+import dev.amble.lib.platform.Platform;
 
 public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
     private static final Property<ResourceLocation> DEMAT_FX = new Property<>(Property.IDENTIFIER, "demat_fx", TardisAnimationRegistry.DEFAULT_DEMAT);
@@ -30,7 +30,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
     private boolean isAnimationInvalidated;
 
     static {
-        if (EnvType.CLIENT == FabricLoader.getInstance().getEnvironmentType()) initClient();
+        if (Platform.isClient()) initClient();
     }
 
     @Environment(EnvType.CLIENT)

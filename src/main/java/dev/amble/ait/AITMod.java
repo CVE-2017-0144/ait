@@ -9,16 +9,7 @@ import java.util.UUID;
 
 import dev.drtheo.multidim.MultiDim;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -94,6 +85,14 @@ import dev.amble.ait.registry.impl.console.variant.ConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.door.DoorRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.container.RegistryContainer;
+import dev.amble.lib.platform.Entrypoints;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.command.Commands;
+import dev.amble.lib.platform.interaction.PlayerInteractionEvents;
+import dev.amble.lib.platform.loot.LootEvents;
+import dev.amble.lib.platform.registry.PlatformGameRules;
+import dev.amble.lib.platform.registry.PlatformRegistries;
+import dev.amble.lib.platform.worldgen.BiomeModifications;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
@@ -104,21 +103,18 @@ public class AITMod implements ModInitializer {
     public static final Random RANDOM = new Random();
 
     public static AITServerConfig CONFIG;
-    public static final GameRules.Key<GameRules.BooleanValue> STASER_GRIEFING = GameRuleRegistry.register("staserGriefing",
-            GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
+    public static final GameRules.Key<GameRules.BooleanValue> STASER_GRIEFING = PlatformGameRules.registerBoolean("staserGriefing", GameRules.Category.MISC, true);
 
-    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_GRIEFING = GameRuleRegistry.register("tardisGriefing",
-            GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
+    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_GRIEFING = PlatformGameRules.registerBoolean("tardisGriefing", GameRules.Category.MISC, true);
 
-    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_FIRE_GRIEFING = GameRuleRegistry.register("tardisFireGriefing",
-            GameRules.Category.MISC, GameRuleFactory.createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_FIRE_GRIEFING = PlatformGameRules.registerBoolean("tardisFireGriefing", GameRules.Category.MISC, false);
 
 
     public static final ResourceKey<PlacedFeature> CUSTOM_GEODE_PLACED_KEY = ResourceKey.create(Registries.PLACED_FEATURE,
             ResourceLocation.fromNamespaceAndPath(MOD_ID, "zeiton_geode"));
 
     // This DefaultParticleType gets called when you want to use your particle in code.
-    public static final SimpleParticleType CORAL_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType CORAL_PARTICLE = PlatformRegistries.simpleParticle();
 
     // This is the Crater feature that generates in the world. It's made with AI so it sucks lol
     public static final Crater CRATER = new Crater(ProbabilityFeatureConfiguration.CODEC);
@@ -127,7 +123,7 @@ public class AITMod implements ModInitializer {
 
     static {
         // 1.x.xx-[BRANCH-]dev+mc.1.20.1
-        String version = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().getFriendlyString();
+        String version = Platform.modVersion(MOD_ID).orElse("unknown");
         // get the part of the version string between the - and +
         BRANCH = version.substring(version.indexOf("-") + 1, version.indexOf("+"));
     }
@@ -190,8 +186,7 @@ public class AITMod implements ModInitializer {
         registerParticles();
 
         // For all the addon devs
-        FabricLoader.getInstance().invokeEntrypoints("ait-main", AITModInitializer.class,
-                AITModInitializer::onInitializeAIT);
+        Entrypoints.invoke(AITModInitializer.class, AITModInitializer::onInitializeAIT);
 
         HandlesResponseRegistry.init();
 
@@ -228,7 +223,7 @@ public class AITMod implements ModInitializer {
 
         Registry.register(net.minecraft.core.registries.BuiltInRegistries.FEATURE, CRATER_ID, CRATER);
 
-        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> {
+        Commands.register(((dispatcher, registryAccess, environment) -> {
             TeleportInteriorCommand.register(dispatcher);
             SummonTardisCommand.register(dispatcher);
             SetLockedCommand.register(dispatcher);
@@ -354,8 +349,8 @@ public class AITMod implements ModInitializer {
             });
         });
 
-        LootTableEvents.MODIFY.register((id, tableBuilder, source, registries) -> {
-            if (source.isBuiltin()
+        LootEvents.MODIFY.register((id, tableBuilder, builtin, registries) -> {
+            if (builtin
                     && (id == BuiltInLootTables.NETHER_BRIDGE || id == BuiltInLootTables.DESERT_PYRAMID
                     || id == BuiltInLootTables.VILLAGE_ARMORER || id == BuiltInLootTables.RUINED_PORTAL)
                     || id.equals(BuiltInLootTables.END_CITY_TREASURE) || id.equals(BuiltInLootTables.SHIPWRECK_MAP)
@@ -375,7 +370,7 @@ public class AITMod implements ModInitializer {
             }
         });
 
-        UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
+        PlayerInteractionEvents.USE_BLOCK.register((player, world, hand, hit) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (!(stack.getItem() instanceof SonicItem)) return InteractionResult.PASS;
 
@@ -408,10 +403,10 @@ public class AITMod implements ModInitializer {
     }
 
     public void entityAttributeRegister() {
-        FabricDefaultAttributeRegistry.register(AITEntityTypes.RIFT_ENTITY,
+        PlatformRegistries.attributes(AITEntityTypes.RIFT_ENTITY,
                 RiftEntity.createMobAttributes());
 
-        FabricDefaultAttributeRegistry.register(AITEntityTypes.FLIGHT_TARDIS_TYPE,
+        PlatformRegistries.attributes(AITEntityTypes.FLIGHT_TARDIS_TYPE,
                 FlightTardisEntity.createDummyAttributes());
     }
 

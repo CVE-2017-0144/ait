@@ -1,10 +1,10 @@
 package dev.amble.ait.api;
 
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import dev.amble.lib.platform.event.Event;
+import dev.amble.lib.platform.event.EventFactory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +19,7 @@ public class ClientWorldEvents {
             });
 
     static {
-        ClientPlayConnectionEvents.JOIN.register((handler, packetSender, client) -> {
+        ClientEvents.JOIN.register((client) -> {
             client.execute(() -> {
                 ClientWorldEvents.CHANGE_WORLD.invoker().onChange(client, client.level);
             });

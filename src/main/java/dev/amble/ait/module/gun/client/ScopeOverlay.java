@@ -1,6 +1,5 @@
 package dev.amble.ait.module.gun.client;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,8 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.module.gun.core.item.StaserRifleItem;
+import dev.amble.lib.platform.render.HudRenderEvents;
 
-public class ScopeOverlay implements HudRenderCallback {
+public class ScopeOverlay implements HudRenderEvents.HudRender {
 
     private static final ResourceLocation SPYGLASS_SCOPE = AITMod.id("textures/gui/overlay/scope.png");
     private int scaledWidth, scaledHeight;

@@ -4,8 +4,6 @@ import dev.amble.ait.AITMod;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.animation.BedrockModelProvider;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;

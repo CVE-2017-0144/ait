@@ -14,15 +14,6 @@ import dev.amble.ait.client.overlays.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.*;
-import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -106,6 +97,14 @@ import dev.amble.ait.registry.impl.console.ConsoleRegistry;
 import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
 import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import dev.amble.lib.platform.clientlifecycle.ClientInputEvents;
+import dev.amble.lib.platform.command.Commands;
+import dev.amble.lib.platform.render.ClientRegistries;
+import dev.amble.lib.platform.render.HudRenderEvents;
+import dev.amble.lib.platform.render.WorldRenderContext;
+import dev.amble.lib.platform.render.WorldRenderEvents;
+import dev.amble.lib.platform.resource.BuiltinPacks;
 import dev.amble.lib.register.AmbleRegistries;
 
 @Environment(value = EnvType.CLIENT)
@@ -144,7 +143,7 @@ public class AITModClient implements ClientModInitializer {
         registerItemColors();
         registerParticles();
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+        Commands.Client.register((dispatcher, registryAccess) -> {
             ConfigCommand.register(dispatcher);
             DebugCommand.register(dispatcher);
         });
@@ -153,13 +152,13 @@ public class AITModClient implements ClientModInitializer {
 
         ClientLandingManager.init();
 
-        HudRenderCallback.EVENT.register(new SonicOverlay());
-        HudRenderCallback.EVENT.register(new RWFOverlay());
-        HudRenderCallback.EVENT.register(new FabricatorOverlay());
-        HudRenderCallback.EVENT.register(new ExteriorAxeOverlay());
-        HudRenderCallback.EVENT.register(new UntemperedSchismOverlay());
+        HudRenderEvents.HUD.register(new SonicOverlay());
+        HudRenderEvents.HUD.register(new RWFOverlay());
+        HudRenderEvents.HUD.register(new FabricatorOverlay());
+        HudRenderEvents.HUD.register(new ExteriorAxeOverlay());
+        HudRenderEvents.HUD.register(new UntemperedSchismOverlay());
 
-        ClientPreAttackCallback.EVENT.register((client, player, clickCount) -> (player.getMainHandItem().getItem() instanceof BaseGunItem));
+        ClientInputEvents.PRE_ATTACK.register((client, player, clickCount) -> (player.getMainHandItem().getItem() instanceof BaseGunItem));
 
         if (DependencyChecker.hasIris()) {
             WorldRenderEvents.END.register(this::exteriorBOTI);
@@ -178,7 +177,7 @@ public class AITModClient implements ClientModInitializer {
         WorldRenderEvents.END.register(context -> BOTI.clearAll());
 
         // @TODO idk why but this gets rid of other important stuff, not sure
-        DimensionRenderingRegistry.registerDimensionEffects(AITDimensions.MARS.location(), new MarsSkyProperties());
+        ClientRegistries.dimensionEffects(AITDimensions.MARS.location(), new MarsSkyProperties());
 
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
             Tardis tardis = ClientTardisUtil.getCurrentTardis();
@@ -276,7 +275,7 @@ public class AITModClient implements ClientModInitializer {
         ClientTardisUtil.init();
 
         WorldRenderEvents.END.register((context) -> SonicRendering.getInstance().renderWorld(context));
-        HudRenderCallback.EVENT.register((context, delta) -> SonicRendering.getInstance()
+        HudRenderEvents.HUD.register((context, delta) -> SonicRendering.getInstance()
                 .renderGui(context, delta.getGameTimeDeltaPartialTick(true)));
 
         SonicModelLoader.init();
@@ -289,8 +288,8 @@ public class AITModClient implements ClientModInitializer {
             });
         });
 
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> BOTI.tryWarn(client));
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> BOTICache.clear());
+        ClientEvents.JOIN.register((client) -> BOTI.tryWarn(client));
+        ClientEvents.DISCONNECT.register((client) -> BOTICache.clear());
 
         AitGravity.clientInit();
         BOTIDataS2CPacket.init();
@@ -451,46 +450,44 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void entityRenderRegister() {
-        EntityRendererRegistry.register(AITEntityTypes.CONTROL_ENTITY_TYPE, ControlEntityRenderer::new);
-        EntityRendererRegistry.register(AITEntityTypes.FALLING_TARDIS_TYPE, FallingTardisRenderer::new);
-        EntityRendererRegistry.register(AITEntityTypes.FLIGHT_TARDIS_TYPE, FlightTardisRenderer::new);
-        EntityRendererRegistry.register(AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE, GallifreyanPaintingEntityRenderer::new);
-        EntityRendererRegistry.register(AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE, TrenzalorePaintingEntityRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.CONTROL_ENTITY_TYPE, ControlEntityRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.FALLING_TARDIS_TYPE, FallingTardisRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.FLIGHT_TARDIS_TYPE, FlightTardisRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE, GallifreyanPaintingEntityRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE, TrenzalorePaintingEntityRenderer::new);
 //        if (isUnlockedOnThisDay(Calendar.DECEMBER, 26)) {
-//            EntityRendererRegistry.register(AITEntityTypes.COBBLED_SNOWBALL_TYPE, FlyingItemEntityRenderer::new);
 //        }
-        EntityRendererRegistry.register(AITEntityTypes.RIFT_ENTITY, RiftEntityRenderer::new);
+        ClientRegistries.entityRenderer(AITEntityTypes.RIFT_ENTITY, RiftEntityRenderer::new);
     }
 
     public static void setupBlockRendering() {
-        BlockRenderLayerMap map = BlockRenderLayerMap.INSTANCE;
-        map.putBlock(AITBlocks.ZEITON_BLOCK, RenderType.cutout());
-        map.putBlock(AITBlocks.BUDDING_ZEITON, RenderType.cutout());
-        map.putBlock(AITBlocks.ENGINE_BLOCK, RenderType.cutout());
-        map.putBlock(AITBlocks.ZEITON_CLUSTER, RenderType.cutout());
-        map.putBlock(AITBlocks.LARGE_ZEITON_BUD, RenderType.cutout());
-        map.putBlock(AITBlocks.MEDIUM_ZEITON_BUD, RenderType.cutout());
-        map.putBlock(AITBlocks.SMALL_ZEITON_BUD, RenderType.cutout());
-        map.putBlock(AITBlocks.MACHINE_CASING, RenderType.cutout());
-        map.putBlock(AITBlocks.FABRICATOR, RenderType.translucent());
-        map.putBlock(AITBlocks.ENVIRONMENT_PROJECTOR, RenderType.cutout());
-        map.putBlock(AITBlocks.WAYPOINT_BANK, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.ZEITON_BLOCK, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.BUDDING_ZEITON, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.ENGINE_BLOCK, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.ZEITON_CLUSTER, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.LARGE_ZEITON_BUD, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.MEDIUM_ZEITON_BUD, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.SMALL_ZEITON_BUD, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.MACHINE_CASING, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.FABRICATOR, RenderType.translucent());
+        ClientRegistries.blockRenderLayer(AITBlocks.ENVIRONMENT_PROJECTOR, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.WAYPOINT_BANK, RenderType.cutout());
         if (isUnlockedOnThisDay(Calendar.DECEMBER, 30)) {
-            map.putBlock(AITBlocks.SNOW_GLOBE, RenderType.cutout());
+            ClientRegistries.blockRenderLayer(AITBlocks.SNOW_GLOBE, RenderType.cutout());
         }
-        map.putBlock(AITBlocks.TARDIS_CORAL_BLOCK, RenderType.cutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_FAN, RenderType.cutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_WALL, RenderType.cutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_FENCE, RenderType.cutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_LEAVES, RenderType.cutout());
-        map.putBlock(AITBlocks.MATRIX_ENERGIZER, RenderType.cutout());
-        map.putBlock(AITBlocks.GENERIC_SUBSYSTEM, RenderType.cutout());
-        map.putBlock(AITBlocks.POTTED_SONIC_SCREWDRIVER, RenderType.cutout());
-        map.putBlock(AITBlocks.ARTRON_COLLECTOR_BLOCK, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.TARDIS_CORAL_BLOCK, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.TARDIS_CORAL_FAN, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.TARDIS_CORAL_WALL, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.TARDIS_CORAL_FENCE, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.TARDIS_CORAL_LEAVES, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.MATRIX_ENERGIZER, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.GENERIC_SUBSYSTEM, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.POTTED_SONIC_SCREWDRIVER, RenderType.cutout());
+        ClientRegistries.blockRenderLayer(AITBlocks.ARTRON_COLLECTOR_BLOCK, RenderType.cutout());
     }
 
     public void registerItemColors() {
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+        ClientRegistries.itemColor((stack, tintIndex) -> {
                     if (tintIndex != 0)
                         return -1;
 
@@ -499,10 +496,10 @@ public class AITModClient implements ClientModInitializer {
                     return colorToInt(integers[0], integers[1], integers[2]);
                 }, AITItems.TARDIS_MATRIX);
 
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex > 0 ? -1 :
+        ClientRegistries.itemColor((stack, tintIndex) -> tintIndex > 0 ? -1 :
                 DrinkUtil.getColor(stack), AITItems.MUG);
 
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+        ClientRegistries.itemColor((stack, tintIndex) -> {
             if (tintIndex != 0)
                 return -1;
 
@@ -511,7 +508,7 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public void registerParticles() {
-        ParticleFactoryRegistry.getInstance().register(CORAL_PARTICLE, EndRodParticle.Provider::new);
+        ClientRegistries.particle(CORAL_PARTICLE, EndRodParticle.Provider::new);
     }
 
     public static boolean skipBuiltInBOTI() {
@@ -670,15 +667,7 @@ public class AITModClient implements ClientModInitializer {
     public static void resourcepackRegister() {
 
         // Register builtin resourcepacks (thank you addie for your help)
-        FabricLoader.getInstance().
-
-                getModContainer("ait").
-
-                ifPresent(modContainer ->
-
-                {
-                    ResourceManagerHelper.registerBuiltinResourcePack(id("aitmenu"), modContainer, ResourcePackActivationType.DEFAULT_ENABLED);
-                    ResourceManagerHelper.registerBuiltinResourcePack(id("bushy_leaves"), modContainer, ResourcePackActivationType.NORMAL);
-                });
+        BuiltinPacks.register(AITMod.MOD_ID, id("aitmenu"), true);
+        BuiltinPacks.register(AITMod.MOD_ID, id("bushy_leaves"), false);
     }
 }

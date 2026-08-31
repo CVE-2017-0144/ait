@@ -4,10 +4,6 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,11 +12,15 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.Identifiable;
+import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 public abstract class SimpleDatapackRegistry<T extends Identifiable> extends DatapackRegistry<T>
         implements
-            SimpleSynchronousResourceReloadListener {
+            SimpleReloadListener {
 
     private final Function<InputStream, T> deserializer;
     private final Codec<T> codec;
@@ -74,7 +74,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
             });
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+        ClientEvents.DISCONNECT.register((client) -> {
             this.clearCache();
             this.defaults();
         });
@@ -87,7 +87,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     public void onCommonInit() {
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
+        ReloadListeners.register(PackType.SERVER_DATA, this);
 
         if (!this.sync)
             return;
@@ -141,7 +141,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public ResourceLocation getReloadId() {
         return SimpleDatapackRegistry.this.name;
     }
 

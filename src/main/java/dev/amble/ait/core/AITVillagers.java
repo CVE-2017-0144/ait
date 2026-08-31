@@ -1,7 +1,6 @@
 package dev.amble.ait.core;
 
 import com.google.common.collect.ImmutableSet;
-import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -11,6 +10,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.level.block.Block;
 import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 
 public class AITVillagers {
     public static final ResourceKey<PoiType> FABRICATOR_ENGINEER_POI_KEY = poiKey("fabricator_engineer_poi");
@@ -26,7 +26,7 @@ public class AITVillagers {
     }
 
     private static PoiType registerPoi(String name, Block block) {
-        return PointOfInterestHelper.register(AITMod.id(name), 1, 1, block);
+        return PlatformRegistries.pointOfInterest(AITMod.id(name), 1, 1, block);
     }
 
     private static ResourceKey<PoiType> poiKey(String name) {

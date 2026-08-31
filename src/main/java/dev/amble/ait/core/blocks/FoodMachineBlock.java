@@ -1,7 +1,6 @@
 package dev.amble.ait.core.blocks;
 
 import com.mojang.serialization.MapCodec;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
@@ -41,6 +40,7 @@ import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.FoodMachineBlockEntity;
 import dev.amble.ait.core.drinks.DrinkRegistry;
 import dev.amble.ait.core.drinks.DrinkUtil;
+import dev.amble.lib.platform.interaction.PlayerInteractionEvents;
 
 public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
     public static final int MAX_ROTATION_INDEX = RotationSegment.getMaxSegmentIndex();
@@ -132,7 +132,7 @@ public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     {
-        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+        PlayerInteractionEvents.ATTACK_BLOCK.register((player, world, hand, pos, direction) -> {
             BlockEntity be = world.getBlockEntity(pos);
             if (!(be instanceof FoodMachineBlockEntity machine)) return InteractionResult.PASS;
             if (!machine.isPoweredOn()) return InteractionResult.PASS;

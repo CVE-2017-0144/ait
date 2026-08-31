@@ -1,9 +1,9 @@
 package dev.amble.ait.compat;
 
 import com.mojang.blaze3d.platform.GlUtil;
+import dev.amble.lib.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 
 public class DependencyChecker {
 
@@ -17,7 +17,7 @@ public class DependencyChecker {
     private static Boolean MAC_OS;
 
     public static boolean doesModExist(String modid) {
-        return FabricLoader.getInstance().isModLoaded(modid);
+        return Platform.isModLoaded(modid);
     }
 
     public static boolean hasPortals() {

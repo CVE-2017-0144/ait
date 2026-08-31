@@ -1,6 +1,5 @@
 package dev.amble.ait.core.tardis.control.sound;
 
-import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -11,15 +10,14 @@ import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.control.impl.*;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
     private static final ControlSoundRegistry instance = new ControlSoundRegistry();
 
-    public static final MappedRegistry<ControlSound> FALLBACKS = FabricRegistryBuilder
-            .createSimple(ResourceKey.<ControlSound>createRegistryKey(AITMod.id("control_sound_fallback")))
-            .buildAndRegister();
+    public static final MappedRegistry<ControlSound> FALLBACKS = PlatformRegistries.createRegistry(ResourceKey.<ControlSound>createRegistryKey(AITMod.id("control_sound_fallback")));
 
     public ControlSoundRegistry() {
         super(ControlSound::fromInputStream, ControlSound.CODEC, "control_sounds", true, AITMod.MOD_ID);

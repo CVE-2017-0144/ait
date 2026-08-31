@@ -57,10 +57,17 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
+			"dev.drtheo.scheduler.SchedulerMod",
+			"dev.drtheo.multidim.MultiDimMod",
+			"dev.amble.lib.AmbleKit",
+			"dev.amble.plushies.Plushies",
 			"dev.amble.ait.AITMod",
 			"dev.amble.ait.compat.permissionapi.PermissionAPICompat"
 		],
 		"client": [
+			"dev.drtheo.scheduler.client.SchedulerClientMod",
+			"dev.amble.lib.client.AmbleKitClient",
+			"dev.amble.plushies.client.PlushiesClient",
 			"dev.amble.ait.client.AITModClient",
 			"dev.amble.ait.compat.Compat"
 		],
@@ -87,6 +94,10 @@
 		]
 	},
 	"mixins": [
+		"scheduler.mixins.json",
+		"queue.mixins.json",
+		"multidim.mixins.json",
+		"amblekit.mixins.json",
 		"ait.mixins.json",
 		"gaslighter.mixins.json",
 		"planet.mixins.json",
@@ -98,8 +109,7 @@
 		"minecraft": "${minecraft_version}",
 		"java": ">=17",
 		"fabric-api": "*",
-		"yet_another_config_lib_v3": ">=${yacl_version}",
-		"amblekit": ">=1.1.16-dev+mc.1.20.1"
+		"yet_another_config_lib_v3": ">=${yacl_version}"
 	},
 	"suggests": {
 		"k9-mod": "*",

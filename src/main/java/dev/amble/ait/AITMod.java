@@ -77,6 +77,7 @@ import dev.amble.ait.core.tardis.control.sound.ControlSoundRegistry;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
 import dev.amble.ait.core.tardis.util.TardisUtil;
+import dev.amble.ait.core.tardis.util.network.c2s.BOTIChunkRequestC2SPacket;
 import dev.amble.ait.core.tardis.vortex.reference.VortexReferenceRegistry;
 import dev.amble.ait.core.util.CustomTrades;
 import dev.amble.ait.core.util.StackUtil;
@@ -215,6 +216,7 @@ public class AITMod implements ModInitializer {
 
         WorldUtil.init();
         TardisUtil.init();
+        BOTIChunkRequestC2SPacket.init();
 
         ServerTardisManager.init();
         TardisCriterions.init();

@@ -12,6 +12,7 @@ import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.DyeColorUtil;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
+import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.Vec3;
 
 public class TardisExteriorBOTI extends BOTI {
@@ -101,6 +103,11 @@ public class TardisExteriorBOTI extends BOTI {
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
+
+        if (tardis.door().isOpen())
+            BOTICache.render(tardis.getUuid(), exterior.getBlockPos(),
+                    RotationSegment.convertToDegrees(exterior.getBlockState().getValue(ExteriorBlock.ROTATION)),
+                    stack);
 
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));

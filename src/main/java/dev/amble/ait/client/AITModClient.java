@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.*;
+import dev.amble.ait.client.boti.BOTICache;
 import dev.amble.ait.client.commands.ConfigCommand;
 import dev.amble.ait.client.commands.DebugCommand;
 import dev.amble.ait.client.config.AITClientConfig;
@@ -92,6 +93,8 @@ import dev.amble.ait.core.entities.RiftEntity;
 import dev.amble.ait.core.item.*;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.util.network.s2c.BOTIDataS2CPacket;
+import dev.amble.ait.core.tardis.util.network.s2c.BOTISyncS2CPacket;
 import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
@@ -286,6 +289,10 @@ public class AITModClient implements ClientModInitializer {
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> BOTI.tryWarn(client));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> BOTICache.clear());
+
+        BOTIDataS2CPacket.init();
+        BOTISyncS2CPacket.init();
 
         BetaVerification.init();
     }

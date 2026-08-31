@@ -1,6 +1,5 @@
 package dev.amble.ait.mixin.client.rendering;
 
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,8 +11,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
 
 @Mixin(HumanoidArmorLayer.class)
 public abstract class ArmorFeatureRendererMixin<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>>
@@ -22,8 +21,10 @@ public abstract class ArmorFeatureRendererMixin<T extends LivingEntity, M extend
         super(context);
     }
 
-    @Inject(at = @At("HEAD"), method = "renderModel", cancellable = true)
-    private void ait$renderArmor(PoseStack matrices, MultiBufferSource vertexConsumers, int light, ArmorItem item, A model, boolean secondTextureLayer, float red, float green, float blue, @Nullable String overlay, CallbackInfo ci) {
-        if (item instanceof RenderableArmorItem armor && armor.hasCustomRendering()) ci.cancel();
+    @Inject(at = @At("HEAD"), method = "renderArmorPiece", cancellable = true)
+    private void ait$renderArmor(PoseStack matrices, MultiBufferSource vertexConsumers, T entity, EquipmentSlot slot,
+            int light, A model, CallbackInfo ci) {
+        if (entity.getItemBySlot(slot).getItem() instanceof RenderableArmorItem armor && armor.hasCustomRendering())
+            ci.cancel();
     }
 }

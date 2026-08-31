@@ -15,8 +15,8 @@ import net.minecraft.client.renderer.LevelRenderer;
 @Mixin(value = LevelRenderer.class, priority = 1001)
 public abstract class CloudMixin {
 
-    @Inject(method="renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
-    private void ait$renderClouds(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
+    @Inject(method="renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
+    private void ait$renderClouds(PoseStack matrices, Matrix4f frustumMatrix, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.player == null)

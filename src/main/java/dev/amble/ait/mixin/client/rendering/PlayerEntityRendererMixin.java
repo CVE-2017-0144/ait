@@ -79,8 +79,8 @@ public abstract class PlayerEntityRendererMixin
         }
     }
 
-    @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
-    public void ait$render(AbstractClientPlayer abstractClientPlayerEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, float partialTick, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At("HEAD"), cancellable = true)
+    public void ait$render(AbstractClientPlayer abstractClientPlayerEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, CallbackInfo ci) {
         if (abstractClientPlayerEntity.getVehicle() instanceof FlightTardisEntity) {
             ci.cancel();
         }

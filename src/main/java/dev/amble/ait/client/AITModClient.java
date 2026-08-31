@@ -90,6 +90,7 @@ import dev.amble.ait.core.drinks.DrinkRegistry;
 import dev.amble.ait.core.drinks.DrinkUtil;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
 import dev.amble.ait.core.entities.RiftEntity;
+import dev.amble.ait.core.gravity.AitGravity;
 import dev.amble.ait.core.item.*;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
@@ -291,6 +292,7 @@ public class AITModClient implements ClientModInitializer {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> BOTI.tryWarn(client));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> BOTICache.clear());
 
+        AitGravity.clientInit();
         BOTIDataS2CPacket.init();
         BOTISyncS2CPacket.init();
 

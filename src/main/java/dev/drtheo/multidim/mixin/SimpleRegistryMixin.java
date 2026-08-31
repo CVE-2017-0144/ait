@@ -1,18 +1,16 @@
 package dev.drtheo.multidim.mixin;
 
-import com.mojang.serialization.Lifecycle;
 import dev.drtheo.multidim.api.MutableRegistry;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import org.jetbrains.annotations.Nullable;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
 import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -23,19 +21,17 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T> {
 
     @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
 
-    @Shadow @Final private Object2IntMap<T> toId;
+    @Shadow @Final private Reference2IntMap<T> toId;
 
     @Shadow @Final private ObjectList<Holder.Reference<T>> byId;
 
     @Shadow @Final private Map<ResourceKey<T>, Holder.Reference<T>> byKey;
 
-    @Shadow @Final private Map<T, Lifecycle> lifecycles;
-
-    @Shadow @Nullable private List<Holder.Reference<T>> holdersInOrder;
+    @Shadow @Final private Map<ResourceKey<T>, RegistrationInfo> registrationInfos;
 
     @Shadow private boolean frozen;
 
-    @Shadow public abstract Holder.Reference<T> register(ResourceKey<T> key, T entry, Lifecycle lifecycle);
+    @Shadow public abstract Holder.Reference<T> register(ResourceKey<T> key, T entry, RegistrationInfo info);
 
     @Shadow public abstract boolean containsKey(ResourceKey<T> key);
 
@@ -53,11 +49,8 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T> {
             this.byLocation.remove(registryEntry.key().location());
             this.byKey.remove(registryEntry.key());
 
-            this.lifecycles.remove(entry);
+            this.registrationInfos.remove(registryEntry.key());
             this.byValue.remove(entry);
-
-            if (this.holdersInOrder != null)
-                this.holdersInOrder.remove(registryEntry);
 
             return true;
         } catch (Throwable e) {
@@ -94,7 +87,7 @@ public abstract class SimpleRegistryMixin<T> implements MutableRegistry<T> {
     }
 
     @Override
-    public Holder.Reference<T> multidim$add(ResourceKey<T> key, T entry, Lifecycle lifecycle) {
-        return this.register(key, entry, lifecycle);
+    public Holder.Reference<T> multidim$add(ResourceKey<T> key, T entry, RegistrationInfo info) {
+        return this.register(key, entry, info);
     }
 }

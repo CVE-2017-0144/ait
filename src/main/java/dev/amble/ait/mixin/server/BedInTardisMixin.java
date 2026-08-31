@@ -5,7 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,8 +23,8 @@ import dev.amble.ait.data.Loyalty;
 
 @Mixin(BedBlock.class)
 public class BedInTardisMixin {
-    @Inject(at = @At("HEAD"), method = "use")
-    private void ait$useOn(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    @Inject(at = @At("HEAD"), method = "useWithoutItem")
+    private void ait$useOn(BlockState state, Level world, BlockPos pos, Player player,
                            BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         if (world.isClientSide()) { this.onClientSleep(player); }
     }

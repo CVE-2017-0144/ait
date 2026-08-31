@@ -53,6 +53,7 @@ import dev.amble.ait.client.screens.widget.IconButtonWidget;
 import dev.amble.ait.client.screens.widget.SwitcherManager;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.sounds.flight.FlightSound;
@@ -328,7 +329,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         context.pose().popPose();
 
         // TODO: this is a fucking nightmare
-        int buttonIndex = 3;
+        int buttonIndex = DependencyChecker.hasGravity() ? 4 : 3;
 
         // arrow buttons (hum/misc screen)
         if (!this.buttons.get(buttonIndex).isHovered())

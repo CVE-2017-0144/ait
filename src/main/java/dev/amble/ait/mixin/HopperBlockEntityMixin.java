@@ -17,11 +17,17 @@ import net.minecraft.world.level.block.state.BlockState;
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin {
 
-    @Inject(method = "ejectItems(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/Container;)Z",
+    @Inject(method = "ejectItems(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/HopperBlockEntity;)Z",
             at = @At("HEAD"), cancellable = true)
     private static void ait$insertIntoConsumableBlock(
-            Level world, BlockPos pos, BlockState state, Container inventory, CallbackInfoReturnable<Boolean> cir
+            Level world, BlockPos pos, HopperBlockEntity hopper, CallbackInfoReturnable<Boolean> cir
     ) {
+        BlockState state = world.getBlockState(pos);
+
+        if (!(state.getBlock() instanceof HopperBlock))
+            return;
+
+        Container inventory = hopper;
         Direction direction = state.getValue(HopperBlock.FACING);
         BlockPos targetPos = pos.relative(direction);
         BlockState targetState = world.getBlockState(targetPos);

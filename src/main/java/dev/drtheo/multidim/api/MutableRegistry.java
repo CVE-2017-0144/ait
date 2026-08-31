@@ -1,7 +1,7 @@
 package dev.drtheo.multidim.api;
 
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -14,5 +14,5 @@ public interface MutableRegistry<T> {
     boolean multidim$isFrozen();
 
     boolean multidim$contains(ResourceKey<T> key);
-    Holder.Reference<T> multidim$add(ResourceKey<T> key, T entry, Lifecycle lifecycle);
+    Holder.Reference<T> multidim$add(ResourceKey<T> key, T entry, RegistrationInfo info);
 }

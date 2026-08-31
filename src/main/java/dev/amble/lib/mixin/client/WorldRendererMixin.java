@@ -6,6 +6,7 @@ import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.animation.client.AnimationMetadata;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -30,8 +31,12 @@ public class WorldRendererMixin {
 	private RenderBuffers renderBuffers;
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;checkPoseStack(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ordinal = 0))
-	public void render(PoseStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f projectionMatrix, CallbackInfo ci) {
+	public void render(DeltaTracker tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
 		if (!(camera.getEntity() instanceof AnimatedEntity animated)) return;
+
+		float tickDelta = tickCounter.getGameTimeDeltaPartialTick(true);
+		PoseStack matrices = new PoseStack();
+		matrices.mulPose(frustumMatrix);
 
 		BedrockAnimation anim = BedrockAnimation.getFor(animated);
 		

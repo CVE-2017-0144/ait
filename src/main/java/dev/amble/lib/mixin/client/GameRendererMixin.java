@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -15,7 +16,7 @@ import net.minecraft.client.renderer.GameRenderer;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 	@Inject(method="render", at=@At("HEAD"))
-	private void amble$renderGame(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+	private void amble$renderGame(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
 		LocalPlayer player = Minecraft.getInstance().player;
 
 		if (player != null) {

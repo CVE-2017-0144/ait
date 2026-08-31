@@ -29,7 +29,7 @@ public abstract class CameraMixin {
 	protected abstract void setPosition(Vec3 pos);
 
 	@Shadow
-	protected abstract void move(double x, double y, double z);
+	protected abstract void move(float x, float y, float z);
 
 	@Shadow
 	public abstract float getYRot();
@@ -41,7 +41,7 @@ public abstract class CameraMixin {
 	public abstract Quaternionf rotation();
 
 	@Shadow
-	protected abstract double getMaxZoom(double desiredCameraDistance);
+	protected abstract float getMaxZoom(float desiredCameraDistance);
 
 	@Inject(method="setup", at=@At("TAIL"))
 	private void amble$update(BlockGetter area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
@@ -86,7 +86,7 @@ public abstract class CameraMixin {
 		Vec3 pos = position.yRot((float)Math.toRadians(90)).scale(-1 / 16F);
 		this.setRotation(yaw, 0);
 		// todo \/ the clipping causes the camera to break when on ground
-		this.move(getMaxZoom(pos.x), getMaxZoom(pos.y), getMaxZoom(pos.z));
+		this.move(getMaxZoom((float) pos.x), getMaxZoom((float) pos.y), getMaxZoom((float) pos.z));
 		this.setRotation(animYaw + yaw, animPitch);
 	}
 }

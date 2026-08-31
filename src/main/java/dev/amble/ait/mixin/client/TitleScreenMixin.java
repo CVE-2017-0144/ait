@@ -31,7 +31,7 @@ public abstract class TitleScreenMixin extends Screen {
     );
 
     // This modifies the panorama in the background
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V", ordinal = 0))
+    @Redirect(method = "renderPanorama", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(Lnet/minecraft/client/gui/GuiGraphics;IIFF)V", ordinal = 0))
     private void something(PanoramaRenderer instance, GuiGraphics graphics, int mouseX, int mouseY, float delta, float alpha) {
         boolean isConfigEnabled = AITModClient.CONFIG.customMenu;
 

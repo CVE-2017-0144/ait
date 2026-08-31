@@ -10,6 +10,7 @@ import dev.drtheo.multidim.util.MultiDimUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -155,7 +156,7 @@ public class MultiDim {
                 .unwrapKey().map(ResourceKey::location).orElse(blueprint.id()));
 
         if (!dimensionsRegistry.multidim$contains(key))
-            dimensionsRegistry.multidim$add(key, options, Lifecycle.stable());
+            dimensionsRegistry.multidim$add(key, options, RegistrationInfo.BUILT_IN);
 
         if (wasFrozen)
             dimensionsRegistry.multidim$freeze();

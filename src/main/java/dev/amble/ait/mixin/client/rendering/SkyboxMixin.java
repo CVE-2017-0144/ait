@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -75,9 +76,9 @@ public abstract class SkyboxMixin {
     private @Nullable VertexBuffer darkBuffer;
 
     @Shadow
-    public abstract void renderLevel(PoseStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline,
-                                Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager,
-                                Matrix4f projectionMatrix);
+    public abstract void renderLevel(DeltaTracker tickCounter, boolean renderBlockOutline, Camera camera,
+                                GameRenderer gameRenderer, LightTexture lightmapTextureManager,
+                                Matrix4f frustumMatrix, Matrix4f projectionMatrix);
 
     @Shadow protected abstract void createStars();
 
@@ -108,11 +109,14 @@ public abstract class SkyboxMixin {
         }
     }
 
-    @Inject(method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
-    public void ait$renderSky(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera,
+    @Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
+    public void ait$renderSky(Matrix4f frustumMatrix, Matrix4f projectionMatrix, float tickDelta, Camera camera,
                               boolean thickFog, Runnable fogCallback, CallbackInfo ci) {
         if (this.level == null)
             return;
+
+        PoseStack matrices = new PoseStack();
+        matrices.mulPose(frustumMatrix);
 
         if (this.needsSkyboxReinit && ClientTardisUtil.getCurrentTardis() != null) {
             this.needsSkyboxReinit = false;

@@ -84,6 +84,10 @@ public class PortalsHandler extends KeyedTardisComponent {
             if (tdis.door().isOpen()) handler.generatePortals();
         });
 
+        ServerPlayConnectionEvents.JOIN.register((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
+            serverPlayNetworkHandler.send(MiscNetworking.DimIdSyncPacket.createPacket(minecraftServer));
+        });
+
         PortalVisualizerUtil.init();
     }
 

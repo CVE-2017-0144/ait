@@ -49,6 +49,10 @@ public abstract class BlockContainer implements RegistryContainer<Block> {
         Item item = this.createBlockItem(value, itemSettings);
         Registry.register(BuiltInRegistries.ITEM, identifier, item);
 
+        // neo fills BY_BLOCK only in its own phase, asItem() is air before
+        if (item instanceof BlockItem blockItem)
+            blockItem.registerBlocks(Item.BY_BLOCK, item);
+
         this.items.add(item);
     }
 

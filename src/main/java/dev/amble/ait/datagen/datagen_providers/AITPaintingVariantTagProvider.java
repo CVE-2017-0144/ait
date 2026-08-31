@@ -18,6 +18,8 @@ public class AITPaintingVariantTagProvider extends TagsProvider<PaintingVariant>
 
     @Override
     protected void addTags(HolderLookup.Provider arg) {
-        this.tag(PaintingVariantTags.PLACEABLE).add(AITPaintings.CRAB_THROWER).add(AITPaintings.PEANUT);
+        this.tag(PaintingVariantTags.PLACEABLE)
+                .addOptional(AITPaintings.CRAB_THROWER.location())
+                .addOptional(AITPaintings.PEANUT.location());
     }
 }

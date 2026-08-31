@@ -1,24 +1,32 @@
 package dev.amble.lib.platform.datagen;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.gson.JsonElement;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.blockstates.BlockStateGenerator;
+import net.minecraft.data.models.model.DelegatedModel;
+import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
+// no vanilla missing-blockstate throw, only our blocks get generated
 public abstract class PlatformModelProvider implements DataProvider {
 
     private final PackOutput.PathProvider blockStatePath;
@@ -37,20 +45,40 @@ public abstract class PlatformModelProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput output) {
         Map<Block, BlockStateGenerator> blockStates = new HashMap<>();
         Map<ResourceLocation, Supplier<JsonElement>> models = new HashMap<>();
-        List<Item> skipped = new ArrayList<>();
+        Set<Item> skipped = new HashSet<>();
 
         this.generateBlockStateModels(new BlockModelGenerators(
-                generator -> blockStates.put(generator.getBlock(), generator), models::put, skipped::add));
+                g -> blockStates.put(g.getBlock(), g), models::put, skipped::add));
         this.generateItemModels(new ItemModelGenerators(models::put));
 
-        List<CompletableFuture<?>> written = new ArrayList<>();
+        BuiltInRegistries.BLOCK.forEach(block -> {
+            if (!blockStates.containsKey(block))
+                return;
 
-        blockStates.forEach((block, generator) -> written.add(DataProvider.saveStable(output, generator.get(),
-                this.blockStatePath.json(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block)))));
-        models.forEach((id, json) -> written.add(DataProvider.saveStable(output, json.get(),
-                this.modelPath.json(id))));
+            Item item = Item.BY_BLOCK.get(block);
 
-        return CompletableFuture.allOf(written.toArray(CompletableFuture[]::new));
+            if (item == null || skipped.contains(item))
+                return;
+
+            ResourceLocation id = ModelLocationUtils.getModelLocation(item);
+
+            if (!models.containsKey(id))
+                models.put(id, new DelegatedModel(ModelLocationUtils.getModelLocation(block)));
+        });
+
+        return CompletableFuture.allOf(
+                this.saveCollection(output, blockStates,
+                        block -> this.blockStatePath.json(block.builtInRegistryHolder().key().location())),
+                this.saveCollection(output, models, this.modelPath::json));
+    }
+
+    private <T> CompletableFuture<?> saveCollection(CachedOutput output,
+            Map<T, ? extends Supplier<JsonElement>> entries, Function<T, Path> path) {
+        List<CompletableFuture<?>> fs = new ArrayList<>();
+
+        entries.forEach((k, v) -> fs.add(DataProvider.saveStable(output, v.get(), path.apply(k))));
+
+        return CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new));
     }
 
     @Override

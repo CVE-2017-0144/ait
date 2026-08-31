@@ -14,9 +14,7 @@ import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class ItemGroupEvents {
-
-    private ItemGroupEvents() {}
+public class ItemGroupEvents {
 
     public interface Modify {
         void modify(ItemGroupEntries entries);
@@ -36,18 +34,18 @@ public final class ItemGroupEvents {
             });
 
     static {
-        IEventBus modBus = Platform.modBus();
+        IEventBus bus = Platform.modBus();
 
-        if (modBus != null)
-            modBus.addListener(BuildCreativeModeTabContentsEvent.class, event -> {
-                ItemGroupEntries entries = wrap(event);
+        if (bus != null)
+            bus.addListener(BuildCreativeModeTabContentsEvent.class, e -> {
+                ItemGroupEntries entries = wrap(e);
 
-                Event<Modify> forTab = EVENTS.get(event.getTabKey());
+                Event<Modify> ev = EVENTS.get(e.getTabKey());
 
-                if (forTab != null)
-                    forTab.invoker().modify(entries);
+                if (ev != null)
+                    ev.invoker().modify(entries);
 
-                MODIFY_ENTRIES_ALL.invoker().modify(event.getTab(), entries);
+                MODIFY_ENTRIES_ALL.invoker().modify(e.getTab(), entries);
             });
     }
 
@@ -64,16 +62,35 @@ public final class ItemGroupEvents {
         return new ItemGroupEntries() {
             @Override
             public void accept(ItemStack stack, CreativeModeTab.TabVisibility visibility) {
+                // blocks w/o an item come in as air, neoforge throws on it
+                if (stack.isEmpty())
+                    return;
+
                 event.accept(stack, visibility);
             }
 
             @Override
             public void addAfter(ItemLike after, ItemLike... items) {
-                ItemStack anchor = new ItemStack(after);
+                // insertAfter needs the exact stack, variants carry components
+                ItemStack anchor = null;
+
+                for (ItemStack s : event.getParentEntries()) {
+                    if (s.getItem() == after.asItem())
+                        anchor = s;
+                }
 
                 for (ItemLike item : items) {
                     ItemStack stack = new ItemStack(item);
-                    event.insertAfter(anchor, stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+
+                    if (stack.isEmpty())
+                        continue;
+
+                    if (anchor == null || anchor.isEmpty()) {
+                        event.accept(stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    } else {
+                        event.insertAfter(anchor, stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    }
+
                     anchor = stack;
                 }
             }

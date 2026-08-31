@@ -54,8 +54,8 @@ public class AITItemTagProvider extends IntrinsicHolderTagsProvider<Item> {
                 AITBlocks.TARDIS_CORAL_BLOCK.asItem(), AITBlocks.TARDIS_CORAL_SLAB.asItem(),
                 AITBlocks.TARDIS_CORAL_FAN.asItem(), AITBlocks.TARDIS_CORAL_STAIRS.asItem(),
                 AITItems.CORAL_FRAGMENT);
-        tag(AITTags.Items.IS_TARDIS_FUEL).addTag(ItemTags.LOGS_THAT_BURN);
-        tag(AITTags.Items.IS_TARDIS_FUEL).addTag(ItemTags.COALS);
+        tag(AITTags.Items.IS_TARDIS_FUEL).addOptionalTag(ItemTags.LOGS_THAT_BURN.location());
+        tag(AITTags.Items.IS_TARDIS_FUEL).addOptionalTag(ItemTags.COALS.location());
         tag(AITTags.Items.IS_TARDIS_FUEL).add(Items.LAVA_BUCKET);
 
         // Rifts

@@ -17,9 +17,7 @@ import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
 @OnlyIn(Dist.CLIENT)
-public final class ClientEvents {
-
-    private ClientEvents() {}
+public class ClientEvents {
 
     public interface Tick {
         void onTick(Minecraft client);
@@ -42,58 +40,57 @@ public final class ClientEvents {
     }
 
     public static final Event<Tick> END_CLIENT_TICK = EventFactory.createArrayBacked(Tick.class,
-            callbacks -> client -> {
-                for (Tick callback : callbacks) {
-                    callback.onTick(client);
+            cbs -> client -> {
+                for (Tick cb : cbs) {
+                    cb.onTick(client);
                 }
             });
 
     public static final Event<Started> CLIENT_STARTED = EventFactory.createArrayBacked(Started.class,
-            callbacks -> client -> {
-                for (Started callback : callbacks) {
-                    callback.onClientStarted(client);
+            cbs -> client -> {
+                for (Started cb : cbs) {
+                    cb.onClientStarted(client);
                 }
             });
 
     public static final Event<Join> JOIN = EventFactory.createArrayBacked(Join.class,
-            callbacks -> client -> {
-                for (Join callback : callbacks) {
-                    callback.onPlayReady(client);
+            cbs -> client -> {
+                for (Join cb : cbs) {
+                    cb.onPlayReady(client);
                 }
             });
 
     public static final Event<Disconnect> DISCONNECT = EventFactory.createArrayBacked(Disconnect.class,
-            callbacks -> client -> {
-                for (Disconnect callback : callbacks) {
-                    callback.onPlayDisconnect(client);
+            cbs -> client -> {
+                for (Disconnect cb : cbs) {
+                    cb.onPlayDisconnect(client);
                 }
             });
 
     public static final Event<Chunk> CHUNK_LOAD = EventFactory.createArrayBacked(Chunk.class,
-            callbacks -> (world, chunk) -> {
-                for (Chunk callback : callbacks) {
-                    callback.onChunk(world, chunk);
+            cbs -> (world, chunk) -> {
+                for (Chunk cb : cbs) {
+                    cb.onChunk(world, chunk);
                 }
             });
 
     public static final Event<Chunk> CHUNK_UNLOAD = EventFactory.createArrayBacked(Chunk.class,
-            callbacks -> (world, chunk) -> {
-                for (Chunk callback : callbacks) {
-                    callback.onChunk(world, chunk);
+            cbs -> (world, chunk) -> {
+                for (Chunk cb : cbs) {
+                    cb.onChunk(world, chunk);
                 }
             });
 
     static {
-        bootstrap();
-    }
-
-    private static void bootstrap() {
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class,
                 event -> END_CLIENT_TICK.invoker().onTick(Minecraft.getInstance()));
         NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingIn.class,
                 event -> JOIN.invoker().onPlayReady(Minecraft.getInstance()));
-        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingOut.class,
-                event -> DISCONNECT.invoker().onPlayDisconnect(Minecraft.getInstance()));
+        // null player = world switch, not a disconnect
+        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingOut.class, event -> {
+            if (event.getPlayer() != null)
+                DISCONNECT.invoker().onPlayDisconnect(Minecraft.getInstance());
+        });
 
         NeoForge.EVENT_BUS.addListener(ChunkEvent.Load.class, event -> {
             if (event.getLevel() instanceof ClientLevel world && event.getChunk() instanceof LevelChunk chunk)

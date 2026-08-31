@@ -3,6 +3,7 @@ package dev.amble.lib.animation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 import dev.amble.lib.client.bedrock.BedrockModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
+import java.util.UUID;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +13,15 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface AnimatedEntity extends EntityAccess, AnimatedInstance {
+	@Override
+	default UUID getUuid() {
+		if (this instanceof Entity entity) {
+			return entity.getUUID();
+		}
+
+		throw new UnsupportedOperationException("getUuid() is only supported for Entity instances. Override this method");
+	}
+
 	@Override
 	default int getAge() {
 		if (this instanceof Entity entity) {

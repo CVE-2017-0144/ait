@@ -54,7 +54,7 @@ neoForge {
         }
 
         data {
-            clientData()
+            data()
 
             programArguments.addAll('--mod', project.mod_id, '--all',
                     '--output', file('src/main/generated').absolutePath,

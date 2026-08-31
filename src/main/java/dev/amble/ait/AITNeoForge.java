@@ -40,8 +40,9 @@ public final class AITNeoForge {
             new PermissionAPICompat().onInitialize();
         });
 
-        modBus.addListener(GatherDataEvent.class, event -> new AITModDataGenerator()
-                .onInitializeDataGenerator(new PlatformDataGenerator(event, AITMod.MOD_ID)));
+        modBus.addListener(GatherDataEvent.class, event -> RegistryFreeze.withRegistriesUnfrozen(
+                () -> new AITModDataGenerator()
+                        .onInitializeDataGenerator(new PlatformDataGenerator(event, AITMod.MOD_ID))));
 
         if (Platform.isClient())
             RegistryFreeze.withRegistriesUnfrozen(() -> Client.init(container));

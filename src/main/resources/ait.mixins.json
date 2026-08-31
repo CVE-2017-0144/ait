@@ -54,8 +54,7 @@
     "client.rendering.framebuffer.MixinMainFramebufferTarget",
     "client.rendering.framebuffer.MixinRenderFramebufferTarget",
     "client.sonic.SonicItemRendererMixin",
-    "client.sonic.SonicModelLoaderWrapperMixin",
-    "compat.portals.ClientTeleportationManagerMixin"
+    "client.sonic.SonicModelLoaderWrapperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

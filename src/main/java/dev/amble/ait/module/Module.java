@@ -13,6 +13,7 @@ import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -37,6 +38,10 @@ public abstract class Module implements Identifiable {
 
     protected Item register(Item item, ResourceLocation id) {
         Registry.register(BuiltInRegistries.ITEM, id, item);
+
+        if (item instanceof BlockItem blockItem)
+            blockItem.registerBlocks(Item.BY_BLOCK, item);
+
         return item;
     }
     protected SoundEvent register(SoundEvent sound, ResourceLocation id) {

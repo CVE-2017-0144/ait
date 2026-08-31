@@ -24,7 +24,8 @@ public final class BuiltinPacks {
             if (event.getPackType() != PackType.CLIENT_RESOURCES)
                 return;
 
-            event.addPackFinders(id, PackType.CLIENT_RESOURCES,
+            event.addPackFinders(ResourceLocation.fromNamespaceAndPath(id.getNamespace(),
+                            "resourcepacks/" + id.getPath()), PackType.CLIENT_RESOURCES,
                     Component.translatable("resourcePack." + id.getPath() + ".name"),
                     PackSource.BUILT_IN, enabledByDefault, Pack.Position.TOP);
         });

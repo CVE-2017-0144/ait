@@ -8,6 +8,7 @@ import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -46,6 +47,10 @@ public class PlushieBlocks extends BlockContainer {
 
             Item item = self.createBlockItem(block, settings.itemSettings());
             Registry.register(BuiltInRegistries.ITEM, id, item);
+
+            if (item instanceof BlockItem blockItem)
+                blockItem.registerBlocks(Item.BY_BLOCK, item);
+
             self.items.add(item);
 
             MARKETABLE_PLUSHIES.add(block);

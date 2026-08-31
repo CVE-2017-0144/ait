@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.platform.datagen.PlatformDataOutput;
@@ -85,8 +86,12 @@ public class AmbleSoundProvider implements DataProvider {
         });
 
         JsonObject soundsJson = new JsonObject();
-        sounds.forEach((soundName, soundEvents) ->
-                soundsJson.add(soundName, serializeSounds(soundEvents)));
+        sounds.forEach((soundName, soundEvents) -> {
+            JsonObject entry = this.serializeSounds(soundEvents);
+
+            if (!entry.getAsJsonArray("sounds").isEmpty())
+                soundsJson.add(soundName, entry);
+        });
 
         return DataProvider.saveStable(writer, soundsJson, getOutputPath());
     }
@@ -101,14 +106,19 @@ public class AmbleSoundProvider implements DataProvider {
         return "Sound Definitions";
     }
 
-    private static JsonObject serializeSounds(Iterable<SoundEventWrapper> wrappers) {
+    private JsonObject serializeSounds(Iterable<SoundEventWrapper> wrappers) {
         JsonObject obj = new JsonObject();
         JsonArray sounds = new JsonArray();
 
         //tardis/moody/moody,tardis/moody/moody1,tardis/moody/moody2 =>
-        //tardis/moody/moody:[tardis/moody/moody, tardis/moody/moody1, tardis/moody/moody2]
+        //tardis/moody/moody:[tardis/moody/moody1, tardis/moody/moody2]
         for (SoundEventWrapper wrapper : wrappers) {
-            sounds.add(wrapper.event.getLocation().toString());
+            // grouping events have no ogg
+            ResourceLocation id = wrapper.event.getLocation();
+            if (this.dataOutput.findResource("assets/" + id.getNamespace() + "/sounds/" + id.getPath() + ".ogg").isEmpty())
+                continue;
+
+            sounds.add(id.toString());
         }
 
         obj.add("sounds", sounds);

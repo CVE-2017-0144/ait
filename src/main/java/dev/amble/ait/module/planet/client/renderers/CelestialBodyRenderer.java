@@ -1,17 +1,20 @@
 package dev.amble.ait.module.planet.client.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.VertexSorter;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
+import com.mojang.math.Axis;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.module.planet.client.models.CelestialBodyModel;
@@ -19,116 +22,116 @@ import dev.amble.ait.module.planet.client.models.CelestialBodyModel;
 
 public class CelestialBodyRenderer {
 
-    public static void renderFarAwayBody(Vec3d targetPosition, Vector3f scale, Identifier texture, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        Camera camera = mc.gameRenderer.getCamera();
-        VertexConsumerProvider.Immediate provider = mc.getBufferBuilders().getEntityVertexConsumers();
+    public static void renderFarAwayBody(Vec3 targetPosition, Vector3f scale, ResourceLocation texture, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor) {
+        Minecraft mc = Minecraft.getInstance();
+        Camera camera = mc.gameRenderer.getMainCamera();
+        MultiBufferSource.BufferSource provider = mc.renderBuffers().bufferSource();
 
-        Vec3d cameraPos = camera.getPos();
+        Vec3 cameraPos = camera.getPosition();
 
-        Vec3d targetPos = new Vec3d(camera.getPos().getX() + targetPosition.getX(),
-                camera.getPos().getY() + targetPosition.getY(),
-                camera.getPos().getZ() + targetPosition.getZ());
+        Vec3 targetPos = new Vec3(camera.getPosition().x() + targetPosition.x(),
+                camera.getPosition().y() + targetPosition.y(),
+                camera.getPosition().z() + targetPosition.z());
 
-        Vec3d diff = targetPos.subtract(cameraPos);
+        Vec3 diff = targetPos.subtract(cameraPos);
 
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+        PoseStack matrixStack = new PoseStack();
+        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(scale.x, scale.y, scale.z);
 
-        BackgroundRenderer.clearFog();
+        FogRenderer.setupNoFog();
         //RenderSystem.depthFunc(GL11.GL_NOTEQUAL);
-        RenderSystem.setProjectionMatrix(matrixStack.peek().getPositionMatrix().perspective(90, 1, 0.05f, 10000000), VertexSorter.BY_Z);
+        RenderSystem.setProjectionMatrix(matrixStack.last().pose().perspective(90, 1, 0.05f, 10000000), VertexSorting.ORTHOGRAPHIC_Z);
 
-        CelestialBodyModel.getTexturedModelData().createModel().render(matrixStack,
-                provider.getBuffer(AITRenderLayers.getBeaconBeam(texture, false)),
-                0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1f);
-        provider.draw();
+        CelestialBodyModel.getTexturedModelData().bakeRoot().render(matrixStack,
+                provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)),
+                0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+        provider.endBatch();
 
         if (hasAtmosphere) {
             atmosphereRenderer(matrixStack, atmosphereColor, provider, false, hasClouds);
-            provider.draw();
+            provider.endBatch();
         }
-        provider.draw();
+        provider.endBatch();
         RenderSystem.restoreProjectionMatrix();
         //RenderSystem.depthFunc(GL11.GL_EQUAL);
     }
 
-    public static void renderStarBody(boolean isTardisSkybox, Vec3d targetPosition, Vector3f scale, Vector3f rotation, Identifier texture, boolean hasAtmosphere, Vector3f atmosphereColor) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        Camera camera = mc.gameRenderer.getCamera();
-        VertexConsumerProvider.Immediate provider = mc.getBufferBuilders().getEntityVertexConsumers();
+    public static void renderStarBody(boolean isTardisSkybox, Vec3 targetPosition, Vector3f scale, Vector3f rotation, ResourceLocation texture, boolean hasAtmosphere, Vector3f atmosphereColor) {
+        Minecraft mc = Minecraft.getInstance();
+        Camera camera = mc.gameRenderer.getMainCamera();
+        MultiBufferSource.BufferSource provider = mc.renderBuffers().bufferSource();
 
-        Vec3d cameraPos = camera.getPos();
+        Vec3 cameraPos = camera.getPosition();
 
-        Vec3d targetPos = new Vec3d(targetPosition.getX(),targetPosition.getY(),targetPosition.getZ());
+        Vec3 targetPos = new Vec3(targetPosition.x(),targetPosition.y(),targetPosition.z());
 
-        Vec3d diff = targetPos.subtract(cameraPos);
+        Vec3 diff = targetPos.subtract(cameraPos);
 
-        MatrixStack matrixStack = new MatrixStack();
+        PoseStack matrixStack = new PoseStack();
 
-        if (mc.world == null)
+        if (mc.level == null)
             return;
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
         if (isTardisSkybox) {
-            matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(mc.world.getSkyAngle(mc.getTickDelta()) * 360.0f));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(mc.level.getTimeOfDay(mc.getFrameTime()) * 360.0f));
             matrixStack.translate(0, -4000, 0);
             matrixStack.scale(0.25f, 0.25f, 0.25f);
         }
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(scale.x, scale.y, scale.z);
 
-        BackgroundRenderer.clearFog();
+        FogRenderer.setupNoFog();
 
 
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation.y()));
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotation.x()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation.z()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(rotation.y()));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(rotation.x()));
+        matrixStack.mulPose(Axis.ZP.rotationDegrees(rotation.z()));
 
-        CelestialBodyModel model = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().createModel());
+        CelestialBodyModel model = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().bakeRoot());
 
         RenderSystem.depthMask(true);
 
         //RenderSystem.setShaderColor(atmosphereColor.x + 0.25f, atmosphereColor.y + 0.25f, atmosphereColor.z + 0.25f, 1f);
-        model.render(matrixStack,
-                provider.getBuffer(AITRenderLayers.getBeaconBeam(texture, false)),
-                0xf000f00, OverlayTexture.DEFAULT_UV, 1 - atmosphereColor.x, 1 - atmosphereColor.y, 1 - atmosphereColor.z, 1f);
-        provider.draw();
+        model.renderToBuffer(matrixStack,
+                provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)),
+                0xf000f00, OverlayTexture.NO_OVERLAY, 1 - atmosphereColor.x, 1 - atmosphereColor.y, 1 - atmosphereColor.z, 1f);
+        provider.endBatch();
         //RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         if (hasAtmosphere) {
             atmosphereRenderer(matrixStack, atmosphereColor, provider, true,false);
-            provider.draw();
+            provider.endBatch();
         }
         //RenderSystem.depthFunc(GL11.GL_EQUAL);
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
-    public static void renderComprehendableBody(boolean isTardisSkybox, Vec3d targetPosition, Vector3f scale, Vector3f rotation, Identifier texture, boolean isSkyRendered, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor, boolean hasRings) {
+    public static void renderComprehendableBody(boolean isTardisSkybox, Vec3 targetPosition, Vector3f scale, Vector3f rotation, ResourceLocation texture, boolean isSkyRendered, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor, boolean hasRings) {
         renderComprehendableBody(0, isTardisSkybox, targetPosition, scale, rotation, texture, isSkyRendered, hasClouds, hasAtmosphere, atmosphereColor, hasRings);
     }
 
-    public static void renderComprehendableBody(float skyboxRot, boolean isTardisSkybox, Vec3d targetPosition, Vector3f scale, Vector3f rotation, Identifier texture, boolean isSkyRendered, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor, boolean hasRings) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        Camera camera = mc.gameRenderer.getCamera();
-        VertexConsumerProvider.Immediate provider = mc.getBufferBuilders().getEntityVertexConsumers();
+    public static void renderComprehendableBody(float skyboxRot, boolean isTardisSkybox, Vec3 targetPosition, Vector3f scale, Vector3f rotation, ResourceLocation texture, boolean isSkyRendered, boolean hasClouds, boolean hasAtmosphere, Vector3f atmosphereColor, boolean hasRings) {
+        Minecraft mc = Minecraft.getInstance();
+        Camera camera = mc.gameRenderer.getMainCamera();
+        MultiBufferSource.BufferSource provider = mc.renderBuffers().bufferSource();
 
-        Vec3d cameraPos = camera.getPos();
+        Vec3 cameraPos = camera.getPosition();
 
-        Vec3d targetPos = new Vec3d(targetPosition.getX(),targetPosition.getY(),targetPosition.getZ());
+        Vec3 targetPos = new Vec3(targetPosition.x(),targetPosition.y(),targetPosition.z());
 
-        Vec3d diff = targetPos.subtract(cameraPos);
+        Vec3 diff = targetPos.subtract(cameraPos);
 
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.push();
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F + skyboxRot));
+        PoseStack matrixStack = new PoseStack();
+        matrixStack.pushPose();
+        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F + skyboxRot));
         if (isTardisSkybox) {
             matrixStack.translate(0, 4000, 0);
             matrixStack.scale(0.25f, 0.25f, 0.25f);
@@ -136,7 +139,7 @@ public class CelestialBodyRenderer {
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(scale.x, scale.y, scale.z);
 
-        BackgroundRenderer.clearFog();
+        FogRenderer.setupNoFog();
         //RenderSystem.depthMask(true);
         if (isSkyRendered) {
             RenderSystem.depthMask(true);
@@ -144,24 +147,24 @@ public class CelestialBodyRenderer {
             GL11.glDepthFunc(GL11.GL_ALWAYS);
         }
 
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation.y()));
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180 + rotation.x()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation.z()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(rotation.y()));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(180 + rotation.x()));
+        matrixStack.mulPose(Axis.ZP.rotationDegrees(rotation.z()));
 
-        CelestialBodyModel celestialBodyModel = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().createModel());
-        celestialBodyModel.render(matrixStack,
-                provider.getBuffer(AITRenderLayers.getEntityNoOutline(texture)),
-                0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1f);
+        CelestialBodyModel celestialBodyModel = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().bakeRoot());
+        celestialBodyModel.renderToBuffer(matrixStack,
+                provider.getBuffer(AITRenderLayers.entityNoOutline(texture)),
+                0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
         if (hasRings) {
             celestialBodyModel.ring.render(matrixStack,
-                    provider.getBuffer(AITRenderLayers.getEntityNoOutline(texture)),
-                    0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1f);
+                    provider.getBuffer(AITRenderLayers.entityNoOutline(texture)),
+                    0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
         }
-        provider.draw();
+        provider.endBatch();
 
         if (hasAtmosphere) {
             atmosphereRenderer(matrixStack, atmosphereColor, provider, false, hasClouds);
-            provider.draw();
+            provider.endBatch();
         }
 
         if (isSkyRendered) {
@@ -169,33 +172,33 @@ public class CelestialBodyRenderer {
             GL11.glDepthFunc(GL11.GL_EQUAL);
             GL11.glDisable(GL11.GL_DEPTH_TEST);
         }
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
-    public static void atmosphereRenderer(MatrixStack matrixStack, Vector3f color, VertexConsumerProvider.Immediate provider, boolean isStar, boolean hasClouds) {
-        CelestialBodyModel model = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().createModel());
+    public static void atmosphereRenderer(PoseStack matrixStack, Vector3f color, MultiBufferSource.BufferSource provider, boolean isStar, boolean hasClouds) {
+        CelestialBodyModel model = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().bakeRoot());
         for (int i = 0; i < 6; i++) {
             float alpha = (float) (0.1f - Math.log(i + 1) * 0.001f);
-            matrixStack.push();
+            matrixStack.pushPose();
             float gg = 1.0f + ((i != 0 ? i : i + 1) * 0.025f);
             matrixStack.scale(gg, gg, gg);
-            RenderLayer renderLayer = AITRenderLayers.getItemEntityTranslucentCull(new Identifier("textures/environment/clouds.png"));//RenderLayer.getEnergySwirl(new Identifier("textures/environment/clouds.png"), delta % 1.0F, (delta * 0.1F) % 1.0F);
-            Identifier texture = AITMod.id("textures/environment/atmosphere.png");
+            RenderType renderLayer = AITRenderLayers.itemEntityTranslucentCull(new ResourceLocation("textures/environment/clouds.png"));//RenderLayer.getEnergySwirl(new Identifier("textures/environment/clouds.png"), delta % 1.0F, (delta * 0.1F) % 1.0F);
+            ResourceLocation texture = AITMod.id("textures/environment/atmosphere.png");
             if (i != 1) {
-                model.render(matrixStack,
+                model.renderToBuffer(matrixStack,
                         provider.getBuffer(isStar && (i == 2 || i == 3 || i == 4) ?
-                                AITRenderLayers.getEyes(texture) : AITRenderLayers.getItemEntityTranslucentCull(texture)),
-                        15728864, OverlayTexture.DEFAULT_UV,  1 + Math.min(color.x + (0.015f * i), 5.0f), 1 + Math.min(color.y + (0.015f * i), 5.0f), 1 + Math.min(color.z + (0.015f * i), 5.0f), -1 + alpha);
+                                AITRenderLayers.eyes(texture) : AITRenderLayers.itemEntityTranslucentCull(texture)),
+                        15728864, OverlayTexture.NO_OVERLAY,  1 + Math.min(color.x + (0.015f * i), 5.0f), 1 + Math.min(color.y + (0.015f * i), 5.0f), 1 + Math.min(color.z + (0.015f * i), 5.0f), -1 + alpha);
             } else if (hasClouds) {
-                model.render(matrixStack,
+                model.renderToBuffer(matrixStack,
                         provider.getBuffer(renderLayer),
-                        15728864, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1F);
+                        15728864, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1F);
                 matrixStack.scale(1.01f, 1.01f, 1.01f);
-                model.render(matrixStack,
+                model.renderToBuffer(matrixStack,
                         provider.getBuffer(renderLayer),
-                        15728864, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1F);
+                        15728864, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1F);
             }
-            matrixStack.pop();
+            matrixStack.popPose();
         }
     }
 }

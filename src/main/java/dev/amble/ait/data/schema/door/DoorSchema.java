@@ -1,17 +1,14 @@
 package dev.amble.ait.data.schema.door;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.ResourceLocationException;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.Vec3;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.schema.door.impl.CapsuleDoorVariant;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
@@ -32,9 +29,9 @@ import dev.amble.lib.api.Identifiable;
  * @see DoorRegistry#OLD_REGISTRY
  */
 public abstract class DoorSchema implements Identifiable {
-    private final Identifier id;
+    private final ResourceLocation id;
 
-    protected DoorSchema(Identifier id) {
+    protected DoorSchema(ResourceLocation id) {
         this.id = id;
     }
 
@@ -47,7 +44,7 @@ public abstract class DoorSchema implements Identifiable {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -67,19 +64,19 @@ public abstract class DoorSchema implements Identifiable {
      * @deprecated {@link #getPortalPosition()}
      */
     @Deprecated(forRemoval = true)
-    public Vec3d adjustPortalPos(Vec3d pos, Direction direction) {
+    public Vec3 adjustPortalPos(Vec3 pos, Direction direction) {
         return pos; // just cus some dont have portals
     }
 
-    @Nullable public Vec3d getPortalPosition() {
-        return adjustPortalPos(Vec3d.ZERO, Direction.NORTH);
+    @Nullable public Vec3 getPortalPosition() {
+        return adjustPortalPos(Vec3.ZERO, Direction.NORTH);
     }
 
-    @NotNull public Vec3d getPortalPosition(Vec3d origin, float angle) {
-        Vec3d pos = getPortalPosition();
+    @NotNull public Vec3 getPortalPosition(Vec3 origin, float angle) {
+        Vec3 pos = getPortalPosition();
         if (pos == null) return origin;
 
-        return pos.rotateX((float) Math.toRadians(180)).rotateY((float) Math.toRadians(180 - angle)).multiply(1, -1, 1).add(origin);
+        return pos.xRot((float) Math.toRadians(180)).yRot((float) Math.toRadians(180 - angle)).multiply(1, -1, 1).add(origin);
     }
 
     public static Object serializer() {
@@ -91,11 +88,11 @@ public abstract class DoorSchema implements Identifiable {
         @Override
         public DoorSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = CapsuleDoorVariant.REFERENCE;
             }
 

@@ -1,23 +1,22 @@
 package dev.amble.ait.data.hum;
 
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.api.Nameable;
 import dev.amble.lib.api.Identifiable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 
 public class Hum implements Identifiable, Nameable {
-    private final Identifier id;
+    private final ResourceLocation id;
     private final SoundEvent sound;
 
-    protected Hum(Identifier id, SoundEvent sound) {
+    protected Hum(ResourceLocation id, SoundEvent sound) {
         this.id = id;
         this.sound = sound;
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -26,7 +25,7 @@ public class Hum implements Identifiable, Nameable {
     }
 
     public static Hum create(String modId, String name, SoundEvent sound) {
-        return new Hum(Identifier.of(modId, name), sound);
+        return new Hum(ResourceLocation.tryBuild(modId, name), sound);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class Hum implements Identifiable, Nameable {
     }
 
     @Override
-    public Text text() {
-        return Text.translatableWithFallback(this.id().toTranslationKey("hum"), this.name());
+    public Component text() {
+        return Component.translatableWithFallback(this.id().toLanguageKey("hum"), this.name());
     }
 }

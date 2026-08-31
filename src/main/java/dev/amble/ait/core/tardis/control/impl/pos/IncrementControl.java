@@ -1,15 +1,14 @@
 package dev.amble.ait.core.tardis.control.impl.pos;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class IncrementControl extends Control {
 
@@ -18,7 +17,7 @@ public class IncrementControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         if (!leftClick) {
@@ -37,10 +36,10 @@ public class IncrementControl extends Control {
         return AITSounds.CRANK;
     }
 
-    private void messagePlayerIncrement(ServerPlayerEntity player, Tardis tardis) {
-        Text text = Text.translatable("tardis.message.control.increment.info")
-                .append(Text.literal("" + IncrementManager.increment(tardis)));
-        player.sendMessage(text, true);
+    private void messagePlayerIncrement(ServerPlayer player, Tardis tardis) {
+        Component text = Component.translatable("tardis.message.control.increment.info")
+                .append(Component.literal("" + IncrementManager.increment(tardis)));
+        player.displayClientMessage(text, true);
     }
 
     @Override

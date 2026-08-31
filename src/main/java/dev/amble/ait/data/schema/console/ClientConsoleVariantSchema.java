@@ -5,11 +5,9 @@ import java.lang.reflect.Type;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
 import dev.amble.ait.client.models.consoles.ConsoleModel;
 import dev.amble.ait.data.schema.console.variant.hartnell.HartnellVariant;
 import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
@@ -19,17 +17,17 @@ import dev.amble.lib.api.Identifiable;
 @Environment(EnvType.CLIENT)
 public abstract class ClientConsoleVariantSchema implements Identifiable {
 
-    private final Identifier parent;
-    private final Identifier id;
+    private final ResourceLocation parent;
+    private final ResourceLocation id;
 
     private ConsoleModel model;
 
-    protected ClientConsoleVariantSchema(Identifier parent, Identifier id) {
+    protected ClientConsoleVariantSchema(ResourceLocation parent, ResourceLocation id) {
         this.parent = parent;
         this.id = id;
     }
 
-    protected ClientConsoleVariantSchema(Identifier parent) {
+    protected ClientConsoleVariantSchema(ResourceLocation parent) {
         this.id = parent;
         this.parent = parent;
     }
@@ -46,13 +44,13 @@ public abstract class ClientConsoleVariantSchema implements Identifiable {
         return ConsoleVariantRegistry.getInstance().get(this.parent);
     }
 
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
-    public abstract Identifier texture();
+    public abstract ResourceLocation texture();
 
-    public abstract Identifier emission();
+    public abstract ResourceLocation emission();
 
     @Environment(EnvType.CLIENT)
     public abstract ConsoleModel model();
@@ -89,11 +87,11 @@ public abstract class ClientConsoleVariantSchema implements Identifiable {
         @Override
         public ClientConsoleVariantSchema deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = HartnellVariant.REFERENCE;
             }
 

@@ -1,17 +1,16 @@
 package dev.amble.lib.mixin;
 
 import dev.amble.lib.animation.AnimatedEntity;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.SkeletonEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(SkeletonEntity.class)
-public abstract class SkeletonEntityMixin extends HostileEntity implements AnimatedEntity {
-	private SkeletonEntityMixin(EntityType<? extends HostileEntity> type, World world) {
+@Mixin(Skeleton.class)
+public abstract class SkeletonEntityMixin extends Monster implements AnimatedEntity {
+	private SkeletonEntityMixin(EntityType<? extends Monster> type, Level world) {
 		super(type, world);
 	}
 

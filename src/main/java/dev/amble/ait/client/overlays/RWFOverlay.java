@@ -2,30 +2,28 @@ package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import dev.amble.ait.core.entities.FlightTardisEntity;
 import dev.amble.ait.core.tardis.Tardis;
 
 public class RWFOverlay implements HudRenderCallback {
-    private static final int ALPHA_GRAY = ColorHelper.Argb.getArgb(125, 255, 255, 255);
+    private static final int ALPHA_GRAY = FastColor.ARGB32.color(125, 255, 255, 255);
     @Override
-    public void onHudRender(DrawContext drawContext, float tickDelta) {
-        MinecraftClient mc = MinecraftClient.getInstance();
+    public void onHudRender(GuiGraphics drawContext, float tickDelta) {
+        Minecraft mc = Minecraft.getInstance();
 
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.level == null)
             return;
 
-        if (mc.player.hasVehicle() &&   mc.player.getVehicle() instanceof FlightTardisEntity entity) {
+        if (mc.player.isPassenger() &&   mc.player.getVehicle() instanceof FlightTardisEntity entity) {
             if (!entity.isLinked()) return;
             Tardis tardis = entity.tardis().get();
             Yaw.render(drawContext, mc.player);
@@ -36,28 +34,28 @@ public class RWFOverlay implements HudRenderCallback {
         }
     }
 
-    private void renderOverlay(DrawContext context, Identifier texture) {
+    private void renderOverlay(GuiGraphics context, ResourceLocation texture) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        context.drawTexture(texture, (context.getScaledWindowWidth() / 2) - 8,
-                (context.getScaledWindowHeight() / 2) - 8, 0, 0.0F, 0.0F, 16, 16, 16, 16);
+        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        context.blit(texture, (context.guiWidth() / 2) - 8,
+                (context.guiHeight() / 2) - 8, 0, 0.0F, 0.0F, 16, 16, 16, 16);
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private static int width() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth();
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth();
     }
     private static int height() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight() - 8;
+        return Minecraft.getInstance().getWindow().getGuiScaledHeight() - 8;
     }
 
 
-    private static void renderIncrementedLine(DrawContext context, int x, int gap) {
-        context.drawVerticalLine(x, 0, height(), ALPHA_GRAY);
+    private static void renderIncrementedLine(GuiGraphics context, int x, int gap) {
+        context.vLine(x, 0, height(), ALPHA_GRAY);
 
         // horizontal line every gap
         /*
@@ -67,12 +65,12 @@ public class RWFOverlay implements HudRenderCallback {
     }
 
     private static class Yaw {
-        private static void render(DrawContext context, AbstractClientPlayerEntity player) {
-            context.drawHorizontalLine(60, width() - 60, 20, ALPHA_GRAY);
-            context.drawVerticalLine(60, 16, 24, Colors.WHITE);
-            context.drawVerticalLine(width() - 60, 16, 24, Colors.WHITE);
+        private static void render(GuiGraphics context, AbstractClientPlayer player) {
+            context.hLine(60, width() - 60, 20, ALPHA_GRAY);
+            context.vLine(60, 16, 24, CommonColors.WHITE);
+            context.vLine(width() - 60, 16, 24, CommonColors.WHITE);
 
-            float current = player.getYaw();
+            float current = player.getYRot();
 
             line(context, -180, current, false);
             line(context, -90, current, false);
@@ -80,44 +78,44 @@ public class RWFOverlay implements HudRenderCallback {
             line(context, 90, current, false);
             line(context, 180, current, false);
 
-            line(context, player.getYaw(), 0, true);
+            line(context, player.getYRot(), 0, true);
         }
 
-        private static void line(DrawContext context, float yaw, float current, boolean isPrimary) {
+        private static void line(GuiGraphics context, float yaw, float current, boolean isPrimary) {
             int x = isPrimary ? width() / 2 : position(yaw, current);
 
             int middle = width() / 2;
             if (!isPrimary && (middle - 10 <= x && x <= middle + 10)) return;
 
-            int color = isPrimary ? Colors.WHITE : ALPHA_GRAY;
+            int color = isPrimary ? CommonColors.WHITE : ALPHA_GRAY;
 
-            context.drawVerticalLine(x, 16, 24, color);
-            context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, Math.round(MathHelper.wrapDegrees(yaw)) + "", x, 26, color);
+            context.vLine(x, 16, 24, color);
+            context.drawCenteredString(Minecraft.getInstance().font, Math.round(Mth.wrapDegrees(yaw)) + "", x, 26, color);
 
-            Direction dir = Direction.fromRotation(yaw);
-            context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, dir.asString().toUpperCase().charAt(0) + "", x, 35, color);
+            Direction dir = Direction.fromYRot(yaw);
+            context.drawCenteredString(Minecraft.getInstance().font, dir.getSerializedName().toUpperCase().charAt(0) + "", x, 35, color);
         }
         private static int position(float yaw, float current) {
-            return (int) ((width() - 120) * (((MathHelper.wrapDegrees(yaw - current) + 180) / 360))) + 60;
+            return (int) ((width() - 120) * (((Mth.wrapDegrees(yaw - current) + 180) / 360))) + 60;
         }
     }
     private static class Pitch {
-        private static void render(DrawContext context, AbstractClientPlayerEntity player) {
+        private static void render(GuiGraphics context, AbstractClientPlayer player) {
             renderIncrementedLine(context, 10, 5);
 
             line(context, 0, false);
             line(context, 45, false);
             line(context, -45, false);
 
-            line(context, player.getPitch(), true);
+            line(context, player.getXRot(), true);
         }
 
-        private static void line(DrawContext context, float pitch, boolean isPrimary) {
+        private static void line(GuiGraphics context, float pitch, boolean isPrimary) {
             int y = position(pitch);
-            int color = isPrimary ? Colors.WHITE : ALPHA_GRAY;
+            int color = isPrimary ? CommonColors.WHITE : ALPHA_GRAY;
 
-            context.drawHorizontalLine(10, 15, y + 3, color);
-            context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, Math.round(pitch) + "", 27, y, color);
+            context.hLine(10, 15, y + 3, color);
+            context.drawCenteredString(Minecraft.getInstance().font, Math.round(pitch) + "", 27, y, color);
         }
 
         private static int position(float pitch) {
@@ -126,9 +124,9 @@ public class RWFOverlay implements HudRenderCallback {
     }
     private static class Position {
         private static class Y {
-            private static void render(DrawContext context, AbstractClientPlayerEntity player, MinecraftClient client) {
-                int bottom = Math.abs(player.getWorld().getBottomY());
-                int range = player.getWorld().getTopY() + (Math.min(bottom, 0));
+            private static void render(GuiGraphics context, AbstractClientPlayer player, Minecraft client) {
+                int bottom = Math.abs(player.level().getMinBuildHeight());
+                int range = player.level().getMaxBuildHeight() + (Math.min(bottom, 0));
 
                 renderIncrementedLine(context, width() - 10, 8);
 
@@ -139,15 +137,15 @@ public class RWFOverlay implements HudRenderCallback {
                 line(context, player.getY(), bottom, range, true);
             }
 
-            private static void line(DrawContext context, double y, int bottom, int range, boolean isPrimary) {
+            private static void line(GuiGraphics context, double y, int bottom, int range, boolean isPrimary) {
                 int yPosition = position(y, bottom, range);
-                int color = isPrimary ? Colors.WHITE : ALPHA_GRAY;
+                int color = isPrimary ? CommonColors.WHITE : ALPHA_GRAY;
 
-                context.drawHorizontalLine(width() - 15, width() - 10, yPosition + 3, color);
+                context.hLine(width() - 15, width() - 10, yPosition + 3, color);
 
-                TextRenderer renderer = MinecraftClient.getInstance().textRenderer;
+                Font renderer = Minecraft.getInstance().font;
                 String text = Math.round(y) + "";
-                context.drawTextWithShadow(renderer, text, width() - renderer.getWidth(text) - 17 , yPosition, color);
+                context.drawString(renderer, text, width() - renderer.width(text) - 17 , yPosition, color);
             }
 
             private static int position(double y, int bottom, int range) {
@@ -155,22 +153,22 @@ public class RWFOverlay implements HudRenderCallback {
             }
         }
 
-        private static void render(DrawContext context, AbstractClientPlayerEntity player, MinecraftClient client) {
+        private static void render(GuiGraphics context, AbstractClientPlayer player, Minecraft client) {
             String i = Math.round(player.getX()) + ", " + Math.round(player.getZ());
-            context.fill(width() - 62 - client.textRenderer.getWidth(i), 48, width() - 58, 61, ALPHA_GRAY);
-            context.drawTextWithShadow(client.textRenderer, i, width() - 60 - client.textRenderer.getWidth(i), 50, 0xFFFFFF);
+            context.fill(width() - 62 - client.font.width(i), 48, width() - 58, 61, ALPHA_GRAY);
+            context.drawString(client.font, i, width() - 60 - client.font.width(i), 50, 0xFFFFFF);
         }
     }
     private static class Speed {
-        private static void render(DrawContext context, AbstractClientPlayerEntity player, MinecraftClient client) {
-            double deltaX = player.getX() - player.prevX;
-            double deltaZ = player.getZ() - player.prevZ;
-            double deltaY = player.getY() - player.prevY;
+        private static void render(GuiGraphics context, AbstractClientPlayer player, Minecraft client) {
+            double deltaX = player.getX() - player.xo;
+            double deltaZ = player.getZ() - player.zo;
+            double deltaY = player.getY() - player.yo;
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
             String s = Math.round(distance * 20) + " m/s";
 
-            context.fill(58, 49, 62 + client.textRenderer.getWidth(s), 60, ALPHA_GRAY);
-            context.drawTextWithShadow(client.textRenderer, s, 60, 50, 0xFFFFFF);
+            context.fill(58, 49, 62 + client.font.width(s), 60, ALPHA_GRAY);
+            context.drawString(client.font, s, 60, 50, 0xFFFFFF);
         }
     }
 }

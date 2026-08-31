@@ -2,11 +2,9 @@ package dev.amble.ait.registry.impl;
 
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.sound.SoundEvents;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.core.AITSounds;
@@ -33,14 +31,14 @@ public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override
     protected void defaults() {
         CORAL = register(Hum.create(AITMod.MOD_ID, "coral", AITSounds.CORAL_HUM));
         CHRISTMAS = register(Hum.create(AITMod.MOD_ID, "christmas", AITSounds.CHRISTMAS_HUM));
-        OFF = register(Hum.create(AITMod.MOD_ID, "off", SoundEvents.INTENTIONALLY_EMPTY));
+        OFF = register(Hum.create(AITMod.MOD_ID, "off", SoundEvents.EMPTY));
     }
 
     @Override
@@ -49,7 +47,7 @@ public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
         super.readFromServer(buf);
 
         ClientSoundManager.getHum().onSynced();

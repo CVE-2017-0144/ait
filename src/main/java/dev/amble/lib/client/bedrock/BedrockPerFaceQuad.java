@@ -1,7 +1,7 @@
 package dev.amble.lib.client.bedrock;
 
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -11,10 +11,10 @@ public record BedrockPerFaceQuad(
         float u0, float v0, float u1, float v1,
         Vector3f normal
 ) {
-    public void render(MatrixStack.Entry entry, VertexConsumer vertices, int light, int overlay,
+    public void render(PoseStack.Pose entry, VertexConsumer vertices, int light, int overlay,
                        float red, float green, float blue, float alpha) {
-        Matrix4f position = entry.getPositionMatrix();
-        Matrix3f normalMat = entry.getNormalMatrix();
+        Matrix4f position = entry.pose();
+        Matrix3f normalMat = entry.normal();
 
         Vector3f n = new Vector3f(normal);
         n.mul(normalMat);
@@ -31,10 +31,10 @@ public record BedrockPerFaceQuad(
                                float red, float green, float blue, float alpha) {
         vc.vertex(pos, p.x(), p.y(), p.z())
                 .color(red, green, blue, alpha)
-                .texture(u, v)
-                .overlay(overlay)
-                .light(light)
+                .uv(u, v)
+                .overlayCoords(overlay)
+                .uv2(light)
                 .normal(n.x(), n.y(), n.z())
-                .next();
+                .endVertex();
     }
 }

@@ -3,7 +3,7 @@ package dev.amble.lib.util;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 
 public class RegistrationUtil {
 	// if i put this in the interface it crashes cus it cant load that stuff

@@ -1,12 +1,11 @@
 package dev.amble.ait.client.util;
 
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.MathHelper;
-
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 
 public class ClientShakeUtil {
     @Deprecated
@@ -22,7 +21,7 @@ public class ClientShakeUtil {
         float medium = 0.225f;
         float high = 0.3f;
 
-        float speed = (float) MathHelper.clamp(0.1f * travel.speed(), 0.1, 0.6f);
+        float speed = (float) Mth.clamp(0.1f * travel.speed(), 0.1, 0.6f);
         low += speed;
         medium += speed;
         high += speed;
@@ -68,36 +67,36 @@ public class ClientShakeUtil {
 
     public static void shake(float scale) {
         if (scale == 0) return;
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (client.player == null)
             return;
 
-        float targetPitch = getShakeX(client.player.getPitch(), scale);
-        float targetYaw = getShakeY(client.player.getYaw(), scale);
+        float targetPitch = getShakeX(client.player.getXRot(), scale);
+        float targetYaw = getShakeY(client.player.getYRot(), scale);
 
-        client.player.setPitch(MathHelper.lerp(SHAKE_INTENSITY, client.player.getPitch(), targetPitch));
-        client.player.setYaw(MathHelper.lerp(SHAKE_INTENSITY, client.player.getYaw(), targetYaw));
+        client.player.setXRot(Mth.lerp(SHAKE_INTENSITY, client.player.getXRot(), targetPitch));
+        client.player.setYRot(Mth.lerp(SHAKE_INTENSITY, client.player.getYRot(), targetYaw));
     }
 
     private static float getShakeY(float baseYaw, float scale) {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (client.player == null)
             return baseYaw;
 
         float temp = (client.player.getRandom().nextFloat() * scale);
         float shakeYaw = baseYaw + (client.player.getRandom().nextBoolean() ? temp : -temp);
 
-        return MathHelper.clamp(shakeYaw, baseYaw - SHAKE_CLAMP, baseYaw + SHAKE_CLAMP);
+        return Mth.clamp(shakeYaw, baseYaw - SHAKE_CLAMP, baseYaw + SHAKE_CLAMP);
     }
 
     private static float getShakeX(float basePitch, float scale) {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (client.player == null)
             return basePitch;
 
         float temp = (client.player.getRandom().nextFloat() * (scale / 2));
         float shakePitch = basePitch + (client.player.getRandom().nextBoolean() ? temp : -temp);
 
-        return MathHelper.clamp(shakePitch, basePitch - SHAKE_CLAMP, basePitch + SHAKE_CLAMP);
+        return Mth.clamp(shakePitch, basePitch - SHAKE_CLAMP, basePitch + SHAKE_CLAMP);
     }
 }

@@ -5,18 +5,16 @@ import java.util.List;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.handles.HandlesResponse;
@@ -34,8 +32,8 @@ import dev.amble.ait.core.world.TardisServerWorld;
  * @author james
  */
 public class HandlesResponseRegistry {
-    public static final SimpleRegistry<HandlesResponse> REGISTRY = FabricRegistryBuilder
-            .createSimple(RegistryKey.<HandlesResponse>ofRegistry(AITMod.id("handles")))
+    public static final MappedRegistry<HandlesResponse> REGISTRY = FabricRegistryBuilder
+            .createSimple(ResourceKey.<HandlesResponse>createRegistryKey(AITMod.id("handles")))
             .buildAndRegister();
     private static HashMap<String, HandlesResponse> COMMANDS_CACHE;
     public static HandlesResponse DEFAULT;
@@ -87,7 +85,7 @@ public class HandlesResponseRegistry {
 
         DEFAULT = register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 return failure(source);
             }
 
@@ -102,20 +100,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("default");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 sendChat(player, getHelpText());
                 return success(source);
             }
 
-            private Text getHelpText() {
-                return Text.translatable("message.ait.handles.available_commands",
+            private Component getHelpText() {
+                return Component.translatable("message.ait.handles.available_commands",
                         String.join(", ", COMMANDS_CACHE.keySet()));
             }
 
@@ -125,7 +123,7 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("help");
             }
         });
@@ -140,13 +138,13 @@ public class HandlesResponseRegistry {
             );
 
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 sendChat(player, getRandomJoke());
                 return success(source);
             }
 
-            private Text getRandomJoke() {
-                return Text.translatable(JOKES.get(AITMod.RANDOM.nextInt(JOKES.size())));
+            private Component getRandomJoke() {
+                return Component.translatable(JOKES.get(AITMod.RANDOM.nextInt(JOKES.size())));
             }
 
             @Override
@@ -155,7 +153,7 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("joke");
             }
         });
@@ -168,13 +166,13 @@ public class HandlesResponseRegistry {
             );
 
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 sendChat(player, getRandomFunFact());
                 return success(source);
             }
 
-            private Text getRandomFunFact() {
-                return Text.translatable(FUN_FACTS.get(AITMod.RANDOM.nextInt(FUN_FACTS.size())));
+            private Component getRandomFunFact() {
+                return Component.translatable(FUN_FACTS.get(AITMod.RANDOM.nextInt(FUN_FACTS.size())));
             }
 
             @Override
@@ -183,21 +181,21 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("fun_fact");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (tardis.travel().inFlight()) {
-                    sendChat(player, Text.translatable("message.ait.handles.already_in_flight"));
+                    sendChat(player, Component.translatable("message.ait.handles.already_in_flight"));
                     return failure(source);
                 }
 
                 tardis.travel().dematerialize();
-                sendChat(player, Text.translatable("message.ait.handles.dematerializing"));
+                sendChat(player, Component.translatable("message.ait.handles.dematerializing"));
                 return success(source);
             }
 
@@ -207,21 +205,21 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("dematerialize");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (!tardis.travel().inFlight()) {
-                    sendChat(player, Text.translatable("message.ait.handles.not_in_flight"));
+                    sendChat(player, Component.translatable("message.ait.handles.not_in_flight"));
                     return failure(source);
                 }
 
                 tardis.travel().rematerialize();
-                sendChat(player, Text.translatable("message.ait.handles.rematerializing"));
+                sendChat(player, Component.translatable("message.ait.handles.rematerializing"));
                 return success(source);
             }
 
@@ -231,21 +229,21 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("rematerialize");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (tardis.door().locked()) {
-                    sendChat(player, Text.translatable("message.ait.handles.doors_already_locked"));
+                    sendChat(player, Component.translatable("message.ait.handles.doors_already_locked"));
                     return failure(source);
                 }
 
                 tardis.door().setLocked(true);
-                sendChat(player, Text.translatable("message.ait.handles.locking_doors"));
+                sendChat(player, Component.translatable("message.ait.handles.locking_doors"));
                 return success(source);
             }
 
@@ -255,21 +253,21 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("lock");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (!tardis.door().locked()) {
-                    sendChat(player, Text.translatable("message.ait.handles.doors_already_unlocked"));
+                    sendChat(player, Component.translatable("message.ait.handles.doors_already_unlocked"));
                     return failure(source);
                 }
 
                 tardis.door().setLocked(false);
-                sendChat(player, Text.translatable("message.ait.handles.unlocking_doors"));
+                sendChat(player, Component.translatable("message.ait.handles.unlocking_doors"));
                 return success(source);
             }
 
@@ -279,20 +277,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("unlock");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (!tardis.waypoint().hasWaypoint()) {
-                    sendChat(player, Text.translatable("message.ait.handles.no_waypoint"));
+                    sendChat(player, Component.translatable("message.ait.handles.no_waypoint"));
                     return failure(source);
                 }
 
-                sendChat(player, Text.translatable("message.ait.handles.setting_course_waypoint"));
+                sendChat(player, Component.translatable("message.ait.handles.setting_course_waypoint"));
                 tardis.waypoint().loadWaypoint();
                 return success(source);
             }
@@ -303,20 +301,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("travel_waypoint");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (tardis.door().isOpen()) {
-                    sendChat(player, Text.translatable("message.ait.handles.doors_already_open"));
+                    sendChat(player, Component.translatable("message.ait.handles.doors_already_open"));
                     return failure(source);
                 }
 
-                sendChat(player, Text.translatable("message.ait.handles.opening_doors"));
+                sendChat(player, Component.translatable("message.ait.handles.opening_doors"));
                 tardis.door().openDoors();
                 return success(source);
             }
@@ -327,20 +325,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("open_door");
             }
         });
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (!tardis.door().isOpen()) {
-                    sendChat(player, Text.translatable("message.ait.handles.doors_already_closed"));
+                    sendChat(player, Component.translatable("message.ait.handles.doors_already_closed"));
                     return failure(source);
                 }
 
-                sendChat(player, Text.translatable("message.ait.handles.closing_doors"));
+                sendChat(player, Component.translatable("message.ait.handles.closing_doors"));
                 tardis.door().closeDoors();
                 return success(source);
             }
@@ -351,7 +349,7 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("close_door");
             }
         });
@@ -359,12 +357,12 @@ public class HandlesResponseRegistry {
 
         register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 TravelHandlerBase.State state = tardis.travel().getState();
-                sendChat(player, Text.translatable("message.ait.handles.tardis_state", state.name()));
+                sendChat(player, Component.translatable("message.ait.handles.tardis_state", state.name()));
 
                 if (state == TravelHandlerBase.State.FLIGHT) {
-                    sendChat(player, Text.translatable("message.ait.handles.flight_complete",
+                    sendChat(player, Component.translatable("message.ait.handles.flight_complete",
                             tardis.travel().getDurationAsPercentage()));
                 }
 
@@ -377,15 +375,15 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("progress");
             }
         });
 
         HandlesResponseRegistry.register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
-                sendChat(player, Text.translatable("message.ait.handles.toggled_shields"));
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
+                sendChat(player, Component.translatable("message.ait.handles.toggled_shields"));
                 tardis.shields().visuallyShielded().toggle();
                 return success(source);
             }
@@ -396,20 +394,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("toggle_shields");
             }
         });
 
         HandlesResponseRegistry.register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (tardis.isRefueling()) {
-                    sendChat(player, Text.translatable("message.ait.handles.refueling_already_enabled"));
+                    sendChat(player, Component.translatable("message.ait.handles.refueling_already_enabled"));
                     return failure(source);
                 }
 
-                sendChat(player, Text.translatable("message.ait.handles.enabling_refueling"));
+                sendChat(player, Component.translatable("message.ait.handles.enabling_refueling"));
                 tardis.travel().handbrake(true);
                 tardis.setRefueling(true);
                 return success(source);
@@ -421,20 +419,20 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("enable_refuel");
             }
         });
 
         HandlesResponseRegistry.register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
                 if (!tardis.isRefueling()) {
-                    sendChat(player, Text.translatable("message.ait.handles.refueling_already_disabled"));
+                    sendChat(player, Component.translatable("message.ait.handles.refueling_already_disabled"));
                     return failure(source);
                 }
 
-                sendChat(player, Text.translatable("message.ait.handles.disabling_refueling"));
+                sendChat(player, Component.translatable("message.ait.handles.disabling_refueling"));
                 tardis.travel().handbrake(false);
                 tardis.setRefueling(false);
                 return success(source);
@@ -446,15 +444,15 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("disable_refuel");
             }
         });
 
         HandlesResponseRegistry.register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
-                sendChat(player, Text.translatable("message.ait.handles.protocol_3_toggled"));
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
+                sendChat(player, Component.translatable("message.ait.handles.protocol_3_toggled"));
                 tardis.cloak().cloaked().toggle();
                 return success(source);
             }
@@ -465,15 +463,15 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("toggle_cloak");
             }
         });
 
         HandlesResponseRegistry.register(new HandlesResponse() {
             @Override
-            public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
-                sendChat(player, Text.translatable("message.ait.handles.antigravs_toggled"));
+            public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
+                sendChat(player, Component.translatable("message.ait.handles.antigravs_toggled"));
                 tardis.travel().antigravs().toggle();
                 return success(source);
             }
@@ -484,30 +482,30 @@ public class HandlesResponseRegistry {
             }
 
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return AITMod.id("toggle_antigravs");
             }
         });
     }
 
 
-    private static boolean onChatMessage(SignedMessage signedMessage, ServerPlayerEntity player, MessageType.Parameters parameters) {
+    private static boolean onChatMessage(PlayerChatMessage signedMessage, ServerPlayer player, ChatType.Bound parameters) {
         ItemStack stack;
-        String message = signedMessage.getSignedContent();
+        String message = signedMessage.signedContent();
 
         boolean bl = message.toLowerCase().startsWith("handles");
-        if (player.getWorld().isClient()) return true;
+        if (player.level().isClientSide()) return true;
         if (!bl) return true;
 
         String command = message.toLowerCase().replace(",", "")
                 .replace("handles ", "");
         HandlesResponse response = get(command);
 
-        for (int i = 0; i < player.getInventory().size(); i++) {
-            stack = player.getInventory().getStack(i);
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            stack = player.getInventory().getItem(i);
 
             if (stack.getItem() instanceof HandlesItem item && item.isLinked(stack)) {
-                Tardis tardis = item.getTardis(player.getWorld(), stack);
+                Tardis tardis = item.getTardis(player.level(), stack);
 
                 if (tardis.butler().getHandles() == null) {
                     response.run(player, HandlesSound.of(player), tardis.asServer());
@@ -518,7 +516,7 @@ public class HandlesResponseRegistry {
             }
         }
 
-        if (!(player.getWorld() instanceof TardisServerWorld tardisWorld))
+        if (!(player.level() instanceof TardisServerWorld tardisWorld))
             return true;
 
         Tardis tardis = tardisWorld.getTardis();

@@ -5,17 +5,15 @@ import gravity_changer.api.GravityChangerAPI;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TypeFilter;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisClientEvents;
@@ -32,7 +30,7 @@ import dev.amble.ait.registry.impl.TardisComponentRegistry;
 
 public class GravityHandler extends KeyedTardisComponent implements TardisTickable {
 
-    private static final Identifier SYNC = AITMod.id("sync_gravity");
+    private static final ResourceLocation SYNC = AITMod.id("sync_gravity");
     private static final Property<Direction> DIRECTION = new Property<>(Property.DIRECTION, "direction",
             Direction.DOWN);
 
@@ -53,20 +51,20 @@ public class GravityHandler extends KeyedTardisComponent implements TardisTickab
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 20 == 0)
+        if (server.getTickCount() % 20 == 0)
             this.onTick();
     }
 
     private void onTick() {
-        for (Entity entity : this.tardis.asServer().world().getEntitiesByType(TypeFilter.instanceOf(LivingEntity.class), EntityTags::canChangeGravity)) {
+        for (Entity entity : this.tardis.asServer().world().getEntities(EntityTypeTest.forClass(LivingEntity.class), EntityTags::canChangeGravity)) {
             GravityChangerAPI.getGravityComponent(entity).setBaseGravityDirection(this.direction.get());
         }
     }
 
     private static void syncToServer(Tardis tardis, Direction direction) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(tardis.getUuid());
-        buf.writeEnumConstant(direction);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(tardis.getUuid());
+        buf.writeEnum(direction);
 
         ClientPlayNetworking.send(SYNC, buf);
     }
@@ -90,7 +88,7 @@ public class GravityHandler extends KeyedTardisComponent implements TardisTickab
                         return;
 
                     GravityHandler gravity = tardis.handler(ID);
-                    Direction direction = buf.readEnumConstant(Direction.class);
+                    Direction direction = buf.readEnum(Direction.class);
 
                     gravity.direction.set(direction);
                 }));
@@ -112,14 +110,14 @@ public class GravityHandler extends KeyedTardisComponent implements TardisTickab
                 button -> onButton(screen, (DynamicPressableTextWidget) button));
     }
 
-    private static Text buttonText(InteriorSettingsScreen screen, DynamicPressableTextWidget button) {
+    private static Component buttonText(InteriorSettingsScreen screen, DynamicPressableTextWidget button) {
         GravityHandler gravity = screen.tardis().handler(ID);
         boolean isChanged = !button.isLeftClick() || gravity.tempDirection != gravity.direction.get();
 
         Direction direction = isChanged ? gravity.tempDirection : gravity.direction.get();
-        Formatting formatting = isChanged ? Formatting.YELLOW : Formatting.WHITE;
+        ChatFormatting formatting = isChanged ? ChatFormatting.YELLOW : ChatFormatting.WHITE;
 
-        return Text.translatable("screen.ait.gravity", capitalize(direction.getName())).formatted(formatting);
+        return Component.translatable("screen.ait.gravity", capitalize(direction.getName())).withStyle(formatting);
     }
 
     private static void onButton(InteriorSettingsScreen screen, DynamicPressableTextWidget button) {

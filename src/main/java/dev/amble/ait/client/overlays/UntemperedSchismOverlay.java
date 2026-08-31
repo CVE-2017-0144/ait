@@ -1,6 +1,7 @@
 package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.blockentities.UntemperedSchismBlockEntity;
@@ -8,52 +9,49 @@ import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.blocks.UntemperedSchismBlock;
 import dev.amble.ait.core.tardis.Tardis;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.AxeItem;
-import net.minecraft.text.Text;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import java.awt.*;
 
 public class UntemperedSchismOverlay implements HudRenderCallback {
 
     @Override
-    public void onHudRender(DrawContext drawContext, float delta) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        MatrixStack stack = drawContext.getMatrices();
+    public void onHudRender(GuiGraphics drawContext, float delta) {
+        Minecraft mc = Minecraft.getInstance();
+        PoseStack stack = drawContext.pose();
 
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.level == null)
             return;
 
-        if (!mc.options.getPerspective().isFirstPerson())
+        if (!mc.options.getCameraType().isFirstPerson())
             return;
 
-        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.BLOCK)
+        if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK)
             return;
 
-        Block block = mc.player.getWorld()
-                .getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos())
+        Block block = mc.player.level()
+                .getBlockState(((BlockHitResult) mc.hitResult).getBlockPos())
                 .getBlock();
         if (!(block instanceof UntemperedSchismBlock)) return;
-        UntemperedSchismBlockEntity schism = (UntemperedSchismBlockEntity) mc.player.getWorld().getBlockEntity(((BlockHitResult) mc.crosshairTarget).getBlockPos());
+        UntemperedSchismBlockEntity schism = (UntemperedSchismBlockEntity) mc.player.level().getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
 
         if (schism == null)
             return;
 
-        Text text = Text.translatable("overlay.ait.untempered_schism.au", (int) schism.getCurrentFuel(), (int) schism.getMaxFuel());
+        Component text = Component.translatable("overlay.ait.untempered_schism.au", (int) schism.getCurrentFuel(), (int) schism.getMaxFuel());
 
-        stack.push();
-        stack.translate((float) drawContext.getScaledWindowWidth() / 2 - (mc.textRenderer.getWidth(text)/2),
-                (float) drawContext.getScaledWindowHeight() / 2 - 12,
+        stack.pushPose();
+        stack.translate((float) drawContext.guiWidth() / 2 - (mc.font.width(text)/2),
+                (float) drawContext.guiHeight() / 2 - 12,
                 -10);
-        drawContext.drawText(mc.textRenderer,  text, 0, 0, Color.WHITE.getRGB(), false);
+        drawContext.drawString(mc.font,  text, 0, 0, Color.WHITE.getRGB(), false);
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        stack.pop();
+        stack.popPose();
     }
 }

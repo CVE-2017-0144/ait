@@ -9,7 +9,7 @@ public class SimpleWorldProgressListener extends AbstractWorldProgressListener {
     }
 
     @Override
-    public void setDone() {
+    public void stop() {
         this.onDone.run();
     }
 }

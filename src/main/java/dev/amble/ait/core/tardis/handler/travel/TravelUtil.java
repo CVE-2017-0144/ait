@@ -3,11 +3,9 @@ package dev.amble.ait.core.tardis.handler.travel;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
@@ -23,7 +21,7 @@ public class TravelUtil {
 
         CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
             CachedDirectedGlobalPos dest = travel.destination();
-            ServerWorld world = dest.getWorld();
+            ServerLevel world = dest.getWorld();
 
             int posX = dest.getPos().getX();
             int posZ = dest.getPos().getZ();
@@ -69,11 +67,11 @@ public class TravelUtil {
         BlockPos diff = destination.getPos().subtract(pos);
 
         return destination
-                .pos(pos.add((int) (diff.getX() * per), (int) (diff.getY() * per), (int) (diff.getZ() * per)));
+                .pos(pos.offset((int) (diff.getX() * per), (int) (diff.getY() * per), (int) (diff.getZ() * per)));
     }
 
     public static int getFlightDuration(CachedDirectedGlobalPos source, CachedDirectedGlobalPos destination) {
-        float distance = MathHelper.sqrt((float) source.getPos().getSquaredDistance(destination.getPos()));
+        float distance = Mth.sqrt((float) source.getPos().distSqr(destination.getPos()));
 
         boolean hasDirChanged = source.getRotation() != destination.getRotation();
         boolean hasDimChanged = !source.getDimension().equals(destination.getDimension());
@@ -98,6 +96,6 @@ public class TravelUtil {
 
     public static int getHardCap(int targetTicks) {
         if (targetTicks <= QUICK_FLIGHT_THRESHOLD) return 1;
-        return 1 + MathHelper.floor(1d/6d * MathHelper.sqrt(targetTicks - QUICK_FLIGHT_THRESHOLD));
+        return 1 + Mth.floor(1d/6d * Mth.sqrt(targetTicks - QUICK_FLIGHT_THRESHOLD));
     }
 }

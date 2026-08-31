@@ -6,8 +6,7 @@ import java.util.NoSuchElementException;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
 import dev.amble.ait.api.tardis.Disposable;
@@ -60,7 +59,7 @@ public class KeyframeTracker<T> extends ArrayList<AnimationKeyframe<T>> implemen
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         this.tickCommon(true);
     }
 

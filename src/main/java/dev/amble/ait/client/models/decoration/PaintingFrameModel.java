@@ -3,45 +3,53 @@ package dev.amble.ait.client.models.decoration;// Made with Blockbench 4.10.4
 // Paste this class into your mod and generate all required imports
 
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
-public class PaintingFrameModel extends SinglePartEntityModel {
+public class PaintingFrameModel extends HierarchicalModel {
     private final ModelPart frame;
     public PaintingFrameModel(ModelPart root) {
         this.frame = root.getChild("frame");
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData frame = modelPartData.addChild("frame", ModelPartBuilder.create().uv(0, 0).cuboid(-24.0F, -32.0F, -9.0F, 48.0F, 32.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition frame = modelPartData.addOrReplaceChild("frame", CubeListBuilder.create().texOffs(0, 0).addBox(-24.0F, -32.0F, -9.0F, 48.0F, 32.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData plane = frame.addChild("plane", ModelPartBuilder.create().uv(0, 33).cuboid(-19.0F, -25.0F, -1.0F, 38.0F, 22.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 22.0F, -6.0F));
-        return TexturedModelData.of(modelData, 128, 128);
+        PartDefinition plane = frame.addOrReplaceChild("plane", CubeListBuilder.create().texOffs(0, 33).addBox(-19.0F, -25.0F, -1.0F, 38.0F, 22.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 22.0F, -6.0F));
+        return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         frame.getChild("plane").visible = false;
         frame.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
-    public void renderWithFbo(MatrixStack matrices, VertexConsumerProvider vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, Identifier frameTex) {
-        frame.getChild("plane").render(matrices, vertexConsumer.getBuffer(RenderLayer.getEntityTranslucentCull(frameTex)), light, overlay, red, green, blue, alpha);
+    public void renderWithFbo(PoseStack matrices, MultiBufferSource vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, ResourceLocation frameTex) {
+        frame.getChild("plane").render(matrices, vertexConsumer.getBuffer(RenderType.entityTranslucentCull(frameTex)), light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return frame;
     }
 
     @Override
-    public void setAngles(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+    public void setupAnim(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
 
     }
 }

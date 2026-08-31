@@ -1,6 +1,6 @@
 package dev.amble.ait.compat;
 
-import com.mojang.blaze3d.platform.GlDebugInfo;
+import com.mojang.blaze3d.platform.GlUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -43,7 +43,7 @@ public class DependencyChecker {
     @Environment(EnvType.CLIENT)
     public static boolean hasNvidiaCard() {
         if (NVIDIA_CARD == null)
-            NVIDIA_CARD = GlDebugInfo.getVendor().toLowerCase().contains("nvidia");
+            NVIDIA_CARD = GlUtil.getVendor().toLowerCase().contains("nvidia");
 
         return NVIDIA_CARD;
     }

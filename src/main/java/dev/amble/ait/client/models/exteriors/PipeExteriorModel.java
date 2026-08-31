@@ -1,11 +1,19 @@
 package dev.amble.ait.client.models.exteriors;
 
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.Entity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
@@ -16,54 +24,54 @@ public class PipeExteriorModel extends SimpleExteriorModel {
     public PipeExteriorModel(ModelPart root) {
         this.tardis = root.getChild("tardis");
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData tardis = modelPartData.addChild("tardis", ModelPartBuilder.create().uv(0, 0).cuboid(-7.5F, -14.5F, -7.0F, 15.0F, 7.0F, 15.0F, new Dilation(0.0F))
-        .uv(0, 22).cuboid(-6.5F, -8.0F, -6.0F, 13.0F, 8.0F, 13.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -22.5F, -0.5F, 0.0F, 0.0F, -3.1416F));
-        return TexturedModelData.of(modelData, 128, 128);
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition tardis = modelPartData.addOrReplaceChild("tardis", CubeListBuilder.create().texOffs(0, 0).addBox(-7.5F, -14.5F, -7.0F, 15.0F, 7.0F, 15.0F, new CubeDeformation(0.0F))
+        .texOffs(0, 22).addBox(-6.5F, -8.0F, -6.0F, 13.0F, 8.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -22.5F, -0.5F, 0.0F, 0.0F, -3.1416F));
+        return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180f));
         tardis.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
+    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180f));
 
         this.renderDoors(tardis, exterior, root, matrices, vertices, light, overlay, red, green, blue, alpha, false);
 
         super.renderWithAnimations(tardis, exterior, root, matrices, vertices, light, overlay, red, green, blue, alpha);
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, MatrixStack matrices,
+    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, PoseStack matrices,
                                                            VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        matrices.push();
+        matrices.pushPose();
         //matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
         Tardis tardis = falling.tardis().get();
 
         if (tardis == null) return;
 
-        this.tardis.pivotY = !tardis.door().isOpen() ? 22F : 8f;
+        this.tardis.y = !tardis.door().isOpen() ? 22F : 8f;
 
         super.renderEntity(falling, root, matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return tardis;
     }
 
     @Override
-    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
-        this.tardis.pivotY = !tardis.door().isOpen() ? -14F : 0;
+    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
+        this.tardis.y = !tardis.door().isOpen() ? -14F : 0;
     }
 }

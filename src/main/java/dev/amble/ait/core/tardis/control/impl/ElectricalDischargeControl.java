@@ -3,20 +3,18 @@ package dev.amble.ait.core.tardis.control.impl;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.SubSystem;
@@ -35,45 +33,45 @@ public class ElectricalDischargeControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         if (tardis.fuel().getCurrentFuel() < ARTRON_COST) {
-            player.sendMessage(Text.translatable("tardis.message.control.electric.fail", ARTRON_COST).formatted(Formatting.RED), true);
+            player.displayClientMessage(Component.translatable("tardis.message.control.electric.fail", ARTRON_COST).withStyle(ChatFormatting.RED), true);
             return Result.FAILURE;
         }
 
         tardis.fuel().removeFuel(ARTRON_COST);
 
         BlockPos exteriorPos = tardis.travel().position().getPos();
-        ServerWorld exteriorWorld = tardis.travel().position().getWorld();
+        ServerLevel exteriorWorld = tardis.travel().position().getWorld();
 
         Scheduler.get().runTaskLater(() -> {
             spreadElectricalEffects(exteriorWorld, exteriorPos);
         }, TaskStage.END_SERVER_TICK, TimeUnit.TICKS, INITIAL_DELAY);
 
         Scheduler.get().runTaskLater(() -> {
-            world.playSound(null, console, AITSounds.DING, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound(null, console, AITSounds.DING, SoundSource.BLOCKS, 1.0F, 1.0F);
         }, TaskStage.END_SERVER_TICK, TimeUnit.TICKS, TOTAL_DURATION);
 
         return Result.SUCCESS;
     }
 
-    private void spreadElectricalEffects(ServerWorld world, BlockPos pos) {
-        Box effectBox = new Box(pos).expand(EFFECT_RADIUS);
+    private void spreadElectricalEffects(ServerLevel world, BlockPos pos) {
+        AABB effectBox = new AABB(pos).inflate(EFFECT_RADIUS);
 
-        world.getEntitiesByClass(LivingEntity.class, effectBox, entity -> true).forEach(entity -> {
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 600, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 300, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 200, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 600, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 275, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 250, 1));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 75, 1));
+        world.getEntitiesOfClass(LivingEntity.class, effectBox, entity -> true).forEach(entity -> {
+            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 600, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, 300, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.HUNGER, 200, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 600, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 275, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 250, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 75, 1));
         });
 
-        for (BlockPos targetPos : BlockPos.iterate(pos.add(-EFFECT_RADIUS, -1, -EFFECT_RADIUS), pos.add(EFFECT_RADIUS, 2, EFFECT_RADIUS))) {
-            world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, targetPos.getX() + 0.5, targetPos.getY() + 1.0, targetPos.getZ() + 0.5, 5, 0, 0.05, 0, 0.1);
+        for (BlockPos targetPos : BlockPos.betweenClosed(pos.offset(-EFFECT_RADIUS, -1, -EFFECT_RADIUS), pos.offset(EFFECT_RADIUS, 2, EFFECT_RADIUS))) {
+            world.sendParticles(ParticleTypes.ELECTRIC_SPARK, targetPos.getX() + 0.5, targetPos.getY() + 1.0, targetPos.getZ() + 0.5, 5, 0, 0.05, 0, 0.1);
         }
     }
 

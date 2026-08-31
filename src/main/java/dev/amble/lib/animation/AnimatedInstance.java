@@ -1,10 +1,10 @@
 package dev.amble.lib.animation;
 
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
-import net.minecraft.entity.AnimationState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import net.minecraft.world.entity.AnimationState;
 
 public interface AnimatedInstance extends BedrockModelProvider, EffectProvider {
 	UUID getUuid();

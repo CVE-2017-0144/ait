@@ -1,11 +1,6 @@
 package dev.amble.ait.core.tardis.handler;
 
 
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.core.AITItems;
@@ -16,6 +11,10 @@ import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.data.properties.bool.BoolProperty;
 import dev.amble.ait.data.properties.bool.BoolValue;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class ExtraHandler extends KeyedTardisComponent {
     private static final Property<ItemStack> SET_REFRESHMENT_ITEM = new Property<>(Property.ITEM_STACK, "set_refreshment_item", (ItemStack) null);
@@ -70,9 +69,9 @@ public class ExtraHandler extends KeyedTardisComponent {
         this.consoleHammer.set(item);
     }
 
-    public static void spawnItem(World world, BlockPos pos, ItemStack sonic) {
+    public static void spawnItem(Level world, BlockPos pos, ItemStack sonic) {
         ItemEntity entity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), sonic);
-        world.spawnEntity(entity);
+        world.addFreshEntity(entity);
     }
 
     public ItemStack getRefreshmentItem() {

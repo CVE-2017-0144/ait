@@ -1,23 +1,30 @@
 package dev.amble.ait.core.item.sonic;
 
-import net.minecraft.block.*;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
 
@@ -28,79 +35,79 @@ public class InteractionSonicMode extends SonicMode {
     }
 
     @Override
-    public Text text() {
-        return Text.translatable("sonic.ait.mode.interaction").formatted(Formatting.GREEN, Formatting.BOLD);
+    public Component text() {
+        return Component.translatable("sonic.ait.mode.interaction").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
     }
 
     @Override
-    public void tick(ItemStack stack, World world, LivingEntity user, int ticks, int ticksLeft) {
-        if (!(world instanceof ServerWorld serverWorld) || ticks % 10 != 0)
+    public void tick(ItemStack stack, Level world, LivingEntity user, int ticks, int ticksLeft) {
+        if (!(world instanceof ServerLevel serverWorld) || ticks % 10 != 0)
             return;
 
         this.process(serverWorld, user, ticks);
     }
 
-    private void process(ServerWorld world, LivingEntity user, int ticks) {
+    private void process(ServerLevel world, LivingEntity user, int ticks) {
         HitResult hitResult = SonicMode.getHitResult(user);
 
         SonicMode.checkSonicWoodAdvancementConditions(world, user, hitResult);
 
-        if (hitResult instanceof EntityHitResult entity && entity.getEntity() instanceof SheepEntity sheep) {
+        if (hitResult instanceof EntityHitResult entity && entity.getEntity() instanceof Sheep sheep) {
             this.shearSheep(sheep, world, user);
         } else if (hitResult instanceof BlockHitResult blockHit) {
             this.interactBlock(blockHit.getBlockPos(), world, user, ticks, blockHit);
         }
     }
 
-    private void interactBlock(BlockPos pos, ServerWorld world, LivingEntity user, int ticks, BlockHitResult blockHit) {
+    private void interactBlock(BlockPos pos, ServerLevel world, LivingEntity user, int ticks, BlockHitResult blockHit) {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
 
-        if (!state.isIn(AITTags.Blocks.SONIC_INTERACTABLE)) return;
+        if (!state.is(AITTags.Blocks.SONIC_INTERACTABLE)) return;
 
-        if (block == Blocks.IRON_DOOR && state.contains(Properties.OPEN)) {
-            boolean isOpen = state.get(Properties.OPEN);
-            world.setBlockState(pos, state.with(Properties.OPEN, !isOpen), 3);
-            world.emitGameEvent(user, GameEvent.BLOCK_ACTIVATE, pos);
+        if (block == Blocks.IRON_DOOR && state.hasProperty(BlockStateProperties.OPEN)) {
+            boolean isOpen = state.getValue(BlockStateProperties.OPEN);
+            world.setBlock(pos, state.setValue(BlockStateProperties.OPEN, !isOpen), 3);
+            world.gameEvent(user, GameEvent.BLOCK_ACTIVATE, pos);
             return;
         }
 
-        if (block == Blocks.IRON_TRAPDOOR && state.contains(Properties.OPEN)) {
-            boolean isOpen = state.get(Properties.OPEN);
-            world.setBlockState(pos, state.with(Properties.OPEN, !isOpen), 3);
-            world.emitGameEvent(user, GameEvent.BLOCK_ACTIVATE, pos);
+        if (block == Blocks.IRON_TRAPDOOR && state.hasProperty(BlockStateProperties.OPEN)) {
+            boolean isOpen = state.getValue(BlockStateProperties.OPEN);
+            world.setBlock(pos, state.setValue(BlockStateProperties.OPEN, !isOpen), 3);
+            world.gameEvent(user, GameEvent.BLOCK_ACTIVATE, pos);
             return;
         }
 
-        if (block instanceof RepeaterBlock && state.contains(Properties.DELAY)) {
-            world.setBlockState(pos, state.cycle(Properties.DELAY), 3);
-            world.emitGameEvent(user, GameEvent.BLOCK_CHANGE, pos);
+        if (block instanceof RepeaterBlock && state.hasProperty(BlockStateProperties.DELAY)) {
+            world.setBlock(pos, state.cycle(BlockStateProperties.DELAY), 3);
+            world.gameEvent(user, GameEvent.BLOCK_CHANGE, pos);
             return;
         }
 
-        if (block instanceof ComparatorBlock && state.contains(Properties.COMPARATOR_MODE)) {
-            world.setBlockState(pos, state.cycle(Properties.COMPARATOR_MODE), 3);
-            world.emitGameEvent(user, GameEvent.BLOCK_CHANGE, pos);
+        if (block instanceof ComparatorBlock && state.hasProperty(BlockStateProperties.MODE_COMPARATOR)) {
+            world.setBlock(pos, state.cycle(BlockStateProperties.MODE_COMPARATOR), 3);
+            world.gameEvent(user, GameEvent.BLOCK_CHANGE, pos);
             return;
         }
 
-        if (block instanceof DaylightDetectorBlock && state.contains(Properties.INVERTED)) {
-            world.setBlockState(pos, state.cycle(Properties.INVERTED), 3);
-            world.emitGameEvent(user, GameEvent.BLOCK_CHANGE, pos);
+        if (block instanceof DaylightDetectorBlock && state.hasProperty(BlockStateProperties.INVERTED)) {
+            world.setBlock(pos, state.cycle(BlockStateProperties.INVERTED), 3);
+            world.gameEvent(user, GameEvent.BLOCK_CHANGE, pos);
             return;
         }
 
-        if (user instanceof PlayerEntity player && block instanceof ButtonBlock button) {
-            button.onUse(state, world, pos, player, player.getActiveHand(), blockHit);
+        if (user instanceof Player player && block instanceof ButtonBlock button) {
+            button.use(state, world, pos, player, player.getUsedItemHand(), blockHit);
             return;
         }
     }
 
-    private void shearSheep(SheepEntity sheep, ServerWorld world, LivingEntity user) {
-        if (!sheep.isShearable()) return;
+    private void shearSheep(Sheep sheep, ServerLevel world, LivingEntity user) {
+        if (!sheep.readyForShearing()) return;
 
-        sheep.sheared(SoundCategory.PLAYERS);
-        world.emitGameEvent(user, GameEvent.SHEAR, sheep.getBlockPos());
+        sheep.shear(SoundSource.PLAYERS);
+        world.gameEvent(user, GameEvent.SHEAR, sheep.blockPosition());
     }
 
     @Override
@@ -109,7 +116,7 @@ public class InteractionSonicMode extends SonicMode {
     }
 
     @Override
-    public Identifier model(SonicSchema.Models models) {
+    public ResourceLocation model(SonicSchema.Models models) {
         return models.interaction();
     }
 }

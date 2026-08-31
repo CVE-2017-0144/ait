@@ -1,17 +1,15 @@
 package dev.amble.ait.data.properties.flt;
 
 import java.util.function.Function;
-
-import net.minecraft.network.PacketByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.PropertyType;
 
 public class FloatProperty extends Property<Float> {
 
-    public static final PropertyType<Float> TYPE = new PropertyType<>(Float.class, PacketByteBuf::writeFloat,
-            PacketByteBuf::readFloat);
+    public static final PropertyType<Float> TYPE = new PropertyType<>(Float.class, FriendlyByteBuf::writeFloat,
+            FriendlyByteBuf::readFloat);
 
     public FloatProperty(String name) {
         this(name, 0);

@@ -3,38 +3,37 @@ package dev.amble.ait.module.planet.core.space.planet;
 import static dev.amble.ait.AITMod.MOD_ID;
 
 import com.mojang.serialization.Codec;
-
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.gen.ProbabilityConfig;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.util.FeatureContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
 /**
  * @author Codiak540
  * Why: Custom crater for Mars/Moon
  */
-public class Crater extends Feature<ProbabilityConfig> {
+public class Crater extends Feature<ProbabilityFeatureConfiguration> {
 
-    public static final Identifier CRATER_ID = Identifier.of(MOD_ID, "crater");
+    public static final ResourceLocation CRATER_ID = ResourceLocation.tryBuild(MOD_ID, "crater");
 
-    public Crater(Codec<ProbabilityConfig> codec) {
+    public Crater(Codec<ProbabilityFeatureConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public boolean generate(FeatureContext<ProbabilityConfig> context) {
-        if (context.getWorld().isClient()) return false;
-        if (!((float) context.getWorld().getRandom().nextInt(11) / 10 < (context.getConfig().probability))) return false;
-        int radius = 5 + context.getWorld().getRandom().nextInt(10);
-        BlockPos pos = context.getWorld().getTopPosition(Heightmap.Type.WORLD_SURFACE_WG, context.getOrigin()).up(radius / 3);
-        pos.add(0, context.getWorld().getRandom().nextInt(4), 0);
-        for (BlockPos p : BlockPos.iterate(pos.add(-radius, -radius, -radius), pos.add(radius, radius, radius))) {
-            if (p.isWithinDistance(pos, radius))
-                if (!context.getWorld().getBlockState(p).isAir())
-                    context.getWorld().setBlockState(p, Blocks.AIR.getDefaultState(), 2);
+    public boolean place(FeaturePlaceContext<ProbabilityFeatureConfiguration> context) {
+        if (context.level().isClientSide()) return false;
+        if (!((float) context.level().getRandom().nextInt(11) / 10 < (context.config().probability))) return false;
+        int radius = 5 + context.level().getRandom().nextInt(10);
+        BlockPos pos = context.level().getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, context.origin()).above(radius / 3);
+        pos.offset(0, context.level().getRandom().nextInt(4), 0);
+        for (BlockPos p : BlockPos.betweenClosed(pos.offset(-radius, -radius, -radius), pos.offset(radius, radius, radius))) {
+            if (p.closerThan(pos, radius))
+                if (!context.level().getBlockState(p).isAir())
+                    context.level().setBlock(p, Blocks.AIR.defaultBlockState(), 2);
         }
         return true;
     }

@@ -4,14 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
-
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.api.tardis.TardisComponent;
@@ -56,12 +54,12 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
         return this.data;
     }
 
-    public Loyalty get(PlayerEntity player) {
-        return this.data.getOrDefault(player.getUuid(), new Loyalty(Loyalty.Type.NEUTRAL));
+    public Loyalty get(Player player) {
+        return this.data.getOrDefault(player.getUUID(), new Loyalty(Loyalty.Type.NEUTRAL));
     }
 
-    public Loyalty set(ServerPlayerEntity player, Loyalty loyalty) {
-        this.data.put(player.getUuid(), loyalty);
+    public Loyalty set(ServerPlayer player, Loyalty loyalty) {
+        this.data.put(player.getUUID(), loyalty);
         this.unlock(player, loyalty);
 
         this.sync();
@@ -70,19 +68,19 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 40 != 0)
+        if (server.getTickCount() % 40 != 0)
             return;
 
-        for (ServerPlayerEntity player : tardis.asServer().world().getPlayers()) {
+        for (ServerPlayer player : tardis.asServer().world().players()) {
             Loyalty loyalty = this.get(player);
 
             if (!loyalty.isOf(Loyalty.Type.NEUTRAL))
                 continue;
 
-            if (ItemOpinionRegistry.getInstance().get(player.getMainHandStack()).isPresent()) {
-                ItemOpinion opinion = ItemOpinionRegistry.getInstance().get(player.getMainHandStack()).get();
+            if (ItemOpinionRegistry.getInstance().get(player.getMainHandItem()).isPresent()) {
+                ItemOpinion opinion = ItemOpinionRegistry.getInstance().get(player.getMainHandItem()).get();
                 tardis.opinions().contains(opinion);
-                player.sendMessage(Text.translatable("ait.tardis.likes_item", true));
+                player.sendSystemMessage(Component.translatable("ait.tardis.likes_item", true));
             }
 
             if (AITMod.RANDOM.nextInt(0, 20) != 14)
@@ -92,14 +90,14 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
         }
     }
 
-    public void update(ServerPlayerEntity player, Function<Loyalty, Loyalty> consumer) {
+    public void update(ServerPlayer player, Function<Loyalty, Loyalty> consumer) {
         Loyalty current = this.get(player);
         current = consumer.apply(current);
 
         this.set(player, current);
     }
 
-    public void unlock(ServerPlayerEntity player, Loyalty loyalty) {
+    public void unlock(ServerPlayer player, Loyalty loyalty) {
         ServerTardis tardis = (ServerTardis) this.tardis;
 
         boolean playSound = messageEnabled;
@@ -116,8 +114,8 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
         }
 
         if (playSound)
-            player.getServerWorld().playSound(null, player.getBlockPos(), AITSounds.LOYALTY_UP,
-                    SoundCategory.PLAYERS, 0.2F, 1.0F);
+            player.serverLevel().playSound(null, player.blockPosition(), AITSounds.LOYALTY_UP,
+                    SoundSource.PLAYERS, 0.2F, 1.0F);
 
         if (loyalty.isOf(Loyalty.Type.OWNER))
             TardisCriterions.REACH_OWNER.trigger(player);
@@ -125,42 +123,42 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
             TardisCriterions.REACH_PILOT.trigger(player);
     }
 
-    private void playUnlockEffects(ServerPlayerEntity player, Nameable nameable) {
-        Text nameText = nameable.text().copy().formatted(Formatting.GREEN);
+    private void playUnlockEffects(ServerPlayer player, Nameable nameable) {
+        Component nameText = nameable.text().copy().withStyle(ChatFormatting.GREEN);
 
-        Text unlockedMessage;
+        Component unlockedMessage;
         if (nameable instanceof SonicSchema) {
-            unlockedMessage = Text.translatable("message.ait.unlocked_sonic", nameText).formatted(Formatting.WHITE);
+            unlockedMessage = Component.translatable("message.ait.unlocked_sonic", nameText).withStyle(ChatFormatting.WHITE);
         } else if (nameable instanceof ConsoleVariantSchema) {
-            unlockedMessage = Text.translatable("message.ait.unlocked_console", nameText).formatted(Formatting.WHITE);
+            unlockedMessage = Component.translatable("message.ait.unlocked_console", nameText).withStyle(ChatFormatting.WHITE);
         } else if (nameable instanceof TardisDesktopSchema) {
-            unlockedMessage = Text.translatable("message.ait.unlocked_interior", nameText).formatted(Formatting.WHITE);
+            unlockedMessage = Component.translatable("message.ait.unlocked_interior", nameText).withStyle(ChatFormatting.WHITE);
         } else if (nameable instanceof ExteriorVariantSchema) {
-            unlockedMessage = Text.translatable("message.ait.unlocked_exterior", nameText).formatted(Formatting.WHITE);
+            unlockedMessage = Component.translatable("message.ait.unlocked_exterior", nameText).withStyle(ChatFormatting.WHITE);
         } else {
-            unlockedMessage = Text.translatable("message.ait.unlocked", nameText).formatted(Formatting.WHITE);
+            unlockedMessage = Component.translatable("message.ait.unlocked", nameText).withStyle(ChatFormatting.WHITE);
         }
 
-        player.sendMessage(unlockedMessage, false);
+        player.displayClientMessage(unlockedMessage, false);
     }
 
 
-    public void addLevel(ServerPlayerEntity player, int level) {
+    public void addLevel(ServerPlayer player, int level) {
         this.update(player, loyalty -> loyalty.add(level));
     }
 
-    public void subLevel(ServerPlayerEntity player, int level) {
+    public void subLevel(ServerPlayer player, int level) {
         this.addLevel(player, -level);
     }
 
-    public ServerPlayerEntity getLoyalPlayerInside() {
+    public ServerPlayer getLoyalPlayerInside() {
         if (!(this.tardis instanceof ServerTardis serverTardis))
             return null;
 
-        ServerPlayerEntity highest = null;
+        ServerPlayer highest = null;
         int highestLoyalty = 0;
 
-        for (ServerPlayerEntity player : serverTardis.world().getPlayers()) {
+        for (ServerPlayer player : serverTardis.world().players()) {
             if (highest == null) {
                 highest = player;
                 highestLoyalty = this.get(highest).level();
@@ -178,12 +176,12 @@ public class LoyaltyHandler extends TardisComponent implements TardisTickable {
         return highest;
     }
 
-    public void sendMessageToPilot(Text text) {
-        ServerPlayerEntity player = this.getLoyalPlayerInside();
+    public void sendMessageToPilot(Component text) {
+        ServerPlayer player = this.getLoyalPlayerInside();
 
         if (player == null)
             return;
 
-        player.sendMessage(text, true);
+        player.displayClientMessage(text, true);
     }
 }

@@ -2,16 +2,14 @@ package dev.amble.ait.module.gun.client.render;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.entities.projectiles.StaserBoltEntityModel;
 import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
@@ -20,26 +18,26 @@ import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
 public class StaserBoltEntityRenderer
         extends EntityRenderer<StaserBoltEntity> {
 
-    public static final Identifier TEXTURE = AITMod.id("textures/entity/projectiles/staser_bolt.png");
-    public StaserBoltEntityModel model = new StaserBoltEntityModel(StaserBoltEntityModel.getTexturedModelData().createModel());
+    public static final ResourceLocation TEXTURE = AITMod.id("textures/entity/projectiles/staser_bolt.png");
+    public StaserBoltEntityModel model = new StaserBoltEntityModel(StaserBoltEntityModel.getTexturedModelData().bakeRoot());
 
-    public StaserBoltEntityRenderer(EntityRendererFactory.Context context) {
+    public StaserBoltEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void render(StaserBoltEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        matrices.push();
+    public void render(StaserBoltEntity entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
+        matrices.pushPose();
         matrices.scale(1.5f, 1.5f, 1.5f);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.getYaw()));
-        matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(entity.getPitch()));
+        matrices.mulPose(Axis.YP.rotationDegrees(entity.getYRot()));
+        matrices.mulPose(Axis.XN.rotationDegrees(entity.getXRot()));
         matrices.translate(0, -1.125f, 0);
-        model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(TEXTURE)), light, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
-        matrices.pop();
+        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        matrices.popPose();
     }
 
     @Override
-    public Identifier getTexture(StaserBoltEntity entity) {
+    public ResourceLocation getTextureLocation(StaserBoltEntity entity) {
         return TEXTURE;
     }
 }

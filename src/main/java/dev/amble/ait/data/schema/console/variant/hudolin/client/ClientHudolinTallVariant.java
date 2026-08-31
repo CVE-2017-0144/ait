@@ -3,19 +3,17 @@ package dev.amble.ait.data.schema.console.variant.hudolin.client;
 
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.HudolinConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.hudolin.HudolinTallVariant;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientHudolinTallVariant extends ClientConsoleVariantSchema {
-    public static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hudolin_console_tall.png"));
-    public static final Identifier EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hudolin_console_tall_emission.png"));
 
     public ClientHudolinTallVariant() {
@@ -23,18 +21,18 @@ public class ClientHudolinTallVariant extends ClientConsoleVariantSchema {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return EMISSION;
     }
 
     @Override
     public SimpleConsoleModel model() {
-        return new HudolinConsoleModel(HudolinConsoleModel.getTexturedModelData().createModel());
+        return new HudolinConsoleModel(HudolinConsoleModel.getTexturedModelData().bakeRoot());
     }
     @Override
     public Vector3f sonicItemTranslations() {

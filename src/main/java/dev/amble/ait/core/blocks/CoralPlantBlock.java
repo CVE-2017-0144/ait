@@ -6,31 +6,35 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.RavagerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Ravager;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoulSandBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.AITBlocks;
@@ -52,19 +56,19 @@ import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 @SuppressWarnings("deprecation")
-public class CoralPlantBlock extends HorizontalDirectionalBlock implements BlockEntityProvider {
-    private final VoxelShape DEFAULT = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 32.0, 16.0);
-    public static final IntProperty AGE = Properties.AGE_7;
+public class CoralPlantBlock extends HorizontalDirectionalBlock implements EntityBlock {
+    private final VoxelShape DEFAULT = Block.box(0.0, 0.0, 0.0, 16.0, 32.0, 16.0);
+    public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 
-    public CoralPlantBlock(Settings settings) {
+    public CoralPlantBlock(Properties settings) {
         super(settings);
 
-        this.setDefaultState(
-                this.getDefaultState().with(AGE, 0)
+        this.registerDefaultState(
+                this.defaultBlockState().setValue(AGE, 0)
         );
     }
 
-    protected IntProperty getAgeProperty() {
+    protected IntegerProperty getAgeProperty() {
         return AGE;
     }
 
@@ -73,7 +77,7 @@ public class CoralPlantBlock extends HorizontalDirectionalBlock implements Block
     }
 
     public int getAge(BlockState state) {
-        return state.get(this.getAgeProperty());
+        return state.getValue(this.getAgeProperty());
     }
 
     public final boolean isMature(BlockState blockState) {
@@ -81,41 +85,41 @@ public class CoralPlantBlock extends HorizontalDirectionalBlock implements Block
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        super.randomDisplayTick(state, world, pos, random);
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+        super.animateTick(state, world, pos, random);
 
-        Vec3d centre = pos.up().toCenterPos();
+        Vec3 centre = pos.above().getCenter();
         for (int i = 0; i < getAge(state); i++) {
             double offsetX = AITMod.RANDOM.nextGaussian() * getAge(state) * 0.01f;
             double offsetY = AITMod.RANDOM.nextGaussian() * getAge(state) * 0.01f;
             double offsetZ = AITMod.RANDOM.nextGaussian() * getAge(state) * 0.01f;
-            world.addParticle(AITMod.CORAL_PARTICLE, centre.getX(), centre.getY() , centre.getZ(), offsetX, offsetY, offsetZ);
+            world.addParticle(AITMod.CORAL_PARTICLE, centre.x(), centre.y() , centre.z(), offsetX, offsetY, offsetZ);
         }
     }
 
     @Override
-    public boolean hasRandomTicks(BlockState state) {
+    public boolean isRandomlyTicking(BlockState state) {
         return true;
     }
 
     @Override
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if (world.getBaseLightLevel(pos, 0) >= 4) {
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        if (world.getRawBrightness(pos, 0) >= 4) {
             int i = this.getAge(state);
             if (i < this.getMaxAge()) {
-                if (!(world.getBlockState(pos.down()).getBlock() instanceof SoulSandBlock)) {
-                    world.breakBlock(pos, true);
+                if (!(world.getBlockState(pos.below()).getBlock() instanceof SoulSandBlock)) {
+                    world.destroyBlock(pos, true);
                     return;
                 }
 
-                world.setBlockState(pos, state.with(AGE, i + 1), 2);
+                world.setBlock(pos, state.setValue(AGE, i + 1), 2);
             }
         }
 
         tryCreate(world, pos, state);
     }
 
-    private boolean tryCreate(ServerWorld world, BlockPos pos, BlockState state) {
+    private boolean tryCreate(ServerLevel world, BlockPos pos, BlockState state) {
         if (!this.isMature(state))
             return false;
 
@@ -130,18 +134,18 @@ public class CoralPlantBlock extends HorizontalDirectionalBlock implements Block
         return true;
     }
 
-    private void createConsole(ServerWorld world, BlockPos pos) {
-        world.playSound(null, pos, AITSounds.FABRICATOR_END, SoundCategory.BLOCKS);
+    private void createConsole(ServerLevel world, BlockPos pos) {
+        world.playSound(null, pos, AITSounds.FABRICATOR_END, SoundSource.BLOCKS);
 
-        world.setBlockState(pos, AITBlocks.CONSOLE.getDefaultState());
+        world.setBlockAndUpdate(pos, AITBlocks.CONSOLE.defaultBlockState());
     }
 
-    private void createTardis(ServerWorld world, BlockPos pos, UUID creatorId, BlockState state) {
-        if (!(world.getPlayerByUuid(creatorId) instanceof ServerPlayerEntity player))
+    private void createTardis(ServerLevel world, BlockPos pos, UUID creatorId, BlockState state) {
+        if (!(world.getPlayerByUUID(creatorId) instanceof ServerPlayer player))
             return;
 
         TardisBuilder builder = new TardisBuilder().at(CachedDirectedGlobalPos.create(world, pos,
-                        CachedDirectedGlobalPos.getGeneralizedRotation(state.get(FACING))))
+                        CachedDirectedGlobalPos.getGeneralizedRotation(state.getValue(FACING))))
                 .owner(player)
                 .<FuelHandler>with(TardisComponent.Id.FUEL, fuel -> fuel.setCurrentFuel(5000))
                 .<LoyaltyHandler>with(TardisComponent.Id.LOYALTY, loyaltyHandler -> loyaltyHandler.set(player, new Loyalty(Loyalty.Type.NEUTRAL)))
@@ -154,77 +158,77 @@ public class CoralPlantBlock extends HorizontalDirectionalBlock implements Block
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
             ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
+        super.setPlacedBy(world, pos, state, placer, itemStack);
 
-        if (!(placer instanceof ServerPlayerEntity player))
+        if (!(placer instanceof ServerPlayer player))
             return;
 
-        if (!RiftChunkManager.isRiftChunk((ServerWorld) world, pos) && !TardisServerWorld.isTardisDimension((ServerWorld) world)) {
-            world.breakBlock(pos, !placer.isPlayer() || !player.isCreative());
-            player.sendMessage(Text.translatable("ait.tooltip.coral_riftchunk").formatted(Formatting.RED), true);
+        if (!RiftChunkManager.isRiftChunk((ServerLevel) world, pos) && !TardisServerWorld.isTardisDimension((ServerLevel) world)) {
+            world.destroyBlock(pos, !placer.isAlwaysTicking() || !player.isCreative());
+            player.displayClientMessage(Component.translatable("ait.tooltip.coral_riftchunk").withStyle(ChatFormatting.RED), true);
             return;
         }
 
-        if (!(world.getBlockState(pos.down()).getBlock() instanceof SoulSandBlock)) {
-            world.breakBlock(pos, !placer.isPlayer() || !player.isCreative());
-            player.sendMessage(Text.translatable("ait.tooltip.coral_soulsand").formatted(Formatting.RED), true);
+        if (!(world.getBlockState(pos.below()).getBlock() instanceof SoulSandBlock)) {
+            world.destroyBlock(pos, !placer.isAlwaysTicking() || !player.isCreative());
+            player.displayClientMessage(Component.translatable("ait.tooltip.coral_soulsand").withStyle(ChatFormatting.RED), true);
             return;
         }
 
         if (world.getBlockEntity(pos) instanceof CoralBlockEntity coral) {
-            if (player.getUuid() != null) {
-                coral.creator = player.getUuid();
-                coral.markDirty();
+            if (player.getUUID() != null) {
+                coral.creator = player.getUUID();
+                coral.setChanged();
             }
             TardisCriterions.PLACE_CORAL.trigger(player);
         }
     }
 
     @Override
-    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        return (world.getBaseLightLevel(pos, 0) >= 4 || world.isSkyVisible(pos)) && super.canPlaceAt(state, world, pos);
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        return (world.getRawBrightness(pos, 0) >= 4 || world.canSeeSky(pos)) && super.canSurvive(state, world, pos);
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        if (entity instanceof RavagerEntity && world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
-            world.breakBlock(pos, true, entity);
+    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
+        if (entity instanceof Ravager && world.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            world.destroyBlock(pos, true, entity);
         }
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return DEFAULT;
     }
 
     @Override
-    public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+    public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
         return DEFAULT;
     }
 
     @Override
-    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-        return AITBlocks.CORAL_PLANT.asItem().getDefaultStack();
+    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state) {
+        return AITBlocks.CORAL_PLANT.asItem().getDefaultInstance();
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(AGE).add(FACING);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        super.appendTooltip(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, world, tooltip, options);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            tooltip.add(Text.translatable("tooltip.ait.tardis_coral").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+            tooltip.add(Component.translatable("tooltip.ait.tardis_coral").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         });
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CoralBlockEntity(pos, state);
     }
 }

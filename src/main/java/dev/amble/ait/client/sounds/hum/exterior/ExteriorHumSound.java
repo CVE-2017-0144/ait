@@ -2,11 +2,9 @@ package dev.amble.ait.client.sounds.hum.exterior;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
@@ -22,7 +20,7 @@ public class ExteriorHumSound extends PositionedLoopingSound implements Linkable
     private TardisRef tardis;
     private float multiplier = 1f;
 
-    public ExteriorHumSound(Hum data, SoundCategory soundCategory) {
+    public ExteriorHumSound(Hum data, SoundSource soundCategory) {
         super(data.sound(), soundCategory, new BlockPos(0,0,0));
         this.data = data;
     }
@@ -55,7 +53,7 @@ public class ExteriorHumSound extends PositionedLoopingSound implements Linkable
         if (this.isLinked()) {
             BlockPos tPos = tardis.get().travel().position().getPos();
 
-            double distance = Math.sqrt(tPos.getSquaredDistance(MinecraftClient.getInstance().player.getPos()));
+            double distance = Math.sqrt(tPos.distToCenterSqr(Minecraft.getInstance().player.position()));
             this.volume = (float) Math.max(0, (1 - ((distance / ExteriorHumHandler.MAX_DISTANCE))) * multiplier);
 
             if (!this.getPosition().equals(tPos)) {
@@ -81,13 +79,13 @@ public class ExteriorHumSound extends PositionedLoopingSound implements Linkable
 
     @Override
     public void link(Tardis tardis) {
-        this.tardis = TardisRef.createAs(MinecraftClient.getInstance().player, tardis);
+        this.tardis = TardisRef.createAs(Minecraft.getInstance().player, tardis);
         this.data = tardis.hum().get();
     }
 
     @Override
     public void link(UUID id) {
-        this.tardis = TardisRef.createAs(MinecraftClient.getInstance().player, id);
+        this.tardis = TardisRef.createAs(Minecraft.getInstance().player, id);
     }
 
     @Override

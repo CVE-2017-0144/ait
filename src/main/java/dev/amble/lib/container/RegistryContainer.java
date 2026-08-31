@@ -4,11 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Locale;
 import java.util.Optional;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.lib.AmbleKit;
 
 public interface RegistryContainer<T> {
@@ -28,7 +26,7 @@ public interface RegistryContainer<T> {
      * @param identifier The identifier the field was assigned, possibly overridden by an {@link AssignedName}
      *                   annotation and always fully lowercase
      */
-    default void postProcessField(Identifier identifier, T value, Field field) {}
+    default void postProcessField(ResourceLocation identifier, T value, Field field) {}
 
     static <T> void register(Class<? extends RegistryContainer<T>> clazz, String namespace) {
         try {
@@ -55,7 +53,7 @@ public interface RegistryContainer<T> {
                 if (field.isAnnotationPresent(AssignedName.class))
                     name = field.getAnnotation(AssignedName.class).value();
 
-                Identifier id = new Identifier(namespace, name);
+                ResourceLocation id = new ResourceLocation(namespace, name);
 
                 // Only register the value when it isn't already present in the target
                 // registry. Some external APIs (e.g. TerraformersMC's boat API) register
@@ -63,10 +61,10 @@ public interface RegistryContainer<T> {
                 // "Attempted to register object ... twice". See issue #56. When that
                 // happens we still run postProcessField (block items, renderers, ...)
                 // using the registry's existing identifier.
-                Optional<RegistryKey<T>> existing = container.getRegistry().getKey(v);
+                Optional<ResourceKey<T>> existing = container.getRegistry().getResourceKey(v);
 
                 if (existing.isPresent()) {
-                    id = existing.get().getValue();
+                    id = existing.get().location();
                 } else {
                     Registry.register(container.getRegistry(), id, v);
                 }

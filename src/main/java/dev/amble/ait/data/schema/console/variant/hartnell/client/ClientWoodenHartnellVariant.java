@@ -1,17 +1,16 @@
 package dev.amble.ait.data.schema.console.variant.hartnell.client;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.HartnellConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.hartnell.WoodenHartnellVariant;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientWoodenHartnellVariant extends ClientConsoleVariantSchema {
-    public static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hartnell_wooden_console.png"));
-    public static final Identifier EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hartnell_console_emission.png"));
 
     public ClientWoodenHartnellVariant() {
@@ -19,17 +18,17 @@ public class ClientWoodenHartnellVariant extends ClientConsoleVariantSchema {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return EMISSION;
     }
 
     @Override
     public SimpleConsoleModel model() {
-        return new HartnellConsoleModel(HartnellConsoleModel.getTexturedModelData().createModel());
+        return new HartnellConsoleModel(HartnellConsoleModel.getTexturedModelData().bakeRoot());
     }
 }

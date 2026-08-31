@@ -1,11 +1,8 @@
 package dev.amble.ait.core.tardis.util;
 
 import java.util.Objects;
-
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.NotImplementedException;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.tardis.handler.ServerHumHandler;
@@ -24,18 +21,18 @@ public enum DefaultThemes {
     PRIME("accursed", "exterior/capsule/default", "prime", "console/hartnell"),
     TOYOTA("toyota", "exterior/police_box/default", "toyota", "console/toyota"),
     RENAISSANCE("renaissance", "exterior/police_box/renaissance", "renaissance", "console/renaissance"),
-    WAR(AITMod.id("war"), new Identifier("frooploof", "coral_war"), AITMod.id("coral"), AITMod.id("console/coral")),
+    WAR(AITMod.id("war"), new ResourceLocation("frooploof", "coral_war"), AITMod.id("coral"), AITMod.id("console/coral")),
     CRYSTALLINE("crystalline", "exterior/police_box/renaissance", "renaissance", "console/crystalline"),
     COPPER("copper", "exterior/police_box/default", "copper", "console/copper");
-    private final Identifier desktop;
-    private final Identifier exterior;
-    private final Identifier hum;
-    private final Identifier console;
+    private final ResourceLocation desktop;
+    private final ResourceLocation exterior;
+    private final ResourceLocation hum;
+    private final ResourceLocation console;
 
     DefaultThemes(String desktop, String exterior, String hum, String console) {
         this(AITMod.id(desktop), AITMod.id(exterior), AITMod.id(hum), AITMod.id(console));
     }
-    DefaultThemes(Identifier desktop, Identifier exterior, Identifier hum, Identifier console) {
+    DefaultThemes(ResourceLocation desktop, ResourceLocation exterior, ResourceLocation hum, ResourceLocation console) {
         this.desktop = desktop;
         this.exterior = exterior;
         this.hum = hum;

@@ -1,30 +1,30 @@
 package dev.amble.ait.client.sounds;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.MovingSoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 
-public class PlayerFollowingSound extends MovingSoundInstance {
-    public PlayerFollowingSound(SoundEvent soundEvent, SoundCategory soundCategory, float volume, float pitch) {
-        super(soundEvent, soundCategory, Random.create());
+public class PlayerFollowingSound extends AbstractTickableSoundInstance {
+    public PlayerFollowingSound(SoundEvent soundEvent, SoundSource soundCategory, float volume, float pitch) {
+        super(soundEvent, soundCategory, RandomSource.create());
 
-        ClientPlayerEntity client = MinecraftClient.getInstance().player;
+        LocalPlayer client = Minecraft.getInstance().player;
         this.x = client.getX();
         this.y = client.getY();
         this.z = client.getZ();
         this.volume = volume;
         this.pitch = pitch;
-        this.repeat = false;
+        this.looping = false;
     }
 
-    public PlayerFollowingSound(SoundEvent soundEvent, SoundCategory soundCategory, float volume) {
+    public PlayerFollowingSound(SoundEvent soundEvent, SoundSource soundCategory, float volume) {
         this(soundEvent, soundCategory, volume, 1);
     }
 
-    public PlayerFollowingSound(SoundEvent soundEvent, SoundCategory soundCategory) {
+    public PlayerFollowingSound(SoundEvent soundEvent, SoundSource soundCategory) {
         this(soundEvent, soundCategory, 1, 1);
     }
 
@@ -34,7 +34,7 @@ public class PlayerFollowingSound extends MovingSoundInstance {
     }
 
     private void setCoordsToPlayerCoords() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null)
             return;
 

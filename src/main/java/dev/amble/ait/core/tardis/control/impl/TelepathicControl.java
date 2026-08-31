@@ -2,33 +2,30 @@ package dev.amble.ait.core.tardis.control.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.NameTagItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import dev.drtheo.queue.api.ActionQueue;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.NameTagItem;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.StructureTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureKeys;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
@@ -63,13 +60,13 @@ public class TelepathicControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         if (tardis.stats().security().get() && !KeyItem.hasMatchingKeyInInventory(player, tardis))
             return Result.FAILURE;
 
-        ItemStack held = player.getMainHandStack();
+        ItemStack held = player.getMainHandItem();
         Item type = held.getItem();
 
         if (type == Items.BRICK) {
@@ -97,30 +94,30 @@ public class TelepathicControl extends Control {
                 return Result.FAILURE;
 
             linker.link(held, tardis);
-            world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.BLOCKS,
+            world.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS,
                     1.0F, 1.0F);
             return Result.SUCCESS_ALT;
         }
 
         if (type instanceof NameTagItem) {
-            if (!held.hasCustomName())
+            if (!held.hasCustomHoverName())
                 return Result.FAILURE;
 
-            tardis.stats().setName(held.getName().getString());
-            world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1F, 1.0F);
+            tardis.stats().setName(held.getHoverName().getString());
+            world.playSound(null, player.blockPosition(), SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 1F, 1.0F);
 
             if (!player.isCreative())
-                held.decrement(1);
+                held.shrink(1);
 
             return Result.SUCCESS;
         }
 
         if (type instanceof HypercubeItem) {
-            DistressCall call = HypercubeItem.getCall(held, world.getServer().getTicks());
+            DistressCall call = HypercubeItem.getCall(held, world.getServer().getTickCount());
 
             if (call == null) {
                 // create new call
-                call = DistressCall.create(tardis, held.hasCustomName() ? held.getName().getString() : "SOS", true);
+                call = DistressCall.create(tardis, held.hasCustomHoverName() ? held.getHoverName().getString() : "SOS", true);
                 HypercubeItem.setCall(held, call);
             }
 
@@ -133,17 +130,17 @@ public class TelepathicControl extends Control {
             return Result.SUCCESS;
         }
 
-        if (held.isOf(AITItems.CORAL_FRAGMENT)) {
+        if (held.is(AITItems.CORAL_FRAGMENT)) {
             Loyalty loyalty = tardis.loyalty().get(player);
             CachedDirectedGlobalPos currentPos = tardis.travel().position();
-            boolean inNether = currentPos != null && currentPos.getDimension().equals(World.NETHER);
+            boolean inNether = currentPos != null && currentPos.getDimension().equals(Level.NETHER);
             Loyalty.Type required = inNether ? Loyalty.Type.OWNER : Loyalty.Type.PILOT;
 
             if (currentPos == null || !tardis.travel().isLanded())
                 return Result.FAILURE;
 
             if (!loyalty.isOf(required)) {
-                player.sendMessage(Text.translatable(
+                player.displayClientMessage(Component.translatable(
                                 inNether ? "tardis.message.control.telepathic.home_denied_nether"
                                         : "tardis.message.control.telepathic.home_denied"),
                         true);
@@ -152,22 +149,22 @@ public class TelepathicControl extends Control {
 
             tardis.stats().setHome(currentPos);
 
-            player.sendMessage(Text.translatable("tardis.message.control.telepathic.home_updated"), true);
+            player.displayClientMessage(Component.translatable("tardis.message.control.telepathic.home_updated"), true);
 
             if (!player.isCreative())
-                held.decrement(1);
+                held.shrink(1);
 
             return Result.SUCCESS;
         }
 
-        if (held.isOf(Items.NETHER_STAR) && tardis.loyalty().get(player).isOf(Loyalty.Type.PILOT)) {
+        if (held.is(Items.NETHER_STAR) && tardis.loyalty().get(player).isOf(Loyalty.Type.PILOT)) {
             tardis.selfDestruct().boom();
 
             if (!(tardis.selfDestruct().isQueued()))
                 return Result.FAILURE;
 
             if (!player.isCreative())
-                held.decrement(1);
+                held.shrink(1);
 
             return Result.SUCCESS;
         }
@@ -182,15 +179,15 @@ public class TelepathicControl extends Control {
         if (opinion != null && tardis.opinions().contains(opinion) && (player.experienceLevel >= opinion.cost() || player.isCreative())) {
             opinion.apply(tardis.asServer(), player);
 
-            player.getServerWorld().playSound(null, console, AITSounds.TARDIS_BLING, SoundCategory.AMBIENT, 0.25f, 1f);
-            player.getServerWorld().spawnParticles((opinion.likes()) ? ParticleTypes.HEART : ParticleTypes.ANGRY_VILLAGER, console.toCenterPos().getX(),
-                    console.toCenterPos().getY() + 1, console.toCenterPos().getZ(), 1, 0f, 1F, 0f, 5.0F);
+            player.serverLevel().playSound(null, console, AITSounds.TARDIS_BLING, SoundSource.AMBIENT, 0.25f, 1f);
+            player.serverLevel().sendParticles((opinion.likes()) ? ParticleTypes.HEART : ParticleTypes.ANGRY_VILLAGER, console.getCenter().x(),
+                    console.getCenter().y() + 1, console.getCenter().z(), 1, 0f, 1F, 0f, 5.0F);
 
             return Result.SUCCESS;
         }
 
-        Text text = Text.translatable("tardis.message.control.telepathic.choosing");
-        player.sendMessage(text, true);
+        Component text = Component.translatable("tardis.message.control.telepathic.choosing");
+        player.displayClientMessage(text, true);
 
         CachedDirectedGlobalPos globalPos = tardis.travel().position();
 
@@ -199,11 +196,11 @@ public class TelepathicControl extends Control {
     }
 
     public static boolean isLiquid(ItemStack held) {
-        return (held.isOf(AITItems.MUG) && DrinkUtil.getDrink(held) != DrinkUtil.EMPTY)
-                || held.isOf(Items.LAVA_BUCKET) || held.isOf(Items.WATER_BUCKET) || held.isOf(Items.MILK_BUCKET);
+        return (held.is(AITItems.MUG) && DrinkUtil.getDrink(held) != DrinkUtil.EMPTY)
+                || held.is(Items.LAVA_BUCKET) || held.is(Items.WATER_BUCKET) || held.is(Items.MILK_BUCKET);
     }
 
-    public static Result spillLiquid(Tardis tardis, ServerWorld world, BlockPos console, @Nullable ServerPlayerEntity player) {
+    public static Result spillLiquid(Tardis tardis, ServerLevel world, BlockPos console, @Nullable ServerPlayer player) {
         /*
             This is an example of how to use the travel queue.
             This code enqueues a crash to be performed after dematerialization.
@@ -220,15 +217,15 @@ public class TelepathicControl extends Control {
             travel.crash();
             tardis.crash().addRepairTicks(1500);
 
-            world.spawnParticles(ParticleTypes.SMALL_FLAME, console.toCenterPos().getX() + 0.5f, console.toCenterPos().getY() + 1.25, console.toCenterPos().getZ() + 0.5f,
+            world.sendParticles(ParticleTypes.SMALL_FLAME, console.getCenter().x() + 0.5f, console.getCenter().y() + 1.25, console.getCenter().z() + 0.5f,
                     5 * 10, 0, 0, 0, 0.1f * 10);
 
-            world.spawnParticles(ParticleTypes.EXPLOSION, console.toCenterPos().getX() + 0.5f, console.toCenterPos().getY() + 1.25, console.toCenterPos().getZ() + 0.5f,
+            world.sendParticles(ParticleTypes.EXPLOSION, console.getCenter().x() + 0.5f, console.getCenter().y() + 1.25, console.getCenter().z() + 0.5f,
                     5 * 10, 0, 0, 0, 0.1f * 10);
 
 
-            world.playSound(null, console, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 1.0f, 1.0f);
-            world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundCategory.BLOCKS, 1.0f, 1.0f);
+            world.playSound(null, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0f, 1.0f);
+            world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
             if (player != null) {
                 TardisCriterions.BRAND_NEW.trigger(player);
@@ -253,14 +250,14 @@ public class TelepathicControl extends Control {
                 // This is called just before the dematerialization starts
                 tardis.alarm().enable();
 
-                world.spawnParticles(ParticleTypes.SMALL_FLAME, console.toCenterPos().getX() + 0.5f, console.toCenterPos().getY() + 1.25, console.toCenterPos().getZ() + 0.5f,
+                world.sendParticles(ParticleTypes.SMALL_FLAME, console.getCenter().x() + 0.5f, console.getCenter().y() + 1.25, console.getCenter().z() + 0.5f,
                         5 * 10, 0, 0, 0, 0.1f * 10);
 
-                world.spawnParticles(ParticleTypes.EXPLOSION, console.toCenterPos().getX() + 0.5f, console.toCenterPos().getY() + 1.25, console.toCenterPos().getZ() + 0.5f,
+                world.sendParticles(ParticleTypes.EXPLOSION, console.getCenter().x() + 0.5f, console.getCenter().y() + 1.25, console.getCenter().z() + 0.5f,
                         5 * 10, 0, 0, 0, 0.1f * 10);
 
-                world.playSound(null, console, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 1.0f, 1.0f);
-                world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                world.playSound(null, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0f, 1.0f);
+                world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundSource.BLOCKS, 1.0f, 1.0f);
             });
 
             travel.autopilot(hadAutopilot);
@@ -277,37 +274,37 @@ public class TelepathicControl extends Control {
         return Result.FAILURE;
     }
 
-    public static void locateStructureOfInterest(ServerPlayerEntity player, Tardis tardis, ServerWorld world,
+    public static void locateStructureOfInterest(ServerPlayer player, Tardis tardis, ServerLevel world,
                                                  BlockPos source) {
-        if (world.getRegistryKey() == World.NETHER) {
-            getStructureViaChunkGen(player, tardis, world, source, RADIUS, StructureKeys.FORTRESS);
-        } else if (world.getRegistryKey() == World.END) {
-            getStructureViaChunkGen(player, tardis, world, source, RADIUS, StructureKeys.END_CITY);
-        } else if (world.getRegistryKey() == World.OVERWORLD) {
+        if (world.dimension() == Level.NETHER) {
+            getStructureViaChunkGen(player, tardis, world, source, RADIUS, BuiltinStructures.FORTRESS);
+        } else if (world.dimension() == Level.END) {
+            getStructureViaChunkGen(player, tardis, world, source, RADIUS, BuiltinStructures.END_CITY);
+        } else if (world.dimension() == Level.OVERWORLD) {
             getStructureViaWorld(player, tardis, world, source, RADIUS, StructureTags.VILLAGE);
         } else {
-            Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
+            Registry<Structure> registry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
             // get a list of all the registry entries
-            List<RegistryEntry<Structure>> structures = new ArrayList<>();
+            List<Holder<Structure>> structures = new ArrayList<>();
 
             for (int i = 0; i < registry.size() - 1; i++) {
-                structures.add(registry.getEntry(i).orElseThrow());
+                structures.add(registry.getHolder(i).orElseThrow());
             }
 
-            locateWithChunkGenAsync(player, tardis, RegistryEntryList.of(structures), world, source, RADIUS);
+            locateWithChunkGenAsync(player, tardis, HolderSet.direct(structures), world, source, RADIUS);
         }
     }
 
-    public static void getStructureViaChunkGen(ServerPlayerEntity player, Tardis tardis, ServerWorld world,
-                                               BlockPos pos, int radius, RegistryKey<Structure> key) {
-        Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
+    public static void getStructureViaChunkGen(ServerPlayer player, Tardis tardis, ServerLevel world,
+                                               BlockPos pos, int radius, ResourceKey<Structure> key) {
+        Registry<Structure> registry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
 
-        if (registry.getEntry(key).isPresent())
-            locateWithChunkGenAsync(player, tardis, RegistryEntryList.of(registry.getEntry(key).get()), world, pos,
+        if (registry.getHolder(key).isPresent())
+            locateWithChunkGenAsync(player, tardis, HolderSet.direct(registry.getHolder(key).get()), world, pos,
                     radius);
     }
 
-    public static void getStructureViaWorld(ServerPlayerEntity player, Tardis tardis, ServerWorld world, BlockPos pos,
+    public static void getStructureViaWorld(ServerPlayer player, Tardis tardis, ServerLevel world, BlockPos pos,
                                             int radius, TagKey<Structure> key) {
         locateWithWorldAsync(player, tardis, key, world, pos, radius);
     }
@@ -327,29 +324,29 @@ public class TelepathicControl extends Control {
         return AITSounds.TELEPATHIC_CIRCUITS;
     }
 
-    public static void locateWithChunkGenAsync(ServerPlayerEntity player, Tardis tardis,
-                                               RegistryEntryList<Structure> structureList, ServerWorld world, BlockPos center, int radius) {
+    public static void locateWithChunkGenAsync(ServerPlayer player, Tardis tardis,
+                                               HolderSet<Structure> structureList, ServerLevel world, BlockPos center, int radius) {
         AsyncLocatorUtil.locate(world, structureList, center, radius, false).thenOnServerThread(pos -> {
             BlockPos newPos = pos != null ? pos.getFirst() : null;
             if (newPos != null) {
-                tardis.travel().forceDestination(cached -> cached.pos(newPos.withY(75)));
+                tardis.travel().forceDestination(cached -> cached.pos(newPos.atY(75)));
                 tardis.removeFuel(500 * tardis.travel().instability());
-                player.sendMessage(Text.translatable("tardis.message.control.telepathic.success"), true);
+                player.displayClientMessage(Component.translatable("tardis.message.control.telepathic.success"), true);
             } else {
-                player.sendMessage(Text.translatable("tardis.message.control.telepathic.failed"), true);
+                player.displayClientMessage(Component.translatable("tardis.message.control.telepathic.failed"), true);
             }
         });
     }
 
-    public static void locateWithWorldAsync(ServerPlayerEntity player, Tardis tardis, TagKey<Structure> structureTagKey,
-                                            ServerWorld world, BlockPos center, int radius) {
+    public static void locateWithWorldAsync(ServerPlayer player, Tardis tardis, TagKey<Structure> structureTagKey,
+                                            ServerLevel world, BlockPos center, int radius) {
         AsyncLocatorUtil.locate(world, structureTagKey, center, radius, false).thenOnServerThread(pos -> {
             if (pos != null) {
-                tardis.travel().forceDestination(cached -> cached.pos(pos.withY(75)));
+                tardis.travel().forceDestination(cached -> cached.pos(pos.atY(75)));
                 tardis.removeFuel(500 * tardis.travel().instability());
-                player.sendMessage(Text.translatable("tardis.message.control.telepathic.success"), true);
+                player.displayClientMessage(Component.translatable("tardis.message.control.telepathic.success"), true);
             } else {
-                player.sendMessage(Text.translatable("tardis.message.control.telepathic.failed"), true);
+                player.displayClientMessage(Component.translatable("tardis.message.control.telepathic.failed"), true);
             }
         });
     }

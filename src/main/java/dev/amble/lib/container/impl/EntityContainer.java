@@ -10,20 +10,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import dev.amble.lib.container.RegistryContainer;
-import net.minecraft.util.Identifier;
-
 import java.lang.reflect.Field;
 
 public interface EntityContainer extends RegistryContainer<EntityType<?>> {
 	@Override
-	default void postProcessField(Identifier identifier, EntityType<?> value, Field field) {
+	default void postProcessField(ResourceLocation identifier, EntityType<?> value, Field field) {
 		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) return;
 
 		// automagically register bedrock renderer
@@ -39,6 +35,6 @@ public interface EntityContainer extends RegistryContainer<EntityType<?>> {
 
 	@Override
 	default Registry<EntityType<?>> getRegistry() {
-		return Registries.ENTITY_TYPE;
+		return BuiltInRegistries.ENTITY_TYPE;
 	}
 }

@@ -3,12 +3,10 @@ package dev.amble.ait.registry.impl;
 import java.util.Optional;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.control.impl.*;
@@ -21,8 +19,8 @@ import dev.amble.ait.core.tardis.control.impl.waypoint.SaveWaypointControl;
 
 public class ControlRegistry {
 
-    public static final SimpleRegistry<Control> REGISTRY = FabricRegistryBuilder
-            .createSimple(RegistryKey.<Control>ofRegistry(AITMod.id("control"))).buildAndRegister();
+    public static final MappedRegistry<Control> REGISTRY = FabricRegistryBuilder
+            .createSimple(ResourceKey.<Control>createRegistryKey(AITMod.id("control"))).buildAndRegister();
 
     public static Control register(Control control) {
         return Registry.register(REGISTRY, control.id(), control);
@@ -35,7 +33,7 @@ public class ControlRegistry {
      *            the id to look for
      * @return the control found
      */
-    public static Optional<Control> fromId(Identifier id) {
+    public static Optional<Control> fromId(ResourceLocation id) {
         return Optional.ofNullable(REGISTRY.get(id));
     }
 

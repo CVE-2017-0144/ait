@@ -8,35 +8,33 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.StringRepresentable;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.enummap.EnumMap;
 
-public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, Identifier> lookup) {
+public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, ResourceLocation> lookup) {
 
     public static BiomeOverrides EMPTY = new BiomeOverrides(createMap());
 
-    private static EnumMap.Compliant<BiomeHandler.BiomeType, Identifier> createMap() {
-        return new EnumMap.Compliant<>(() -> BiomeHandler.BiomeType.VALUES, Identifier[]::new);
+    private static EnumMap.Compliant<BiomeHandler.BiomeType, ResourceLocation> createMap() {
+        return new EnumMap.Compliant<>(() -> BiomeHandler.BiomeType.VALUES, ResourceLocation[]::new);
     }
 
-    private BiomeOverrides(Map<BiomeHandler.BiomeType, Identifier> map) {
+    private BiomeOverrides(Map<BiomeHandler.BiomeType, ResourceLocation> map) {
         this(createMap());
         this.lookup.putAll(map);
     }
 
-    public Identifier get(BiomeHandler.BiomeType type) {
+    public ResourceLocation get(BiomeHandler.BiomeType type) {
         return this.lookup.get(type);
     }
 
     @Environment(EnvType.CLIENT)
     public void validate() {
-        ResourceManager manager = MinecraftClient.getInstance().getResourceManager();
+        ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
         this.lookup.map(id -> {
             if (id == null)
@@ -46,8 +44,8 @@ public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, Identifie
         });
     }
 
-    public static BiomeOverrides of(Function<BiomeHandler.BiomeType, Identifier> func) {
-        EnumMap.Compliant<BiomeHandler.BiomeType, Identifier> map = createMap();
+    public static BiomeOverrides of(Function<BiomeHandler.BiomeType, ResourceLocation> func) {
+        EnumMap.Compliant<BiomeHandler.BiomeType, ResourceLocation> map = createMap();
 
         for (BiomeHandler.BiomeType type : BiomeHandler.BiomeType.VALUES) {
             map.put(type, func.apply(type));
@@ -67,14 +65,14 @@ public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, Identifie
     public static final MapCodec<BiomeOverrides> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.simpleMap(
-                            BiomeHandler.BiomeType.CODEC, Identifier.CODEC,
-                            StringIdentifiable.toKeyable(BiomeHandler.BiomeType.VALUES)
+                            BiomeHandler.BiomeType.CODEC, ResourceLocation.CODEC,
+                            StringRepresentable.keys(BiomeHandler.BiomeType.VALUES)
                     ).forGetter(overrides -> overrides.lookup)
             ).apply(instance, BiomeOverrides::new));
 
     public static class Builder {
 
-        private final EnumMap.Compliant<BiomeHandler.BiomeType, Identifier> map = createMap();
+        private final EnumMap.Compliant<BiomeHandler.BiomeType, ResourceLocation> map = createMap();
 
         private Builder() { }
 
@@ -84,12 +82,12 @@ public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, Identifie
             }
         }
 
-        public Builder with(BiomeHandler.BiomeType type, Identifier id) {
+        public Builder with(BiomeHandler.BiomeType type, ResourceLocation id) {
             map.put(type, id);
             return this;
         }
 
-        public Builder with(Function<BiomeHandler.BiomeType, Identifier> func, BiomeHandler.BiomeType... types) {
+        public Builder with(Function<BiomeHandler.BiomeType, ResourceLocation> func, BiomeHandler.BiomeType... types) {
             for (BiomeHandler.BiomeType type : types) {
                 this.with(type, func.apply(type));
             }

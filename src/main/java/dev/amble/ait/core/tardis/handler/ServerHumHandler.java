@@ -3,11 +3,9 @@ package dev.amble.ait.core.tardis.handler;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
@@ -15,8 +13,8 @@ import dev.amble.ait.data.hum.Hum;
 import dev.amble.ait.registry.impl.HumRegistry;
 
 public class ServerHumHandler extends TardisComponent {
-    public static final Identifier SEND = AITMod.id("send_hum");
-    public static final Identifier RECEIVE = AITMod.id("receive_hum");
+    public static final ResourceLocation SEND = AITMod.id("send_hum");
+    public static final ResourceLocation RECEIVE = AITMod.id("receive_hum");
     private Hum current;
 
     static {
@@ -24,7 +22,7 @@ public class ServerHumHandler extends TardisComponent {
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     if (tardis == null) return;
 
-                    Hum hum = HumRegistry.getInstance().get(buf.readIdentifier());
+                    Hum hum = HumRegistry.getInstance().get(buf.readResourceLocation());
 
                     if (hum == null)
                         return;
@@ -52,10 +50,10 @@ public class ServerHumHandler extends TardisComponent {
     }
 
     private void updateClientHum() {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeIdentifier(this.current.sound().getId());
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeResourceLocation(this.current.sound().getLocation());
 
-        for (ServerPlayerEntity player : this.tardis.asServer().world().getPlayers()) {
+        for (ServerPlayer player : this.tardis.asServer().world().players()) {
             ServerPlayNetworking.send(player, SEND, buf);
         }
     }

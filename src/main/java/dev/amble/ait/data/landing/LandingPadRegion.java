@@ -3,15 +3,12 @@ package dev.amble.ait.data.landing;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import com.google.common.collect.ImmutableCollection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
@@ -71,7 +68,7 @@ public class LandingPadRegion {
     private LandingPadSpot createSpot() {
         if (this.spots.isEmpty())
             return new LandingPadSpot(new BlockPos(
-                    this.chunk.getStartX() + 1, this.defaultY, this.chunk.getStartZ() + 1
+                    this.chunk.getMinBlockX() + 1, this.defaultY, this.chunk.getMinBlockZ() + 1
             ));
 
         float rowCount = ((float) this.spots.size() / MAX_PER_ROW);
@@ -79,7 +76,7 @@ public class LandingPadRegion {
         BlockPos lastPos = this.spots.get(this.spots.size() - 1).getPos();
 
         if (!isNewRow)
-            return new LandingPadSpot(lastPos.add(2, 0, 0));
+            return new LandingPadSpot(lastPos.offset(2, 0, 0));
 
         return new LandingPadSpot(new BlockPos(this.spots.get(0).getPos().getX(),
                 this.defaultY, lastPos.getZ() + 2));

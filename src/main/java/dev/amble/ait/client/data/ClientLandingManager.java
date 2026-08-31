@@ -7,16 +7,14 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.WorldChunk;
-
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.core.world.LandingPadManager;
 import dev.amble.ait.data.landing.LandingPadRegion;
@@ -52,8 +50,8 @@ public class ClientLandingManager {
         return this.regions.get(pos);
     }
 
-    public void receive(PacketByteBuf buf) {
-        LandingPadManager.Network.Action action = buf.readEnumConstant(LandingPadManager.Network.Action.class);
+    public void receive(FriendlyByteBuf buf) {
+        LandingPadManager.Network.Action action = buf.readEnum(LandingPadManager.Network.Action.class);
 
         if (action == LandingPadManager.Network.Action.CLEAR) {
             this.invalidate();
@@ -78,22 +76,22 @@ public class ClientLandingManager {
         this.regions.remove(pos);
     }
 
-    private void request(RegistryKey<World> world, long chunk) {
-        NbtCompound data = new NbtCompound();
+    private void request(ResourceKey<Level> world, long chunk) {
+        CompoundTag data = new CompoundTag();
 
-        data.putString("World", world.getValue().toString());
+        data.putString("World", world.location().toString());
         data.putLong("Chunk", chunk);
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeNbt(data);
 
         ClientPlayNetworking.send(LandingPadManager.Network.REQUEST, buf);
     }
 
-    private void request(ClientWorld world, WorldChunk chunk) {
+    private void request(ClientLevel world, LevelChunk chunk) {
         if (!NetworkUtil.canClientSendPackets())
             return;
 
-        this.request(world.getRegistryKey(), chunk.getPos().toLong());
+        this.request(world.dimension(), chunk.getPos().toLong());
     }
 }

@@ -11,6 +11,6 @@ public class ClientBookshelfDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new BookshelfDoorModel(BookshelfDoorModel.getTexturedModelData().createModel());
+        return new BookshelfDoorModel(BookshelfDoorModel.getTexturedModelData().bakeRoot());
     }
 }

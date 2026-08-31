@@ -2,18 +2,16 @@ package dev.amble.ait.core.blockentities;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.blocks.PottedSonicScrewdriverBlock;
 
@@ -55,42 +53,42 @@ public class PottedSonicScrewdriverBlockEntity extends BlockEntity {
     }
 
     private void sync() {
-        this.markDirty();
-        if (this.world != null && !this.world.isClient)
-            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), net.minecraft.block.Block.NOTIFY_ALL);
+        this.setChanged();
+        if (this.level != null && !this.level.isClientSide)
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
-        NbtList list = new NbtList();
+        ListTag list = new ListTag();
         for (ItemStack stack : this.sonics)
-            list.add(stack.writeNbt(new NbtCompound()));
+            list.add(stack.save(new CompoundTag()));
 
         nbt.put("Sonics", list);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
         this.sonics.clear();
-        NbtList list = nbt.getList("Sonics", NbtElement.COMPOUND_TYPE);
+        ListTag list = nbt.getList("Sonics", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size() && this.sonics.size() < PottedSonicScrewdriverBlock.MAX_SONICS; i++) {
-            ItemStack stack = ItemStack.fromNbt(list.getCompound(i));
+            ItemStack stack = ItemStack.of(list.getCompound(i));
             if (!stack.isEmpty())
                 this.sonics.add(stack.copyWithCount(1));
         }
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
+    public CompoundTag getUpdateTag() {
+        return this.saveWithoutMetadata();
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

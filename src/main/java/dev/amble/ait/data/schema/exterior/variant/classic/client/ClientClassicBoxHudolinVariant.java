@@ -5,10 +5,10 @@ import dev.amble.ait.client.models.exteriors.ClassicHudolinExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientClassicBoxHudolinVariant extends ClientClassicBoxVariant {
-    protected static final Identifier BIOME_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_hudolin.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_hudolin.png");
 
     private final BiomeOverrides OVERRIDES = BiomeOverrides.builder(ClientClassicBoxVariant.OVERRIDES)
             .with(type -> type.getTexture(BIOME_IDENTIFIER),
@@ -27,7 +27,7 @@ public class ClientClassicBoxHudolinVariant extends ClientClassicBoxVariant {
 
     @Override
     public SimpleExteriorModel model() {
-        return new ClassicHudolinExteriorModel(ClassicHudolinExteriorModel.getTexturedModelData().createModel());
+        return new ClassicHudolinExteriorModel(ClassicHudolinExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override

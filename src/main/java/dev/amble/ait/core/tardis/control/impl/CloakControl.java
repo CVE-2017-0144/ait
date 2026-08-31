@@ -1,22 +1,21 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.handler.CloakHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 
 public class CloakControl extends Control {
-    public static final Identifier ID = AITMod.id("protocol_3");
+    public static final ResourceLocation ID = AITMod.id("protocol_3");
 
     public CloakControl() {
         // ⬚ ?
@@ -24,14 +23,14 @@ public class CloakControl extends Control {
     }
 
     @Override
-    public Text getName(Tardis tardis) {
-        return Text.translatable(tardis.cloak().silent().get()
+    public Component getName(Tardis tardis) {
+        return Component.translatable(tardis.cloak().silent().get()
                 ? "control.ait.protocol_3_silent_active"
                 : "control.ait.protocol_3_silent_inactive");
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         CloakHandler cloak = tardis.handler(TardisComponent.Id.CLOAK);
@@ -41,7 +40,7 @@ public class CloakControl extends Control {
             boolean wasSilent = cloak.silent().get();
             cloak.silent().set(!wasSilent);
 
-            player.sendMessage(Text.translatable("control.ait.protocol_3_silent_" + (wasSilent ? "deactivated" : "activated")), true);
+            player.displayClientMessage(Component.translatable("control.ait.protocol_3_silent_" + (wasSilent ? "deactivated" : "activated")), true);
         } else {
             cloak.cloaked().set(!wasCloaked);
 
@@ -53,7 +52,7 @@ public class CloakControl extends Control {
 
     @Override
     public SoundEvent getFallbackSound() {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 
     @Override

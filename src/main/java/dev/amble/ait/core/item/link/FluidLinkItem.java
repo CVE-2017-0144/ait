@@ -2,7 +2,7 @@ package dev.amble.ait.core.item.link;
 
 public class FluidLinkItem extends AbstractLinkItem {
 
-    public FluidLinkItem(Type type, Settings settings) {
+    public FluidLinkItem(Type type, Properties settings) {
         super(type, settings);
     }
 

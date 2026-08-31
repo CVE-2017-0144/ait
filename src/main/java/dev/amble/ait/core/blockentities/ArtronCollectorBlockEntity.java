@@ -6,20 +6,18 @@ import dev.amble.lib.animation.BedrockModelProvider;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.api.ArtronHolder;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.AITBlockEntityTypes;
@@ -43,23 +41,23 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
         nbt.putDouble("artronAmount", this.artronAmount);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
+    public void load(CompoundTag nbt) {
         if (nbt.contains("artronAmount"))
             this.setCurrentFuel(nbt.getDouble("artronAmount"));
-        super.readNbt(nbt);
+        super.load(nbt);
     }
 
-    public void useOn(World world, boolean sneaking, PlayerEntity player) {
-        if (!world.isClient()) {
-            player.sendMessage(Text.literal(this.getCurrentFuel() + "/" + ArtronCollectorItem.COLLECTOR_MAX_FUEL)
-                    .formatted(Formatting.GOLD));
-            ItemStack stack = player.getMainHandStack();
+    public void useOn(Level world, boolean sneaking, Player player) {
+        if (!world.isClientSide()) {
+            player.sendSystemMessage(Component.literal(this.getCurrentFuel() + "/" + ArtronCollectorItem.COLLECTOR_MAX_FUEL)
+                    .withStyle(ChatFormatting.GOLD));
+            ItemStack stack = player.getMainHandItem();
             if (stack.getItem() instanceof ArtronCollectorItem) {
                 double residual = ArtronCollectorItem.addFuel(stack, this.getCurrentFuel());
                 this.setCurrentFuel(residual);
@@ -73,15 +71,15 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
                 double residual = magazine.addFuel(this.getCurrentFuel(), stack);
                 this.setCurrentFuel(residual);
             }
-            if (stack.isOf(AITBlocks.ZEITON_CLUSTER.asItem())) {
+            if (stack.is(AITBlocks.ZEITON_CLUSTER.asItem())) {
                 if (sneaking) {
-                    player.getInventory().setStack(player.getInventory().selectedSlot,
+                    player.getInventory().setItem(player.getInventory().selected,
                             new ItemStack(AITItems.CHARGED_ZEITON_CRYSTAL));
                     return;
                 }
 
                 this.addFuel(15);
-                stack.decrement(1);
+                stack.shrink(1);
             }
         }
     }
@@ -89,7 +87,7 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     @Override
     public void setCurrentFuel(double artronAmount) {
         this.artronAmount = artronAmount;
-        this.updateListeners(this.getCachedState());
+        this.updateListeners(this.getBlockState());
     }
 
     @Override
@@ -103,18 +101,18 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        NbtCompound nbtCompound = super.toInitialChunkDataNbt();
+    public CompoundTag getUpdateTag() {
+        CompoundTag nbtCompound = super.getUpdateTag();
         nbtCompound.putDouble("artronAmount", this.artronAmount);
         return nbtCompound;
     }
 
     @Override
-    public void tick(World world, BlockPos pos, BlockState state, ArtronCollectorBlockEntity blockEntity) {
-        if (!(world instanceof ServerWorld serverWorld))
+    public void tick(Level world, BlockPos pos, BlockState state, ArtronCollectorBlockEntity blockEntity) {
+        if (!(world instanceof ServerLevel serverWorld))
             return;
 
-        if (serverWorld.getServer().getTicks() % 3 == 0)
+        if (serverWorld.getServer().getTickCount() % 3 == 0)
             return;
 
         ChunkPos chunk = new ChunkPos(pos);
@@ -144,12 +142,12 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     }
 
     private void updateListeners(BlockState state) {
-        this.markDirty();
+        this.setChanged();
 
-        if (!this.hasWorld())
+        if (!this.hasLevel())
             return;
 
-        this.world.updateListeners(this.getPos(), this.getCachedState(), state, Block.NOTIFY_ALL);
+        this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), state, Block.UPDATE_ALL);
     }
 
     @Override

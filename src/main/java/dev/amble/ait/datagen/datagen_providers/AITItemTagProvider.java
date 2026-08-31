@@ -5,15 +5,13 @@ import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITTags;
@@ -22,12 +20,12 @@ import dev.amble.ait.module.planet.core.PlanetItems;
 
 public class AITItemTagProvider extends FabricTagProvider<Item> {
     public AITItemTagProvider(FabricDataOutput output,
-            @Nullable CompletableFuture<RegistryWrapper.WrapperLookup> completableFuture) {
-        super(output, RegistryKeys.ITEM, completableFuture);
+            @Nullable CompletableFuture<HolderLookup.Provider> completableFuture) {
+        super(output, Registries.ITEM, completableFuture);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup arg) {
+    protected void addTags(HolderLookup.Provider arg) {
         // Items
         getOrCreateTagBuilder(AITTags.Items.SONIC_ITEM).add(AITItems.SONIC_SCREWDRIVER);
 

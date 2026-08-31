@@ -8,35 +8,39 @@ import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.*;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.structure.Structure;
-
+import net.minecraft.resources.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.phys.BlockHitResult;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.screens.AstralMapScreen;
 import dev.amble.ait.core.AITBlockEntityTypes;
@@ -47,23 +51,23 @@ import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
-public class AstralMapBlock extends BlockWithEntity implements BlockEntityProvider {
-    public static final int MAX_ROTATION_INDEX = RotationPropertyHelper.getMax();
+public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
+    public static final int MAX_ROTATION_INDEX = RotationSegment.getMaxSegmentIndex();
     private static final int MAX_ROTATIONS = MAX_ROTATION_INDEX + 1;
-    public static final IntProperty ROTATION = Properties.ROTATION;
+    public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
 
-    public static final Identifier REQUEST_SEARCH = AITMod.id("c2s/request_search");
-    public static final Identifier OPEN_ASTRAL_MAP = AITMod.id("s2c/open_astral_map");
+    public static final ResourceLocation REQUEST_SEARCH = AITMod.id("c2s/request_search");
+    public static final ResourceLocation OPEN_ASTRAL_MAP = AITMod.id("s2c/open_astral_map");
     // Store structure IDs on the client since they aren't synced by default
-    public static List<Identifier> structureIds;
+    public static List<ResourceLocation> structureIds;
 
     static {
         ServerPlayNetworking.registerGlobalReceiver(REQUEST_SEARCH, (server, player, handler, buf, responseSender) -> {
             try {
-                ServerWorld checkWorld = player.getServerWorld();
-                BlockPos playerPos = player.getBlockPos();
+                ServerLevel checkWorld = player.serverLevel();
+                BlockPos playerPos = player.blockPosition();
                 boolean hasAccess = false;
-                for (BlockPos nearby : BlockPos.iterateOutwards(playerPos, 4, 4, 4)) {
+                for (BlockPos nearby : BlockPos.withinManhattan(playerPos, 4, 4, 4)) {
                     if (checkWorld.getBlockState(nearby).getBlock() instanceof AstralMapBlock) {
                         hasAccess = true;
                         break;
@@ -71,8 +75,8 @@ public class AstralMapBlock extends BlockWithEntity implements BlockEntityProvid
                 }
                 if (!hasAccess) return;
 
-                Identifier target = buf.readIdentifier();
-                AstralMapScreen.Category category = buf.readEnumConstant(AstralMapScreen.Category.class);
+                ResourceLocation target = buf.readResourceLocation();
+                AstralMapScreen.Category category = buf.readEnum(AstralMapScreen.Category.class);
 
                 switch(category) {
                     case BIOMES -> handleBiomeRequest(player, target);
@@ -84,51 +88,51 @@ public class AstralMapBlock extends BlockWithEntity implements BlockEntityProvid
         });
     }
 
-    public AstralMapBlock(Settings settings) {
+    public AstralMapBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(ROTATION, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(ROTATION, 0));
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return AITBlockEntityTypes.ASTRAL_MAP.instantiate(pos, state);
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return AITBlockEntityTypes.ASTRAL_MAP.create(pos, state);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
                               BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
-        if (blockEntity instanceof AstralMapBlockEntity && !world.isClient()) {
-            ServerWorld serverWorld = (ServerWorld) world;
-            ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        if (blockEntity instanceof AstralMapBlockEntity && !world.isClientSide()) {
+            ServerLevel serverWorld = (ServerLevel) world;
+            ServerPlayer serverPlayer = (ServerPlayer) player;
 
             sendStructuresAndOpenScreen(serverWorld, serverPlayer);
 
             player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 1.0F);
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    private static Optional<RegistryEntry.Reference<Structure>> getStructure(ServerWorld world, Identifier id) {
-        Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
-        RegistryKey<Structure> key = RegistryKey.of(RegistryKeys.STRUCTURE, id);
-        return registry.getEntry(key);
+    private static Optional<Holder.Reference<Structure>> getStructure(ServerLevel world, ResourceLocation id) {
+        Registry<Structure> registry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, id);
+        return registry.getHolder(key);
     }
 
-    private static void handleStructureRequest(ServerPlayerEntity player, Identifier target) {
-        player.sendMessage(Text.translatable("block.ait.astral_map.finder.searching_for_structure"), false);
+    private static void handleStructureRequest(ServerPlayer player, ResourceLocation target) {
+        player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.searching_for_structure"), false);
 
-        ServerWorld world = player.getServerWorld();
-        BlockPos pos = player.getBlockPos();
+        ServerLevel world = player.serverLevel();
+        BlockPos pos = player.blockPosition();
 
         if (TardisServerWorld.isTardisDimension(world)) {
             ServerTardis tardis = ((TardisServerWorld) world).getTardis();
             var tPos = tardis.travel().position();
             world = tPos.getWorld();
 
-            RegistryEntry.Reference<Structure> targetStructure = getStructure(world, target).orElse(null);
+            Holder.Reference<Structure> targetStructure = getStructure(world, target).orElse(null);
             if (targetStructure == null) {
                 AITMod.LOGGER.error("Structure not found: {}", target);
                 return;
@@ -136,81 +140,81 @@ public class AstralMapBlock extends BlockWithEntity implements BlockEntityProvid
 
             pos = tPos.getPos();
 
-            AsyncLocatorUtil.locate(world, RegistryEntryList.of(targetStructure), pos, TelepathicControl.RADIUS, false).thenOnServerThread(pPos -> {
+            AsyncLocatorUtil.locate(world, HolderSet.direct(targetStructure), pos, TelepathicControl.RADIUS, false).thenOnServerThread(pPos -> {
                 BlockPos newPos = pPos != null ? pPos.getFirst() : null;
                 if (newPos != null) {
-                    player.sendMessage(Text.translatable(
+                    player.displayClientMessage(Component.translatable(
                             "block.ait.astral_map.finder.found", newPos.getX(), newPos.getY(), newPos.getZ(),
-                            Math.round(Math.sqrt(newPos.getSquaredDistance(tPos.getPos())))), false);
+                            Math.round(Math.sqrt(newPos.distSqr(tPos.getPos())))), false);
                     tardis.travel().destination(destination -> destination.pos(newPos));
                 } else {
-                    player.sendMessage(Text.translatable("block.ait.astral_map.finder.structure_not_found"), false);
+                    player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.structure_not_found"), false);
                 }
             });
         }
     }
 
-    private static void handleBiomeRequest(ServerPlayerEntity player, Identifier target) {
-        player.sendMessage(Text.translatable("block.ait.astral_map.finder.searching_for_biome"), false);
+    private static void handleBiomeRequest(ServerPlayer player, ResourceLocation target) {
+        player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.searching_for_biome"), false);
         player.getServer().execute(() -> {
-            ServerWorld world = player.getServerWorld();
+            ServerLevel world = player.serverLevel();
             if (!TardisServerWorld.isTardisDimension(world))
                 return;
 
             ServerTardis tardis = ((TardisServerWorld) world).getTardis();
             CachedDirectedGlobalPos currentPos = tardis.travel().position();
-            ServerWorld targetWorld = currentPos.getWorld();
+            ServerLevel targetWorld = currentPos.getWorld();
             BlockPos start = currentPos.getPos();
-            RegistryKey<Biome> biomeKey = RegistryKey.of(RegistryKeys.BIOME, target);
+            ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, target);
 
-            Pair<BlockPos, RegistryEntry<Biome>> r = targetWorld.locateBiome(
-                    entry -> entry.matchesKey(biomeKey),
+            Pair<BlockPos, Holder<Biome>> r = targetWorld.findClosestBiome3d(
+                    entry -> entry.is(biomeKey),
                     start, AITMod.CONFIG.astralMapBiomeLocatorRange, 32, 64);
 
             if (r != null) {
                 BlockPos locatedBiome = r.getFirst();
-                int distance = (int) Math.round(Math.sqrt(locatedBiome.getSquaredDistance(start)));
-                player.sendMessage(Text.translatable("block.ait.astral_map.finder.found",
+                int distance = (int) Math.round(Math.sqrt(locatedBiome.distSqr(start)));
+                player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.found",
                         locatedBiome.getX(), locatedBiome.getY(), locatedBiome.getZ(), distance), false);
                 tardis.travel().destination(destination -> destination.pos(locatedBiome));
             } else {
-                player.sendMessage(Text.translatable("block.ait.astral_map.finder.biome_not_found"), false);
+                player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.biome_not_found"), false);
             }
         });
     }
 
-    private static void sendStructuresAndOpenScreen(ServerWorld world, ServerPlayerEntity target) {
+    private static void sendStructuresAndOpenScreen(ServerLevel world, ServerPlayer target) {
         if (structureIds == null || structureIds.isEmpty()) {
-            Registry<Structure> registry = world.getRegistryManager().get(RegistryKeys.STRUCTURE);
-            List<Identifier> ids = new ArrayList<>(registry.size());
+            Registry<Structure> registry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
+            List<ResourceLocation> ids = new ArrayList<>(registry.size());
             for (Structure entry : registry) {
-                ids.add(registry.getId(entry));
+                ids.add(registry.getKey(entry));
             }
             structureIds = ids;
         }
 
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeCollection(structureIds, PacketByteBuf::writeIdentifier);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeCollection(structureIds, FriendlyByteBuf::writeResourceLocation);
         ServerPlayNetworking.send(target, OPEN_ASTRAL_MAP, buf);
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(ROTATION, RotationPropertyHelper.fromYaw(ctx.getPlayerYaw()));
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return this.defaultBlockState().setValue(ROTATION, RotationSegment.convertToSegment(ctx.getRotation()));
     }
 
     @Override
-    public BlockState rotate(BlockState state, BlockRotation rotation) {
-        return state.with(ROTATION, rotation.rotate(state.get(ROTATION), MAX_ROTATIONS));
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(ROTATION, rotation.rotate(state.getValue(ROTATION), MAX_ROTATIONS));
     }
 
     @Override
-    public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return state.with(ROTATION, mirror.mirror(state.get(ROTATION), MAX_ROTATIONS));
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.setValue(ROTATION, mirror.mirror(state.getValue(ROTATION), MAX_ROTATIONS));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(ROTATION);
     }
 }

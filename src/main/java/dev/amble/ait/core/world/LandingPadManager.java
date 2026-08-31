@@ -7,20 +7,18 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.WorldChunk;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.landing.LandingPadRegion;
@@ -36,14 +34,14 @@ public class LandingPadManager {
 
     }
 
-    private final ServerWorld world;
+    private final ServerLevel world;
 
-    public LandingPadManager(ServerWorld world) {
+    public LandingPadManager(ServerLevel world) {
         this.world = world;
     }
 
     @Nullable public LandingPadRegion getRegion(ChunkPos pos) {
-        Chunk chunk = this.world.getChunk(pos.x, pos.z, ChunkStatus.FULL, true);
+        ChunkAccess chunk = this.world.getChunk(pos.x, pos.z, ChunkStatus.FULL, true);
 
         if (chunk == null)
             return null;
@@ -60,7 +58,7 @@ public class LandingPadManager {
     }
 
     private LandingPadRegion claim(ChunkPos pos, int y) {
-        WorldChunk chunk = this.world.getChunk(pos.x, pos.z);
+        LevelChunk chunk = this.world.getChunk(pos.x, pos.z);
 
         if (chunk.hasAttached(PERSISTENT))
             throw new IllegalStateException("Region already occupied");
@@ -73,8 +71,8 @@ public class LandingPadManager {
     }
 
     public LandingPadRegion claim(BlockPos pos) {
-        return this.claim(new ChunkPos(pos), world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()))
-                .sampleHeightmap(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX() & 15, pos.getZ() & 15));
+        return this.claim(new ChunkPos(pos), world.getChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()))
+                .getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX() & 15, pos.getZ() & 15));
     }
 
     private @Nullable LandingPadRegion release(ChunkPos pos) {
@@ -88,21 +86,21 @@ public class LandingPadManager {
         return this.release(new ChunkPos(pos));
     }
 
-    public static LandingPadManager getInstance(ServerWorld world) {
+    public static LandingPadManager getInstance(ServerLevel world) {
         return new LandingPadManager(world);
     }
 
     public static class Network {
 
-        public static final Identifier SYNC = AITMod.id("landingpad_sync");
-        public static final Identifier REQUEST = AITMod.id("landingpad_request");
+        public static final ResourceLocation SYNC = AITMod.id("landingpad_sync");
+        public static final ResourceLocation REQUEST = AITMod.id("landingpad_request");
 
-        public static void syncForPlayer(Action action, ServerPlayerEntity player) {
-            ServerWorld world = player.getServerWorld();
-            ChunkPos pos = player.getChunkPos();
+        public static void syncForPlayer(Action action, ServerPlayer player) {
+            ServerLevel world = player.serverLevel();
+            ChunkPos pos = player.chunkPosition();
 
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeEnumConstant(action);
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            buf.writeEnum(action);
 
             if (action != Action.CLEAR)
                 buf.writeChunkPos(pos);
@@ -121,9 +119,9 @@ public class LandingPadManager {
             NetworkUtil.send(player, SYNC, buf);
         }
 
-        public static void syncTracked(Action action, ServerWorld world, ChunkPos pos) {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeEnumConstant(action);
+        public static void syncTracked(Action action, ServerLevel world, ChunkPos pos) {
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            buf.writeEnum(action);
 
             if (action != Action.CLEAR)
                 buf.writeChunkPos(pos);
@@ -135,14 +133,14 @@ public class LandingPadManager {
                 if (region == null)
                     return;
 
-                for (ServerPlayerEntity player : PlayerLookup.tracking(world, pos)) {
+                for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
                     NetworkUtil.send(player, buf, SYNC, LandingPadRegion.CODEC, region);
                 }
 
                 return;
             }
 
-            for (ServerPlayerEntity player : PlayerLookup.tracking(world, pos)) {
+            for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
                 NetworkUtil.send(player, SYNC, buf);
             }
         }

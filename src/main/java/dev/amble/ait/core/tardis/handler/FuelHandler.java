@@ -1,18 +1,17 @@
 package dev.amble.ait.core.tardis.handler;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.api.ArtronHolder;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -52,13 +51,13 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
             if (tardis.fuel().hasPower() || !tardis.door().locked() || player == null)
                 return DoorHandler.InteractionResult.CONTINUE;
 
-            ItemStack stack = player.getStackInHand(Hand.MAIN_HAND);
+            ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
             // if holding a key and in siege mode and have an empty interior, disable siege
             // mode !!
             if (stack.getItem() instanceof KeyItem key && tardis.siege().isActive() && key.isOf(stack, tardis)
                     && TardisUtil.isInteriorEmpty(tardis.asServer())) {
-                player.swingHand(Hand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND);
                 tardis.siege().setActive(false);
 
                 tardis.door().interactLock(false, player, true);
@@ -69,15 +68,15 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
                 if (tardis.siege().isActive())
                     return DoorHandler.InteractionResult.CANCEL;
 
-                player.swingHand(Hand.MAIN_HAND);
-                stack.setDamage(stack.getDamage() - 1);
+                player.swing(InteractionHand.MAIN_HAND);
+                stack.setDamageValue(stack.getDamageValue() - 1);
 
                 if (pos != null)
-                    world.playSound(null, pos, SoundEvents.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, SoundCategory.BLOCKS, 1f,
+                    world.playSound(null, pos, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1f,
                             1f);
 
                 interior.playSound(null, tardis.getDesktop().getDoorPos().getPos(),
-                        SoundEvents.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, SoundCategory.BLOCKS);
+                        SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS);
 
                 // forcefully unlock the tardis
                 tardis.door().interactLock(false, player, true);
@@ -104,7 +103,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 20 != 0)
+        if (server.getTickCount() % 20 != 0)
             return;
 
         TravelHandler travel = this.tardis().travel();
@@ -125,7 +124,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
     @Override
     public void setCurrentFuel(double fuel) {
         double prev = this.getCurrentFuel();
-        this.fuel.set(MathHelper.clamp(fuel, 0, this.getMaxFuel()));
+        this.fuel.set(Mth.clamp(fuel, 0, this.getMaxFuel()));
 
         if (this.isOutOfFuel() && prev != 0) {
             EmergencyPower backup = this.tardis().subsystems().emergency();
@@ -188,7 +187,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
             TravelHandler travel = tardis.travel();
 
             CachedDirectedGlobalPos pos = travel.position();
-            ServerWorld world = pos.getWorld();
+            ServerLevel world = pos.getWorld();
 
             RiftChunkManager manager = RiftChunkManager.getInstance(world);
             ChunkPos chunk = new ChunkPos(pos.getPos());
@@ -236,7 +235,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
         this.disableProtocols();
     }
     private void disableProtocols() {
-        tardis.getDesktop().playSoundAtEveryConsole(AITSounds.SHUTDOWN, SoundCategory.AMBIENT, 10f, 1f);
+        tardis.getDesktop().playSoundAtEveryConsole(AITSounds.SHUTDOWN, SoundSource.AMBIENT, 10f, 1f);
 
         // disabling protocols
         tardis.travel().antigravs().set(false);
@@ -256,8 +255,8 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
         this.power.set(true);
         this.updateExteriorState();
 
-        this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.POWERUP, SoundCategory.AMBIENT, 10f, 1f);
-        this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.CONSOLE_BOOTUP, SoundCategory.AMBIENT, 0.15f, 1f);
+        this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.POWERUP, SoundSource.AMBIENT, 10f, 1f);
+        this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.CONSOLE_BOOTUP, SoundSource.AMBIENT, 0.15f, 1f);
         TardisEvents.REGAIN_POWER.invoker().onRegainPower(this.tardis);
     }
     public void enablePower() {
@@ -273,7 +272,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
             return;
 
         CachedDirectedGlobalPos pos = travel.position();
-        World world = pos.getWorld();
+        Level world = pos.getWorld();
 
         if (world == null)
             return;
@@ -281,7 +280,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
         if (!(state.getBlock() instanceof ExteriorBlock))
             return;
 
-        world.setBlockState(pos.getPos(),
-                state.with(ExteriorBlock.LEVEL_4, this.power.get() ? 4 : 0));
+        world.setBlockAndUpdate(pos.getPos(),
+                state.setValue(ExteriorBlock.LEVEL_4, this.power.get() ? 4 : 0));
     }
 }

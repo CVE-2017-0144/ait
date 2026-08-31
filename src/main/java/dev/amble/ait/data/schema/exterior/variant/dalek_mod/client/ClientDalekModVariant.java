@@ -1,23 +1,21 @@
 package dev.amble.ait.data.schema.exterior.variant.dalek_mod.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.client.models.exteriors.advent.DalekModExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 
 public abstract class ClientDalekModVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/dalek_mod";
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
             CATEGORY_PATH + "/dalek_mod.png");
-    protected static final Identifier BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/dalek_mod.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/dalek_mod.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/dalek_mod_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()
@@ -35,16 +33,16 @@ public abstract class ClientDalekModVariant extends ClientExteriorVariantSchema 
 
     @Override
     public SimpleExteriorModel model() {
-        return new DalekModExteriorModel(DalekModExteriorModel.getTexturedModelData().createModel());
+        return new DalekModExteriorModel(DalekModExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return AITMod.id(TEXTURE_PATH + name + "_emission" + ".png");
     }
 

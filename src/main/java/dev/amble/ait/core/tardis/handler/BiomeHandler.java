@@ -1,15 +1,13 @@
 package dev.amble.ait.core.tardis.handler;
 
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBiomeTags;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import org.apache.commons.lang3.StringUtils;
-
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -56,7 +54,7 @@ public class BiomeHandler extends KeyedTardisComponent {
         if (globalPos == null)
             return;
 
-        RegistryEntry<Biome> entry = globalPos.getWorld().getBiome(globalPos.getPos());
+        Holder<Biome> entry = globalPos.getWorld().getBiome(globalPos.getPos());
         BiomeType biome = getTagForBiome(entry);
 
         this.type.set(biome);
@@ -73,39 +71,39 @@ public class BiomeHandler extends KeyedTardisComponent {
     }
 
     // FIXME(PERFORMANCE)
-    private static BiomeType getTagForBiome(RegistryEntry<Biome> biome) {
-        if (biome.isIn(ConventionalBiomeTags.SNOWY) || biome.isIn(ConventionalBiomeTags.SNOWY_PLAINS)
-                || biome.isIn(ConventionalBiomeTags.ICY))
+    private static BiomeType getTagForBiome(Holder<Biome> biome) {
+        if (biome.is(ConventionalBiomeTags.SNOWY) || biome.is(ConventionalBiomeTags.SNOWY_PLAINS)
+                || biome.is(ConventionalBiomeTags.ICY))
             return BiomeType.SNOWY;
 
-        if (biome.isIn(ConventionalBiomeTags.DESERT) || biome.isIn(ConventionalBiomeTags.BEACH)
-                || biome.isIn(ConventionalBiomeTags.DEAD))
+        if (biome.is(ConventionalBiomeTags.DESERT) || biome.is(ConventionalBiomeTags.BEACH)
+                || biome.is(ConventionalBiomeTags.DEAD))
             return BiomeType.SANDY;
 
-        if (biome.isIn(ConventionalBiomeTags.BADLANDS))
+        if (biome.is(ConventionalBiomeTags.BADLANDS))
             return BiomeType.RED_SANDY;
 
-        if (biome.isIn(ConventionalBiomeTags.SWAMP))
+        if (biome.is(ConventionalBiomeTags.SWAMP))
             return BiomeType.MUDDY;
 
-        if (biome.isIn(ConventionalBiomeTags.IN_THE_END))
+        if (biome.is(ConventionalBiomeTags.IN_THE_END))
             return BiomeType.CHORUS;
 
-        if (biome.isIn(ConventionalBiomeTags.FLORAL))
+        if (biome.is(ConventionalBiomeTags.FLORAL))
             return BiomeType.CHERRY;
 
-        RegistryKey<Biome> biomeKey = biome.getKey().orElse(null);
+        ResourceKey<Biome> biomeKey = biome.unwrapKey().orElse(null);
 
-        if (biomeKey == BiomeKeys.DEEP_DARK)
+        if (biomeKey == Biomes.DEEP_DARK)
             return BiomeType.SCULK;
 
-        if (biomeKey == BiomeKeys.CHERRY_GROVE)
+        if (biomeKey == Biomes.CHERRY_GROVE)
             return BiomeType.CHERRY;
 
         return BiomeType.DEFAULT;
     }
 
-    public enum BiomeType implements StringIdentifiable, Ordered {
+    public enum BiomeType implements StringRepresentable, Ordered {
         DEFAULT, SNOWY("_snowy"),
         SCULK("_sculk"),
         SANDY("_sand"),
@@ -115,7 +113,7 @@ public class BiomeHandler extends KeyedTardisComponent {
         CHERRY("_cherry");
 
         public static final BiomeType[] VALUES = BiomeType.values();
-        public static final Codec<BiomeType> CODEC = StringIdentifiable.createCodec(() -> VALUES);
+        public static final EnumCodec<BiomeType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
 
         private final String suffix;
 
@@ -128,11 +126,11 @@ public class BiomeHandler extends KeyedTardisComponent {
         }
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return StringUtils.capitalize(this.toString().replace("_", " "));
         }
 
-        public Identifier getTexture(Identifier texture) {
+        public ResourceLocation getTexture(ResourceLocation texture) {
             if (this.suffix == null)
                 return texture;
 
@@ -140,7 +138,7 @@ public class BiomeHandler extends KeyedTardisComponent {
             return AITMod.id(path.substring(0, path.length() - 4) + this.suffix + ".png");
         };
 
-        public Identifier get(BiomeOverrides overrides) {
+        public ResourceLocation get(BiomeOverrides overrides) {
             if (overrides == null)
                 return null;
 

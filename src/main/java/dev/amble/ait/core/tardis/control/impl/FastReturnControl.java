@@ -1,16 +1,15 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class FastReturnControl extends Control {
 
@@ -19,7 +18,7 @@ public class FastReturnControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         TravelHandler travel = tardis.travel();
@@ -32,15 +31,15 @@ public class FastReturnControl extends Control {
             return Result.SUCCESS;
         }
 
-        Text text = Text.translatable("tardis.message.control.fast_return.destination_nonexistent");
-        player.sendMessage(text, true);
+        Component text = Component.translatable("tardis.message.control.fast_return.destination_nonexistent");
+        player.displayClientMessage(text, true);
         return Result.FAILURE;
     }
 
-    public void messagePlayer(ServerPlayerEntity player, boolean isLastPosition) {
-        Text previousPosition = Text.translatable("tardis.message.control.fast_return.last_position");
-        Text currentPosition = Text.translatable("tardis.message.control.fast_return.current_position");
-        player.sendMessage((!isLastPosition ? previousPosition : currentPosition), true);
+    public void messagePlayer(ServerPlayer player, boolean isLastPosition) {
+        Component previousPosition = Component.translatable("tardis.message.control.fast_return.last_position");
+        Component currentPosition = Component.translatable("tardis.message.control.fast_return.current_position");
+        player.displayClientMessage((!isLastPosition ? previousPosition : currentPosition), true);
     }
 
     @Override

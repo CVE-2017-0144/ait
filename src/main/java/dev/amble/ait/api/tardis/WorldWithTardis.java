@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.ChunkPos;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.core.tardis.ServerTardis;
 
 public interface WorldWithTardis {
@@ -25,7 +23,7 @@ public interface WorldWithTardis {
 
     static TardisEvents.SyncTardis forSync(PlayerTardisConsumer consumer) {
         return (player, chunk) -> {
-            if (!(player.getWorld() instanceof WorldWithTardis withTardis) || !withTardis.ait$hasLookup())
+            if (!(player.level() instanceof WorldWithTardis withTardis) || !withTardis.ait$hasLookup())
                 return;
 
             Set<ServerTardis> tardisSet = withTardis.ait$lookup().get(chunk);
@@ -39,7 +37,7 @@ public interface WorldWithTardis {
 
     static TardisEvents.UnloadTardis forDesync(PlayerTardisConsumer consumer) {
         return (player, chunk) -> {
-            if (!(player.getWorld() instanceof WorldWithTardis withTardis) || !withTardis.ait$hasLookup())
+            if (!(player.level() instanceof WorldWithTardis withTardis) || !withTardis.ait$hasLookup())
                 return;
 
             Set<ServerTardis> tardisSet = withTardis.ait$lookup().get(chunk);
@@ -53,7 +51,7 @@ public interface WorldWithTardis {
 
     @FunctionalInterface
     interface PlayerTardisConsumer {
-        void accept(ServerPlayerEntity player, Set<ServerTardis> tardisSet);
+        void accept(ServerPlayer player, Set<ServerTardis> tardisSet);
     }
 
     final class Lookup extends HashMap<ChunkPos, Set<ServerTardis>> {

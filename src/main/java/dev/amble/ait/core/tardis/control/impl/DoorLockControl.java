@@ -1,14 +1,13 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class DoorLockControl extends Control {
     public DoorLockControl() {
@@ -16,7 +15,7 @@ public class DoorLockControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
 

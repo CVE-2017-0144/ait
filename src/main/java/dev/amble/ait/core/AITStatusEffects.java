@@ -1,24 +1,23 @@
 package dev.amble.ait.core;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.effects.OxygenatedEffect;
 import dev.amble.ait.core.effects.ZeitonHighEffect;
 import dev.amble.ait.module.planet.core.effect.LunarRegolithEffect;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
 
 public class AITStatusEffects {
-    public static StatusEffect ZEITON_HIGH = register(new ZeitonHighEffect(), "zeiton_high");
+    public static MobEffect ZEITON_HIGH = register(new ZeitonHighEffect(), "zeiton_high");
 
-    public static StatusEffect OXYGENATED = register(new OxygenatedEffect(), "oxygenated");
-    public static StatusEffect LUNAR_SICKNESS = register(new LunarRegolithEffect(), "lunar_sickness");
+    public static MobEffect OXYGENATED = register(new OxygenatedEffect(), "oxygenated");
+    public static MobEffect LUNAR_SICKNESS = register(new LunarRegolithEffect(), "lunar_sickness");
 
     public static void init() {
     }
 
-    private static StatusEffect register(StatusEffect effect, String name) {
-        return Registry.register(Registries.STATUS_EFFECT, AITMod.id(name), effect);
+    private static MobEffect register(MobEffect effect, String name) {
+        return Registry.register(BuiltInRegistries.MOB_EFFECT, AITMod.id(name), effect);
     }
 }

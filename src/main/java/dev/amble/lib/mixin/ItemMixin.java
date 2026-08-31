@@ -5,27 +5,25 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-
 import dev.amble.lib.item.AItem;
 import dev.amble.lib.item.AItemSettings;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 
 @Mixin(Item.class)
 public class ItemMixin implements AItem {
 
     @Unique
-    private ItemGroup amble$group;
+    private CreativeModeTab amble$group;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void init(Item.Settings settings, CallbackInfo ci) {
+    public void init(Item.Properties settings, CallbackInfo ci) {
         if (settings instanceof AItemSettings ais)
             this.amble$group = ais.group();
     }
 
     @Override
-    public ItemGroup amble$group() {
+    public CreativeModeTab amble$group() {
         return this.amble$group;
     }
 }

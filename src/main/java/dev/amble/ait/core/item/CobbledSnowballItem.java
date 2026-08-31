@@ -1,10 +1,10 @@
 package dev.amble.ait.core.item;
 
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 
 public class CobbledSnowballItem extends Item {
-    public CobbledSnowballItem(Settings settings) {
+    public CobbledSnowballItem(Properties settings) {
         super(settings);
     }
 

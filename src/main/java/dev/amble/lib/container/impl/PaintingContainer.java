@@ -1,10 +1,9 @@
 package dev.amble.lib.container.impl;
 
-import net.minecraft.entity.decoration.painting.PaintingVariant;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-
 import dev.amble.lib.container.RegistryContainer;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 
 public interface PaintingContainer extends RegistryContainer<PaintingVariant> {
 
@@ -15,6 +14,6 @@ public interface PaintingContainer extends RegistryContainer<PaintingVariant> {
 
     @Override
     default Registry<PaintingVariant> getRegistry() {
-        return Registries.PAINTING_VARIANT;
+        return BuiltInRegistries.PAINTING_VARIANT;
     }
 }

@@ -1,38 +1,36 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
 
 public class KeySmithingTemplateItem extends Item {
 
-    private static final Formatting TITLE_FORMATTING = Formatting.GRAY;
-    private static final Formatting DESCRIPTION_FORMATTING = Formatting.BLUE;
+    private static final ChatFormatting TITLE_FORMATTING = ChatFormatting.GRAY;
+    private static final ChatFormatting DESCRIPTION_FORMATTING = ChatFormatting.BLUE;
     private final String KEY;
     private final String INGREDIENT;
 
-    public KeySmithingTemplateItem(Settings settings, String key, String ingredient) {
+    public KeySmithingTemplateItem(Properties settings, String key, String ingredient) {
         super(settings);
         this.KEY = key;
         this.INGREDIENT = ingredient;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
-        tooltip.add(Text.translatable("message.ait.keysmithing.upgrade").formatted(TITLE_FORMATTING));
-        tooltip.add(ScreenTexts.EMPTY);
-        tooltip.add(Text.translatable("message.ait.keysmithing.key").formatted(TITLE_FORMATTING));
-        tooltip.add(ScreenTexts.space().append(Text.literal(this.KEY)).formatted(DESCRIPTION_FORMATTING));
-        tooltip.add(Text.translatable("message.ait.keysmithing.ingredient").formatted(TITLE_FORMATTING));
-        tooltip.add(ScreenTexts.space().append(Text.literal(this.INGREDIENT)).formatted(DESCRIPTION_FORMATTING));
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
+        tooltip.add(Component.translatable("message.ait.keysmithing.upgrade").withStyle(TITLE_FORMATTING));
+        tooltip.add(CommonComponents.EMPTY);
+        tooltip.add(Component.translatable("message.ait.keysmithing.key").withStyle(TITLE_FORMATTING));
+        tooltip.add(CommonComponents.space().append(Component.literal(this.KEY)).withStyle(DESCRIPTION_FORMATTING));
+        tooltip.add(Component.translatable("message.ait.keysmithing.ingredient").withStyle(TITLE_FORMATTING));
+        tooltip.add(CommonComponents.space().append(Component.literal(this.INGREDIENT)).withStyle(DESCRIPTION_FORMATTING));
     }
 }

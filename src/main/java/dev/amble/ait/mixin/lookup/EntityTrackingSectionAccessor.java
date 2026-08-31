@@ -1,15 +1,14 @@
 package dev.amble.ait.mixin.lookup;
 
+import net.minecraft.util.ClassInstanceMultiMap;
+import net.minecraft.world.level.entity.EntityAccess;
+import net.minecraft.world.level.entity.EntitySection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.util.collection.TypeFilterableList;
-import net.minecraft.world.entity.EntityLike;
-import net.minecraft.world.entity.EntityTrackingSection;
+@Mixin(EntitySection.class)
+public interface EntityTrackingSectionAccessor<T extends EntityAccess> {
 
-@Mixin(EntityTrackingSection.class)
-public interface EntityTrackingSectionAccessor<T extends EntityLike> {
-
-    @Accessor("collection")
-    TypeFilterableList<T> getCollection();
+    @Accessor("storage")
+    ClassInstanceMultiMap<T> getCollection();
 }

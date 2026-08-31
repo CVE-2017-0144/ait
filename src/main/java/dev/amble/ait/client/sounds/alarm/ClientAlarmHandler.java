@@ -1,8 +1,5 @@
 package dev.amble.ait.client.sounds.alarm;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-
 import dev.amble.ait.client.sounds.LoopingSound;
 import dev.amble.ait.client.sounds.PlayerFollowingLoopingSound;
 import dev.amble.ait.client.sounds.SoundHandler;
@@ -10,6 +7,8 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientShakeUtil;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITSounds;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 
 // Client only class. One of the last surviving remnants of Duzocode.
 public class ClientAlarmHandler extends SoundHandler {
@@ -24,7 +23,7 @@ public class ClientAlarmHandler extends SoundHandler {
     }
 
     private LoopingSound createAlarmSound() {
-        return new PlayerFollowingLoopingSound(AITSounds.CLOISTER, SoundCategory.AMBIENT, 10f);
+        return new PlayerFollowingLoopingSound(AITSounds.CLOISTER, SoundSource.AMBIENT, 10f);
     }
 
     public static ClientAlarmHandler create() {
@@ -45,7 +44,7 @@ public class ClientAlarmHandler extends SoundHandler {
         return tardis != null && tardis.alarm().isEnabled();
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.sounds == null)

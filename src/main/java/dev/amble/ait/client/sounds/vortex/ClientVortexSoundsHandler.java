@@ -1,10 +1,8 @@
 package dev.amble.ait.client.sounds.vortex;
 
 import java.util.Objects;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.client.sounds.LoopingSound;
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
 import dev.amble.ait.client.sounds.SoundHandler;
@@ -40,7 +38,7 @@ public class ClientVortexSoundsHandler extends SoundHandler {
         if (tardis == null || tardis.getDesktop().getDoorPos().getPos() == null)
             return null;
 
-        return new PositionedLoopingSound(AITSounds.VORTEX_SOUND, SoundCategory.AMBIENT,
+        return new PositionedLoopingSound(AITSounds.VORTEX_SOUND, SoundSource.AMBIENT,
                 tardis.getDesktop().getDoorPos().getPos(), 0.2f);
     }
 
@@ -73,7 +71,7 @@ public class ClientVortexSoundsHandler extends SoundHandler {
         return 0.2f;
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.sounds == null)

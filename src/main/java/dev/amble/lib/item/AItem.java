@@ -1,7 +1,7 @@
 package dev.amble.lib.item;
 
-import net.minecraft.item.ItemGroup;
+import net.minecraft.world.item.CreativeModeTab;
 
 public interface AItem {
-    ItemGroup amble$group();
+    CreativeModeTab amble$group();
 }

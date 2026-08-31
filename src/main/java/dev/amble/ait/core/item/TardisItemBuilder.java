@@ -1,19 +1,5 @@
 package dev.amble.ait.core.item;
 
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -30,66 +16,79 @@ import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.registry.impl.DesktopRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 public class TardisItemBuilder extends Item {
-    private final Identifier exterior;
-    private final Identifier desktop;
+    private final ResourceLocation exterior;
+    private final ResourceLocation desktop;
 
-    public TardisItemBuilder(Settings settings, Identifier exterior, Identifier desktopId) {
+    public TardisItemBuilder(Properties settings, ResourceLocation exterior, ResourceLocation desktopId) {
         super(settings);
 
         this.exterior = exterior;
         this.desktop = desktopId;
     }
 
-    public TardisItemBuilder(Settings settings, Identifier exterior) {
+    public TardisItemBuilder(Properties settings, ResourceLocation exterior) {
         this(settings, exterior, null);
     }
 
-    public TardisItemBuilder(Settings settings) {
+    public TardisItemBuilder(Properties settings) {
         this(settings, null);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        PlayerEntity player = context.getPlayer();
+    public InteractionResult useOn(UseOnContext context) {
+        Level world = context.getLevel();
+        Player player = context.getPlayer();
 
-        if (!(player instanceof ServerPlayerEntity serverPlayer))
-            return ActionResult.PASS;
+        if (!(player instanceof ServerPlayer serverPlayer))
+            return InteractionResult.PASS;
 
-        if (!(world instanceof ServerWorld serverWorld))
-            return ActionResult.PASS;
+        if (!(world instanceof ServerLevel serverWorld))
+            return InteractionResult.PASS;
 
-        if (player.getItemCooldownManager().isCoolingDown(this))
-            return ActionResult.FAIL;
+        if (player.getCooldowns().isOnCooldown(this))
+            return InteractionResult.FAIL;
 
-        if (context.getHand() != Hand.MAIN_HAND)
-            return ActionResult.SUCCESS;
+        if (context.getHand() != InteractionHand.MAIN_HAND)
+            return InteractionResult.SUCCESS;
 
         CachedDirectedGlobalPos pos = CachedDirectedGlobalPos.create(serverWorld,
-                serverWorld.getBlockState(context.getBlockPos()).isReplaceable()
-                        ? context.getBlockPos()
-                        : context.getBlockPos().up(),
-                DirectionControl.getGeneralizedRotation(RotationPropertyHelper.fromYaw(player.getBodyYaw())));
+                serverWorld.getBlockState(context.getClickedPos()).canBeReplaced()
+                        ? context.getClickedPos()
+                        : context.getClickedPos().above(),
+                DirectionControl.getGeneralizedRotation(RotationSegment.convertToSegment(player.getVisualRotationYInDegrees())));
 
-        BlockEntity entity = world.getBlockEntity(context.getBlockPos());
+        BlockEntity entity = world.getBlockEntity(context.getClickedPos());
 
         if (entity instanceof ConsoleBlockEntity consoleBlock) {
             Tardis tardis = consoleBlock.tardis().get();
 
             if (tardis == null)
-                return ActionResult.FAIL;
+                return InteractionResult.FAIL;
 
             TravelHandlerBase.State state = tardis.travel().getState();
 
             if (!(state == TravelHandlerBase.State.LANDED || state == TravelHandlerBase.State.FLIGHT))
-                return ActionResult.PASS;
+                return InteractionResult.PASS;
 
             consoleBlock.killControls();
-            world.removeBlock(context.getBlockPos(), false);
-            world.removeBlockEntity(context.getBlockPos());
-            return ActionResult.SUCCESS;
+            world.removeBlock(context.getClickedPos(), false);
+            world.removeBlockEntity(context.getClickedPos());
+            return InteractionResult.SUCCESS;
         }
 
         // ExteriorCategorySchema category = CategoryRegistry.getInstance().get(this.exterior);
@@ -118,16 +117,16 @@ public class TardisItemBuilder extends Item {
         ServerTardis created = ServerTardisManager.getInstance()
                 .create(builder);
 
-        player.sendMessage(Text.translatable("message.ait.unlocked_all", Text.translatable("message.ait.all_types").formatted(Formatting.GREEN)).formatted(Formatting.WHITE), false);
+        player.displayClientMessage(Component.translatable("message.ait.unlocked_all", Component.translatable("message.ait.all_types").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.WHITE), false);
 
 
         if ( created == null ) {
-            player.sendMessage(Text.translatable("message.ait.max_tardises"), true);
-            return ActionResult.FAIL;
+            player.displayClientMessage(Component.translatable("message.ait.max_tardises"), true);
+            return InteractionResult.FAIL;
         }
 
-        context.getStack().decrement(1);
-        player.getItemCooldownManager().set(this, 20);
-        return ActionResult.SUCCESS;
+        context.getItemInHand().shrink(1);
+        player.getCooldowns().addCooldown(this, 20);
+        return InteractionResult.SUCCESS;
     }
 }

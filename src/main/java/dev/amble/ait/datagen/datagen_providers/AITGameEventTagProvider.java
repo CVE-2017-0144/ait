@@ -4,19 +4,17 @@ import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.event.GameEvent;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.gameevent.GameEvent;
 import dev.amble.ait.core.AITTags;
 
 public class AITGameEventTagProvider extends FabricTagProvider.GameEventTagProvider {
-    public AITGameEventTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> completableFuture) {
+    public AITGameEventTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
         super(output, completableFuture);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup arg) {
+    protected void addTags(HolderLookup.Provider arg) {
         this.getOrCreateTagBuilder(AITTags.GameEvents.MATRIX_CAN_LISTEN).add(GameEvent.SHRIEK);
     }
 }

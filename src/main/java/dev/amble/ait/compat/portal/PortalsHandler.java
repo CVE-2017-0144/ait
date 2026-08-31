@@ -4,6 +4,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import qouteall.imm_ptl.core.api.PortalAPI;
 import qouteall.imm_ptl.core.portal.Portal;
@@ -11,14 +17,6 @@ import qouteall.imm_ptl.core.portal.PortalManipulation;
 import qouteall.imm_ptl.core.render.PortalEntityRenderer;
 import qouteall.q_misc_util.MiscNetworking;
 import qouteall.q_misc_util.my_util.DQuaternion;
-
-import net.minecraft.network.packet.Packet;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -47,7 +45,7 @@ public class PortalsHandler extends KeyedTardisComponent {
     }
 
     public static void init() {
-        Registry.register(Registries.ENTITY_TYPE, AITMod.id("ip_portal"), TardisPortal.ENTITY_TYPE);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, AITMod.id("ip_portal"), TardisPortal.ENTITY_TYPE);
 
         if (!AITMod.CONFIG.allowPortalsBoti) return;
 
@@ -88,7 +86,7 @@ public class PortalsHandler extends KeyedTardisComponent {
 
         ServerPlayConnectionEvents.JOIN.register((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
             Packet<?> dimSyncPacket = MiscNetworking.createDimSyncPacket();
-            serverPlayNetworkHandler.sendPacket(dimSyncPacket);
+            serverPlayNetworkHandler.send(dimSyncPacket);
         });
 
         PortalVisualizerUtil.init();
@@ -109,7 +107,7 @@ public class PortalsHandler extends KeyedTardisComponent {
     public TardisPortal getInterior() {
         if (this.interiorRef != null) {
             if (!this.interiorRef.hasWorld() && tardis instanceof ServerTardis serverTardis) {
-                ServerWorld interiorWorld = serverTardis.world();
+                ServerLevel interiorWorld = serverTardis.world();
                 this.interiorRef.setWorld(interiorWorld);
             }
 
@@ -122,7 +120,7 @@ public class PortalsHandler extends KeyedTardisComponent {
     public TardisPortal getExterior() {
         if (this.exteriorRef != null) {
             if (!this.exteriorRef.hasWorld() && tardis instanceof ServerTardis) {
-                ServerWorld exteriorWorld = tardis.travel().position().getWorld();
+                ServerLevel exteriorWorld = tardis.travel().position().getWorld();
                 this.exteriorRef.setWorld(exteriorWorld);
             }
 
@@ -162,32 +160,32 @@ public class PortalsHandler extends KeyedTardisComponent {
         ExteriorVariantSchema variant = tardis.getExterior().getVariant();
         double portalHeight = variant.portalHeight();
 
-        Vec3d doorAdjust = adjustInteriorPos(variant.door(), doorPos, portalHeight);
-        Vec3d exteriorAdjust = adjustExteriorPos(variant, exteriorPos, portalHeight);
+        Vec3 doorAdjust = adjustInteriorPos(variant.door(), doorPos, portalHeight);
+        Vec3 exteriorAdjust = adjustExteriorPos(variant, exteriorPos, portalHeight);
 
         TardisPortal portal = new TardisPortal(tardis, tardis.travel().getState() == TravelHandlerBase.State.FLIGHT ? WorldUtil.getTimeVortex() : exteriorPos.getWorld());
 
         portal.setOrientationAndSize(
-                new Vec3d(1, 0, 0), // axisW
-                new Vec3d(0, 1, 0), // axisH
+                new Vec3(1, 0, 0), // axisW
+                new Vec3(0, 1, 0), // axisH
                 variant.portalWidth(), // width
                 portalHeight // height
         );
 
-        DQuaternion quat = DQuaternion.rotationByDegrees(new Vec3d(0, -1, 0), 180 + RotationPropertyHelper.toDegrees(exteriorPos.getRotation()));
-        DQuaternion doorQuat = DQuaternion.rotationByDegrees(new Vec3d(0, -1, 0), RotationPropertyHelper.toDegrees(doorPos.getRotation()));
+        DQuaternion quat = DQuaternion.rotationByDegrees(new Vec3(0, -1, 0), 180 + RotationSegment.convertToDegrees(exteriorPos.getRotation()));
+        DQuaternion doorQuat = DQuaternion.rotationByDegrees(new Vec3(0, -1, 0), RotationSegment.convertToDegrees(doorPos.getRotation()));
 
         PortalAPI.setPortalOrientationQuaternion(portal, quat);
         portal.setOtherSideOrientation(doorQuat);
 
         portal.setOriginPos(exteriorAdjust);
 
-        portal.setDestinationDimension(tardis.asServer().world().getRegistryKey());
+        portal.setDestinationDimension(tardis.asServer().world().dimension());
         portal.setDestination(doorAdjust);
 
         //portal.renderingMergable = true;
         portal.setInteractable(false);
-        portal.getWorld().spawnEntity(portal);
+        portal.level().addFreshEntity(portal);
 
         return portal;
     }
@@ -200,47 +198,47 @@ public class PortalsHandler extends KeyedTardisComponent {
         ExteriorVariantSchema variant = tardis.getExterior().getVariant();
         double portalHeight = variant.portalHeight();
 
-        Vec3d doorAdjust = adjustInteriorPos(variant.door(), doorPos, portalHeight);
-        Vec3d exteriorAdjust = adjustExteriorPos(variant, exteriorPos, portalHeight);
+        Vec3 doorAdjust = adjustInteriorPos(variant.door(), doorPos, portalHeight);
+        Vec3 exteriorAdjust = adjustExteriorPos(variant, exteriorPos, portalHeight);
 
         TardisPortal portal = new TardisPortal(tardis, tardis.asServer().world());
 
         portal.setOrientationAndSize(
-                new Vec3d(1, 0, 0), // axisW
-                new Vec3d(0, 1, 0), // axisH
+                new Vec3(1, 0, 0), // axisW
+                new Vec3(0, 1, 0), // axisH
                 variant.portalWidth(), // width
                 portalHeight // height
         );
 
-        DQuaternion quat = DQuaternion.rotationByDegrees(new Vec3d(0, -1, 0), RotationPropertyHelper.toDegrees(doorPos.getRotation()));
-        DQuaternion extQuat = DQuaternion.rotationByDegrees(new Vec3d(0, -1, 0), 180 + RotationPropertyHelper.toDegrees(exteriorPos.getRotation()));
+        DQuaternion quat = DQuaternion.rotationByDegrees(new Vec3(0, -1, 0), RotationSegment.convertToDegrees(doorPos.getRotation()));
+        DQuaternion extQuat = DQuaternion.rotationByDegrees(new Vec3(0, -1, 0), 180 + RotationSegment.convertToDegrees(exteriorPos.getRotation()));
 
         PortalAPI.setPortalOrientationQuaternion(portal, quat);
         portal.setOtherSideOrientation(extQuat);
 
         portal.setOriginPos(doorAdjust);
 
-        portal.setDestinationDimension(tardis.travel().getState() == TravelHandlerBase.State.FLIGHT ? AITDimensions.TIME_VORTEX_WORLD : exteriorPos.getWorld().getRegistryKey());
+        portal.setDestinationDimension(tardis.travel().getState() == TravelHandlerBase.State.FLIGHT ? AITDimensions.TIME_VORTEX_WORLD : exteriorPos.getWorld().dimension());
         portal.setDestination(exteriorAdjust);
 
         //portal.renderingMergable = true;w
         portal.setInteractable(false);
-        portal.getWorld().spawnEntity(portal);
+        portal.level().addFreshEntity(portal);
 
         return portal;
     }
 
-    private static Vec3d adjustExteriorPos(ExteriorVariantSchema exterior, DirectedGlobalPos directed, double portalHeight) {
-        return adjustPortalPos(exterior.getPortalPosition(directed.getPos().toCenterPos(), directed.getRotationDegrees()), portalHeight);
+    private static Vec3 adjustExteriorPos(ExteriorVariantSchema exterior, DirectedGlobalPos directed, double portalHeight) {
+        return adjustPortalPos(exterior.getPortalPosition(directed.getPos().getCenter(), directed.getRotationDegrees()), portalHeight);
     }
 
-    private static Vec3d adjustInteriorPos(DoorSchema door, DirectedBlockPos directed, double portalHeight) {
-        return adjustPortalPos(door.getPortalPosition(directed.getPos().toCenterPos(),
-                RotationPropertyHelper.toDegrees(directed.getRotation())
+    private static Vec3 adjustInteriorPos(DoorSchema door, DirectedBlockPos directed, double portalHeight) {
+        return adjustPortalPos(door.getPortalPosition(directed.getPos().getCenter(),
+                RotationSegment.convertToDegrees(directed.getRotation())
         ), portalHeight);
     }
 
-    private static Vec3d adjustPortalPos(Vec3d vec, double portalHeight) {
+    private static Vec3 adjustPortalPos(Vec3 vec, double portalHeight) {
         return vec.add(0, -0.5f + portalHeight / 2f, 0);
     }
 

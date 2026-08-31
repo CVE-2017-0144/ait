@@ -2,14 +2,12 @@ package dev.amble.ait.registry.impl.exterior;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.joml.Vector3f;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.BedrockExteriorModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
@@ -90,10 +88,10 @@ public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteri
      * Do not call
      */
     @Override
-    public void syncToClient(ServerPlayerEntity player) { }
+    public void syncToClient(ServerPlayer player) { }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
         for (ExteriorVariantSchema schema : ExteriorVariantRegistry.getInstance().toList()) {
             if (!(schema instanceof DatapackExterior variant)) continue;
 
@@ -112,12 +110,12 @@ public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteri
         return new ClientExteriorVariantSchema(variant.id()) {
 
             @Override
-            public Identifier texture() {
+            public ResourceLocation texture() {
                 return variant.texture();
             }
 
             @Override
-            public Identifier emission() {
+            public ResourceLocation emission() {
                 return variant.emission();
             }
 
@@ -318,18 +316,18 @@ public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteri
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return AITMod.id("client_exterior");
     }
 
     @Override
     public void onCommonInit() {
         super.onCommonInit();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         for (ClientExteriorVariantSchema schema : REGISTRY.values()) {
             BiomeOverrides overrides = schema.overrides();
 

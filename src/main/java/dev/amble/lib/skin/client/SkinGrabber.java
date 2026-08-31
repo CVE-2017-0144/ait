@@ -14,20 +14,18 @@ import javax.imageio.ImageIO;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Pair;
 import dev.amble.lib.skin.ConcurrentQueueMap;
 import dev.amble.lib.skin.SkinConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.util.DefaultSkinHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.util.Identifier;
-
 import dev.amble.lib.AmbleKit;
 
 /**
@@ -38,10 +36,10 @@ public class SkinGrabber {
     public static final SkinGrabber INSTANCE = new SkinGrabber();
 	public static final String DEFAULT_DIR = "./" + AmbleKit.MOD_ID + "/";
     public static final String SKIN_DIR = DEFAULT_DIR + "/skins/";
-    private static final Identifier MISSING = new Identifier(AmbleKit.MOD_ID, "textures/skins/error.png");
+    private static final ResourceLocation MISSING = new ResourceLocation(AmbleKit.MOD_ID, "textures/skins/error.png");
     private static final String USER_AGENT = AmbleKit.MOD_ID + "/1.0";
 
-    private final ConcurrentHashMap<String, Identifier> downloads;
+    private final ConcurrentHashMap<String, ResourceLocation> downloads;
     private final ConcurrentHashMap<String, String> urls;
     private final ConcurrentQueueMap<String, String> downloadQueue;
     private final SkinCache cache;
@@ -58,14 +56,14 @@ public class SkinGrabber {
         jeryn = new JerynSkins(new ArrayList<>());
     }
 
-    public static Identifier missing() {
-        if (MinecraftClient.getInstance().player == null) {
+    public static ResourceLocation missing() {
+        if (Minecraft.getInstance().player == null) {
             return MISSING;
         }
-        return DefaultSkinHelper.getTexture(MinecraftClient.getInstance().player.getUuid());
+        return DefaultPlayerSkin.getDefaultSkin(Minecraft.getInstance().player.getUUID());
     }
 
-	public static boolean isMissingTexture(Identifier id) {
+	public static boolean isMissingTexture(ResourceLocation id) {
 		return id == null || id.equals(missing());
 	}
 
@@ -117,7 +115,7 @@ public class SkinGrabber {
     private static void doNotchTransparencyHack(NativeImage p_118013_, int p_118014_, int p_118015_, int p_118016_, int p_118017_) {
         for (int i = p_118014_; i < p_118016_; ++i) {
             for (int j = p_118015_; j < p_118017_; ++j) {
-                int k = p_118013_.getColor(i, j);
+                int k = p_118013_.getPixelRGBA(i, j);
                 if ((k >> 24 & 255) < 128) {
                     return;
                 }
@@ -126,7 +124,7 @@ public class SkinGrabber {
 
         for (int l = p_118014_; l < p_118016_; ++l) {
             for (int i1 = p_118015_; i1 < p_118017_; ++i1) {
-                p_118013_.setColor(l, i1, p_118013_.getColor(l, i1) & 16777215);
+                p_118013_.setPixelRGBA(l, i1, p_118013_.getPixelRGBA(l, i1) & 16777215);
             }
         }
 
@@ -135,7 +133,7 @@ public class SkinGrabber {
     private static void setNoAlpha(NativeImage p_118023_, int p_118024_, int p_118025_, int p_118026_, int p_118027_) {
         for (int i = p_118024_; i < p_118026_; ++i) {
             for (int j = p_118025_; j < p_118027_; ++j) {
-                p_118023_.setColor(i, j, p_118023_.getColor(i, j) | -16777216);
+                p_118023_.setPixelRGBA(i, j, p_118023_.getPixelRGBA(i, j) | -16777216);
             }
         }
     }
@@ -147,11 +145,11 @@ public class SkinGrabber {
      * @param name The name of the player
      * @return The skin, or a missing texture if it doesn't exist / is downloading
      */
-    public Identifier getSkin(String name) {
+    public ResourceLocation getSkin(String name) {
         return getSkinOrDownload(name, SkinConstants.SKIN_URL + name);
     }
 
-    public Optional<Identifier> getPossibleSkin(String id) {
+    public Optional<ResourceLocation> getPossibleSkin(String id) {
         id = id.toLowerCase().replace(" ", "_");
 
         if (downloads.containsKey(id)) {
@@ -161,10 +159,10 @@ public class SkinGrabber {
         return Optional.empty();
     }
 
-    public Identifier getSkinOrDownload(String id, String url) {
+    public ResourceLocation getSkinOrDownload(String id, String url) {
         id = id.toLowerCase().replace(" ", "_");
 
-        Identifier existing = getPossibleSkin(id).orElse(null);
+        ResourceLocation existing = getPossibleSkin(id).orElse(null);
         if (existing != null) {
             return existing;
         }
@@ -182,28 +180,28 @@ public class SkinGrabber {
         return urls.get(key);
     }
 
-    private Identifier registerSkin(String name) {
+    private ResourceLocation registerSkin(String name) {
         // register new skin to prepare
         File file = new File(SKIN_DIR + name.toLowerCase().replace(" ", "_") + ".png");
-        Identifier location = fileToLocation(file);
+        ResourceLocation location = fileToLocation(file);
         downloads.put(name, location);
         return location;
     }
 
     public void clearTextures() {
-        MinecraftClient minecraft = MinecraftClient.getInstance();
-        if (minecraft.world == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
             TextureManager manager = minecraft.getTextureManager();
 
             // Release the textures if the cache isnt empty
             if (!this.downloads.isEmpty()) {
-                this.downloads.forEach((key, value) -> manager.destroyTexture(value));
+                this.downloads.forEach((key, value) -> manager.release(value));
                 this.downloads.clear();
             }
         }
     }
 
-    private Identifier fileToLocation(File file) {
+    private ResourceLocation fileToLocation(File file) {
         NativeImage image;
         try {
             image = processLegacySkin(NativeImage.read(new FileInputStream(file)));
@@ -217,9 +215,9 @@ public class SkinGrabber {
         return registerImage(image);
     }
 
-    private Identifier registerImage(NativeImage image) {
-        TextureManager manager = MinecraftClient.getInstance().getTextureManager();
-        return manager.registerDynamicTexture("player_", new NativeImageBackedTexture(image));
+    private ResourceLocation registerImage(NativeImage image) {
+        TextureManager manager = Minecraft.getInstance().getTextureManager();
+        return manager.register("player_", new DynamicTexture(image));
     }
 
     private static boolean isValidUrl(String url) {

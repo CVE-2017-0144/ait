@@ -4,11 +4,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
@@ -52,11 +50,11 @@ public class TardisRef implements Disposable {
                 real -> TardisManager.with(blockEntity, (o, manager) -> manager.demandTardis(o, real)));
     }
 
-    public static TardisRef createAs(World world, Tardis tardis) {
+    public static TardisRef createAs(Level world, Tardis tardis) {
         return new TardisRef(tardis, real -> TardisManager.with(world, (o, manager) -> manager.demandTardis(o, real)));
     }
 
-    public static TardisRef createAs(World world, UUID uuid) {
+    public static TardisRef createAs(Level world, UUID uuid) {
         return new TardisRef(uuid, real -> TardisManager.with(world, (o, manager) -> manager.demandTardis(o, real)));
     }
 

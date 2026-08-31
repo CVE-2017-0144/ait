@@ -4,28 +4,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
-
 import dev.amble.ait.AITMod;
 import dev.amble.lib.api.Identifiable;
 
-public record DatapackPotion(Identifier id, int duration, int amplifier, Optional<Boolean> ambient,
+public record DatapackPotion(ResourceLocation id, int duration, int amplifier, Optional<Boolean> ambient,
                              Optional<Boolean> showParticles, Optional<Boolean> showIcon) implements Identifiable,
-        Comparable<StatusEffectInstance> {
-    public static final Codec<DatapackPotion> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
-                    Identifier.CODEC.fieldOf("id").forGetter(DatapackPotion::id),
+        Comparable<MobEffectInstance> {
+    public static final Codec<DatapackPotion> CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(
+                    ResourceLocation.CODEC.fieldOf("id").forGetter(DatapackPotion::id),
                     Codec.INT.fieldOf("duration").forGetter(DatapackPotion::duration),
                     Codec.INT.fieldOf("amplifier").forGetter(DatapackPotion::amplifier),
                     Codec.BOOL.optionalFieldOf("ambient").forGetter(DatapackPotion::ambient),
@@ -34,47 +31,47 @@ public record DatapackPotion(Identifier id, int duration, int amplifier, Optiona
             .apply(instance, DatapackPotion::new)));
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
-    public DatapackPotion(Identifier id) {
+    public DatapackPotion(ResourceLocation id) {
         this(id, 0, 0, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(Identifier id, int duration, int amplifier) {
+    public DatapackPotion(ResourceLocation id, int duration, int amplifier) {
         this(id, duration, amplifier, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(Identifier id, int duration, int amplifier, boolean ambient) {
+    public DatapackPotion(ResourceLocation id, int duration, int amplifier, boolean ambient) {
         this(id, duration, amplifier, Optional.of(ambient), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(Identifier id, int duration, int amplifier, boolean ambient, boolean showParticles) {
+    public DatapackPotion(ResourceLocation id, int duration, int amplifier, boolean ambient, boolean showParticles) {
         this(id, duration, amplifier, Optional.of(ambient), Optional.of(showParticles), Optional.empty());
     }
 
-    public DatapackPotion(Identifier id, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+    public DatapackPotion(ResourceLocation id, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
         this(id, duration, amplifier, Optional.of(ambient), Optional.of(showParticles), Optional.of(showIcon));
     }
 
-    public DatapackPotion(StatusEffect statusEffect) {
+    public DatapackPotion(MobEffect statusEffect) {
         this(getEffect(statusEffect), 0, 0, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(StatusEffect statusEffect, int duration, int amplifier) {
+    public DatapackPotion(MobEffect statusEffect, int duration, int amplifier) {
         this(getEffect(statusEffect), duration, amplifier, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(StatusEffect statusEffect, int duration, int amplifier, boolean ambient) {
+    public DatapackPotion(MobEffect statusEffect, int duration, int amplifier, boolean ambient) {
         this(getEffect(statusEffect), duration, amplifier, Optional.of(ambient), Optional.empty(), Optional.empty());
     }
 
-    public DatapackPotion(StatusEffect statusEffect, int duration, int amplifier, boolean ambient, boolean showParticles) {
+    public DatapackPotion(MobEffect statusEffect, int duration, int amplifier, boolean ambient, boolean showParticles) {
         this(getEffect(statusEffect), duration, amplifier, Optional.of(ambient), Optional.of(showParticles), Optional.empty());
     }
 
-    public DatapackPotion(StatusEffect statusEffect, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+    public DatapackPotion(MobEffect statusEffect, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
         this(getEffect(statusEffect), duration, amplifier, Optional.of(ambient), Optional.of(showParticles), Optional.of(showIcon));
     }
 
@@ -106,18 +103,18 @@ public record DatapackPotion(Identifier id, int duration, int amplifier, Optiona
     }
 
     @Override
-    public int compareTo(StatusEffectInstance statusEffectInstance) {
+    public int compareTo(MobEffectInstance statusEffectInstance) {
         int i = 32147;
         if (this.getDuration() > 32147 && statusEffectInstance.getDuration() > 32147 || this.isAmbient() && statusEffectInstance.isAmbient()) {
             return ComparisonChain.start().compare(this.isAmbient(),
                     statusEffectInstance.isAmbient()).compare(this.getEffectType().getColor(),
-                    statusEffectInstance.getEffectType().getColor()).result();
+                    statusEffectInstance.getEffect().getColor()).result();
         }
         return ComparisonChain.start().compareFalseFirst(this.isAmbient(),
                 statusEffectInstance.isAmbient()).compareFalseFirst(this.isInfinite(),
-                statusEffectInstance.isInfinite()).compare(this.getDuration(),
+                statusEffectInstance.isInfiniteDuration()).compare(this.getDuration(),
                 statusEffectInstance.getDuration()).compare(this.getEffectType().getColor(),
-                statusEffectInstance.getEffectType().getColor()).result();
+                statusEffectInstance.getEffect().getColor()).result();
     }
 
     public int getDuration() {
@@ -136,18 +133,18 @@ public record DatapackPotion(Identifier id, int duration, int amplifier, Optiona
         return this.ambient().orElse(false);
     }
 
-    public StatusEffect getEffectType() {
-        return Registries.STATUS_EFFECT.get(this.id());
+    public MobEffect getEffectType() {
+        return BuiltInRegistries.MOB_EFFECT.get(this.id());
     }
 
-    public static Identifier getEffect(StatusEffect statusEffect) {
-        return Registries.STATUS_EFFECT.getId(statusEffect);
+    public static ResourceLocation getEffect(MobEffect statusEffect) {
+        return BuiltInRegistries.MOB_EFFECT.getKey(statusEffect);
     }
 
-    public StatusEffectInstance getInstance() {
-        StatusEffect effect1 = this.getEffectType();
+    public MobEffectInstance getInstance() {
+        MobEffect effect1 = this.getEffectType();
         if (effect1 == null) return null;
-        return new StatusEffectInstance(effect1,
+        return new MobEffectInstance(effect1,
                 this.duration(), this.amplifier(), this.ambient().orElse(false),
                 this.showParticles().orElse(true), this.showIcon().orElse(false));
     }

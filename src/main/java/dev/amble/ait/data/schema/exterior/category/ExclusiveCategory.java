@@ -1,9 +1,7 @@
 package dev.amble.ait.data.schema.exterior.category;
 
 import java.util.UUID;
-
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.devteam.DevTeam;
 import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
@@ -15,7 +13,7 @@ import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
  * This is NOT meant for multiple variants of the same exterior (cough, Classic). Every dev team member gets one exterior.
  */
 public class ExclusiveCategory extends ExteriorCategorySchema {
-    public static final Identifier REFERENCE = AITMod.id("exterior/exclusive");
+    public static final ResourceLocation REFERENCE = AITMod.id("exterior/exclusive");
 
     public ExclusiveCategory() {
         super(REFERENCE, "exclusive");

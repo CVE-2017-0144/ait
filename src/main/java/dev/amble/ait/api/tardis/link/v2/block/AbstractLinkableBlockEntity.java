@@ -1,21 +1,19 @@
 package dev.amble.ait.api.tardis.link.v2.block;
 
 import java.util.UUID;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerChunkManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -36,41 +34,41 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         if (this.ref != null && this.ref.getId() != null)
-            nbt.putUuid("tardis", this.ref.getId());
+            nbt.putUUID("tardis", this.ref.getId());
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
-        NbtElement id = nbt.get("tardis");
+        Tag id = nbt.get("tardis");
 
         if (id == null)
             return;
 
-        this.ref = TardisRef.createAs(this, NbtHelper.toUuid(id));
+        this.ref = TardisRef.createAs(this, NbtUtils.loadUUID(id));
 
-        if (this.world == null)
+        if (this.level == null)
             return;
 
         this.onLinked();
     }
 
     @Override
-    public void markRemoved() {
-        super.markRemoved();
+    public void setRemoved() {
+        super.setRemoved();
 
         if (this.ref == null || this.ref.isEmpty())
             return;
 
-        if (!(this.world instanceof ServerWorld serverWorld))
+        if (!(this.level instanceof ServerLevel serverWorld))
             return;
 
-        ServerTardisManager.getInstance().unmark(serverWorld, (ServerTardis) this.ref.get(), new ChunkPos(this.pos));
+        ServerTardisManager.getInstance().unmark(serverWorld, (ServerTardis) this.ref.get(), new ChunkPos(this.worldPosition));
     }
 
     @Override
@@ -86,9 +84,9 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
     }
 
     private void mark() {
-        if (this.world instanceof ServerWorld serverWorld)
+        if (this.level instanceof ServerLevel serverWorld)
             ServerTardisManager.getInstance().mark(serverWorld, (ServerTardis) this.tardis().get(),
-                    new ChunkPos(this.pos));
+                    new ChunkPos(this.worldPosition));
     }
 
     private void handleLink() {
@@ -96,24 +94,24 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
         this.onLinked();
 
         this.sync();
-        this.markDirty();
+        this.setChanged();
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
+    public CompoundTag getUpdateTag() {
         if (this.isLinked())
             this.mark();
 
-        return createNbt();
+        return saveWithoutMetadata();
     }
 
     protected void sync() {
-        if (this.world != null && this.world.getChunkManager() instanceof ServerChunkManager chunkManager)
-            chunkManager.markForUpdate(this.pos);
+        if (this.level != null && this.level.getChunkSource() instanceof ServerChunkCache chunkManager)
+            chunkManager.blockChanged(this.worldPosition);
     }
 }

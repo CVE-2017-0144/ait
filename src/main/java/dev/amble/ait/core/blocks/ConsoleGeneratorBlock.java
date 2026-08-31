@@ -4,55 +4,53 @@ import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.previousConsol
 import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.previousVariant;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.ConsoleGeneratorBlockEntity;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlock;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.lib.api.ICantBreak;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
-public class ConsoleGeneratorBlock extends FluidLinkBlock implements BlockEntityProvider, ICantBreak {
+public class ConsoleGeneratorBlock extends FluidLinkBlock implements EntityBlock, ICantBreak {
 
-    public ConsoleGeneratorBlock(Settings settings) {
+    public ConsoleGeneratorBlock(Properties settings) {
         super(settings);
     }
 
     @Nullable @Override
-    public FluidLinkBlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public FluidLinkBlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ConsoleGeneratorBlockEntity(pos, state);
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
             BlockHitResult hit) {
 
         if (world.getBlockEntity(pos) instanceof ConsoleGeneratorBlockEntity be)
-            be.useOn(world, player.isSneaking(), false, player);
+            be.useOn(world, player.isShiftKeyDown(), false, player);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         double centerX = pos.getX() + 0.5;
         double centerY = pos.getY() + 0.5;
         double centerZ = pos.getZ() + 0.5;
@@ -93,26 +91,26 @@ public class ConsoleGeneratorBlock extends FluidLinkBlock implements BlockEntity
 
     // Triggers instead of onTryBreak when punching in survival mode.
     @Override
-    public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    public void attack(BlockState state, Level world, BlockPos pos, Player player) {
         if (world.getBlockEntity(pos) instanceof ConsoleGeneratorBlockEntity be)
-            be.useOn(world, player.isSneaking(), true, player);
+            be.useOn(world, player.isShiftKeyDown(), true, player);
     }
 
     // Triggers instead of onBlockBreakStart when punching in creative mode.
     @Override
-    public void onTryBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void onTryBreak(Level world, BlockPos pos, BlockState state, Player player) {
         if (player == null)
             return;
 
-        if (!TardisServerWorld.isTardisDimension(world) || !player.getMainHandStack().isEmpty()) {
-            world.breakBlock(pos, true);
+        if (!TardisServerWorld.isTardisDimension(world) || !player.getMainHandItem().isEmpty()) {
+            world.destroyBlock(pos, true);
             return;
         }
 
         if (world.getBlockEntity(pos) instanceof ConsoleGeneratorBlockEntity be) {
-            world.playSound(null, pos, SoundEvents.BLOCK_SCULK_CHARGE, SoundCategory.BLOCKS, 0.5f, 1.0f);
+            world.playSound(null, pos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, 0.5f, 1.0f);
 
-            if (player.isSneaking())
+            if (player.isShiftKeyDown())
                 be.changeConsole(previousVariant(be.getConsoleVariant()));
             else
                 be.changeConsole(previousConsole(be.getConsoleSchema()));

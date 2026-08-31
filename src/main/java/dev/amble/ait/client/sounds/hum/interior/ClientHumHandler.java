@@ -5,14 +5,12 @@ import java.util.List;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.api.tardis.TardisClientEvents;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.AITModClient;
@@ -39,7 +37,7 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     private static void refresh() {
-        if (MinecraftClient.getInstance().world == null)
+        if (Minecraft.getInstance().level == null)
             return;
 
         ClientHumHandler handler = ClientSoundManager.getHum();
@@ -50,10 +48,10 @@ public class ClientHumHandler extends SoundHandler {
 
     protected ClientHumHandler() {
         ClientPlayNetworking.registerGlobalReceiver(ServerHumHandler.SEND, (client, handler, buf, responseSender) -> {
-            Identifier id = buf.readIdentifier();
+            ResourceLocation id = buf.readResourceLocation();
             SoundInstance sound = findSoundById(id);
 
-            if (sound.getId() == SoundEvents.INTENTIONALLY_EMPTY.getId())
+            if (sound.getLocation() == SoundEvents.EMPTY.getLocation())
                 return;
 
             if (!(sound instanceof LoopingSound hum))
@@ -87,9 +85,9 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     public void setServersHum(ClientTardis tardis, Hum hum) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(tardis.getUuid());
-        buf.writeIdentifier(hum.id());
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(tardis.getUuid());
+        buf.writeResourceLocation(hum.id());
 
         ClientPlayNetworking.send(ServerHumHandler.RECEIVE, buf);
     }
@@ -109,7 +107,7 @@ public class ClientHumHandler extends SoundHandler {
         List<SoundInstance> list = new ArrayList<>();
 
         for (Hum sound : HumRegistry.getInstance().toList()) {
-            list.add(new PlayerFollowingLoopingSound(sound.sound(), SoundCategory.AMBIENT,
+            list.add(new PlayerFollowingLoopingSound(sound.sound(), SoundSource.AMBIENT,
                     AITModClient.CONFIG.interiorHumVolume));
         }
 
@@ -131,7 +129,7 @@ public class ClientHumHandler extends SoundHandler {
         return this.suppressed;
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.sounds == null)
@@ -156,7 +154,7 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     @Override
-    public SoundInstance findSoundById(Identifier id) {
+    public SoundInstance findSoundById(ResourceLocation id) {
         if (this.sounds == null) sounds = registryToList();
 
         return super.findSoundById(id);

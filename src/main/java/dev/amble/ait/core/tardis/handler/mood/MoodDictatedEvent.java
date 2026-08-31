@@ -3,15 +3,13 @@ package dev.amble.ait.core.tardis.handler.mood;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.ServerTardis;
 
 public interface MoodDictatedEvent {
 
-    default Identifier id() {
+    default ResourceLocation id() {
         return AITMod.id("mood_dictated_event");
     }
 
@@ -24,13 +22,13 @@ public interface MoodDictatedEvent {
     TardisMood.Alignment getMoodTypeCompatibility();
 
     class Builder implements MoodDictatedEvent {
-        private final Identifier id;
+        private final ResourceLocation id;
         private final ExecuteMoodEvent execute;
         private final int cost;
         private final Set<TardisMood.Moods> moodsList;
         private final TardisMood.Alignment alignmentCompatibility;
 
-        public Builder(Identifier id, ExecuteMoodEvent execute, int cost, TardisMood.Alignment alignment,
+        public Builder(ResourceLocation id, ExecuteMoodEvent execute, int cost, TardisMood.Alignment alignment,
                 TardisMood.Moods... moods) {
             this.id = id;
             this.execute = execute;
@@ -39,13 +37,13 @@ public interface MoodDictatedEvent {
             this.alignmentCompatibility = alignment;
         }
 
-        public static MoodDictatedEvent create(Identifier id, ExecuteMoodEvent execute, int cost,
+        public static MoodDictatedEvent create(ResourceLocation id, ExecuteMoodEvent execute, int cost,
                 TardisMood.Alignment alignment, TardisMood.Moods... moods) {
             return new MoodDictatedEvent.Builder(id, execute, cost, alignment, moods);
         }
 
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return this.id;
         }
 

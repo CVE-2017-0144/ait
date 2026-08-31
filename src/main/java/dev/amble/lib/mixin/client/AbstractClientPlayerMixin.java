@@ -3,8 +3,8 @@ package dev.amble.lib.mixin.client;
 import dev.amble.lib.skin.SkinData;
 import dev.amble.lib.skin.SkinTracker;
 import dev.amble.lib.skin.client.SkinGrabber;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,20 +12,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractClientPlayerEntity.class)
+@Mixin(AbstractClientPlayer.class)
 public abstract class AbstractClientPlayerMixin {
 	@Unique @Nullable private SkinData lastSkin = null;
 
-	@Inject(method="getSkinTexture", at=@At("HEAD"), cancellable = true)
-	private void amblekit$getSkinTexture(CallbackInfoReturnable<Identifier> cir) {
-		AbstractClientPlayerEntity player = (AbstractClientPlayerEntity)(Object)this;
+	@Inject(method="getSkinTextureLocation", at=@At("HEAD"), cancellable = true)
+	private void amblekit$getSkinTexture(CallbackInfoReturnable<ResourceLocation> cir) {
+		AbstractClientPlayer player = (AbstractClientPlayer)(Object)this;
 
 		SkinTracker tracker = SkinTracker.getInstance();
 
-		SkinData data = tracker.get(player.getUuid());
+		SkinData data = tracker.get(player.getUUID());
 		if (data == null) return;
 
-		Identifier id = data.get();
+		ResourceLocation id = data.get();
 		if (id == null) return;
 
 		if (SkinGrabber.isMissingTexture(id) && lastSkin != null) {
@@ -37,13 +37,13 @@ public abstract class AbstractClientPlayerMixin {
 		cir.setReturnValue(id);
 	}
 
-	@Inject(method="getModel", at=@At("HEAD"), cancellable = true)
+	@Inject(method="getModelName", at=@At("HEAD"), cancellable = true)
 	private void amblekit$getModel(CallbackInfoReturnable<String> cir) {
-		AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) (Object) this;
+		AbstractClientPlayer player = (AbstractClientPlayer) (Object) this;
 
 		SkinTracker tracker = SkinTracker.getInstance();
 
-		SkinData data = tracker.get(player.getUuid());
+		SkinData data = tracker.get(player.getUUID());
 		if (data == null) return;
 
 		cir.setReturnValue(data.slim() ? "slim" : "default");

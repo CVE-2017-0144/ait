@@ -9,11 +9,9 @@ import dev.amble.lib.skin.SkinTracker;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.lib.api.AmbleKitInitializer;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
@@ -40,7 +38,7 @@ public class AmbleKit implements ModInitializer {
                 AmbleKitInitializer::onInitialize);
     }
 
-    public static Identifier id(String path) {
-        return new Identifier(MOD_ID, path);
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MOD_ID, path);
     }
 }

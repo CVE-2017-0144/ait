@@ -10,15 +10,15 @@ import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.drtheo.queue.api.ActionQueue;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.monster.Monster;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.AITSounds;
@@ -28,12 +28,11 @@ import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.properties.bool.BoolProperty;
 import dev.amble.ait.data.properties.bool.BoolValue;
-import net.minecraft.util.Identifier;
 
 // use this as reference for starting other looping sounds on the exterior
 public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTickable {
 
-    public static final Identifier TOGGLE_HOSTILE_ALARMS = AITMod.id("toggle_hostile_alarms");
+    public static final ResourceLocation TOGGLE_HOSTILE_ALARMS = AITMod.id("toggle_hostile_alarms");
 
     public static final int CLOISTER_LENGTH_TICKS = 3 * 20;
 
@@ -105,7 +104,7 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
         return cause;
     }
 
-    public Alarm enable(Text cause) {
+    public Alarm enable(Component cause) {
         return enable(() -> Optional.ofNullable(cause));
     }
 
@@ -142,10 +141,10 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 20 == 0 && !this.enabled().get() && this.hostilePresence().get()) {
+        if (server.getTickCount() % 20 == 0 && !this.enabled().get() && this.hostilePresence().get()) {
             for (Entity entity : TardisUtil.getEntitiesInInterior(tardis, 200)) {
-                if (entity instanceof TntEntity || (entity instanceof HostileEntity && !entity.hasCustomName())
-                        || entity instanceof ServerPlayerEntity player
+                if (entity instanceof PrimedTnt || (entity instanceof Monster && !entity.hasCustomName())
+                        || entity instanceof ServerPlayer player
                         && tardis.loyalty().get(player).level() == Loyalty.Type.REJECT.level) {
                     tardis.alarm().enable(AlarmType.HOSTILE_PRESENCE);
                 }
@@ -173,10 +172,10 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
             float pitch = isDoorOpen() ? 1f : 0.2f;
 
             tardis.travel().position().getWorld().playSound(null, tardis.travel().position().getPos(),
-                    AITSounds.CLOISTER, SoundCategory.AMBIENT, volume, pitch);
+                    AITSounds.CLOISTER, SoundSource.AMBIENT, volume, pitch);
 
             if (currentAlarm != null) {
-                tardis.asServer().world().getPlayers().forEach(player -> {
+                tardis.asServer().world().players().forEach(player -> {
                     currentAlarm.sendMessage(player);
                 });
             }
@@ -200,11 +199,11 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
             return 0;
         }
 
-        default void sendMessage(ServerPlayerEntity player) {
-            getAlarmText().ifPresent(text -> player.sendMessage(text, true));
+        default void sendMessage(ServerPlayer player) {
+            getAlarmText().ifPresent(text -> player.displayClientMessage(text, true));
         }
 
-        Optional<Text> getAlarmText();
+        Optional<Component> getAlarmText();
     }
 
     public static class Countdown implements Alarm {
@@ -249,10 +248,10 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
         }
 
         @Override
-        public Optional<Text> getAlarmText() {
+        public Optional<Component> getAlarmText() {
             if (translation == null) return Optional.empty();
 
-            return Optional.of(Text.translatable(this.translation, Math.ceil(this.ticks / 20F)).formatted(Formatting.RED));
+            return Optional.of(Component.translatable(this.translation, Math.ceil(this.ticks / 20F)).withStyle(ChatFormatting.RED));
         }
 
         public static class Builder {
@@ -339,8 +338,8 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
         }
 
         @Override
-        public Optional<Text> getAlarmText() {
-            return Optional.of(Text.translatable(this.translation).formatted(Formatting.RED));
+        public Optional<Component> getAlarmText() {
+            return Optional.of(Component.translatable(this.translation).withStyle(ChatFormatting.RED));
         }
     }
 }

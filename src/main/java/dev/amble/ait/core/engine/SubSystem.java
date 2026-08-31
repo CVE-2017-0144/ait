@@ -4,14 +4,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.Initializable;
@@ -49,8 +46,8 @@ public abstract class SubSystem extends Initializable<SubSystem.InitContext> imp
         return this.tardis;
     }
 
-    public Text name() {
-        return Text.translatable(this.getId().toTranslationKey());
+    public Component name() {
+        return Component.translatable(this.getId().toTranslationKey());
     }
     public void setTardis(Tardis tardis) {
         this.tardis = tardis;
@@ -111,8 +108,8 @@ public abstract class SubSystem extends Initializable<SubSystem.InitContext> imp
         if (this instanceof StructureHolder holder && holder.getStructure() != null && !holder.getStructure().isEmpty())
             stacks.addAll(holder.getStructure().toStacks());
 
-        stacks.add(this.asItem().getDefaultStack());
-        stacks.add(AITBlocks.GENERIC_SUBSYSTEM.asItem().getDefaultStack());
+        stacks.add(this.asItem().getDefaultInstance());
+        stacks.add(AITBlocks.GENERIC_SUBSYSTEM.asItem().getDefaultInstance());
         return stacks;
     }
 

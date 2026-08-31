@@ -1,17 +1,15 @@
 package dev.amble.ait.module.planet.core.item;
 
 import java.util.function.Supplier;
-
-import net.minecraft.item.ToolMaterial;
-import net.minecraft.recipe.Ingredient;
-
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.Ingredient;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
 
-public enum PlanetToolMaterial implements ToolMaterial {
+public enum PlanetToolMaterial implements Tier {
     MARTIAN_STONE(1, 201, 4.0f, 1.0f, 6,
-            () -> Ingredient.ofItems(PlanetBlocks.MARTIAN_STONE)),
+            () -> Ingredient.of(PlanetBlocks.MARTIAN_STONE)),
     ANORTHOSITE(1, 194, 4.0f, 1.0f, 6,
-                          () -> Ingredient.ofItems(PlanetBlocks.ANORTHOSITE));
+                          () -> Ingredient.of(PlanetBlocks.ANORTHOSITE));
 
     private final int miningLevel;
     private final int itemDurability;
@@ -30,27 +28,27 @@ public enum PlanetToolMaterial implements ToolMaterial {
     }
 
     @Override
-    public int getDurability() {
+    public int getUses() {
         return this.itemDurability;
     }
 
     @Override
-    public float getMiningSpeedMultiplier() {
+    public float getSpeed() {
         return this.miningSpeed;
     }
 
     @Override
-    public float getAttackDamage() {
+    public float getAttackDamageBonus() {
         return this.attackDamage;
     }
 
     @Override
-    public int getMiningLevel() {
+    public int getLevel() {
         return this.miningLevel;
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return this.enchantability;
     }
 

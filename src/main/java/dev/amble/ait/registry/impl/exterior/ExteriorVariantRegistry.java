@@ -7,11 +7,9 @@ import java.util.Random;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.AITRegistryEvents;
 import dev.amble.ait.data.datapack.DatapackExterior;
@@ -71,20 +69,20 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        PacketByteBuf secondary = PacketByteBufs.create();
+    public void syncToClient(ServerPlayer player) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf secondary = PacketByteBufs.create();
 
         int counter = 0;
         for (ExteriorVariantSchema schema : this.toList()) {
             if (!(schema instanceof DatapackExterior type)) continue;
 
             counter++;
-            secondary.encodeAsJson(DatapackExterior.CODEC, type);
+            secondary.writeJsonWithCodec(DatapackExterior.CODEC, type);
         }
 
         buf.writeInt(counter);
@@ -94,8 +92,8 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
-        PacketByteBuf copy = PacketByteBufs.copy(buf);
+    public void readFromServer(FriendlyByteBuf buf) {
+        FriendlyByteBuf copy = PacketByteBufs.copy(buf);
 
         for (ExteriorVariantSchema schema : this.toList()) {
             if (!(schema instanceof DatapackExterior type)) continue;
@@ -106,7 +104,7 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            DatapackExterior type = buf.decodeAsJson(DatapackExterior.CODEC);
+            DatapackExterior type = buf.readJsonWithCodec(DatapackExterior.CODEC);
             this.register(type);
         }
 

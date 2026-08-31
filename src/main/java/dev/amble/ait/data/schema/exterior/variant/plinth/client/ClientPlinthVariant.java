@@ -1,22 +1,20 @@
 package dev.amble.ait.data.schema.exterior.variant.plinth.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.PlinthExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 // a useful class for creating tardim variants as they all have the same filepath you know
 public abstract class ClientPlinthVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/plinth";
-    protected static final Identifier BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/plinth.png");
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID,
+    protected static final ResourceLocation BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/plinth.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
             CATEGORY_PATH + "/plinth.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/plinth_";
 
@@ -39,16 +37,16 @@ public abstract class ClientPlinthVariant extends ClientExteriorVariantSchema {
 
     @Override
     public SimpleExteriorModel model() {
-        return new PlinthExteriorModel(PlinthExteriorModel.getTexturedModelData().createModel());
+        return new PlinthExteriorModel(PlinthExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return null;
     }
 

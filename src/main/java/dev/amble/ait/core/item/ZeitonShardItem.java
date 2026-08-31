@@ -1,28 +1,27 @@
 package dev.amble.ait.core.item;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.util.ActionResult;
-
 import dev.amble.ait.core.AITBlocks;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ZeitonShardItem extends Item {
-    public ZeitonShardItem(Settings settings) {
+    public ZeitonShardItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        BlockState state = context.getWorld().getBlockState(context.getBlockPos());
+    public InteractionResult useOn(UseOnContext context) {
+        BlockState state = context.getLevel().getBlockState(context.getClickedPos());
 
-        if (state.isOf(Blocks.COBBLESTONE)) {
-            context.getWorld().setBlockState(context.getBlockPos(), AITBlocks.ZEITON_COBBLE.getDefaultState());
-            context.getStack().decrement(1);
-            return ActionResult.SUCCESS;
+        if (state.is(Blocks.COBBLESTONE)) {
+            context.getLevel().setBlockAndUpdate(context.getClickedPos(), AITBlocks.ZEITON_COBBLE.defaultBlockState());
+            context.getItemInHand().shrink(1);
+            return InteractionResult.SUCCESS;
         }
 
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 }

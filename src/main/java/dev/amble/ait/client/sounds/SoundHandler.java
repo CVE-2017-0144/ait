@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.AITMod;
 
 public class SoundHandler {
@@ -49,11 +47,11 @@ public class SoundHandler {
     }
 
     public boolean isPlaying(SoundEvent event) {
-        return MinecraftClient.getInstance().getSoundManager().isPlaying(findSoundByEvent(event));
+        return Minecraft.getInstance().getSoundManager().isActive(findSoundByEvent(event));
     }
 
     public boolean isPlaying(SoundInstance sound) {
-        return MinecraftClient.getInstance().getSoundManager().isPlaying(sound);
+        return Minecraft.getInstance().getSoundManager().isActive(sound);
     }
 
     /**
@@ -65,25 +63,25 @@ public class SoundHandler {
      */
     public void startSound(SoundEvent event) {
         SoundInstance sound = findSoundByEvent(event);
-        if (sound == null || sound.getId() == null) {
+        if (sound == null || sound.getLocation() == null) {
             return;
         }
 
-        MinecraftClient.getInstance().getSoundManager().play(sound);
+        Minecraft.getInstance().getSoundManager().play(sound);
     }
 
     public void startSound(SoundInstance sound) {
-if (sound == null || sound.getId() == null)
+if (sound == null || sound.getLocation() == null)
 return;
-        MinecraftClient.getInstance().getSoundManager().play(sound);
+        Minecraft.getInstance().getSoundManager().play(sound);
     }
 
     public void stopSound(SoundEvent event) {
-        MinecraftClient.getInstance().getSoundManager().stop(findSoundByEvent(event));
+        Minecraft.getInstance().getSoundManager().stop(findSoundByEvent(event));
     }
 
     public void stopSound(SoundInstance sound) {
-        MinecraftClient.getInstance().getSoundManager().stop(sound);
+        Minecraft.getInstance().getSoundManager().stop(sound);
     }
 
     public void stopSounds() {
@@ -100,20 +98,20 @@ return;
      * sm and it doesnt work for sounds which are randomised
      */
     public SoundInstance findSoundByEvent(SoundEvent event) {
-        return findSoundById(event.getId());
+        return findSoundById(event.getLocation());
     }
 
-    public SoundInstance findSoundById(Identifier id) {
-        Identifier temp;
+    public SoundInstance findSoundById(ResourceLocation id) {
+        ResourceLocation temp;
 
         for (SoundInstance sound : this.sounds) {
-            temp = sound.getId();
+            temp = sound.getLocation();
 
             if (temp.equals(id))
                 return sound;
         }
 
         AITMod.LOGGER.error("Could not find sound {} in list, returning empty sound!", id);
-        return new PlayerFollowingLoopingSound(SoundEvents.INTENTIONALLY_EMPTY, SoundCategory.NEUTRAL);
+        return new PlayerFollowingLoopingSound(SoundEvents.EMPTY, SoundSource.NEUTRAL);
     }
 }

@@ -10,13 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import qouteall.q_misc_util.MiscNetworking;
 import qouteall.q_misc_util.api.DimensionAPI;
 import qouteall.q_misc_util.dimension.DimensionIdManagement;
-
-import net.minecraft.network.packet.Packet;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.world.TardisServerWorld;
 
@@ -41,7 +39,7 @@ public class TardisServerWorldMixin {
             return null;
 
         MinecraftServer server = world.getServer();
-        RegistryKey<World> key = world.getRegistryKey();
+        ResourceKey<Level> key = world.dimension();
 
         // An excerpt from `qouteall.q_misc_util.dimension.DynamicDimensionsImpl#addDimensionDynamically`
         // FIXME: this line MAY be causing issues with the relogs
@@ -59,11 +57,11 @@ public class TardisServerWorldMixin {
 
         Packet<?> dimSyncPacket = MiscNetworking.createDimSyncPacket();
 
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.sendPacket(dimSyncPacket);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.connection.send(dimSyncPacket);
         }
 
-        DimensionAPI.serverDimensionDynamicUpdateEvent.invoker().run(server.getWorldRegistryKeys());
+        DimensionAPI.serverDimensionDynamicUpdateEvent.invoker().run(server.levelKeys());
         return world;
     }
 }

@@ -1,14 +1,13 @@
 package dev.amble.ait.core.tardis.animation.v2.datapack;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.resources.ResourceLocation;
 
 public class TardisAnimationRegistry extends SimpleDatapackRegistry<TardisAnimation> {
-    public static final Identifier DEFAULT_DEMAT = AITMod.id("pulsating_demat");
-    public static final Identifier DEFAULT_MAT = AITMod.id("pulsating_mat");
+    public static final ResourceLocation DEFAULT_DEMAT = AITMod.id("pulsating_demat");
+    public static final ResourceLocation DEFAULT_MAT = AITMod.id("pulsating_mat");
     private static TardisAnimationRegistry INSTANCE;
 
     private TardisAnimationRegistry() {
@@ -28,7 +27,7 @@ public class TardisAnimationRegistry extends SimpleDatapackRegistry<TardisAnimat
 
     }
 
-    public TardisAnimation instantiate(Identifier id) {
+    public TardisAnimation instantiate(ResourceLocation id) {
         return this.getOrFallback(id).instantiate();
     }
 

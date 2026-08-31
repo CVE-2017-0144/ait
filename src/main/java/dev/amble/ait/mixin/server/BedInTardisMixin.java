@@ -2,23 +2,21 @@ package dev.amble.ait.mixin.server;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.block.BedBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
@@ -26,27 +24,27 @@ import dev.amble.ait.data.Loyalty;
 
 @Mixin(BedBlock.class)
 public class BedInTardisMixin {
-    @Inject(at = @At("HEAD"), method = "onUse")
-    private void ait$useOn(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-                           BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
-        if (world.isClient()) { this.onClientSleep(player); }
+    @Inject(at = @At("HEAD"), method = "use")
+    private void ait$useOn(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+                           BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+        if (world.isClientSide()) { this.onClientSleep(player); }
     }
 
     @Unique @Environment(EnvType.CLIENT)
-    private void onClientSleep(PlayerEntity player) {
+    private void onClientSleep(Player player) {
         Tardis tardis = ClientTardisUtil.getCurrentTardis();
         if (tardis == null) return;
 
         Loyalty loyalty = tardis.loyalty().get(player);
 
-        Text message = switch (loyalty.type()) {
-            case REJECT -> Text.translatable("tardis.loyalty.message.reject");
-            case NEUTRAL -> Text.translatable("tardis.loyalty.message.neutral");
-            case COMPANION -> Text.translatable("tardis.loyalty.message.companion");
-            case PILOT -> Text.translatable("tardis.loyalty.message.pilot");
-            case OWNER -> Text.translatable("tardis.loyalty.message.owner");
+        Component message = switch (loyalty.type()) {
+            case REJECT -> Component.translatable("tardis.loyalty.message.reject");
+            case NEUTRAL -> Component.translatable("tardis.loyalty.message.neutral");
+            case COMPANION -> Component.translatable("tardis.loyalty.message.companion");
+            case PILOT -> Component.translatable("tardis.loyalty.message.pilot");
+            case OWNER -> Component.translatable("tardis.loyalty.message.owner");
         };
-        player.sendMessage(message, false);
+        player.displayClientMessage(message, false);
 
         SoundEvent sound = switch(loyalty.type()) {
             case OWNER -> AITSounds.OWNER_BED;

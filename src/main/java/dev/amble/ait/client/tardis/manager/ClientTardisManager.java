@@ -14,11 +14,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.PacketByteBuf;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.sounds.ClientSoundManager;
@@ -29,7 +27,7 @@ import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.TardisMap;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
 
-public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftClient> {
+public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> {
 
     private static ClientTardisManager instance;
 
@@ -54,7 +52,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
         ClientPlayNetworking.registerGlobalReceiver(SEND_COMPONENT, (client, handler, buf, responseSender) -> this.syncDelta(buf));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null || client.world == null)
+            if (client.player == null || client.level == null)
                 return;
 
             for (ClientTardis tardis : this.lookup.values()) {
@@ -69,8 +67,8 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> this.reset());
     }
 
-    private void remove(PacketByteBuf buf) {
-        this.lookup.remove(buf.readUuid());
+    private void remove(FriendlyByteBuf buf) {
+        this.lookup.remove(buf.readUUID());
     }
 
     @Override
@@ -80,18 +78,18 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
 
     @Override
     @Deprecated
-    public @Nullable ClientTardis demandTardis(MinecraftClient client, UUID uuid) {
+    public @Nullable ClientTardis demandTardis(Minecraft client, UUID uuid) {
         Objects.requireNonNull(uuid);
         return this.lookup.get(uuid);
     }
 
     @Deprecated
     public @Nullable ClientTardis demandTardis(UUID uuid) {
-        return this.demandTardis(MinecraftClient.getInstance(), uuid);
+        return this.demandTardis(Minecraft.getInstance(), uuid);
     }
 
     public void getTardis(UUID uuid, Consumer<ClientTardis> consumer) {
-        this.getTardis(MinecraftClient.getInstance(), uuid, consumer);
+        this.getTardis(Minecraft.getInstance(), uuid, consumer);
     }
 
     private void syncTardis(UUID uuid, String json) {
@@ -113,11 +111,11 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
         }
     }
 
-    private void syncTardis(PacketByteBuf buf) {
-        this.syncTardis(buf.readUuid(), buf.readString());
+    private void syncTardis(FriendlyByteBuf buf) {
+        this.syncTardis(buf.readUUID(), buf.readUtf());
     }
 
-    private void syncBulk(PacketByteBuf buf) {
+    private void syncBulk(FriendlyByteBuf buf) {
         int count = buf.readInt();
 
         for (int i = 0; i < count; i++) {
@@ -125,8 +123,8 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
         }
     }
 
-    private void syncDelta(PacketByteBuf buf) {
-        UUID id = buf.readUuid();
+    private void syncDelta(FriendlyByteBuf buf) {
+        UUID id = buf.readUUID();
         int count = buf.readShort();
 
         ClientTardis tardis = this.demandTardis(id);
@@ -138,17 +136,17 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
             return; // wait 'till the server sends a full update
 
         for (int i = 0; i < count; i++) {
-            String rawId = buf.readString();
+            String rawId = buf.readUtf();
             TardisComponent.IdLike idLike = TardisComponentRegistry.getInstance().get(rawId);
             ids[i] = idLike;
-            TardisComponent component = this.networkGson.fromJson(buf.readString(), idLike.clazz());
+            TardisComponent component = this.networkGson.fromJson(buf.readUtf(), idLike.clazz());
             if (component == null) {
                 AITMod.LOGGER.error("Received null component for id {} in TARDIS {}", rawId, tardis.getUuid());
                 continue;
             }
             components[i] = component;
         }
-        MinecraftClient.getInstance().execute(() -> {
+        Minecraft.getInstance().execute(() -> {
             for (int p = 0; p < components.length; p++) {
                 TardisComponent component = components[p];
                 TardisComponent.IdLike idLike = ids[p];
@@ -165,7 +163,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, MinecraftCl
     }
 
     @Override
-    public void getTardis(MinecraftClient client, UUID uuid, Consumer<ClientTardis> consumer) {
+    public void getTardis(Minecraft client, UUID uuid, Consumer<ClientTardis> consumer) {
         if (uuid == null)
             return; // ugh
 

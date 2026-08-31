@@ -1,45 +1,44 @@
 package dev.amble.ait.core;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-
 import dev.amble.ait.core.entities.*;
 import dev.amble.lib.container.AssignedName;
 import dev.amble.lib.container.impl.EntityContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 
 public class AITEntityTypes implements EntityContainer {
 
     @AssignedName("control_entity")
     public static final EntityType<ConsoleControlEntity> CONTROL_ENTITY_TYPE = EntityType.Builder
-            .create(ConsoleControlEntity::new, SpawnGroup.MISC).setDimensions(0.125f, 0.125f)
-            .disableSummon()
+            .of(ConsoleControlEntity::new, MobCategory.MISC).sized(0.125f, 0.125f)
+            .noSummon()
             .build("control_entity");
 
     @AssignedName("falling_tardis")
     public static final EntityType<FallingTardisEntity> FALLING_TARDIS_TYPE = EntityType.Builder
-            .create(FallingTardisEntity::new, SpawnGroup.MISC).setDimensions(0.98f, 0.98f)
-            .disableSummon()
+            .of(FallingTardisEntity::new, MobCategory.MISC).sized(0.98f, 0.98f)
+            .noSummon()
             .build("falling_tardis");
 
     @AssignedName("flight_tardis")
     public static final EntityType<FlightTardisEntity> FLIGHT_TARDIS_TYPE = EntityType.Builder
-            .create(FlightTardisEntity::new, SpawnGroup.MISC).setDimensions(0.98f, 0.98f)
-            .disableSummon()
+            .of(FlightTardisEntity::new, MobCategory.MISC).sized(0.98f, 0.98f)
+            .noSummon()
             .build("flight_tardis");
 
     public static final EntityType<GallifreyFallsPaintingEntity> GALLIFREY_FALLS_PAINTING_ENTITY_TYPE = EntityType.Builder
-            .create(GallifreyFallsPaintingEntity::new, SpawnGroup.MISC)
-            .setDimensions(0.5f, 0.5f).build("gallifrey_falls_painting_entity_type");
+            .of(GallifreyFallsPaintingEntity::new, MobCategory.MISC)
+            .sized(0.5f, 0.5f).build("gallifrey_falls_painting_entity_type");
 
     public static final EntityType<TrenzalorePaintingEntity> TRENZALORE_PAINTING_ENTITY_TYPE = EntityType.Builder
-            .create(TrenzalorePaintingEntity::new, SpawnGroup.MISC)
-            .setDimensions(0.5f, 0.5f).build("trenzalore_painting_entity_type");
+            .of(TrenzalorePaintingEntity::new, MobCategory.MISC)
+            .sized(0.5f, 0.5f).build("trenzalore_painting_entity_type");
 
 //    public static final EntityType<CobbledSnowballEntity> COBBLED_SNOWBALL_TYPE = EntityType.Builder
 //            .<CobbledSnowballEntity>create(SpawnGroup.MISC, CobbledSnowballEntity::new)
 //            .dimensions(EntityDimensions.fixed(0.25f, 0.25f)).trackRangeBlocks(4).trackedUpdateRate(10).build();
 
     public static final EntityType<RiftEntity> RIFT_ENTITY = EntityType.Builder
-            .<RiftEntity>create(RiftEntity::new, SpawnGroup.MISC).setDimensions(1.5f, 2f)
-            .spawnableFarFromPlayer().build("rift_entity");
+            .<RiftEntity>of(RiftEntity::new, MobCategory.MISC).sized(1.5f, 2f)
+            .canSpawnFarFromPlayer().build("rift_entity");
 }

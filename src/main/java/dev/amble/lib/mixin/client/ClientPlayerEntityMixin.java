@@ -4,18 +4,18 @@ import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.animation.client.AnimationMetadata;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayerEntity.class)
+@Mixin(LocalPlayer.class)
 public class ClientPlayerEntityMixin {
-    @Inject(method = "tickMovement", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "aiStep", at = @At("HEAD"), cancellable = true)
     private void animation$tickMovement(CallbackInfo ci) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (!(player instanceof AnimatedEntity animated)) return;
 

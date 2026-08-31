@@ -4,36 +4,34 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.util.Hand;
-
 import dev.amble.ait.module.gun.core.item.BaseGunItem;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.InteractionHand;
 
-@Mixin(value = PlayerEntityRenderer.class, priority = 1002)
+@Mixin(value = PlayerRenderer.class, priority = 1002)
 public abstract class PlayerEntityRendererMixin
         extends
-        LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
+        LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    public PlayerEntityRendererMixin(EntityRendererFactory.Context ctx,
-                                     PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
+    public PlayerEntityRendererMixin(EntityRendererProvider.Context ctx,
+                                     PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 
     @Inject(at = @At("RETURN"), method = "getArmPose", cancellable = true)
-    private static void ait$getArmPose(AbstractClientPlayerEntity player, Hand hand, CallbackInfoReturnable<BipedEntityModel.ArmPose> cir) {
+    private static void ait$getArmPose(AbstractClientPlayer player, InteractionHand hand, CallbackInfoReturnable<HumanoidModel.ArmPose> cir) {
         if (player == null) return;
-        if (player.getMainHandStack().getItem() instanceof BaseGunItem) {
-            if (MinecraftClient.getInstance().options.useKey.isPressed()) {
-                cir.setReturnValue(BipedEntityModel.ArmPose.CROSSBOW_CHARGE);
+        if (player.getMainHandItem().getItem() instanceof BaseGunItem) {
+            if (Minecraft.getInstance().options.keyUse.isDown()) {
+                cir.setReturnValue(HumanoidModel.ArmPose.CROSSBOW_CHARGE);
             }
-            cir.setReturnValue(BipedEntityModel.ArmPose.CROSSBOW_HOLD);
+            cir.setReturnValue(HumanoidModel.ArmPose.CROSSBOW_HOLD);
         }
     }
 }

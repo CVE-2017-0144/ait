@@ -1,6 +1,6 @@
 package dev.drtheo.gaslighter.api;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public interface Twitter {
     void ait$setFake(BlockPos pos, boolean fake);

@@ -2,12 +2,11 @@ package dev.drtheo.gaslighter.api;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FakeBlockEvents {
 
@@ -49,22 +48,22 @@ public class FakeBlockEvents {
 
     @FunctionalInterface
     public interface Interact {
-        Action check(ServerPlayerEntity player, Hand hand, BlockPos pos);
+        Action check(ServerPlayer player, InteractionHand hand, BlockPos pos);
     }
 
     @FunctionalInterface
     public interface Check {
-        Action check(ServerPlayerEntity player, Hand hand, BlockState state, BlockPos pos);
+        Action check(ServerPlayer player, InteractionHand hand, BlockState state, BlockPos pos);
     }
 
     @FunctionalInterface
     public interface Place {
-        void onPlace(ServerWorld world, BlockState state, BlockPos pos);
+        void onPlace(ServerLevel world, BlockState state, BlockPos pos);
     }
 
     @FunctionalInterface
     public interface Remove {
-        void onRemove(ServerWorld world, BlockPos pos);
+        void onRemove(ServerLevel world, BlockPos pos);
     }
 
     public enum Action {

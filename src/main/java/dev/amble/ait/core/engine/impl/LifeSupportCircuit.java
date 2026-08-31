@@ -1,12 +1,10 @@
 package dev.amble.ait.core.engine.impl;
 
 import java.util.List;
-
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.engine.DurableSubSystem;
 import dev.amble.ait.core.engine.StructureHolder;
@@ -57,13 +55,13 @@ public class LifeSupportCircuit extends DurableSubSystem implements StructureHol
         ServerTardis tardis = this.tardis().asServer();
 
         if (!this.isEnabled()) return;
-        if (ServerLifecycleHooks.get().getTicks() % TICK_RATE != 0)
+        if (ServerLifecycleHooks.get().getTickCount() % TICK_RATE != 0)
             return;
 
         List<LivingEntity> entities = TardisUtil.getLivingEntitiesInInterior(tardis);
 
         for (LivingEntity entity : entities) {
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, TICK_RATE * 2, 1, true, false));
+            entity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, TICK_RATE * 2, 1, true, false));
         }
     }
 }

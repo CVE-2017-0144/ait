@@ -3,12 +3,12 @@ package dev.amble.lib.skin;
 import dev.amble.lib.skin.client.SkinGrabber;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.entity.EntityLike;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.entity.EntityAccess;
 
-public interface PlayerSkinTexturable extends EntityLike {
+public interface PlayerSkinTexturable extends EntityAccess {
 	default SkinData getSkin() {
-		return SkinTracker.getInstance().get(this.getUuid());
+		return SkinTracker.getInstance().get(this.getUUID());
 	}
 
 	default void setSkin(SkinData skin) {
@@ -16,7 +16,7 @@ public interface PlayerSkinTexturable extends EntityLike {
 	}
 
 	@Environment(EnvType.CLIENT)
-	default Identifier getSkinTexture() {
+	default ResourceLocation getSkinTexture() {
 		SkinData skin = this.getSkin();
 		if (skin == null) return SkinGrabber.missing();
 		return skin.get();

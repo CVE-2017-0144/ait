@@ -1,21 +1,19 @@
 package dev.amble.ait.data.schema.exterior.variant.present.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.PresentExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class ClientPresentVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/present";
-    protected static final Identifier BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/present.png");
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID,
+    protected static final ResourceLocation BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/present.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
             CATEGORY_PATH + "/present.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/present_";
 
@@ -34,7 +32,7 @@ public abstract class ClientPresentVariant extends ClientExteriorVariantSchema {
 
     @Override
     public SimpleExteriorModel model() {
-        return new PresentExteriorModel(PresentExteriorModel.getTexturedModelData().createModel());
+        return new PresentExteriorModel(PresentExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
@@ -43,12 +41,12 @@ public abstract class ClientPresentVariant extends ClientExteriorVariantSchema {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return null;
     }
 

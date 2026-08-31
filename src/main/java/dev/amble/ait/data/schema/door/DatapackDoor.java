@@ -4,50 +4,47 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.Vec3;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.util.PortalOffsets;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 
 public class DatapackDoor extends DoorSchema implements AnimatedDoor {
     public static final Codec<DatapackDoor> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(DoorSchema::id),
-            Identifier.CODEC.fieldOf("open_sound").forGetter(DatapackDoor::getOpenSoundId),
-            Identifier.CODEC.fieldOf("close_sound").forGetter(DatapackDoor::getCloseSoundId),
-            Identifier.CODEC.fieldOf("model").forGetter(DatapackDoor::getModelId),
+            ResourceLocation.CODEC.fieldOf("id").forGetter(DoorSchema::id),
+            ResourceLocation.CODEC.fieldOf("open_sound").forGetter(DatapackDoor::getOpenSoundId),
+            ResourceLocation.CODEC.fieldOf("close_sound").forGetter(DatapackDoor::getCloseSoundId),
+            ResourceLocation.CODEC.fieldOf("model").forGetter(DatapackDoor::getModelId),
             Codec.BOOL.fieldOf("is_double").forGetter(DoorSchema::isDouble),
             PortalOffsets.CODEC.optionalFieldOf("portal_info").forGetter(door -> Optional.ofNullable(door.getPortalOffsets())),
             BedrockAnimationReference.CODEC.optionalFieldOf("left_animation").forGetter(DatapackDoor::getLeftAnimation),
             BedrockAnimationReference.CODEC.optionalFieldOf("right_animation").forGetter(DatapackDoor::getRightAnimation),
-            Vec3d.CODEC.optionalFieldOf("scale", new Vec3d(1, 1, 1)).forGetter(DatapackDoor::getScale),
-            Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(DatapackDoor::getOffset),
+            Vec3.CODEC.optionalFieldOf("scale", new Vec3(1, 1, 1)).forGetter(DatapackDoor::getScale),
+            Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(DatapackDoor::getOffset),
             Codec.BOOL.optionalFieldOf("isDatapack", true).forGetter(DatapackDoor::wasDatapack)
         ).apply(instance, DatapackDoor::new)
     );
 
-    protected final Identifier openSound;
-    protected final Identifier closeSound;
-    protected final Identifier model;
+    protected final ResourceLocation openSound;
+    protected final ResourceLocation closeSound;
+    protected final ResourceLocation model;
     protected final boolean isDouble;
     protected final PortalOffsets portalOffsets;
     protected final BedrockAnimationReference leftAnimation;
     protected final BedrockAnimationReference rightAnimation;
-    protected final Vec3d scale;
-    protected final Vec3d offset;
+    protected final Vec3 scale;
+    protected final Vec3 offset;
     protected final boolean initiallyDatapack;
 
-    public DatapackDoor(Identifier id, Identifier openSound, Identifier closeSound, Identifier model, boolean isDouble, Optional<PortalOffsets> portalOffsets, Optional<BedrockAnimationReference> leftAnimation, Optional<BedrockAnimationReference> rightAnimation, Vec3d scale, Vec3d offset, boolean initiallyDatapack) {
+    public DatapackDoor(ResourceLocation id, ResourceLocation openSound, ResourceLocation closeSound, ResourceLocation model, boolean isDouble, Optional<PortalOffsets> portalOffsets, Optional<BedrockAnimationReference> leftAnimation, Optional<BedrockAnimationReference> rightAnimation, Vec3 scale, Vec3 offset, boolean initiallyDatapack) {
         super(id);
 
         this.openSound = openSound;
@@ -69,12 +66,12 @@ public class DatapackDoor extends DoorSchema implements AnimatedDoor {
 
     @Override
     public SoundEvent openSound() {
-        return SoundEvent.of(getOpenSoundId());
+        return SoundEvent.createVariableRangeEvent(getOpenSoundId());
     }
 
     @Override
     public SoundEvent closeSound() {
-        return SoundEvent.of(getCloseSoundId());
+        return SoundEvent.createVariableRangeEvent(getCloseSoundId());
     }
 
     @Override
@@ -88,15 +85,15 @@ public class DatapackDoor extends DoorSchema implements AnimatedDoor {
     }
 
     @Override
-    public @Nullable Vec3d getPortalPosition() {
+    public @Nullable Vec3 getPortalPosition() {
         return this.portalOffsets != null ? this.portalOffsets.offset() : null;
     }
 
-    public Identifier getOpenSoundId() {
+    public ResourceLocation getOpenSoundId() {
         return openSound;
     }
 
-    public Identifier getCloseSoundId() {
+    public ResourceLocation getCloseSoundId() {
         return closeSound;
     }
 
@@ -108,17 +105,17 @@ public class DatapackDoor extends DoorSchema implements AnimatedDoor {
         return initiallyDatapack; // Datapack doors are always considered as such
     }
 
-    public Identifier getModelId() {
+    public ResourceLocation getModelId() {
         return model;
     }
 
     @Override
-    public Vec3d getScale() {
+    public Vec3 getScale() {
         return scale;
     }
 
     @Override
-    public Vec3d getOffset() {
+    public Vec3 getOffset() {
         return offset;
     }
 

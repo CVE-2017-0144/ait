@@ -5,8 +5,7 @@ import dev.drtheo.scheduler.api.task.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.util.Util;
-
+import net.minecraft.Util;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
@@ -15,7 +14,7 @@ import java.util.function.Consumer;
 @Environment(EnvType.CLIENT)
 public class ClientScheduler {
 
-    private static final ExecutorService service = Util.getMainWorkerExecutor();
+    private static final ExecutorService service = Util.backgroundExecutor();
 
     private static ClientScheduler self;
 

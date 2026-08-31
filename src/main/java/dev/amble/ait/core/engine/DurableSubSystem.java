@@ -1,7 +1,5 @@
 package dev.amble.ait.core.engine;
 
-import net.minecraft.item.ItemStack;
-
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.item.RepairToolItem;
 import dev.amble.lib.util.ServerLifecycleHooks;
@@ -80,7 +78,7 @@ public abstract class DurableSubSystem extends SubSystem {
         if (this.isBroken()) return;
         if (!ServerLifecycleHooks.isServer()) return;
         if (!this.shouldDurabilityChange()) return;
-        if (ServerLifecycleHooks.get().getTicks() % this.changeFrequency() != 0) return;
+        if (ServerLifecycleHooks.get().getTickCount() % this.changeFrequency() != 0) return;
 
         this.removeDurability(this.cost());
     }

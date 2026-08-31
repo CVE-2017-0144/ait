@@ -1,19 +1,16 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.item.sonic.SonicMode;
@@ -27,37 +24,37 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
 
     public static final String CAN_CONTAIN_PLAYERS = "can_contain_players";
 
-    public ControlDiscItem(Settings settings) {
+    public ControlDiscItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
         // if (world.isClient()) return TypedActionResult.consume(user.getMainHandStack()); //<-- Not sure if it being on either is an issue or not - Loqor
-        ItemStack offhand = user.getOffHandStack();
-        ItemStack mainhand = user.getMainHandStack();
+        ItemStack offhand = user.getOffhandItem();
+        ItemStack mainhand = user.getMainHandItem();
 
         if (TardisServerWorld.isTardisDimension(world)) {
-            user.sendMessage(Text.translatable("ait.control_disc.unusable_in_tardis_world"), true);
-            return TypedActionResult.fail(user.getMainHandStack());
+            user.displayClientMessage(Component.translatable("ait.control_disc.unusable_in_tardis_world"), true);
+            return InteractionResultHolder.fail(user.getMainHandItem());
         }
         if (offhand.getItem() instanceof SonicItem sonic) {
             if (sonic.isLinked(offhand)) {
                 SonicMode mode = SonicItem.mode(offhand);
                 if (mode.equals(SonicMode.Modes.INTERACTION) && AbstractCoordinateModifierItem.getPos(mainhand) == null) {
-                    CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(world.getRegistryKey(),
-                            user.getBlockPos(), DirectedGlobalPos.getGeneralizedRotation(user.getMovementDirection()));
-                    AbstractCoordinateModifierItem.setPos(user.getMainHandStack(), targetPos);
+                    CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(world.dimension(),
+                            user.blockPosition(), DirectedGlobalPos.getGeneralizedRotation(user.getMotionDirection()));
+                    AbstractCoordinateModifierItem.setPos(user.getMainHandItem(), targetPos);
                     ControlDiscItem.setCanContainPlayers(mainhand, true);
                     user.playSound(AITSounds.DING, 1f, 1f);
-                    user.sendMessage(Text.translatable("ait.control_disc.set_position")
-                            .append(Text.literal(" > " + targetPos)
-                                    .formatted(Formatting.BLUE)), true);
+                    user.displayClientMessage(Component.translatable("ait.control_disc.set_position")
+                            .append(Component.literal(" > " + targetPos)
+                                    .withStyle(ChatFormatting.BLUE)), true);
                 } else if (mode.equals(SonicMode.Modes.OVERLOAD) && AbstractCoordinateModifierItem.getPos(mainhand) != null) {
                     ControlDiscItem.setCanContainPlayers(mainhand, !ControlDiscItem.canContainPlayers(mainhand));
                     user.playSound(AITSounds.DING, 1f, 0.1f);
-                    user.sendMessage(Text.translatable("ait.control_disc.can_contain_players.toggle", ControlDiscItem.canContainPlayers(mainhand))
-                                    .formatted(Formatting.BLUE), true);
+                    user.displayClientMessage(Component.translatable("ait.control_disc.can_contain_players.toggle", ControlDiscItem.canContainPlayers(mainhand))
+                                    .withStyle(ChatFormatting.BLUE), true);
                 }
             }
         }
@@ -65,27 +62,27 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
     }
 
     public static boolean canContainPlayers(ItemStack stack) {
-        NbtCompound main = stack.getOrCreateNbt();
+        CompoundTag main = stack.getOrCreateTag();
         if (!main.contains(CAN_CONTAIN_PLAYERS))
             return false;
         return main.getBoolean(CAN_CONTAIN_PLAYERS);
     }
 
     public static void setCanContainPlayers(ItemStack stack, boolean canContainPlayers) {
-        NbtCompound main = stack.getOrCreateNbt();
+        CompoundTag main = stack.getOrCreateTag();
         main.putBoolean(CAN_CONTAIN_PLAYERS, canContainPlayers);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
-        NbtCompound main = stack.getOrCreateNbt();
+        CompoundTag main = stack.getOrCreateTag();
         if (!main.contains(CAN_CONTAIN_PLAYERS))
             return;
         boolean canContainPlayers = main.getBoolean(CAN_CONTAIN_PLAYERS);
-        tooltip.add(Text.translatable("ait.control_disc.can_contain_players.toggle", canContainPlayers)
-                .formatted(Formatting.BLUE));
+        tooltip.add(Component.translatable("ait.control_disc.can_contain_players.toggle", canContainPlayers)
+                .withStyle(ChatFormatting.BLUE));
     }
 
     public static ItemStack create(Waypoint pos) {
@@ -95,7 +92,7 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
         setPos(stack, pos.getPos());
 
         if (pos.hasName())
-            stack.setCustomName(Text.literal(pos.name()));
+            stack.setHoverName(Component.literal(pos.name()));
 
         return stack;
     }

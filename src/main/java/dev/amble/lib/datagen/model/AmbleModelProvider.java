@@ -4,12 +4,18 @@ import java.util.*;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-
-import net.minecraft.block.Block;
-import net.minecraft.data.client.*;
-import net.minecraft.item.Item;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.data.models.*;
+import net.minecraft.data.models.blockstates.*;
+import net.minecraft.data.models.model.*;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelLocationUtils;
+import net.minecraft.data.models.model.ModelTemplate;
+import net.minecraft.data.models.model.TextureMapping;
+import net.minecraft.data.models.model.TextureSlot;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.container.impl.ItemContainer;
@@ -30,18 +36,18 @@ public class AmbleModelProvider extends FabricModelProvider {
     }
 
     @Override
-    public void generateBlockStateModels(BlockStateModelGenerator generator) {
+    public void generateBlockStateModels(BlockModelGenerators generator) {
         this.blockClass.forEach(clazz -> {
             ReflectionUtil.getAnnotatedValues(clazz, Block.class, AutomaticModel.class, false).forEach((block, annotation) -> {
                 if (!annotation.orElseThrow().justItem()) {
-                    generator.registerSimpleCubeAll(block);
+                    generator.createTrivialCube(block);
                 }
             });
         });
     }
 
     @Override
-    public void generateItemModels(ItemModelGenerator generator) {
+    public void generateItemModels(ItemModelGenerators generator) {
         this.blockClass.forEach(clazz -> {
             ReflectionUtil.getAnnotatedValues(clazz, Block.class, AutomaticModel.class, false).forEach((block, annotation) -> {
                 if (annotation.orElseThrow().justItem()) {
@@ -73,33 +79,33 @@ public class AmbleModelProvider extends FabricModelProvider {
         return this;
     }
 
-    private static Model item(String modid, String parent, TextureKey... requiredTextureKeys) {
-        return new Model(Optional.of(new Identifier(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
+    private static ModelTemplate item(String modid, String parent, TextureSlot... requiredTextureKeys) {
+        return new ModelTemplate(Optional.of(new ResourceLocation(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
     }
 
-    private static Model item(TextureKey... requiredTextureKeys) {
+    private static ModelTemplate item(TextureSlot... requiredTextureKeys) {
         return item("minecraft", "generated", requiredTextureKeys);
     }
 
-    private void registerItem(ItemModelGenerator generator, Item item, String modid) {
-        Model model = item(TextureKey.LAYER0);
-        model.upload(ModelIds.getItemModelId(item), createTextureMap(item, modid), generator.writer);
+    private void registerItem(ItemModelGenerators generator, Item item, String modid) {
+        ModelTemplate model = item(TextureSlot.LAYER0);
+        model.create(ModelLocationUtils.getModelLocation(item), createTextureMap(item, modid), generator.output);
     }
 
-    private TextureMap createTextureMap(Item item, String modid) {
-        Identifier texture = new Identifier(modid, "item/" + getItemName(item));
+    private TextureMapping createTextureMap(Item item, String modid) {
+        ResourceLocation texture = new ResourceLocation(modid, "item/" + getItemName(item));
         if (!(doesTextureExist(texture))) {
             texture = AmbleKit.id("item/error");
         }
 
-        return new TextureMap().put(TextureKey.LAYER0, texture);
+        return new TextureMapping().put(TextureSlot.LAYER0, texture);
     }
 
     private static String getItemName(Item item) {
-        return item.getTranslationKey().split("\\.")[2];
+        return item.getDescriptionId().split("\\.")[2];
     }
 
-    public boolean doesTextureExist(Identifier texture) {
+    public boolean doesTextureExist(ResourceLocation texture) {
         return this.output.getModContainer().findPath("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
     }
 }

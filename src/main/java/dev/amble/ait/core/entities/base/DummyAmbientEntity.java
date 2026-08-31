@@ -1,50 +1,49 @@
 package dev.amble.ait.core.entities.base;
 
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.ambient.AmbientCreature;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.mob.AmbientEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Arm;
-import net.minecraft.world.World;
+public class DummyAmbientEntity extends AmbientCreature {
 
-public class DummyAmbientEntity extends AmbientEntity {
-
-    protected DummyAmbientEntity(EntityType<? extends AmbientEntity> entityType, World world) {
+    protected DummyAmbientEntity(EntityType<? extends AmbientCreature> entityType, Level world) {
         super(entityType, world);
     }
 
     @Override
-    public void tickMovement() { }
+    public void aiStep() { }
 
     @Override
-    public Iterable<ItemStack> getArmorItems() {
+    public Iterable<ItemStack> getArmorSlots() {
         return DummyLivingEntity.ARMOR;
     }
 
     @Override
-    public boolean hasNoGravity() {
+    public boolean isNoGravity() {
         return true;
     }
 
     @Override
-    public ItemStack getEquippedStack(EquipmentSlot slot) {
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void equipStack(EquipmentSlot slot, ItemStack stack) {
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
     }
 
     @Override
-    public Arm getMainArm() {
-        return Arm.LEFT;
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.LEFT;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class DummyAmbientEntity extends AmbientEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         return false;
     }
 
@@ -68,7 +67,7 @@ public class DummyAmbientEntity extends AmbientEntity {
     }
 
     @Override
-    public boolean doesRenderOnFire() {
+    public boolean displayFireAnimation() {
         return false;
     }
 
@@ -79,17 +78,17 @@ public class DummyAmbientEntity extends AmbientEntity {
 
     @Nullable @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 
     @Override
-    public FallSounds getFallSounds() {
-        return new FallSounds(SoundEvents.INTENTIONALLY_EMPTY, SoundEvents.INTENTIONALLY_EMPTY);
+    public Fallsounds getFallSounds() {
+        return new Fallsounds(SoundEvents.EMPTY, SoundEvents.EMPTY);
     }
 
     @Nullable @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 
     @Override
@@ -97,7 +96,7 @@ public class DummyAmbientEntity extends AmbientEntity {
     }
 
     @Override
-    public boolean addStatusEffect(StatusEffectInstance effect, @Nullable Entity source) {
+    public boolean addEffect(MobEffectInstance effect, @Nullable Entity source) {
         return false;
     }
 }

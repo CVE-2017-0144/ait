@@ -5,32 +5,29 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.lib.api.Identifiable;
 
-public record BlueprintSchema(Identifier id, Text text, InputList inputs, ItemStack output) implements Identifiable {
+public record BlueprintSchema(ResourceLocation id, Component text, InputList inputs, ItemStack output) implements Identifiable {
     public static Codec<BlueprintSchema> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemStack.CODEC.fieldOf("output").forGetter(BlueprintSchema::output),
             InputList.CODEC.fieldOf("inputs").forGetter(BlueprintSchema::inputs)
     ).apply(instance, BlueprintSchema::new));
 
     public BlueprintSchema(ItemStack output, InputList inputs) {
-        this(Registries.ITEM.getId(output.getItem()), Text.translatable(output.getTranslationKey()), inputs, output);
+        this(BuiltInRegistries.ITEM.getKey(output.getItem()), Component.translatable(output.getDescriptionId()), inputs, output);
     }
 
     public Blueprint create() {
@@ -64,7 +61,7 @@ public record BlueprintSchema(Identifier id, Text text, InputList inputs, ItemSt
 
     public static class Input {
         public static Codec<Input> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Identifier.CODEC.fieldOf("item").forGetter(input -> Registries.ITEM.getId(input.item)),
+                ResourceLocation.CODEC.fieldOf("item").forGetter(input -> BuiltInRegistries.ITEM.getKey(input.item)),
                 Codec.INT.fieldOf("minCount").forGetter(Input::minimum),
                 Codec.INT.fieldOf("maxCount").forGetter(Input::maximum)
         ).apply(instance, Input::new));
@@ -88,8 +85,8 @@ public record BlueprintSchema(Identifier id, Text text, InputList inputs, ItemSt
             this(stack.getItem(), stack.getCount());
         }
 
-        private Input(Identifier item, Integer min, Integer max) {
-            this(Registries.ITEM.get(item), min, max);
+        private Input(ResourceLocation item, Integer min, Integer max) {
+            this(BuiltInRegistries.ITEM.get(item), min, max);
         }
 
         public int minimum() {
@@ -119,10 +116,10 @@ public record BlueprintSchema(Identifier id, Text text, InputList inputs, ItemSt
                     '}';
         }
 
-        public Text text() {
-            Text countText = minCount == maxCount ? Text.literal(String.valueOf(minCount)) : Text.literal(minCount + "-" + maxCount);
+        public Component text() {
+            Component countText = minCount == maxCount ? Component.literal(String.valueOf(minCount)) : Component.literal(minCount + "-" + maxCount);
 
-            return Texts.bracketed(Text.translatable(item.getTranslationKey()))
+            return ComponentUtils.wrapInSquareBrackets(Component.translatable(item.getDescriptionId()))
                     .append(" x")
                     .append(countText);
         }

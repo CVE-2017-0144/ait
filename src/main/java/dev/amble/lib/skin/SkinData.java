@@ -3,16 +3,15 @@ package dev.amble.lib.skin;
 import dev.amble.lib.skin.client.SkinGrabber;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public record SkinData(String key, @Nullable String url, @Nullable Identifier localTexture, boolean slim) {
+public record SkinData(String key, @Nullable String url, @Nullable ResourceLocation localTexture, boolean slim) {
 	private static final SkinData CLEAR = new SkinData("supersecretcodeword", null, null, false);
 
 	public static SkinData username(String username, boolean slim) {
@@ -31,7 +30,7 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 		return new SkinData(SkinConstants.encodeURL(url), url, null, slim);
 	}
 
-	public static SkinData texture(Identifier texture, boolean slim) {
+	public static SkinData texture(ResourceLocation texture, boolean slim) {
 		return new SkinData(texture.toString(), null, texture, slim);
 	}
 
@@ -39,10 +38,10 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 		return CLEAR;
 	}
 
-	public static SkinData readBuf(PacketByteBuf buf) {
-		String key = buf.readString();
-		String url = buf.readBoolean() ? buf.readString() : null;
-		Identifier localTexture = buf.readBoolean() ? buf.readIdentifier() : null;
+	public static SkinData readBuf(FriendlyByteBuf buf) {
+		String key = buf.readUtf();
+		String url = buf.readBoolean() ? buf.readUtf() : null;
+		ResourceLocation localTexture = buf.readBoolean() ? buf.readResourceLocation() : null;
 		boolean slim = buf.readBoolean();
 
 
@@ -51,12 +50,12 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 		return new SkinData(key, url, localTexture, slim);
 	}
 
-	public void writeBuf(PacketByteBuf buf) {
-		buf.writeString(key);
+	public void writeBuf(FriendlyByteBuf buf) {
+		buf.writeUtf(key);
 		buf.writeBoolean(url != null);
-		if (url != null) buf.writeString(url);
+		if (url != null) buf.writeUtf(url);
 		buf.writeBoolean(localTexture != null);
-		if (localTexture != null) buf.writeIdentifier(localTexture);
+		if (localTexture != null) buf.writeResourceLocation(localTexture);
 		buf.writeBoolean(slim);
 	}
 
@@ -65,7 +64,7 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Identifier get() {
+	public ResourceLocation get() {
 		if (localTexture != null) return localTexture;
 
 		SkinGrabber grabber = SkinGrabber.INSTANCE;
@@ -87,8 +86,8 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 	 * Uploads this skin data to the tracker for the given player.
 	 * @param player the player
 	 */
-	public void upload(ServerPlayerEntity player) {
-		upload(player.getUuid());
+	public void upload(ServerPlayer player) {
+		upload(player.getUUID());
 	}
 
 	/**
@@ -96,6 +95,6 @@ public record SkinData(String key, @Nullable String url, @Nullable Identifier lo
 	 * @param player the player
 	 */
 	public void upload(PlayerSkinTexturable player) {
-		upload(player.getUuid());
+		upload(player.getUUID());
 	}
 }

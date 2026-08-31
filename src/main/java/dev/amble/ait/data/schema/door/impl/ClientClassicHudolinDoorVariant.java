@@ -11,6 +11,6 @@ public class ClientClassicHudolinDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new ClassicHudolinDoorModel(ClassicHudolinDoorModel.getTexturedModelData().createModel());
+        return new ClassicHudolinDoorModel(ClassicHudolinDoorModel.getTexturedModelData().bakeRoot());
     }
 }

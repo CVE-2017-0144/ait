@@ -11,19 +11,17 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.client.renderers.VortexRender;
 import dev.amble.lib.api.Identifiable;
 
-public record VortexReference(Identifier id, Identifier texture, String name) implements Identifiable, Nameable {
+public record VortexReference(ResourceLocation id, ResourceLocation texture, String name) implements Identifiable, Nameable {
     public static final Codec<VortexReference> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(VortexReference::id),
-            Identifier.CODEC.fieldOf("texture").forGetter(VortexReference::texture),
+            ResourceLocation.CODEC.fieldOf("id").forGetter(VortexReference::id),
+            ResourceLocation.CODEC.fieldOf("texture").forGetter(VortexReference::texture),
             Codec.STRING.optionalFieldOf("name", "").forGetter(VortexReference::name)
     ).apply(instance, VortexReference::new));
 
@@ -33,13 +31,13 @@ public record VortexReference(Identifier id, Identifier texture, String name) im
         }
     }
 
-    public VortexReference(Identifier id, Identifier texture) {
+    public VortexReference(ResourceLocation id, ResourceLocation texture) {
         this(id, texture, id.getPath());
     }
 
     @Override
-    public Text text() {
-        return Text.translatableWithFallback(this.id().toTranslationKey("vortex"), this.name());
+    public Component text() {
+        return Component.translatableWithFallback(this.id().toLanguageKey("vortex"), this.name());
     }
 
     @Environment(EnvType.CLIENT)

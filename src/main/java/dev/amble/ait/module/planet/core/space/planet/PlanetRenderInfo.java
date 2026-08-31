@@ -3,18 +3,16 @@ package dev.amble.ait.module.planet.core.space.planet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.codec.MoreCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
-public record PlanetRenderInfo(Identifier texture, Vec3d position, Vector3f scale, Vector3f rotation, boolean clouds,
+public record PlanetRenderInfo(ResourceLocation texture, Vec3 position, Vector3f scale, Vector3f rotation, boolean clouds,
                                boolean atmosphere, Vector3f color, double radius, double suctionRadius, boolean hasRings) {
     public static final Codec<PlanetRenderInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("texture").forGetter(PlanetRenderInfo::texture),
-            Vec3d.CODEC.fieldOf("position").forGetter(PlanetRenderInfo::position),
+            ResourceLocation.CODEC.fieldOf("texture").forGetter(PlanetRenderInfo::texture),
+            Vec3.CODEC.fieldOf("position").forGetter(PlanetRenderInfo::position),
             MoreCodec.VECTOR3F.fieldOf("scale").forGetter(PlanetRenderInfo::scale),
             MoreCodec.VECTOR3F.fieldOf("rotation").forGetter(PlanetRenderInfo::rotation),
             Codec.BOOL.fieldOf("clouds").forGetter(PlanetRenderInfo::clouds),
@@ -35,7 +33,7 @@ public record PlanetRenderInfo(Identifier texture, Vec3d position, Vector3f scal
     }
 
     public static final PlanetRenderInfo EMPTY = new PlanetRenderInfo(AITMod.id("textures/item/error.png"),
-            new Vec3d(0, 0, 0), new Vector3f(1, 1, 1),
+            new Vec3(0, 0, 0), new Vector3f(1, 1, 1),
             new Vector3f(0, 0, 0), false, false,
             new Vector3f(1, 1, 1), 0, 0, false);
 }

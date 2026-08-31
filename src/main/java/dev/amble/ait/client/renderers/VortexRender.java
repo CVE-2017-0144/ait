@@ -1,23 +1,27 @@
 package dev.amble.ait.client.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.core.tardis.vortex.reference.VortexReference;
 import dev.amble.ait.core.tardis.vortex.reference.VortexReferenceRegistry;
 
 public class VortexRender {
     private static VortexRender INSTANCE;
 
-    public Identifier texture;
-    public Identifier secondLayer;
-    public Identifier thirdLayer;
+    public ResourceLocation texture;
+    public ResourceLocation secondLayer;
+    public ResourceLocation thirdLayer;
     private final float distortionSpeed;
     private final float distortionSeparationFactor;
     private final float distortionFactor;
@@ -25,7 +29,7 @@ public class VortexRender {
     private float speed = 4;
     private float time = 0;
 
-    public VortexRender(Identifier texture) {
+    public VortexRender(ResourceLocation texture) {
         replaceWith(texture);
         this.distortionSpeed = 0.5f;
         this.distortionSeparationFactor = 32f;
@@ -57,57 +61,57 @@ public class VortexRender {
         return INSTANCE;
     }
 
-    public boolean isFor(Identifier texture) {
+    public boolean isFor(ResourceLocation texture) {
         return this.texture.equals(texture);
     }
 
-    public void replaceWith(Identifier texture) {
+    public void replaceWith(ResourceLocation texture) {
         this.texture = texture;
-        secondLayer = new Identifier(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
+        secondLayer = new ResourceLocation(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
                 "_second" + ".png");
-        thirdLayer = new Identifier(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
+        thirdLayer = new ResourceLocation(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
                 "_third" + ".png");
     }
 
-    public void render(MatrixStack matrixStack) {
+    public void render(PoseStack matrixStack) {
 
-        time = MinecraftClient.getInstance().getTickDelta() + MinecraftClient.getInstance().player.age;
+        time = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
 
         this.renderLayer(matrixStack, 1.0F, texture);
         this.renderLayer(matrixStack, 1.5f);
         this.renderLayer(matrixStack, 2.5f);
     }
 
-    public void renderLayer(MatrixStack matrixStack, float scaleFactor) {
-        Identifier currentTexture = scaleFactor == 1.5f ? secondLayer : thirdLayer;
-        if (MinecraftClient.getInstance().getResourceManager().getResource(currentTexture).isEmpty()) return;
+    public void renderLayer(PoseStack matrixStack, float scaleFactor) {
+        ResourceLocation currentTexture = scaleFactor == 1.5f ? secondLayer : thirdLayer;
+        if (Minecraft.getInstance().getResourceManager().getResource(currentTexture).isEmpty()) return;
         this.renderLayer(matrixStack, scaleFactor, currentTexture);
     }
 
-    private void renderLayer(MatrixStack matrixStack, float scaleFactor, Identifier layer) {
+    private void renderLayer(PoseStack matrixStack, float scaleFactor, ResourceLocation layer) {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getRenderTypeBeaconBeamProgram);
+        RenderSystem.setShader(GameRenderer::getRendertypeBeaconBeamShader);
         RenderSystem.setShaderTexture(0, layer);
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
         matrixStack.scale(scale / scaleFactor, scale / scaleFactor, scale);
 
-        MinecraftClient.getInstance().getTextureManager().bindTexture(layer);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        Minecraft.getInstance().getTextureManager().bindForSetup(layer);
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
 
-        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
         for (int i = 0; i < 32; ++i) {
-            this.renderSection(buffer, i,(MinecraftClient.getInstance().getTickDelta() + MinecraftClient.getInstance().player.age) / (120 / this.speed), (float) Math.sin(i * Math.PI / 32),
-                    (float) Math.sin((i + 1) * Math.PI / 32), matrixStack.peek().getNormalMatrix(), matrixStack.peek().getPositionMatrix());
+            this.renderSection(buffer, i,(Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount) / (120 / this.speed), (float) Math.sin(i * Math.PI / 32),
+                    (float) Math.sin((i + 1) * Math.PI / 32), matrixStack.last().normal(), matrixStack.last().pose());
         }
 
-        tessellator.draw();
-        matrixStack.pop();
+        tessellator.end();
+        matrixStack.popPose();
 
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
@@ -217,7 +221,7 @@ public class VortexRender {
     }
 
     private void addVertex(VertexConsumer builder, Matrix3f normalMatrix, Matrix4f matrix, float x, float y, float z, float u, float v) {
-        builder.vertex(matrix, x, y, z).color(1, 1, 1, 1f).texture(u, v).light(0xF000F0).normal(normalMatrix,0, 0.0f, 0).next();
+        builder.vertex(matrix, x, y, z).color(1, 1, 1, 1f).uv(u, v).uv2(0xF000F0).normal(normalMatrix,0, 0.0f, 0).endVertex();
     }
 
     private float computeDistortionFactor(float time, int t) {

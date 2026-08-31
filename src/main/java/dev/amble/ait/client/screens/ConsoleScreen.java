@@ -2,16 +2,14 @@ package dev.amble.ait.client.screens;
 
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.client.sounds.PlayerFollowingLoopingSound;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.AITSounds;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 
 /**
  * A screen that is opened from a console.
@@ -22,20 +20,20 @@ public abstract class ConsoleScreen extends TardisScreen {
     protected final BlockPos console;
     protected static PlayerFollowingLoopingSound idleSound;
 
-    protected ConsoleScreen(Text title, ClientTardis tardis, BlockPos console) {
+    protected ConsoleScreen(Component title, ClientTardis tardis, BlockPos console) {
         super(title, tardis);
 
-        this.client = MinecraftClient.getInstance();
+        this.minecraft = Minecraft.getInstance();
         this.console = console;
 
-        boolean hasChanged = idleSound == null || idleSound.getId() != this.getIdleSound().getId();
+        boolean hasChanged = idleSound == null || idleSound.getLocation() != this.getIdleSound().getLocation();
 
         if (hasChanged) {
-            idleSound = (shouldPlayIdleSfx()) ? new PlayerFollowingLoopingSound(this.getIdleSound(), SoundCategory.AMBIENT, 0.25F) : null;
+            idleSound = (shouldPlayIdleSfx()) ? new PlayerFollowingLoopingSound(this.getIdleSound(), SoundSource.AMBIENT, 0.25F) : null;
         }
 
         if (!shouldPlayIdleSfx() || hasChanged)
-            this.client.getSoundManager().stop(idleSound);
+            this.minecraft.getSoundManager().stop(idleSound);
     }
 
     @Override
@@ -43,8 +41,8 @@ public abstract class ConsoleScreen extends TardisScreen {
         if (super.keyPressed(keyCode, scanCode, modifiers))
             return true;
 
-        if (this.canCloseWithKey() && this.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
-            this.close();
+        if (this.canCloseWithKey() && this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            this.onClose();
             return true;
         }
 
@@ -67,15 +65,15 @@ public abstract class ConsoleScreen extends TardisScreen {
     protected void init() {
         super.init();
 
-        if (idleSound != null && !this.client.getSoundManager().isPlaying(idleSound))
-            this.client.getSoundManager().play(idleSound);
+        if (idleSound != null && !this.minecraft.getSoundManager().isActive(idleSound))
+            this.minecraft.getSoundManager().play(idleSound);
     }
 
     @Override
-    public void close() {
-        this.client.getSoundManager().stop(idleSound);
+    public void onClose() {
+        this.minecraft.getSoundManager().stop(idleSound);
 
-        super.close();
+        super.onClose();
     }
 
     public boolean canCloseWithKey() {

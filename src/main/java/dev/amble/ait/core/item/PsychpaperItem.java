@@ -1,31 +1,31 @@
 package dev.amble.ait.core.item;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class PsychpaperItem extends Item {
 
-    public PsychpaperItem(Settings settings) {
+    public PsychpaperItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        return TypedActionResult.pass(user.getStackInHand(hand));
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        return InteractionResultHolder.pass(user.getItemInHand(hand));
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (world.isClient() || !(entity instanceof PlayerEntity player) || !selected) return;
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
+        if (world.isClientSide() || !(entity instanceof Player player) || !selected) return;
 
-        player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.HERO_OF_THE_VILLAGE, 200, 0, true, false, false));
+        player.addEffect(new MobEffectInstance(
+                MobEffects.HERO_OF_THE_VILLAGE, 200, 0, true, false, false));
     }
 }

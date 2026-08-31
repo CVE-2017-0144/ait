@@ -11,6 +11,6 @@ public class ClientPipeDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new PipeDoorModel(PipeDoorModel.getTexturedModelData().createModel());
+        return new PipeDoorModel(PipeDoorModel.getTexturedModelData().bakeRoot());
     }
 }

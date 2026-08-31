@@ -9,23 +9,21 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -55,16 +53,16 @@ import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.data.DirectedGlobalPos;
 
 public class InteriorChangingHandler extends KeyedTardisComponent implements TardisTickable {
-    public static final Identifier CHANGE_DESKTOP = AITMod.id("change_desktop");
-    private static final Property<Identifier> QUEUED_INTERIOR_PROPERTY = new Property<>(Property.IDENTIFIER, "queued_interior", new Identifier(""));
+    public static final ResourceLocation CHANGE_DESKTOP = AITMod.id("change_desktop");
+    private static final Property<ResourceLocation> QUEUED_INTERIOR_PROPERTY = new Property<>(Property.IDENTIFIER, "queued_interior", new ResourceLocation(""));
     private static final BoolProperty QUEUED = new BoolProperty("queued");
     private static final BoolProperty REGENERATING = new BoolProperty("regenerating");
     private static final int MIN_FUEL_COST = 5000;
 
     public static final int MAX_PLASMIC_MATERIAL_AMOUNT = 8;
-    private static final Text HINT_TEXT = Text.translatable("tardis.message.growth.hint").formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
+    private static final Component HINT_TEXT = Component.translatable("tardis.message.growth.hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
 
-    private final Value<Identifier> queuedInterior = QUEUED_INTERIOR_PROPERTY.create(this);
+    private final Value<ResourceLocation> queuedInterior = QUEUED_INTERIOR_PROPERTY.create(this);
     private static final IntProperty PLASMIC_MATERIAL_AMOUNT = new IntProperty("plasmic_material_amount");
     private final IntValue plasmicMaterialAmount = PLASMIC_MATERIAL_AMOUNT.create(this);
     private static final BoolProperty HAS_CAGE = new BoolProperty("has_cage");
@@ -123,7 +121,7 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
         ServerPlayNetworking.registerGlobalReceiver(InteriorChangingHandler.CHANGE_DESKTOP,
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
-                    TardisDesktopSchema desktop = DesktopRegistry.getInstance().get(buf.readIdentifier());
+                    TardisDesktopSchema desktop = DesktopRegistry.getInstance().get(buf.readResourceLocation());
 
                     if (tardis == null || desktop == null)
                         return;
@@ -174,15 +172,15 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
             return;
 
         if (tardis.fuel().getCurrentFuel() < (MIN_FUEL_COST * tardis.travel().instability())) {
-            tardis.asServer().world().getPlayers().forEach(player -> player.sendMessage(
-                    Text.translatable("tardis.message.interiorchange.not_enough_fuel").formatted(Formatting.RED),
+            tardis.asServer().world().players().forEach(player -> player.displayClientMessage(
+                    Component.translatable("tardis.message.interiorchange.not_enough_fuel").withStyle(ChatFormatting.RED),
                     true));
 
             return;
         }
 
         if (tardis.subsystems().isEnabled()) {
-            tardis.asServer().world().getPlayers().forEach(player -> {
+            tardis.asServer().world().players().forEach(player -> {
                 int count = 0;
 
                 for (SubSystem subSystem : tardis.subsystems()) {
@@ -190,9 +188,9 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
                         count++;
                 }
 
-                player.sendMessage(
-                        Text.translatable("tardis.message.interiorchange.subsystems_enabled", count)
-                                .formatted(Formatting.RED), false);
+                player.displayClientMessage(
+                        Component.translatable("tardis.message.interiorchange.subsystems_enabled", count)
+                                .withStyle(ChatFormatting.RED), false);
             });
         }
 
@@ -239,12 +237,12 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
                         tardis.removeFuel(MIN_FUEL_COST * tardis.travel().instability());
                     }
 
-                    TardisUtil.sendMessageToLinked(tardis.asServer(), Text.translatable("tardis.message.interiorchange.success", tardis.stats().getName(), tardis.getDesktop().getSchema().name()));
+                    TardisUtil.sendMessageToLinked(tardis.asServer(), Component.translatable("tardis.message.interiorchange.success", tardis.stats().getName(), tardis.getDesktop().getSchema().name()));
 
                     this.restoreSubsystemsToConsole();
                     this.playReconfigureCompleteSound();
 
-                    ParticleEffect particle = ParticleTypes.CLOUD;
+                    ParticleOptions particle = ParticleTypes.CLOUD;
                     tardis.door().setDoorParticles(particle);
                     tardis.door().setLocked(false);
                     Scheduler.get().runTaskLater(() -> tardis.door().setDoorParticles(null), TaskStage.END_SERVER_TICK, TimeUnit.SECONDS, 3);
@@ -253,10 +251,10 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
     private void playReconfigureCompleteSound() {
         CachedDirectedGlobalPos position = tardis.travel().position();
-        ServerWorld world = position.getWorld();
+        ServerLevel world = position.getWorld();
         BlockPos pos = position.getPos();
 
-        world.playSound(null, pos, AITSounds.TARDIS_BLING, SoundCategory.BLOCKS, 10.0F, 1.0F);
+        world.playSound(null, pos, AITSounds.TARDIS_BLING, SoundSource.BLOCKS, 10.0F, 1.0F);
     }
 
     private void restoreSubsystemsToConsole() {
@@ -276,13 +274,13 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
     }
 
     private void replaceConsoleWithGrowth(BlockPos cPos) {
-        ServerWorld world = tardis.asServer().world();
+        ServerLevel world = tardis.asServer().world();
 
         if (!(world.getBlockEntity(cPos) instanceof ConsoleBlockEntity console))
             return;
 
-        world.setBlockState(cPos, Blocks.AIR.getDefaultState());
-        world.setBlockState(cPos.down(), Blocks.SOUL_SAND.getDefaultState());
+        world.setBlockAndUpdate(cPos, Blocks.AIR.defaultBlockState());
+        world.setBlockAndUpdate(cPos.below(), Blocks.SOUL_SAND.defaultBlockState());
 
         console.onBroken();
     }
@@ -309,17 +307,17 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
         if (!TardisUtil.isInteriorEmpty(tardis.asServer())) {
             if (this.regenerating.get()) {
-                PlayerEntity target = TardisUtil.getAnyPlayerInsideInterior(tardis.asServer().world());
+                Player target = TardisUtil.getAnyPlayerInsideInterior(tardis.asServer().world());
 
                 if (this.tardis().subsystems().lifeSupport().isEnabled()) {
                     TardisUtil.teleportOutside(tardis.asServer(), target);
                 } else {
-                    target.damage(AITDamageTypes.of(target.getWorld(), AITDamageTypes.INTERIOR_CHANGE), Float.MAX_VALUE);
+                    target.hurt(AITDamageTypes.of(target.level(), AITDamageTypes.INTERIOR_CHANGE), Float.MAX_VALUE);
                 }
             }
 
             TardisUtil.sendMessageToInterior(tardis.asServer(),
-                    Text.translatable("tardis.message.interiorchange.warning").formatted(Formatting.RED));
+                    Component.translatable("tardis.message.interiorchange.warning").withStyle(ChatFormatting.RED));
             return;
         }
 
@@ -331,7 +329,7 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
     }
 
     private void tickGrowth(MinecraftServer server) {
-        if (server.getTicks() % 10 != 0 || !this.tardis.isGrowth())
+        if (server.getTickCount() % 10 != 0 || !this.tardis.isGrowth())
             return;
 
         this.generateInteriorWithItem();
@@ -339,8 +337,8 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
         if (this.queued.get())
             return;
 
-        if (server.getTicks() % 200 == 0 && this.hasEnoughPlasmicMaterial())
-            this.tardis.asServer().world().getPlayers().forEach(player -> player.sendMessage(HINT_TEXT, true));
+        if (server.getTickCount() % 200 == 0 && this.hasEnoughPlasmicMaterial())
+            this.tardis.asServer().world().players().forEach(player -> player.displayClientMessage(HINT_TEXT, true));
 
         if (this.tardis.door().isClosed()) {
             this.tardis.door().openDoors();
@@ -355,17 +353,17 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
     protected void generateInteriorWithItem() {
         if (!hasEnoughPlasmicMaterial()) {
-            TardisUtil.sendMessageToInterior(tardis.asServer(), Text.translatable("tardis.message.interiorchange.not_enough_plasmic_material", this.plasmicMaterialAmount()).formatted(Formatting.GRAY));
+            TardisUtil.sendMessageToInterior(tardis.asServer(), Component.translatable("tardis.message.interiorchange.not_enough_plasmic_material", this.plasmicMaterialAmount()).withStyle(ChatFormatting.GRAY));
             return;
         }
 
         TardisUtil.getEntitiesInInterior(this.tardis, 50).stream()
                 .filter(entity -> entity instanceof ItemEntity item
-                        && (item.getStack().getItem() == AITItems.TARDIS_MATRIX)
-                        && entity.isTouchingWater())
+                        && (item.getItem().getItem() == AITItems.TARDIS_MATRIX)
+                        && entity.isInWater())
                 .forEach(entity -> {
                     ItemEntity item = (ItemEntity) entity;
-                    ItemStack stack = item.getStack();
+                    ItemStack stack = item.getItem();
                     DirectedGlobalPos position = this.tardis.travel().position();
 
                     if (position == null)
@@ -373,15 +371,15 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
                     this.tardis.setFuelCount(8000);
 
-                    entity.getWorld().playSound(null, entity.getBlockPos(), SoundEvents.BLOCK_BEACON_POWER_SELECT,
-                            SoundCategory.BLOCKS, 10.0F, 0.75F);
-                    entity.getWorld().playSound(null, position.getPos(), SoundEvents.BLOCK_BEACON_POWER_SELECT,
-                            SoundCategory.BLOCKS, 10.0F, 0.75F);
+                    entity.level().playSound(null, entity.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
+                            SoundSource.BLOCKS, 10.0F, 0.75F);
+                    entity.level().playSound(null, position.getPos(), SoundEvents.BEACON_POWER_SELECT,
+                            SoundSource.BLOCKS, 10.0F, 0.75F);
 
                     this.queueInteriorChange(DesktopRegistry.getInstance().get(AITMod.id("cave")));
 
-                    if (stack.isOf(AITItems.TARDIS_MATRIX)) {
-                        NbtCompound nbt = stack.getOrCreateNbt();
+                    if (stack.is(AITItems.TARDIS_MATRIX)) {
+                        CompoundTag nbt = stack.getOrCreateTag();
                         if (nbt.contains("name")) {
                             this.tardis.stats().setName(nbt.getString("name"));
                         }

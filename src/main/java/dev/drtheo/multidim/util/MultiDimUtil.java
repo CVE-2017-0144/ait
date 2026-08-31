@@ -1,21 +1,21 @@
 package dev.drtheo.multidim.util;
 
 import dev.drtheo.multidim.api.MutableRegistry;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionOptions;
+import net.minecraft.world.level.dimension.LevelStem;
 
 
 public class MultiDimUtil {
 
-    public static SimpleRegistry<DimensionOptions> getDimensionsRegistry(MinecraftServer server) {
-        DynamicRegistryManager registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
-        return (SimpleRegistry<DimensionOptions>) registryManager.get(RegistryKeys.DIMENSION);
+    public static MappedRegistry<LevelStem> getDimensionsRegistry(MinecraftServer server) {
+        RegistryAccess registryManager = server.registries().compositeAccess();
+        return (MappedRegistry<LevelStem>) registryManager.registryOrThrow(Registries.LEVEL_STEM);
     }
 
-    public static MutableRegistry<DimensionOptions> getMutableDimensionsRegistry(MinecraftServer server) {
-        return (MutableRegistry<DimensionOptions>) getDimensionsRegistry(server);
+    public static MutableRegistry<LevelStem> getMutableDimensionsRegistry(MinecraftServer server) {
+        return (MutableRegistry<LevelStem>) getDimensionsRegistry(server);
     }
 }

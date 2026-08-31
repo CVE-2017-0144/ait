@@ -2,8 +2,8 @@ package dev.amble.lib.mixin;
 
 import dev.amble.lib.animation.AnimatedInstance;
 import dev.amble.lib.animation.AnimationTracker;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,14 +25,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin {
 
-    @Inject(method = "markRemoved", at = @At("HEAD"))
+    @Inject(method = "setRemoved", at = @At("HEAD"))
     private void amblekit$clearAnimationOnRemove(CallbackInfo ci) {
         if (!((Object) this instanceof AnimatedInstance animated))
             return;
 
         // Only the server holds the authoritative tracker and drives the client sync.
-        World world = ((BlockEntity) (Object) this).getWorld();
-        if (world == null || world.isClient)
+        Level world = ((BlockEntity) (Object) this).getLevel();
+        if (world == null || world.isClientSide)
             return;
 
         // markRemoved fires constantly on chunk unload, so only sync a removal when

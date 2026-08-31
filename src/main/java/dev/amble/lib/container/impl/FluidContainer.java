@@ -1,9 +1,9 @@
 package dev.amble.lib.container.impl;
 
 import dev.amble.lib.container.RegistryContainer;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.material.Fluid;
 
 public interface FluidContainer extends RegistryContainer<Fluid> {
 
@@ -14,6 +14,6 @@ public interface FluidContainer extends RegistryContainer<Fluid> {
 
     @Override
     default Registry<Fluid> getRegistry() {
-        return Registries.FLUID;
+        return BuiltInRegistries.FLUID;
     }
 }

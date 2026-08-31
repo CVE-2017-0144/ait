@@ -22,36 +22,34 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTables;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.LootFunctionType;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.DefaultParticleType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.ProbabilityConfig;
-import net.minecraft.world.gen.feature.PlacedFeature;
-
 import dev.amble.ait.api.AITModInitializer;
 import dev.amble.ait.config.AITServerConfig;
 import dev.amble.ait.core.*;
@@ -107,24 +105,24 @@ public class AITMod implements ModInitializer {
     public static final Random RANDOM = new Random();
 
     public static AITServerConfig CONFIG;
-    public static final GameRules.Key<GameRules.BooleanRule> STASER_GRIEFING = GameRuleRegistry.register("staserGriefing",
+    public static final GameRules.Key<GameRules.BooleanValue> STASER_GRIEFING = GameRuleRegistry.register("staserGriefing",
             GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
 
-    public static final GameRules.Key<GameRules.BooleanRule> TARDIS_GRIEFING = GameRuleRegistry.register("tardisGriefing",
+    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_GRIEFING = GameRuleRegistry.register("tardisGriefing",
             GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
 
-    public static final GameRules.Key<GameRules.BooleanRule> TARDIS_FIRE_GRIEFING = GameRuleRegistry.register("tardisFireGriefing",
+    public static final GameRules.Key<GameRules.BooleanValue> TARDIS_FIRE_GRIEFING = GameRuleRegistry.register("tardisFireGriefing",
             GameRules.Category.MISC, GameRuleFactory.createBooleanRule(false));
 
 
-    public static final RegistryKey<PlacedFeature> CUSTOM_GEODE_PLACED_KEY = RegistryKey.of(RegistryKeys.PLACED_FEATURE,
-            new Identifier(MOD_ID, "zeiton_geode"));
+    public static final ResourceKey<PlacedFeature> CUSTOM_GEODE_PLACED_KEY = ResourceKey.create(Registries.PLACED_FEATURE,
+            new ResourceLocation(MOD_ID, "zeiton_geode"));
 
     // This DefaultParticleType gets called when you want to use your particle in code.
-    public static final DefaultParticleType CORAL_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType CORAL_PARTICLE = FabricParticleTypes.simple();
 
     // This is the Crater feature that generates in the world. It's made with AI so it sucks lol
-    public static final Crater CRATER = new Crater(ProbabilityConfig.CODEC);
+    public static final Crater CRATER = new Crater(ProbabilityFeatureConfiguration.CODEC);
 
     public static final String BRANCH;
 
@@ -148,7 +146,7 @@ public class AITMod implements ModInitializer {
     }
 
     public void registerParticles() {
-        Registry.register(Registries.PARTICLE_TYPE, id("coral_particle"), CORAL_PARTICLE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("coral_particle"), CORAL_PARTICLE);
     }
 
     @Override
@@ -214,9 +212,9 @@ public class AITMod implements ModInitializer {
         RegistryContainer.register(AITPaintings.class, MOD_ID);
         ModuleRegistry.instance().onCommonInit();
 
-        BlueprintRegistry.BLUEPRINT_TYPE = Registry.register(Registries.LOOT_FUNCTION_TYPE,
+        BlueprintRegistry.BLUEPRINT_TYPE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE,
                 AITMod.id("set_blueprint"),
-                new LootFunctionType(new SetBlueprintLootFunction.Serializer()));
+                new LootItemFunctionType(new SetBlueprintLootFunction.Serializer()));
 
         WorldUtil.init();
         TardisUtil.init();
@@ -226,10 +224,10 @@ public class AITMod implements ModInitializer {
 
         entityAttributeRegister();
 
-        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES,
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES,
                 CUSTOM_GEODE_PLACED_KEY);
 
-        Registry.register(net.minecraft.registry.Registries.FEATURE, CRATER_ID, CRATER);
+        Registry.register(net.minecraft.core.registries.BuiltInRegistries.FEATURE, CRATER_ID, CRATER);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> {
             TeleportInteriorCommand.register(dispatcher);
@@ -268,23 +266,23 @@ public class AITMod implements ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(TardisUtil.REGION_LANDING_CODE,
                 (server, player, handler, buf, responseSender) -> {
                     BlockPos pos = buf.readBlockPos();
-                    String landingCode = buf.readString();
+                    String landingCode = buf.readUtf();
 
                     server.execute(() -> {
-                        LandingPadRegion region = LandingPadManager.getInstance((ServerWorld) player.getWorld()).getRegionAt(pos);
+                        LandingPadRegion region = LandingPadManager.getInstance((ServerLevel) player.level()).getRegionAt(pos);
 
                         if (region == null)
                             return;
 
                         region.setLandingCode(landingCode);
-                        LandingPadManager.Network.syncTracked(LandingPadManager.Network.Action.ADD, player.getServerWorld(),
-                                new ChunkPos(player.getBlockPos()));
+                        LandingPadManager.Network.syncTracked(LandingPadManager.Network.Action.ADD, player.serverLevel(),
+                                new ChunkPos(player.blockPosition()));
                     });
                 });
 
         ServerPlayNetworking.registerGlobalReceiver(MachineItem.MACHINE_DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
-                    ItemStack machine = buf.readItemStack();
+                    ItemStack machine = buf.readItem();
 
                     Optional<MachineRecipeSchema> schema = MachineRecipeRegistry.getInstance().findMatching(machine);
 
@@ -301,7 +299,7 @@ public class AITMod implements ModInitializer {
 
         ServerPlayNetworking.registerGlobalReceiver(AbstractTardisPart.DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
-                    ItemStack machine = buf.readItemStack();
+                    ItemStack machine = buf.readItem();
 
                     Optional<MachineRecipeSchema> schema = MachineRecipeRegistry.getInstance().findMatching(machine);
 
@@ -321,25 +319,25 @@ public class AITMod implements ModInitializer {
             boolean enabled = buf.readBoolean();
 
             server.execute(() -> {
-                World world = player.getWorld();
+                Level world = player.level();
                 BlockState state = world.getBlockState(pos);
 
                 if (!(world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector))
                     return;
 
                 Tardis tardis = projector.tardis().get();
-                world.setBlockState(pos, state.with(EnvironmentProjectorBlock.ENABLED, enabled), Block.NOTIFY_ALL);
+                world.setBlock(pos, state.setValue(EnvironmentProjectorBlock.ENABLED, enabled), Block.UPDATE_ALL);
                 EnvironmentProjectorBlock.toggle(tardis, null, world, pos, world.getBlockState(pos), enabled);
             });
         });
 
         ServerPlayNetworking.registerGlobalReceiver(PROJECTOR_SELECTION, (server, player, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
-            Identifier id = buf.readIdentifier();
+            ResourceLocation id = buf.readResourceLocation();
             server.execute(() -> {
-                ServerWorld world = player.getServerWorld();
+                ServerLevel world = player.serverLevel();
                 if (world != null && world.getBlockEntity(pos) instanceof dev.amble.ait.core.blockentities.EnvironmentProjectorBlockEntity projector) {
-                    RegistryKey<World> key = RegistryKey.of(RegistryKeys.WORLD, id);
+                    ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, id);
                     projector.setCurrentFromClient(key, player);
                 }
             });
@@ -350,7 +348,7 @@ public class AITMod implements ModInitializer {
             float yaw = buf.readFloat();
             float pitch = buf.readFloat();
             server.execute(() -> {
-                ServerWorld world = player.getServerWorld();
+                ServerLevel world = player.serverLevel();
                 if (world != null && world.getBlockEntity(pos) instanceof dev.amble.ait.core.blockentities.EnvironmentProjectorBlockEntity projector) {
                     projector.setAnglesFromClient(yaw, pitch, player);
                 }
@@ -359,54 +357,54 @@ public class AITMod implements ModInitializer {
 
         LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
             if (source.isBuiltin()
-                    && (id.equals(LootTables.NETHER_BRIDGE_CHEST) || id.equals(LootTables.DESERT_PYRAMID_CHEST)
-                    || id.equals(LootTables.VILLAGE_ARMORER_CHEST) || id.equals(LootTables.RUINED_PORTAL_CHEST))
-                    || id.equals(LootTables.END_CITY_TREASURE_CHEST) || id.equals(LootTables.SHIPWRECK_MAP_CHEST)
-                    || id.equals(LootTables.ABANDONED_MINESHAFT_CHEST) || id.equals(LootTables.VILLAGE_CARTOGRAPHER_CHEST)
-                    || id.equals(LootTables.VILLAGE_TOOLSMITH_CHEST) || id.equals(LootTables.SHIPWRECK_TREASURE_CHEST)
-                    || id.equals(LootTables.ANCIENT_CITY_CHEST) || id.equals(LootTables.ANCIENT_CITY_ICE_BOX_CHEST)
-                    || id.equals(LootTables.BURIED_TREASURE_CHEST) || id.equals(LootTables.DESERT_PYRAMID_ARCHAEOLOGY)
-                    || id.equals(LootTables.DESERT_WELL_ARCHAEOLOGY) || id.equals(LootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY)
-                    || id.equals(LootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY) || id.equals(LootTables.TRAIL_RUINS_RARE_ARCHAEOLOGY)
-                    || id.equals(LootTables.FISHING_TREASURE_GAMEPLAY) || id.equals(LootTables.DESERT_PYRAMID_CHEST)
-                    || id.equals(LootTables.SIMPLE_DUNGEON_CHEST) || id.equals(LootTables.STRONGHOLD_LIBRARY_CHEST)) {
+                    && (id.equals(BuiltInLootTables.NETHER_BRIDGE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
+                    || id.equals(BuiltInLootTables.VILLAGE_ARMORER) || id.equals(BuiltInLootTables.RUINED_PORTAL))
+                    || id.equals(BuiltInLootTables.END_CITY_TREASURE) || id.equals(BuiltInLootTables.SHIPWRECK_MAP)
+                    || id.equals(BuiltInLootTables.ABANDONED_MINESHAFT) || id.equals(BuiltInLootTables.VILLAGE_CARTOGRAPHER)
+                    || id.equals(BuiltInLootTables.VILLAGE_TOOLSMITH) || id.equals(BuiltInLootTables.SHIPWRECK_TREASURE)
+                    || id.equals(BuiltInLootTables.ANCIENT_CITY) || id.equals(BuiltInLootTables.ANCIENT_CITY_ICE_BOX)
+                    || id.equals(BuiltInLootTables.BURIED_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY)
+                    || id.equals(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY) || id.equals(BuiltInLootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY)
+                    || id.equals(BuiltInLootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY) || id.equals(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE)
+                    || id.equals(BuiltInLootTables.FISHING_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
+                    || id.equals(BuiltInLootTables.SIMPLE_DUNGEON) || id.equals(BuiltInLootTables.STRONGHOLD_LIBRARY)) {
 
 
-                LootPool.Builder poolBuilder = LootPool.builder().with(ItemEntry.builder(AITItems.BLUEPRINT).apply(SetBlueprintLootFunction.random()).weight(10));
+                LootPool.Builder poolBuilder = LootPool.lootPool().add(LootItem.lootTableItem(AITItems.BLUEPRINT).apply(SetBlueprintLootFunction.random()).setWeight(10));
 
-                tableBuilder.pool(poolBuilder);
+                tableBuilder.withPool(poolBuilder);
             }
         });
 
         UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
-            ItemStack stack = player.getStackInHand(hand);
-            if (!(stack.getItem() instanceof SonicItem)) return ActionResult.PASS;
+            ItemStack stack = player.getItemInHand(hand);
+            if (!(stack.getItem() instanceof SonicItem)) return InteractionResult.PASS;
 
             BlockPos pos = hit.getBlockPos();
             BlockState state = world.getBlockState(pos);
 
-            if (state.isOf(Blocks.FLOWER_POT)) {
-                if (!world.isClient) {
-                    world.setBlockState(pos, AITBlocks.POTTED_SONIC_SCREWDRIVER.getDefaultState(), Block.NOTIFY_ALL);
+            if (state.is(Blocks.FLOWER_POT)) {
+                if (!world.isClientSide) {
+                    world.setBlock(pos, AITBlocks.POTTED_SONIC_SCREWDRIVER.defaultBlockState(), Block.UPDATE_ALL);
                     if (world.getBlockEntity(pos) instanceof PottedSonicScrewdriverBlockEntity pot)
                         pot.addSonic(stack);
-                    world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-                    if (!player.getAbilities().creativeMode) stack.decrement(1);
+                    world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+                    if (!player.getAbilities().instabuild) stack.shrink(1);
                 }
-                return ActionResult.success(world.isClient);
+                return InteractionResult.sidedSuccess(world.isClientSide);
             }
 
-            if (state.isOf(AITBlocks.POTTED_SONIC_SCREWDRIVER)
+            if (state.is(AITBlocks.POTTED_SONIC_SCREWDRIVER)
                     && world.getBlockEntity(pos) instanceof PottedSonicScrewdriverBlockEntity pot && !pot.isFull()) {
-                if (!world.isClient) {
+                if (!world.isClientSide) {
                     pot.addSonic(stack);
-                    world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-                    if (!player.getAbilities().creativeMode) stack.decrement(1);
+                    world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+                    if (!player.getAbilities().instabuild) stack.shrink(1);
                 }
-                return ActionResult.success(world.isClient);
+                return InteractionResult.sidedSuccess(world.isClientSide);
             }
 
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
     }
 
@@ -418,73 +416,73 @@ public class AITMod implements ModInitializer {
                 FlightTardisEntity.createDummyAttributes());
     }
 
-    public static final Identifier OPEN_SCREEN = AITMod.id("open_screen");
-    public static final Identifier OPEN_SCREEN_TARDIS = AITMod.id("open_screen_tardis");
-    public static final Identifier OPEN_SCREEN_CONSOLE = AITMod.id("open_screen_console");
-    public static final Identifier OPEN_SCREEN_PROJECTOR = AITMod.id("open_screen_projector");
-    public static final Identifier TOGGLE_PROJECTOR = AITMod.id("toggle_projector");
-    public static final Identifier PROJECTOR_SELECTION = new Identifier(MOD_ID, "projector_selection");
-    public static final Identifier PROJECTOR_ANGLES = new Identifier(MOD_ID, "projector_angles");
+    public static final ResourceLocation OPEN_SCREEN = AITMod.id("open_screen");
+    public static final ResourceLocation OPEN_SCREEN_TARDIS = AITMod.id("open_screen_tardis");
+    public static final ResourceLocation OPEN_SCREEN_CONSOLE = AITMod.id("open_screen_console");
+    public static final ResourceLocation OPEN_SCREEN_PROJECTOR = AITMod.id("open_screen_projector");
+    public static final ResourceLocation TOGGLE_PROJECTOR = AITMod.id("toggle_projector");
+    public static final ResourceLocation PROJECTOR_SELECTION = new ResourceLocation(MOD_ID, "projector_selection");
+    public static final ResourceLocation PROJECTOR_ANGLES = new ResourceLocation(MOD_ID, "projector_angles");
 
-    public static void openScreen(ServerPlayerEntity player, int id) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void openScreen(ServerPlayer player, int id) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
         ServerPlayNetworking.send(player, OPEN_SCREEN, buf);
     }
 
-    public static void openScreen(ServerPlayerEntity player, int id, UUID tardis) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void openScreen(ServerPlayer player, int id, UUID tardis) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
-        buf.writeUuid(tardis);
+        buf.writeUUID(tardis);
         ServerPlayNetworking.send(player, OPEN_SCREEN_TARDIS, buf);
     }
 
-    public static void openScreen(ServerPlayerEntity player, int id, UUID tardis, BlockPos console) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void openScreen(ServerPlayer player, int id, UUID tardis, BlockPos console) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
-        buf.writeUuid(tardis);
+        buf.writeUUID(tardis);
         buf.writeBlockPos(console);
 
         ServerPlayNetworking.send(player, OPEN_SCREEN_CONSOLE, buf);
     }
 
-    public static void openScreen(ServerPlayerEntity player, int id, BlockPos console) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void openScreen(ServerPlayer player, int id, BlockPos console) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
         buf.writeBlockPos(console);
 
-        List<ServerWorld> worlds = WorldUtil.getProjectorWorlds();
+        List<ServerLevel> worlds = WorldUtil.getProjectorWorlds();
         buf.writeVarInt(worlds.size());
-        for (ServerWorld world : worlds)
-            buf.writeIdentifier(world.getRegistryKey().getValue());
+        for (ServerLevel world : worlds)
+            buf.writeResourceLocation(world.dimension().location());
 
         ServerPlayNetworking.send(player, OPEN_SCREEN_PROJECTOR, buf);
     }
 
 
     public static void sendProjectorToggle(BlockPos pos, boolean enabled) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(pos);
         buf.writeBoolean(enabled);
         ClientPlayNetworking.send(TOGGLE_PROJECTOR, buf);
     }
 
-    public static void sendProjectorSelection(BlockPos pos, Identifier worldId) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void sendProjectorSelection(BlockPos pos, ResourceLocation worldId) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(pos);
-        buf.writeIdentifier(worldId);
+        buf.writeResourceLocation(worldId);
         ClientPlayNetworking.send(PROJECTOR_SELECTION, buf);
     }
 
     public static void sendProjectorAngles(BlockPos pos, float yaw, float pitch) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(pos);
         buf.writeFloat(yaw);
         buf.writeFloat(pitch);
         ClientPlayNetworking.send(PROJECTOR_ANGLES, buf);
     }
 
-    public static Identifier id(String path) {
-        return new Identifier(MOD_ID, path);
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MOD_ID, path);
     }
 }

@@ -8,11 +8,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.InputStream;
@@ -23,7 +23,7 @@ public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> impleme
 	private static final BedrockModelRegistry INSTANCE = new BedrockModelRegistry();
 
 	private BedrockModelRegistry() {
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
 	}
 
 	@Override
@@ -32,20 +32,20 @@ public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> impleme
 	}
 
 	@Override
-	public Identifier getFabricId() {
+	public ResourceLocation getFabricId() {
 		return AmbleKit.id("bedrock_model");
 	}
 
 	@Override
-	public void reload(ResourceManager manager) {
+	public void onResourceManagerReload(ResourceManager manager) {
 		clearCache();
 
-		for (Identifier rawId : manager.findResources("bedrock", filename -> filename.getPath().endsWith("geo.json")).keySet()) {
-			try (InputStream stream = manager.getResource(rawId).get().getInputStream()) {
+		for (ResourceLocation rawId : manager.listResources("bedrock", filename -> filename.getPath().endsWith("geo.json")).keySet()) {
+			try (InputStream stream = manager.getResource(rawId).get().open()) {
 				String path = rawId.getPath();
 				// remove "bedrock/" prefix and ".geo.json" suffix
 				String idPath = path.substring("bedrock/".length(), path.length() - ".geo.json".length());
-				Identifier id = Identifier.of(rawId.getNamespace(), idPath);
+				ResourceLocation id = ResourceLocation.tryBuild(rawId.getNamespace(), idPath);
 
 				JsonObject json = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject();
 				BedrockModel model = BedrockModel.from(json, id);
@@ -60,12 +60,12 @@ public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> impleme
 	}
 
 	@Override
-	public void syncToClient(ServerPlayerEntity player) {
+	public void syncToClient(ServerPlayer player) {
 		throw new UnsupportedOperationException("Client-side only registry");
 	}
 
 	@Override
-	public void readFromServer(PacketByteBuf buf) {
+	public void readFromServer(FriendlyByteBuf buf) {
 		throw new UnsupportedOperationException("Client-side only registry");
 	}
 

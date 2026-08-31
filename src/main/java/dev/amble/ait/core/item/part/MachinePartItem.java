@@ -1,14 +1,12 @@
 package dev.amble.ait.core.item.part;
 
 import java.util.function.Supplier;
-
-import net.minecraft.item.Item;
-
+import net.minecraft.world.item.Item;
 import dev.amble.ait.core.AITItems;
 
 public class MachinePartItem extends AbstractMachinePartItem<MachinePartItem.Type> {
 
-    public MachinePartItem(Type type, Settings settings) {
+    public MachinePartItem(Type type, Properties settings) {
         super(type, settings);
     }
 

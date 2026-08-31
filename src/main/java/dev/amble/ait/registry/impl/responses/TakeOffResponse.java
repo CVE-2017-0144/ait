@@ -2,10 +2,8 @@ package dev.amble.ait.registry.impl.responses;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.handles.HandlesResponse;
 import dev.amble.ait.core.handles.HandlesSound;
@@ -13,7 +11,7 @@ import dev.amble.ait.core.tardis.ServerTardis;
 
 public class TakeOffResponse implements HandlesResponse {
     @Override
-    public boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis) {
+    public boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis) {
         return false;
     }
 
@@ -25,7 +23,7 @@ public class TakeOffResponse implements HandlesResponse {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return AITMod.id("take_off");
     }
 }

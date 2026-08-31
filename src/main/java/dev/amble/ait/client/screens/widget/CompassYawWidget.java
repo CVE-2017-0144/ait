@@ -4,19 +4,18 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class CompassYawWidget extends ClickableWidget {
+public class CompassYawWidget extends AbstractWidget {
 
     private static final float STEP = 10f;
 
@@ -26,7 +25,7 @@ public class CompassYawWidget extends ClickableWidget {
     private boolean fresh = true;
 
     public CompassYawWidget(int x, int y, int size, float initial, Consumer<Float> onChange) {
-        super(x, y, size, size, Text.translatable("screen.ait.environment_projector.yaw"));
+        super(x, y, size, size, Component.translatable("screen.ait.environment_projector.yaw"));
         this.value = wrap(initial);
         this.lastClickValue = this.value;
         this.onChange = onChange;
@@ -61,7 +60,7 @@ public class CompassYawWidget extends ClickableWidget {
     }
 
     private void maybePlayClick() {
-        float delta = MathHelper.wrapDegrees(this.value - this.lastClickValue);
+        float delta = Mth.wrapDegrees(this.value - this.lastClickValue);
         if (this.fresh || Math.abs(delta) >= STEP) {
             playClick();
             this.lastClickValue = this.value;
@@ -70,8 +69,8 @@ public class CompassYawWidget extends ClickableWidget {
     }
 
     private void playClick() {
-        MinecraftClient.getInstance().getSoundManager().play(
-                PositionedSoundInstance.master(SoundEvents.BLOCK_LEVER_CLICK, 1.6f));
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.LEVER_CLICK, 1.6f));
     }
 
     @Override
@@ -90,11 +89,11 @@ public class CompassYawWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int cx = centerX();
         int cy = centerY();
         int radius = this.getWidth() / 2 - 4;
-        int accent = this.isSelected() ? 0xFFFFFFFF : 0xFFFFCC55;
+        int accent = this.isHoveredOrFocused() ? 0xFFFFFFFF : 0xFFFFCC55;
 
         double rad = Math.toRadians(this.value);
         double sin = Math.sin(rad);
@@ -121,13 +120,13 @@ public class CompassYawWidget extends ClickableWidget {
         context.fill(cx - 2, cy - 2, cx + 3, cy + 3, accent);
     }
 
-    private static void drawThickLine(DrawContext ctx, int x1, int y1, int x2, int y2, int color) {
+    private static void drawThickLine(GuiGraphics ctx, int x1, int y1, int x2, int y2, int color) {
         drawLine(ctx, x1, y1, x2, y2, color);
         drawLine(ctx, x1 + 1, y1, x2 + 1, y2, color);
         drawLine(ctx, x1, y1 + 1, x2, y2 + 1, color);
     }
 
-    private static void drawLine(DrawContext ctx, int x1, int y1, int x2, int y2, int color) {
+    private static void drawLine(GuiGraphics ctx, int x1, int y1, int x2, int y2, int color) {
         int dx = Math.abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
         int dy = -Math.abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
         int err = dx + dy;
@@ -142,7 +141,7 @@ public class CompassYawWidget extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        this.appendDefaultNarrations(builder);
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+        this.defaultButtonNarrationText(builder);
     }
 }

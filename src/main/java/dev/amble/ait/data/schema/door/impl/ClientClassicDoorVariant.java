@@ -11,6 +11,6 @@ public class ClientClassicDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new ClassicDoorModel(ClassicDoorModel.getTexturedModelData().createModel());
+        return new ClassicDoorModel(ClassicDoorModel.getTexturedModelData().bakeRoot());
     }
 }

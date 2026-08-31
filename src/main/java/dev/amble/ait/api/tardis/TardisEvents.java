@@ -5,14 +5,12 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.entity.Entity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.core.engine.DurableSubSystem;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.engine.impl.EngineSystem;
@@ -480,12 +478,12 @@ public final class TardisEvents {
 
     @FunctionalInterface
     public interface UseDoor {
-        DoorHandler.InteractionResult onUseDoor(Tardis tardis, ServerWorld interior, ServerWorld world, @Nullable ServerPlayerEntity player, @Nullable BlockPos pos);
+        DoorHandler.InteractionResult onUseDoor(Tardis tardis, ServerLevel interior, ServerLevel world, @Nullable ServerPlayer player, @Nullable BlockPos pos);
     }
 
     @FunctionalInterface
     public interface DoorUsed {
-        DoorHandler.InteractionResult onDoorUsed(Tardis tardis, ServerPlayerEntity player);
+        DoorHandler.InteractionResult onDoorUsed(Tardis tardis, ServerPlayer player);
     }
     /**
      * Called when the interior door position is changed, meaning it was probably
@@ -528,17 +526,17 @@ public final class TardisEvents {
 
     @FunctionalInterface
     public interface SyncTardis {
-        void sync(ServerPlayerEntity player, ChunkPos chunk);
+        void sync(ServerPlayer player, ChunkPos chunk);
     }
 
     @FunctionalInterface
     public interface SendTardis {
-        void send(Tardis tardis, ServerPlayerEntity player);
+        void send(Tardis tardis, ServerPlayer player);
     }
 
     @FunctionalInterface
     public interface UnloadTardis {
-        void unload(ServerPlayerEntity player, ChunkPos chunk);
+        void unload(ServerPlayer player, ChunkPos chunk);
     }
 
     @FunctionalInterface
@@ -585,7 +583,7 @@ public final class TardisEvents {
          * @param control
          *            the control that was used
          */
-        void onUse(Control control, Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick);
+        void onUse(Control control, Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick);
     }
 
 

@@ -1,17 +1,13 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
@@ -25,19 +21,21 @@ import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.register.unlockable.Unlockable;
 import dev.amble.lib.register.unlockable.UnlockableRegistry;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 
 public class UnlockCommand {
 
-    public static final SuggestionProvider<ServerCommandSource> CONSOLE_SUGGESTION = (context,
+    public static final SuggestionProvider<CommandSourceStack> CONSOLE_SUGGESTION = (context,
             builder) -> IdentifierWildcardArgumentType.suggestWildcardIds(builder,
                     ConsoleVariantRegistry.getInstance());
-    public static final SuggestionProvider<ServerCommandSource> DESKTOP_SUGGESTION = (context,
+    public static final SuggestionProvider<CommandSourceStack> DESKTOP_SUGGESTION = (context,
             builder) -> IdentifierWildcardArgumentType.suggestWildcardIds(builder, DesktopRegistry.getInstance());
-    public static final SuggestionProvider<ServerCommandSource> EXTERIOR_SUGGESTION = (context,
+    public static final SuggestionProvider<CommandSourceStack> EXTERIOR_SUGGESTION = (context,
             builder) -> IdentifierWildcardArgumentType.suggestWildcardIds(builder,
                     ExteriorVariantRegistry.getInstance());
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(AITMod.MOD_ID).then(literal("unlock")
                 .requires(source -> PermissionAPICompat.hasPermission(source, "ait.command.unlock", 2))
                 .then(argument("tardis", TardisArgumentType.tardis())
@@ -50,40 +48,40 @@ public class UnlockCommand {
     }
 
     private static <T extends Identifiable & Unlockable & Nameable> int unlock(
-            CommandContext<ServerCommandSource> context, Text type, Wildcard<T> wildcard,
+            CommandContext<CommandSourceStack> context, Component type, Wildcard<T> wildcard,
             UnlockableRegistry<T> registry) throws CommandSyntaxException {
-        ServerCommandSource source = context.getSource();
+        CommandSourceStack source = context.getSource();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
 
         if (wildcard.isPresent()) {
             T t = wildcard.get();
             source.getServer().execute(() -> tardis.stats().unlock(t));
 
-            source.sendMessage(Text.translatableWithFallback("command.ait.unlock.some", "Granted [%s] %s %s",
+            source.sendSystemMessage(Component.translatableWithFallback("command.ait.unlock.some", "Granted [%s] %s %s",
                     tardis.getUuid(), t.name(), type));
 
             return Command.SINGLE_SUCCESS;
         }
 
         source.getServer().execute(() -> registry.unlockAll(tardis));
-        source.sendMessage(Text.translatableWithFallback("command.ait.unlock.all", "Granted [%s] every %s",
+        source.sendSystemMessage(Component.translatableWithFallback("command.ait.unlock.all", "Granted [%s] every %s",
                 tardis.getUuid(), type));
 
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int unlockConsole(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return unlock(context, Text.translatable("command.ait.unlock.type.console"),
+    private static int unlockConsole(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return unlock(context, Component.translatable("command.ait.unlock.type.console"),
                 IdentifierWildcardArgumentType.getConsoleVariantArgument(context, "console"), ConsoleVariantRegistry.getInstance());
     }
 
-    private static int unlockDesktop(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return unlock(context, Text.translatable("command.ait.unlock.type.desktop"),
+    private static int unlockDesktop(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return unlock(context, Component.translatable("command.ait.unlock.type.desktop"),
                 IdentifierWildcardArgumentType.getDesktopArgument(context, "desktop"), DesktopRegistry.getInstance());
     }
 
-    private static int unlockExterior(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return unlock(context, Text.translatable("command.ait.unlock.type.exterior_variant"),
+    private static int unlockExterior(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return unlock(context, Component.translatable("command.ait.unlock.type.exterior_variant"),
                 IdentifierWildcardArgumentType.getExteriorVariantArgument(context, "exterior"),
                 ExteriorVariantRegistry.getInstance());
     }

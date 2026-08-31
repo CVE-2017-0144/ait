@@ -1,6 +1,16 @@
 package dev.amble.ait.mixin;
 
 import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -8,18 +18,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.ExtraPushableEntity;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.AITTags;
@@ -34,9 +32,9 @@ public abstract class LivingEntityMixin extends Entity implements ExtraPushableE
 
     @Unique private TriState ait$pushable = TriState.DEFAULT;
 
-    @Shadow public abstract ItemStack getEquippedStack(EquipmentSlot var1);
+    @Shadow public abstract ItemStack getItemBySlot(EquipmentSlot var1);
 
-    public LivingEntityMixin(EntityType<?> type, World world) {
+    public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
@@ -44,20 +42,20 @@ public abstract class LivingEntityMixin extends Entity implements ExtraPushableE
     public void ait$tick(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
-        if (entity instanceof PlayerEntity player
+        if (entity instanceof Player player
                 && (player.isCreative() || player.isSpectator()))
              return;
 
-        ItemStack stack = entity.getEquippedStack(EquipmentSlot.HEAD);
+        ItemStack stack = entity.getItemBySlot(EquipmentSlot.HEAD);
 
-        if (stack.isIn(AITTags.Items.FULL_RESPIRATORS) || stack.isIn(AITTags.Items.HALF_RESPIRATORS))
+        if (stack.is(AITTags.Items.FULL_RESPIRATORS) || stack.is(AITTags.Items.HALF_RESPIRATORS))
             return;
 
-        if (entity.getWorld() instanceof TardisServerWorld tardisWorld && !tardisWorld.getTardis().isGrowth()
+        if (entity.level() instanceof TardisServerWorld tardisWorld && !tardisWorld.getTardis().isGrowth()
                 && !tardisWorld.getTardis().subsystems().lifeSupport().isEnabled()) {
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 1,
+            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 1,
                     200, false, false));
-            entity.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
+            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
                     200, 1, false, false));
         }
     }
@@ -82,20 +80,20 @@ public abstract class LivingEntityMixin extends Entity implements ExtraPushableE
         cir.setReturnValue(pushable);
     }
 
-    @Inject(method = "tickInVoid", at = @At("HEAD"))
+    @Inject(method = "onBelowWorld", at = @At("HEAD"))
     public void tickVoid(CallbackInfo ci) {
-        if (!this.getWorld().isClient() && this.getWorld().getRegistryKey() == AITDimensions.TIME_VORTEX_WORLD) {
+        if (!this.level().isClientSide() && this.level().dimension() == AITDimensions.TIME_VORTEX_WORLD) {
             if (WorldUtil.getTravelWorlds().isEmpty())
                 return;
 
             LivingEntity entity = (LivingEntity) (Object) this;
-            int worldIndex = this.getWorld().getRandom().nextInt(WorldUtil.getTravelWorlds().size());
+            int worldIndex = this.level().getRandom().nextInt(WorldUtil.getTravelWorlds().size());
 
-            ServerWorld world = WorldUtil.getTravelWorlds().get(worldIndex);
-            CachedDirectedGlobalPos safe = CachedDirectedGlobalPos.create(world, entity.getBlockPos(), (byte) 0);
+            ServerLevel world = WorldUtil.getTravelWorlds().get(worldIndex);
+            CachedDirectedGlobalPos safe = CachedDirectedGlobalPos.create(world, entity.blockPosition(), (byte) 0);
 
             SafePosSearch.wrapSafe(safe, SafePosSearch.Kind.MEDIAN, true,
-                    result -> TeleportUtil.teleport(entity, world, result.getPos().toCenterPos(), entity.getYaw()));
+                    result -> TeleportUtil.teleport(entity, world, result.getPos().getCenter(), entity.getYRot()));
         }
     }
 }

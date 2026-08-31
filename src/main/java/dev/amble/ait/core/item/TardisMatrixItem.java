@@ -1,33 +1,30 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
 
 public class TardisMatrixItem extends Item {
-    public TardisMatrixItem(Settings settings) {
+    public TardisMatrixItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ItemStack getDefaultStack() {
-        return super.getDefaultStack();
+    public ItemStack getDefaultInstance() {
+        return super.getDefaultInstance();
     }
 
     public static ItemStack randomize() {
         ItemStack stack = new ItemStack(AITItems.TARDIS_MATRIX);
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putInt("r", (int) (Math.random() * 256));
         nbt.putInt("g", (int) (Math.random() * 256));
         nbt.putInt("b", (int) (Math.random() * 256));
@@ -36,7 +33,7 @@ public class TardisMatrixItem extends Item {
     }
 
     public int[] getColor(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         if (!nbt.contains("r") && !nbt.contains("g") && !nbt.contains("b")) {
             return new int[]{255, 255, 255};
         }
@@ -55,12 +52,12 @@ public class TardisMatrixItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
-        tooltip.add(Text.translatable("tooltip.ait.tardis_matrix.name", stack.getOrCreateNbt().getString("name"))
-                .formatted(Formatting.BLUE));
-        tooltip.add(Text.literal("#" + colorToInt(getColor(stack)[0], getColor(stack)[1], getColor(stack)[2]))
-                .formatted(Formatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.ait.tardis_matrix.name", stack.getOrCreateTag().getString("name"))
+                .withStyle(ChatFormatting.BLUE));
+        tooltip.add(Component.literal("#" + colorToInt(getColor(stack)[0], getColor(stack)[1], getColor(stack)[2]))
+                .withStyle(ChatFormatting.GRAY));
     }
 }

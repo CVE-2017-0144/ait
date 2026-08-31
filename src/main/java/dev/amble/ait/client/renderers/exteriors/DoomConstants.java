@@ -1,51 +1,50 @@
 package dev.amble.ait.client.renderers.exteriors;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.Tardis;
+import net.minecraft.resources.ResourceLocation;
 
 // TODO: move to client exterior schema or sum
 public class DoomConstants {
 
-    public static final Identifier DOOM_FRONT_BACK = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back.png");
-    public static final Identifier DOOM_LEFT_SIDE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side.png");
-    public static final Identifier DOOM_RIGHT_SIDE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side.png");
-    public static final Identifier DOOM_LEFT_DIAGONAL = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal.png");
-    public static final Identifier DOOM_RIGHT_DIAGONAL = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal.png");
-    public static final Identifier DOOM_BLANK_DIAGONAL = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_BLANK_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_blank_diagonal.png");
-    public static final Identifier DOOM_TEXTURE_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_TEXTURE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_emission.png");
-    public static final Identifier DOOM_LEFT_SIDE_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side_emission.png");
-    public static final Identifier DOOM_RIGHT_SIDE_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side_emission.png");
-    public static final Identifier DOOM_DIAGONAL_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_DIAGONAL_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_diagonal_emission.png");
-    public static final Identifier DOOM_LEFT_DIAGONAL_OPEN = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal_open.png");
-    public static final Identifier DOOM_RIGHT_DIAGONAL_OPEN = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal_open.png");
-    public static final Identifier DOOM_LEFT_SIDE_OPEN = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE_OPEN = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side_open.png");
-    public static final Identifier DOOM_RIGHT_SIDE_OPEN = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE_OPEN = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side_open.png");
-    public static final Identifier DOOM_FRONT_BACK_OPEN = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK_OPEN = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back_open.png");
-    public static final Identifier DOOM_LEFT_DIAGONAL_OPEN_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal_open_emission.png");
-    public static final Identifier DOOM_RIGHT_DIAGONAL_OPEN_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal_open_emission.png");
-    public static final Identifier DOOM_FRONT_BACK_OPEN_EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back_open_emission.png");
 
-    public static Identifier getTextureForRotation(float rotation, Tardis tardis) {
+    public static ResourceLocation getTextureForRotation(float rotation, Tardis tardis) {
         boolean bl = tardis.door().isOpen();
         if (rotation > 70 && rotation < 110) {
             return bl ? DOOM_RIGHT_SIDE_OPEN : DOOM_RIGHT_SIDE;
@@ -62,7 +61,7 @@ public class DoomConstants {
         }
     }
 
-    public static Identifier getEmissionForRotation(Identifier identifier, Tardis tardis) {
+    public static ResourceLocation getEmissionForRotation(ResourceLocation identifier, Tardis tardis) {
         boolean bl = tardis.door().isOpen();
         if (identifier == DOOM_RIGHT_DIAGONAL || identifier == DOOM_RIGHT_DIAGONAL_OPEN) {
             return bl ? DOOM_RIGHT_DIAGONAL_OPEN_EMISSION : DOOM_DIAGONAL_EMISSION;

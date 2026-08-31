@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 
 
 // TODO: when finished, move to SonicRendering
 public class SonicModelLoader {
 
-    public static List<Identifier> toLoad;
+    public static List<ResourceLocation> toLoad;
 
     public static void init() {
         ModelLoadingPlugin.register(context -> {
@@ -22,11 +21,11 @@ public class SonicModelLoader {
         });
     }
 
-    public static void fromMap(ResourceFinder finder, Map<Identifier, Resource> map) {
-        List<Identifier> result = new ArrayList<>();
+    public static void fromMap(FileToIdConverter finder, Map<ResourceLocation, Resource> map) {
+        List<ResourceLocation> result = new ArrayList<>();
 
         map.forEach((identifier, resource) -> {
-            result.add(finder.toResourceId(identifier));
+            result.add(finder.fileToId(identifier));
         });
 
         toLoad = result;

@@ -5,25 +5,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.TardisEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
-@Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity {
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerEntityMixin extends Player {
 
-    public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
+    public ServerPlayerEntityMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
         super(world, pos, yaw, gameProfile);
     }
 
-    @Inject(method = "sendUnloadChunkPacket", at = @At("TAIL"))
+    @Inject(method = "untrackChunk", at = @At("TAIL"))
     public void ait$sendUnloadChunkPacket(ChunkPos chunkPos, CallbackInfo ci) {
         if (this.isAlive())
-            TardisEvents.UNLOAD_TARDIS.invoker().unload((ServerPlayerEntity) (Object) this, chunkPos);
+            TardisEvents.UNLOAD_TARDIS.invoker().unload((ServerPlayer) (Object) this, chunkPos);
     }
 }

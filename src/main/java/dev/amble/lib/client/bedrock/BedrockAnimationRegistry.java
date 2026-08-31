@@ -19,9 +19,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class BedrockAnimationRegistry implements SimpleSynchronousResourceReload
 	private final Map<String, BedrockAnimation.Group> groups = new HashMap<>();
 
 	public BedrockAnimationRegistry() {
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
 	}
 
 	public BedrockAnimation get(String fileName, String animationName) {
@@ -52,23 +52,23 @@ public class BedrockAnimationRegistry implements SimpleSynchronousResourceReload
 	}
 
 	@Override
-	public Identifier getFabricId() {
+	public ResourceLocation getFabricId() {
 		return AmbleKit.id("bedrock_animation");
 	}
 
 	@Override
-	public void reload(ResourceManager manager) {
+	public void onResourceManagerReload(ResourceManager manager) {
 		int animationCount = 0;
 		groups.clear();
 
-		for (Identifier rawId : manager.findResources("bedrock", filename -> filename.getPath().endsWith(".animation.json")).keySet()) {
-			try (InputStream stream = manager.getResource(rawId).get().getInputStream()) {
+		for (ResourceLocation rawId : manager.listResources("bedrock", filename -> filename.getPath().endsWith(".animation.json")).keySet()) {
+			try (InputStream stream = manager.getResource(rawId).get().open()) {
 				JsonObject json = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject();
 
 				@Nullable JsonObject metadata = null;
-				Identifier metadataId = Identifier.of(rawId.getNamespace(), rawId.getPath().replaceFirst("\\.animation\\.json$", ".metadata.json"));
+				ResourceLocation metadataId = ResourceLocation.tryBuild(rawId.getNamespace(), rawId.getPath().replaceFirst("\\.animation\\.json$", ".metadata.json"));
 				if (manager.getResource(metadataId).isPresent()) {
-					try (InputStream metaStream = manager.getResource(metadataId).get().getInputStream()) {
+					try (InputStream metaStream = manager.getResource(metadataId).get().open()) {
 						metadata = JsonParser.parseReader(new InputStreamReader(metaStream)).getAsJsonObject();
 					} catch (Exception e) {
 						AmbleKit.LOGGER.error("Error occurred while loading metadata for bedrock model {}", rawId.toString(), e);

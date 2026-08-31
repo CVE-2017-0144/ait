@@ -3,28 +3,32 @@ package dev.amble.ait.client.renderers;
 import java.util.Locale;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.profiler.Profiler;
-
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blocks.DetectorBlock;
 import dev.amble.ait.core.engine.DurableSubSystem;
@@ -38,68 +42,68 @@ import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.core.world.TardisServerWorld;
 
 public class SonicRendering {
-    private static final Identifier SELECTED = AITMod.id("textures/marker/landing.png");
-    public static final Identifier SELECTED_RED = AITMod.id("textures/marker/landing_red.png");
+    private static final ResourceLocation SELECTED = AITMod.id("textures/marker/landing.png");
+    public static final ResourceLocation SELECTED_RED = AITMod.id("textures/marker/landing_red.png");
 
-    private final MinecraftClient client;
-    private final Profiler profiler;
+    private final Minecraft client;
+    private final ProfilerFiller profiler;
 
-    public SonicRendering(MinecraftClient client) {
+    public SonicRendering(Minecraft client) {
         this.client = client;
         this.profiler = client.getProfiler();
     }
     public SonicRendering() {
-        this(MinecraftClient.getInstance());
+        this(Minecraft.getInstance());
     }
 
-    public static void renderFloorTexture(BlockPos pos, Identifier texture, @Nullable Identifier previous, boolean spinning) {
-        renderFloorTexture(new Vec3d(pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1), texture, previous, spinning);
+    public static void renderFloorTexture(BlockPos pos, ResourceLocation texture, @Nullable ResourceLocation previous, boolean spinning) {
+        renderFloorTexture(new Vec3(pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1), texture, previous, spinning);
     }
 
-    public static void renderFloorTexture(Vec3d target, Identifier texture, @Nullable Identifier previous, boolean spinning) {
-        Profiler profiler = MinecraftClient.getInstance().world.getProfiler();
+    public static void renderFloorTexture(Vec3 target, ResourceLocation texture, @Nullable ResourceLocation previous, boolean spinning) {
+        ProfilerFiller profiler = Minecraft.getInstance().level.getProfiler();
 
         profiler.push("get");
-        MinecraftClient client = MinecraftClient.getInstance();
-        Camera camera = client.gameRenderer.getCamera();
-        MatrixStack matrices = new MatrixStack();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
+        Minecraft client = Minecraft.getInstance();
+        Camera camera = client.gameRenderer.getMainCamera();
+        PoseStack matrices = new PoseStack();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
+        Matrix4f positionMatrix = matrices.last().pose();
 
-        profiler.swap("transform");
-        Vec3d transform = target.subtract(camera.getPos());
+        profiler.popPush("transform");
+        Vec3 transform = target.subtract(camera.getPosition());
 
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180f));
+        matrices.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        matrices.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180f));
         matrices.translate(transform.x - 0.5f, transform.y + 0.05f, transform.z - 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90f));
+        matrices.mulPose(Axis.XP.rotationDegrees(90f));
 
         if (spinning) {
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(client.player.age / 200f * 360f));
+            matrices.mulPose(Axis.ZP.rotationDegrees(client.player.tickCount / 200f * 360f));
         }
         matrices.translate(-0.5f, 0.5f, 0f);
 
-        profiler.swap("vertexes");
+        profiler.popPush("vertexes");
 
-        if (!buffer.isBuilding()) buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
+        if (!buffer.building()) buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 
-        buffer.vertex(positionMatrix, 0, 0, 0).color(1f, 1f, 1f, 1f).texture(0f, 0f).next();
-        buffer.vertex(positionMatrix, 0, -1, 0).color(1f, 1f, 1f, 1f).texture(0f, 1f).next();
-        buffer.vertex(positionMatrix, 1, -1, 0).color(1f, 1f, 1f, 1f).texture(1f, 1f).next();
-        buffer.vertex(positionMatrix, 1, 0, 0).color(1f, 1f, 1f, 1f).texture(1f, 0f).next();
+        buffer.vertex(positionMatrix, 0, 0, 0).color(1f, 1f, 1f, 1f).uv(0f, 0f).endVertex();
+        buffer.vertex(positionMatrix, 0, -1, 0).color(1f, 1f, 1f, 1f).uv(0f, 1f).endVertex();
+        buffer.vertex(positionMatrix, 1, -1, 0).color(1f, 1f, 1f, 1f).uv(1f, 1f).endVertex();
+        buffer.vertex(positionMatrix, 1, 0, 0).color(1f, 1f, 1f, 1f).uv(1f, 0f).endVertex();
 
         boolean shouldRender = !texture.equals(previous);
 
         if (shouldRender) {
-            profiler.swap("draw");
-            RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
+            profiler.popPush("draw");
+            RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.setShaderTexture(0, texture);
             RenderSystem.disableCull();
             RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
-            Tessellator.getInstance().draw();
+            Tesselator.getInstance().end();
 
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
             RenderSystem.enableCull();
@@ -109,14 +113,14 @@ public class SonicRendering {
     }
 
     public void renderWorld(WorldRenderContext context) {
-        Profiler worldProfiler = context.profiler();
+        ProfilerFiller worldProfiler = context.profiler();
         worldProfiler.push("sonic");
         worldProfiler.push("world");
 
         if (client.player == null)
             return;
 
-        if (isPlayerHoldingSonicOf(SonicMode.Modes.TARDIS) && !TardisServerWorld.isTardisDimension(client.player.getWorld()))
+        if (isPlayerHoldingSonicOf(SonicMode.Modes.TARDIS) && !TardisServerWorld.isTardisDimension(client.player.level()))
             renderSelectedBlock(context);
 
         worldProfiler.pop();
@@ -124,28 +128,28 @@ public class SonicRendering {
     }
 
     private void renderSelectedBlock(WorldRenderContext context) {
-        Profiler worldProfiler = context.profiler();
+        ProfilerFiller worldProfiler = context.profiler();
         worldProfiler.push("target");
 
-        if (!(client.crosshairTarget instanceof BlockHitResult crosshair)) {
+        if (!(client.hitResult instanceof BlockHitResult crosshair)) {
             profiler.pop();
             profiler.pop();
             return;
         }
 
-        if (client.player == null || client.world == null) {
+        if (client.player == null || client.level == null) {
             profiler.pop();
             return;
         }
 
         BlockPos targetPos = crosshair.getBlockPos();
-        BlockState state = client.world.getBlockState(targetPos.down());
+        BlockState state = client.level.getBlockState(targetPos.below());
         if (state.isAir()) {
             profiler.pop();
             return;
         }
 
-        Tardis tardis = SonicItem.getTardisStatic(client.world, getSonicStack(client.player));
+        Tardis tardis = SonicItem.getTardisStatic(client.level, getSonicStack(client.player));
 
         if (tardis == null) {
             profiler.pop();
@@ -166,84 +170,84 @@ public class SonicRendering {
         worldProfiler.pop();
     }
 
-    public void renderGui(DrawContext context, float delta) {
-        if (client.world == null) return;
+    public void renderGui(GuiGraphics context, float delta) {
+        if (client.level == null) return;
         if (!isPlayerHoldingScanningSonic()) return;
 
-        profiler.swap("sonic");
+        profiler.popPush("sonic");
         profiler.push("gui");
 
         profiler.push("target");;
-        if (!(client.crosshairTarget instanceof BlockHitResult crosshair)) {
+        if (!(client.hitResult instanceof BlockHitResult crosshair)) {
             profiler.pop();
             profiler.pop();
             return;
         }
         BlockPos targetPos = crosshair.getBlockPos();
-        BlockState state = client.world.getBlockState(targetPos);
+        BlockState state = client.level.getBlockState(targetPos);
 
-        profiler.swap("redstone");
+        profiler.popPush("redstone");
         renderRedstone(context, state, targetPos);
-        profiler.swap("subsystem_info");
+        profiler.popPush("subsystem_info");
         renderSubSystemInfo(context, targetPos);
-        profiler.swap("detector_type");
+        profiler.popPush("detector_type");
         renderDetectorState(context, targetPos);
 
         profiler.pop();
         profiler.pop();
     }
 
-    private void renderRedstone(DrawContext context, BlockState state, BlockPos pos) {
+    private void renderRedstone(GuiGraphics context, BlockState state, BlockPos pos) {
         profiler.push("power");
         renderPower(context, pos);
         profiler.pop();
     }
 
-    private void renderPower(DrawContext context, BlockPos pos) {
-        int power = this.client.world.getReceivedRedstonePower(pos);
+    private void renderPower(GuiGraphics context, BlockPos pos) {
+        int power = this.client.level.getBestNeighborSignal(pos);
         if (power == 0) return;
 
-        context.drawCenteredTextWithShadow(client.textRenderer, "" + power, getCentreX(), (int) (getMaxY() * 0.4), Colors.WHITE);
+        context.drawCenteredString(client.font, "" + power, getCentreX(), (int) (getMaxY() * 0.4), CommonColors.WHITE);
     }
 
-    private void renderDetectorState(DrawContext context, BlockPos pos) {
-        ClientWorld world = client.world;
+    private void renderDetectorState(GuiGraphics context, BlockPos pos) {
+        ClientLevel world = client.level;
         if (world == null) return;
         BlockState state = world.getBlockState(pos);
         if (!(state.getBlock() instanceof DetectorBlock)) return;
-        DetectorBlock.Type type = state.get(DetectorBlock.TYPE);
-        context.drawCenteredTextWithShadow(client.textRenderer,
-                Text.translatable("block.ait.detector.type." + type.name().toLowerCase(Locale.ROOT)), getCentreX(),
-                (int) (getMaxY() * 0.4), Colors.WHITE);
+        DetectorBlock.Type type = state.getValue(DetectorBlock.TYPE);
+        context.drawCenteredString(client.font,
+                Component.translatable("block.ait.detector.type." + type.name().toLowerCase(Locale.ROOT)), getCentreX(),
+                (int) (getMaxY() * 0.4), CommonColors.WHITE);
     }
 
-    private void renderSubSystemInfo(DrawContext context, BlockPos pos) {
-        if (!(client.world.getBlockEntity(pos) instanceof SubSystemBlockEntity be)) return;
+    private void renderSubSystemInfo(GuiGraphics context, BlockPos pos) {
+        if (!(client.level.getBlockEntity(pos) instanceof SubSystemBlockEntity be)) return;
 
         SubSystem system = be.system();
         if (system == null) return;
 
-        Text text = Text.empty();
+        Component text = Component.empty();
 
         if (system instanceof DurableSubSystem) {
-            text = Text.literal((Math.round(((DurableSubSystem) be.system()).durability())) + " / " + DurableSubSystem.MAX_DURABILITY);
+            text = Component.literal((Math.round(((DurableSubSystem) be.system()).durability())) + " / " + DurableSubSystem.MAX_DURABILITY);
         }
         if (!system.isEnabled() && !(system instanceof EngineSystem)) {
-            text = Text.translatable("tardis.message.subsystem.requires_link");
+            text = Component.translatable("tardis.message.subsystem.requires_link");
         }
 
-        context.drawCenteredTextWithShadow(client.textRenderer, text, getCentreX(), (int) (getMaxY() * 0.42), Colors.WHITE);
+        context.drawCenteredString(client.font, text, getCentreX(), (int) (getMaxY() * 0.42), CommonColors.WHITE);
 
         text = system.name();
-        context.drawCenteredTextWithShadow(client.textRenderer, text, getCentreX(), (int) (getMaxY() * 0.46), Colors.WHITE);
+        context.drawCenteredString(client.font, text, getCentreX(), (int) (getMaxY() * 0.46), CommonColors.WHITE);
     }
 
     private int getMaxX() {
-        return client.getWindow().getScaledWidth();
+        return client.getWindow().getGuiScaledWidth();
     }
 
     private int getMaxY() {
-        return client.getWindow().getScaledHeight() ;
+        return client.getWindow().getGuiScaledHeight() ;
     }
 
 
@@ -256,7 +260,7 @@ public class SonicRendering {
     }
 
     private int getTextWidth(String text) {
-        return client.textRenderer.getWidth(text);
+        return client.font.width(text);
     }
 
     private static SonicRendering INSTANCE;
@@ -284,7 +288,7 @@ public class SonicRendering {
     }
 
     public static boolean isPlayerHoldingSonicOf(SonicMode mode) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (player == null)
             return false;
@@ -297,12 +301,12 @@ public class SonicRendering {
         return isSonicOf(mode, sonic);
     }
 
-    public static ItemStack getSonicStack(PlayerEntity player) {
-        if (player.getMainHandStack().getItem() instanceof SonicItem)
-            return player.getMainHandStack();
+    public static ItemStack getSonicStack(Player player) {
+        if (player.getMainHandItem().getItem() instanceof SonicItem)
+            return player.getMainHandItem();
 
-        if (player.getOffHandStack().getItem() instanceof SonicItem)
-            return player.getOffHandStack();
+        if (player.getOffhandItem().getItem() instanceof SonicItem)
+            return player.getOffhandItem();
 
         return null;
     }

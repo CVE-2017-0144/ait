@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -82,14 +80,14 @@ public class MoodHandler extends TardisComponent implements TardisTickable {
 
     public void rollForMoodDictatedEvent() {
         int rand = AITMod.RANDOM.nextInt(0, MoodEventPoolRegistry.REGISTRY.size());
-        MoodDictatedEvent moodEvent = MoodEventPoolRegistry.REGISTRY.get(rand);
+        MoodDictatedEvent moodEvent = MoodEventPoolRegistry.REGISTRY.byId(rand);
 
         if (moodEvent == null)
             return;
 
         this.moodEvent = moodEvent;
-        this.tardis.asServer().world().getPlayers().forEach(player -> player
-                .sendMessage(Text.literal(this.moodEvent.id().getPath()).formatted(Formatting.BOLD), true));
+        this.tardis.asServer().world().players().forEach(player -> player
+                .displayClientMessage(Component.literal(this.moodEvent.id().getPath()).withStyle(ChatFormatting.BOLD), true));
 
         raceMoods();
     }
@@ -110,7 +108,7 @@ public class MoodHandler extends TardisComponent implements TardisTickable {
         TardisMood.Moods key = moodWin.getKey();
 
         this.winningMood = new TardisMood(key, moodWin.getKey().alignment(), moodWin.getValue());
-        this.tardis.getDesktop().playSoundAtEveryConsole(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.BLOCKS, 1, 1);
+        this.tardis.getDesktop().playSoundAtEveryConsole(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1, 1);
     }
 
     private void handleNegativeMood(TardisMood.Alignment alignment) {

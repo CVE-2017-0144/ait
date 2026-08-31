@@ -3,8 +3,18 @@ package dev.amble.ait.module.planet.core;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.item.*;
-
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SwordItem;
 import dev.amble.ait.core.item.HandlesItem;
 import dev.amble.ait.module.planet.PlanetModule;
 import dev.amble.ait.module.planet.core.item.AnorthositeSwordItem;
@@ -18,16 +28,16 @@ public class PlanetItems extends ItemContainer {
     // SPACESUIT
 
     public static final Item SPACESUIT_HELMET = new SpacesuitItem(ArmorMaterials.IRON, ArmorItem.Type.HELMET,
-            new AItemSettings().maxDamage(240), true);
+            new AItemSettings().durability(240), true);
 
     public static final Item SPACESUIT_CHESTPLATE = new SpacesuitItem(ArmorMaterials.IRON, ArmorItem.Type.CHESTPLATE,
-            new AItemSettings().maxDamage(240), true);
+            new AItemSettings().durability(240), true);
 
     public static final Item SPACESUIT_LEGGINGS = new SpacesuitItem(ArmorMaterials.IRON, ArmorItem.Type.LEGGINGS,
-            new AItemSettings().maxDamage(240), true);
+            new AItemSettings().durability(240), true);
 
     public static final Item SPACESUIT_BOOTS = new SpacesuitItem(ArmorMaterials.IRON, ArmorItem.Type.BOOTS,
-            new AItemSettings().maxDamage(240), true);
+            new AItemSettings().durability(240), true);
 
     // TOOLS
     public static final Item MARTIAN_STONE_SWORD = new SwordItem(PlanetToolMaterial.MARTIAN_STONE, 3, -2.4f, new AItemSettings());
@@ -42,28 +52,28 @@ public class PlanetItems extends ItemContainer {
     public static final Item ANORTHOSITE_AXE = new AxeItem(PlanetToolMaterial.ANORTHOSITE, 3, 1f, new AItemSettings());
     public static final Item ANORTHOSITE_HOE = new HoeItem(PlanetToolMaterial.ANORTHOSITE, 1, 2f, new AItemSettings());
 
-    public static final Item HANDLES = new HandlesItem(new AItemSettings().maxCount(1)/*.group(PlanetModule.instance().getItemGroup())*/);
+    public static final Item HANDLES = new HandlesItem(new AItemSettings().stacksTo(1)/*.group(PlanetModule.instance().getItemGroup())*/);
 
     // MATERIALS
     public static final Item FABRIC = new Item(new AItemSettings());
 
     @Override
-    public @Nullable ItemGroup getDefaultGroup() {
+    public @Nullable CreativeModeTab getDefaultGroup() {
         return PlanetModule.instance().getItemGroup();
     }
 
     // ITEM GROUP TOOL PLACEMENT
     static {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
             entries.addAfter(Items.STONE_SWORD, MARTIAN_STONE_SWORD);
             entries.addAfter(MARTIAN_STONE_SWORD, ANORTHOSITE_SWORD);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.addAfter(Items.PAPER, FABRIC);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
             entries.addAfter(Items.STONE_HOE, MARTIAN_STONE_SHOVEL);
             entries.addAfter(MARTIAN_STONE_SHOVEL, MARTIAN_STONE_PICKAXE);
             entries.addAfter(MARTIAN_STONE_PICKAXE, MARTIAN_STONE_AXE);

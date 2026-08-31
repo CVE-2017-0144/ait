@@ -1,15 +1,13 @@
 package dev.amble.ait.data.schema.door.impl;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
 public class PoliceBoxCoralDoorVariant extends DoorSchema {
-    public static final Identifier REFERENCE = AITMod.id("door/police_box/coral");
+    public static final ResourceLocation REFERENCE = AITMod.id("door/police_box/coral");
 
     public PoliceBoxCoralDoorVariant() {
         super(REFERENCE);
@@ -21,7 +19,7 @@ public class PoliceBoxCoralDoorVariant extends DoorSchema {
     }
 
     @Override
-    public @Nullable Vec3d getPortalPosition() {
-        return new Vec3d(0, -0.125, -0.4);
+    public @Nullable Vec3 getPortalPosition() {
+        return new Vec3(0, -0.125, -0.4);
     }
 }

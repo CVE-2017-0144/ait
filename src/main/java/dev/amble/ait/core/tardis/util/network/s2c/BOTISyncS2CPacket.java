@@ -3,16 +3,14 @@ package dev.amble.ait.core.tardis.util.network.s2c;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.tardis.Tardis;
@@ -20,24 +18,24 @@ import dev.amble.ait.core.tardis.Tardis;
 public class BOTISyncS2CPacket implements FabricPacket {
     public static final PacketType<BOTISyncS2CPacket> TYPE = PacketType.create(AITMod.id("boti_sync"), BOTISyncS2CPacket::new);
     private final BlockPos pos;
-    private final RegistryKey<World> targetWorld;
+    private final ResourceKey<Level> targetWorld;
     private final BlockPos targetPos;
 
-    public BOTISyncS2CPacket(BlockPos pos, RegistryKey<World> targetWorld, BlockPos targetPos) {
+    public BOTISyncS2CPacket(BlockPos pos, ResourceKey<Level> targetWorld, BlockPos targetPos) {
         this.pos = pos;
         this.targetWorld = targetWorld;
         this.targetPos = targetPos;
     }
 
-    public BOTISyncS2CPacket(PacketByteBuf buf) {
+    public BOTISyncS2CPacket(FriendlyByteBuf buf) {
         this.pos = buf.readBlockPos();
-        this.targetWorld = buf.readRegistryKey(RegistryKeys.WORLD);
+        this.targetWorld = buf.readResourceKey(Registries.DIMENSION);
         this.targetPos = buf.readBlockPos();
     }
     @Override
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
-        buf.writeRegistryKey(targetWorld);
+        buf.writeResourceKey(targetWorld);
         buf.writeBlockPos(targetPos);
     }
 
@@ -47,9 +45,9 @@ public class BOTISyncS2CPacket implements FabricPacket {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> boolean handle(ClientPlayerEntity source, PacketSender response) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        World world = client.world;
+    public <T> boolean handle(LocalPlayer source, PacketSender response) {
+        Minecraft client = Minecraft.getInstance();
+        Level world = client.level;
         if (world == null) return false;
 
         BlockEntity exterior = world.getBlockEntity(this.pos);

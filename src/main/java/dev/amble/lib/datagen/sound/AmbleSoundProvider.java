@@ -9,13 +9,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.data.DataOutput;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.DataWriter;
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.SoundEvent;
-
+import net.minecraft.data.PackOutput;
+import net.minecraft.sounds.SoundEvent;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.util.StringCursor;
 
@@ -69,9 +67,9 @@ public class AmbleSoundProvider implements DataProvider {
     }
 
     @Override
-    public CompletableFuture<?> run(DataWriter writer) {
+    public CompletableFuture<?> run(CachedOutput writer) {
         getSoundsFromMod(dataOutput.getModId()).forEach(sound -> {
-            String path = sound.getId().getPath();
+            String path = sound.getLocation().getPath();
 
             addSound(path, false, sound);
 
@@ -90,11 +88,11 @@ public class AmbleSoundProvider implements DataProvider {
         sounds.forEach((soundName, soundEvents) ->
                 soundsJson.add(soundName, serializeSounds(soundEvents)));
 
-        return DataProvider.writeToPath(writer, soundsJson, getOutputPath());
+        return DataProvider.saveStable(writer, soundsJson, getOutputPath());
     }
 
     public Path getOutputPath() {
-        return dataOutput.resolvePath(DataOutput.OutputType.RESOURCE_PACK).resolve(dataOutput.getModId())
+        return dataOutput.getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(dataOutput.getModId())
                 .resolve("sounds.json");
     }
 
@@ -110,7 +108,7 @@ public class AmbleSoundProvider implements DataProvider {
         //tardis/moody/moody,tardis/moody/moody1,tardis/moody/moody2 =>
         //tardis/moody/moody:[tardis/moody/moody, tardis/moody/moody1, tardis/moody/moody2]
         for (SoundEventWrapper wrapper : wrappers) {
-            sounds.add(wrapper.event.getId().toString());
+            sounds.add(wrapper.event.getLocation().toString());
         }
 
         obj.add("sounds", sounds);
@@ -145,7 +143,7 @@ public class AmbleSoundProvider implements DataProvider {
     }
 
     public static Stream<SoundEvent> getSoundsFromMod(String namespace) {
-        return Registries.SOUND_EVENT.stream().filter(sound -> sound.getId().getNamespace().equals(namespace));
+        return BuiltInRegistries.SOUND_EVENT.stream().filter(sound -> sound.getLocation().getNamespace().equals(namespace));
     }
 
     static class SoundEventWrapper {
@@ -158,7 +156,7 @@ public class AmbleSoundProvider implements DataProvider {
 
         @Override
         public int hashCode() {
-            return event.getId().hashCode();
+            return event.getLocation().hashCode();
         }
     }
 }

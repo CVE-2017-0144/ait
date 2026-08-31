@@ -5,19 +5,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-import net.minecraft.world.chunk.WorldChunk;
-
 import dev.amble.ait.api.tardis.TardisEvents;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.chunk.LevelChunk;
 
-@Mixin(value = ThreadedAnvilChunkStorage.class, priority = 1001)
+@Mixin(value = ChunkMap.class, priority = 1001)
 public abstract class ThreadedAnvilChunkStorageMixin {
 
-    @Inject(method = "sendChunkDataPackets", at = @At("RETURN"))
-    public void sendChunkDataPackets(ServerPlayerEntity player, MutableObject<ChunkDataS2CPacket> cachedDataPacket, WorldChunk chunk, CallbackInfo ci) {
+    @Inject(method = "playerLoadedChunk", at = @At("RETURN"))
+    public void sendChunkDataPackets(ServerPlayer player, MutableObject<ClientboundLevelChunkWithLightPacket> cachedDataPacket, LevelChunk chunk, CallbackInfo ci) {
         TardisEvents.SYNC_TARDIS.invoker().sync(player, chunk.getPos());
     }
 }

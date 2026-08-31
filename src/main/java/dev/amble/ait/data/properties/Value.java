@@ -10,9 +10,7 @@ import java.util.function.Function;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.network.PacketByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisComponent;
@@ -126,7 +124,7 @@ public class Value<T> implements Disposable {
             this.sync();
     }
 
-    public void read(PacketByteBuf buf) {
+    public void read(FriendlyByteBuf buf) {
         if (this.property == null)
             throw new IllegalStateException(
                     "Couldn't get the parent property value! Maybe you forgot to initialize the value field on load?");
@@ -136,7 +134,7 @@ public class Value<T> implements Disposable {
         this.set(value, false);
     }
 
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         this.property.getType().encode(buf, this.value);
     }
 

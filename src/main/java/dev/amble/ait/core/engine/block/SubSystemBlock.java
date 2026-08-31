@@ -1,31 +1,29 @@
 package dev.amble.ait.core.engine.block;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.engine.DurableSubSystem;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.engine.block.generic.GenericStructureSystemBlockEntity;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlock;
 import dev.amble.ait.core.item.RepairToolItem;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public abstract class SubSystemBlock extends FluidLinkBlock {
     private final SubSystem.IdLike id;
 
-    protected SubSystemBlock(Settings settings, SubSystem.IdLike system) {
+    protected SubSystemBlock(Properties settings, SubSystem.IdLike system) {
         super(settings);
 
         this.id = system;
@@ -36,19 +34,19 @@ public abstract class SubSystemBlock extends FluidLinkBlock {
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (state.getBlock() != newState.getBlock() && !(world.isClient())) {
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
+        if (state.getBlock() != newState.getBlock() && !(world.isClientSide())) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
 
             if (blockEntity instanceof SubSystemBlockEntity be)
-                world.updateComparators(pos, this);
+                world.updateNeighbourForOutputSignal(pos, this);
         }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onRemove(state, world, pos, newState, moved);
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
         return (world1, pos, state1, blockEntity) -> {
             if (blockEntity instanceof SubSystemBlockEntity be) {
                 be.tick(world1, pos, state1);
@@ -57,22 +55,22 @@ public abstract class SubSystemBlock extends FluidLinkBlock {
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
                               BlockHitResult hit) {
-        ItemStack stack = player.getStackInHand(hand);
+        ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() instanceof RepairToolItem)
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof GenericStructureSystemBlockEntity be)
-            return be.useOn(state, world, player.isSneaking(), player, stack);
+            return be.useOn(state, world, player.isShiftKeyDown(), player, stack);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        super.randomDisplayTick(state, world, pos, random);
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+        super.animateTick(state, world, pos, random);
 
         if (!(world.getBlockEntity(pos) instanceof SubSystemBlockEntity be))
             return;

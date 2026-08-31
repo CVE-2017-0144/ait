@@ -7,21 +7,19 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.screens.widget.CallbackCheckboxWidget;
 import dev.amble.ait.core.blocks.AstralMapBlock;
@@ -30,21 +28,21 @@ import dev.amble.ait.core.util.WorldUtil;
 @Environment(EnvType.CLIENT)
 public class AstralMapScreen extends Screen {
 
-    private static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/gui/astral_map.png");
-    private static final Text SEARCH_TEXT = Text.translatable("gui.socialInteractions.search_hint")
-            .formatted(Formatting.ITALIC).formatted(Formatting.GRAY);
+    private static final Component SEARCH_TEXT = Component.translatable("gui.socialInteractions.search_hint")
+            .withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
     int bgHeight = 190;
     int bgWidth = 324;
     int left, top;
 
-    private TextFieldWidget searchBox;
+    private EditBox searchBox;
     private AstralMapListWidget entryList;
     private CallbackCheckboxWidget showStructuresCheckbox;
     private CallbackCheckboxWidget showBiomesCheckbox;
 
-    private static final Text SHOW_STRUCTURES_MESSAGE = Text.translatable("screen.ait.astral_map.show_structures");
-    private static final Text SHOW_BIOMES_MESSAGE = Text.translatable("screen.ait.astral_map.show_biomes");
+    private static final Component SHOW_STRUCTURES_MESSAGE = Component.translatable("screen.ait.astral_map.show_structures");
+    private static final Component SHOW_BIOMES_MESSAGE = Component.translatable("screen.ait.astral_map.show_biomes");
 
     public enum Category {
         STRUCTURES,
@@ -59,12 +57,12 @@ public class AstralMapScreen extends Screen {
     }
 
     public AstralMapScreen() {
-        super(Text.translatable("screen." + AITMod.MOD_ID + ".astral_map"));
-        this.client = MinecraftClient.getInstance();
+        super(Component.translatable("screen." + AITMod.MOD_ID + ".astral_map"));
+        this.minecraft = Minecraft.getInstance();
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -74,23 +72,23 @@ public class AstralMapScreen extends Screen {
         this.left = (this.width - this.bgWidth) / 2;
         super.init();
 
-        this.searchBox = new TextFieldWidget(this.client.textRenderer, this.left + 12,
+        this.searchBox = new EditBox(this.minecraft.font, this.left + 12,
                 this.top + 13, this.bgWidth - 26, 15, SEARCH_TEXT);
-        this.searchBox.setPlaceholder(SEARCH_TEXT);
-        this.searchBox.setChangedListener(this::onSearchChange);
+        this.searchBox.setHint(SEARCH_TEXT);
+        this.searchBox.setResponder(this::onSearchChange);
 
         this.showStructuresCheckbox = new CallbackCheckboxWidget(this.left + 11, this.top + 33,
                 20, 20, SHOW_STRUCTURES_MESSAGE, true, this::onShowStructuresChecked);
         this.showBiomesCheckbox = new CallbackCheckboxWidget(
-                this.left + this.client.textRenderer.getWidth(SHOW_STRUCTURES_MESSAGE) + 38, this.top + 33,
+                this.left + this.minecraft.font.width(SHOW_STRUCTURES_MESSAGE) + 38, this.top + 33,
                 20, 20, SHOW_BIOMES_MESSAGE, true, this::onShowBiomesChecked);
         this.entryList = new AstralMapListWidget(width, height, top + 63,
                 (height + bgHeight) / 2 - 9, 13);
 
-        this.addSelectableChild(searchBox);
-        this.addDrawableChild(showStructuresCheckbox);
-        this.addDrawableChild(showBiomesCheckbox);
-        this.addSelectableChild(entryList);
+        this.addWidget(searchBox);
+        this.addRenderableWidget(showStructuresCheckbox);
+        this.addRenderableWidget(showBiomesCheckbox);
+        this.addWidget(entryList);
         this.setInitialFocus(searchBox);
     }
 
@@ -99,19 +97,19 @@ public class AstralMapScreen extends Screen {
     }
 
     private void onShowStructuresChecked(CallbackCheckboxWidget checkbox) {
-        this.showBiomesCheckbox.active = checkbox.isChecked() || !this.showBiomesCheckbox.isChecked();
+        this.showBiomesCheckbox.active = checkbox.selected() || !this.showBiomesCheckbox.selected();
         this.entryList.toggleCategory(Category.STRUCTURES);
     }
 
     private void onShowBiomesChecked(CallbackCheckboxWidget checkbox) {
-        this.showStructuresCheckbox.active = checkbox.isChecked() || !this.showStructuresCheckbox.isChecked();
+        this.showStructuresCheckbox.active = checkbox.selected() || !this.showStructuresCheckbox.selected();
         this.entryList.toggleCategory(Category.BIOMES);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!this.searchBox.isFocused() && this.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
-            this.close();
+        if (!this.searchBox.isFocused() && this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            this.onClose();
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_ENTER) {
@@ -124,10 +122,10 @@ public class AstralMapScreen extends Screen {
     }
 
     private void exit(AstralMapListWidget.Entry entry) {
-        var packetByteBuf = PacketByteBufs.create().writeIdentifier(entry.identifier);
-        packetByteBuf.writeEnumConstant(entry.category);
+        var packetByteBuf = PacketByteBufs.create().writeResourceLocation(entry.identifier);
+        packetByteBuf.writeEnum(entry.category);
         ClientPlayNetworking.send(AstralMapBlock.REQUEST_SEARCH, packetByteBuf);
-        this.client.setScreen(null);
+        this.minecraft.setScreen(null);
     }
 
     @Override
@@ -137,11 +135,11 @@ public class AstralMapScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(RenderLayer.getEndGateway(), this.left + 4, this.top + 4, this.left + this.bgWidth - 4,
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        context.fill(RenderType.endGateway(), this.left + 4, this.top + 4, this.left + this.bgWidth - 4,
                 this.top + this.bgHeight - 4, 0xFFFFFF);
         context.fill(left + 2, top + 62, left + bgWidth - 4, top + bgHeight - 4, 0xAA000000);
-        context.drawTexture(TEXTURE, left, top, 0, 0, bgWidth, bgHeight, bgWidth, bgHeight);
+        context.blit(TEXTURE, left, top, 0, 0, bgWidth, bgHeight, bgWidth, bgHeight);
 
         this.searchBox.render(context, mouseX, mouseY, delta);
         this.entryList.render(context, mouseX, mouseY, delta);
@@ -151,12 +149,12 @@ public class AstralMapScreen extends Screen {
     /**
      * Widget to display a searchable list of biomes and structures to locate
      */
-     class AstralMapListWidget extends AlwaysSelectedEntryListWidget<AstralMapListWidget.Entry> {
+     class AstralMapListWidget extends ObjectSelectionList<AstralMapListWidget.Entry> {
 
         // Bit flags are used to filter which categories to show. All categories are initially shown, hence the
         // bit inversion of 0 for initialization
         private int shownCategories = ~0;
-        private final List<Entry> entries = new ArrayList<>();
+        private final List<dev.amble.ait.client.screens.AstralMapScreen.AstralMapListWidget.Entry> entries = new ArrayList<>();
         private final Map<String, String> mods = new HashMap<>();
         private String currentSearch = "";
 
@@ -166,13 +164,13 @@ public class AstralMapScreen extends Screen {
         private boolean shouldHover;
 
         public AstralMapListWidget(int width, int height, int top, int bottom, int elementHeight) {
-            super(AstralMapScreen.this.client, width, height, top, bottom, elementHeight);
-            this.setRenderHorizontalShadows(false);
+            super(AstralMapScreen.this.minecraft, width, height, top, bottom, elementHeight);
+            this.setRenderTopAndBottom(false);
             this.setRenderBackground(false);
 
             this.refreshEntries();
             this.replaceEntries(this.entries);
-            this.setFocused(this.getFirst());
+            this.setFocused(this.getFirstElement());
         }
 
         public String getModName(String modId) {
@@ -183,13 +181,13 @@ public class AstralMapScreen extends Screen {
         public void refreshEntries() {
             this.entries.clear();
             if (Category.STRUCTURES.isShown(this.shownCategories)) {
-                for (Identifier id : AstralMapBlock.structureIds) {
-                    this.entries.add(new Entry(id, Category.STRUCTURES, null));
+                for (ResourceLocation id : AstralMapBlock.structureIds) {
+                    this.entries.add(new dev.amble.ait.client.screens.AstralMapScreen.AstralMapListWidget.Entry(id, Category.STRUCTURES, null));
                 }
             }
             if (Category.BIOMES.isShown(this.shownCategories)) {
-                for (Identifier id : client.world.getRegistryManager().get(RegistryKeys.BIOME).getIds()) {
-                    this.entries.add(new Entry(id, Category.BIOMES, id.toTranslationKey("biome")));
+                for (ResourceLocation id : minecraft.level.registryAccess().registryOrThrow(Registries.BIOME).keySet()) {
+                    this.entries.add(new dev.amble.ait.client.screens.AstralMapScreen.AstralMapListWidget.Entry(id, Category.BIOMES, id.toLanguageKey("biome")));
                 }
             }
             this.entries.sort((e1, e2) -> e1.text.getString().compareToIgnoreCase(e2.text.getString()));
@@ -217,7 +215,7 @@ public class AstralMapScreen extends Screen {
             this.setScrollAmount(0);
             this.replaceEntries(this.entries);
             if (!this.children().isEmpty()) {
-                this.setFocused(this.getFirst());
+                this.setFocused(this.getFirstElement());
             }
         }
 
@@ -234,14 +232,14 @@ public class AstralMapScreen extends Screen {
         }
 
         @Override
-        protected int getScrollbarPositionX() {
+        protected int getScrollbarPosition() {
             return (this.width + bgWidth) / 2 - 18;
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
             // Adjust for scrollbar width
-            this.left = this.getMaxScroll() > 0 ? -5 : 0;
+            this.x0 = this.getMaxScroll() > 0 ? -5 : 0;
 
             if (this.lastMouseX == 0 && this.lastMouseY == 0) {
                 this.lastMouseX = mouseX;
@@ -257,26 +255,26 @@ public class AstralMapScreen extends Screen {
         /**
          * Entry representing a biome or structure
          */
-        class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
+        class Entry extends ObjectSelectionList.Entry<dev.amble.ait.client.screens.AstralMapScreen.AstralMapListWidget.Entry> {
 
-            private final Identifier identifier;
-            private final Text text;
+            private final ResourceLocation identifier;
+            private final Component text;
             private final String modName;
             public final Category category;
 
-            public Entry(Identifier identifier, Category category, @Nullable String translationKey) {
+            public Entry(ResourceLocation identifier, Category category, @Nullable String translationKey) {
                 this.identifier = identifier;
                 this.category = category;
                 // Only biomes have actual translation keys and some modded ones might not
                 if (translationKey != null) {
-                    this.text = Text.translatableWithFallback(translationKey, identifierToName(identifier));
+                    this.text = Component.translatableWithFallback(translationKey, identifierToName(identifier));
                 } else {
-                    this.text = Text.literal(identifierToName(identifier));
+                    this.text = Component.literal(identifierToName(identifier));
                 }
                 this.modName = getModName(identifier.getNamespace());
             }
 
-            public static String identifierToName(Identifier id) {
+            public static String identifierToName(ResourceLocation id) {
                 try {
                     return WorldUtil.fakeTranslate(id.getPath());
                 } catch (Exception e) {
@@ -285,13 +283,13 @@ public class AstralMapScreen extends Screen {
             }
 
             @Override
-            public void render(DrawContext context, int index, int y, int x, int entryWidth,
+            public void render(GuiGraphics context, int index, int y, int x, int entryWidth,
                                int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-                int modNameWidth = client.textRenderer.getWidth(this.modName);
-                context.drawText(client.textRenderer, this.modName,
-                        x + getRowWidth() - modNameWidth - 4, y, Colors.GRAY, false);
+                int modNameWidth = minecraft.font.width(this.modName);
+                context.drawString(minecraft.font, this.modName,
+                        x + getRowWidth() - modNameWidth - 4, y, CommonColors.GRAY, false);
 
-                context.drawText(client.textRenderer, this.text, x + 2, y, Colors.WHITE, false);
+                context.drawString(minecraft.font, this.text, x + 2, y, CommonColors.WHITE, false);
 
                 if (hovered && AstralMapListWidget.this.shouldHover) {
                     AstralMapListWidget.this.setFocused(this);
@@ -309,7 +307,7 @@ public class AstralMapScreen extends Screen {
             }
 
             @Override
-            public Text getNarration() {
+            public Component getNarration() {
                 return this.text;
             }
         }

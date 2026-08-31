@@ -26,8 +26,8 @@ import dev.amble.ait.data.hum.Hum;
 import dev.amble.ait.registry.impl.HumRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 public class SwitcherManager<T extends Nameable, U> implements Nameable {
 
@@ -125,7 +125,7 @@ public class SwitcherManager<T extends Nameable, U> implements Nameable {
 
         private static void sync(VortexReference current, ClientTardis tardis) {
             tardis.stats().setVortexEffects(current.id());
-            sync(tardis, buf -> buf.writeIdentifier(current.id()), StatsHandler.VORTEX_PACKET);
+            sync(tardis, buf -> buf.writeResourceLocation(current.id()), StatsHandler.VORTEX_PACKET);
         }
     }
 
@@ -180,8 +180,8 @@ public class SwitcherManager<T extends Nameable, U> implements Nameable {
             tardis.travel().setAnimationFor(current.getExpectedState(), current.id());
 
             sync(tardis, buf -> {
-                buf.writeEnumConstant(current.getExpectedState());
-                buf.writeIdentifier(current.id());
+                buf.writeEnum(current.getExpectedState());
+                buf.writeResourceLocation(current.id());
             }, TravelHandler.ANIMATION_PACKET);
         }
     }
@@ -213,7 +213,7 @@ public class SwitcherManager<T extends Nameable, U> implements Nameable {
         private static void sync(FlightSound current, ClientTardis tardis) {
             tardis.stats().setFlightEffects(current.id());
 
-            sync(tardis, buf -> buf.writeIdentifier(current.id()), StatsHandler.FLIGHT_SOUND_PACKET);
+            sync(tardis, buf -> buf.writeResourceLocation(current.id()), StatsHandler.FLIGHT_SOUND_PACKET);
         }
     }
 
@@ -247,9 +247,9 @@ public class SwitcherManager<T extends Nameable, U> implements Nameable {
         }
     }
 
-    public static void sync(Tardis tardis, Consumer<PacketByteBuf> bufConsumer, Identifier channel) {
-        PacketByteBuf bufs = PacketByteBufs.create();
-        bufs.writeUuid(tardis.getUuid());
+    public static void sync(Tardis tardis, Consumer<FriendlyByteBuf> bufConsumer, ResourceLocation channel) {
+        FriendlyByteBuf bufs = PacketByteBufs.create();
+        bufs.writeUUID(tardis.getUuid());
         bufConsumer.accept(bufs);
         ClientPlayNetworking.send(channel, bufs);
     }

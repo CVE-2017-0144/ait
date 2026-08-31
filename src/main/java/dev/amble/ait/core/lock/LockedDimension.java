@@ -4,34 +4,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.ItemStack;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.lib.register.unlockable.Unlockable;
 
-public record LockedDimension(Identifier dimension, ItemStack stack) implements Unlockable, Nameable {
-    public static final Codec<LockedDimension> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("dimension").forGetter(LockedDimension::dimension),
+public record LockedDimension(ResourceLocation dimension, ItemStack stack) implements Unlockable, Nameable {
+    public static final Codec<LockedDimension> CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("dimension").forGetter(LockedDimension::dimension),
             ItemStack.CODEC.fieldOf("stack").forGetter(LockedDimension::stack))
             .apply(instance, LockedDimension::new)));
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.dimension();
     }
 
@@ -66,7 +63,7 @@ public record LockedDimension(Identifier dimension, ItemStack stack) implements 
     }
 
     @Override
-    public Text text() {
-        return WorldUtil.worldText(RegistryKey.of(RegistryKeys.WORLD, this.dimension()), false);
+    public Component text() {
+        return WorldUtil.worldText(ResourceKey.create(Registries.DIMENSION, this.dimension()), false);
     }
 }

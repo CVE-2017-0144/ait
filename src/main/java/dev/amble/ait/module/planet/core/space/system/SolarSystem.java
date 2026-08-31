@@ -2,20 +2,18 @@ package dev.amble.ait.module.planet.core.space.system;
 
 import java.util.Arrays;
 import java.util.HashSet;
-
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 
 public class SolarSystem extends HashSet<Planet> implements Nameable {
-    protected final Text name;
+    protected final Component name;
 
-    public SolarSystem(Text name) {
+    public SolarSystem(Component name) {
         this.name = name;
     }
-    public SolarSystem(Text name, Planet... planets) {
+    public SolarSystem(Component name, Planet... planets) {
         this(name);
         this.addAll(Arrays.asList(planets));
     }
@@ -26,7 +24,7 @@ public class SolarSystem extends HashSet<Planet> implements Nameable {
     }
 
     @Override
-    public Text text() {
+    public Component text() {
         return name;
     }
 
@@ -34,7 +32,7 @@ public class SolarSystem extends HashSet<Planet> implements Nameable {
      * @return newly created set of all loaded planets
      */
     public static SolarSystem all() {
-        SolarSystem system = new SolarSystem(Text.of("AMBLE"));
+        SolarSystem system = new SolarSystem(Component.nullToEmpty("AMBLE"));
 
         system.addAll(PlanetRegistry.getInstance().toList());
 

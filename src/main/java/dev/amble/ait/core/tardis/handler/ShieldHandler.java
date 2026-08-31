@@ -1,18 +1,17 @@
 package dev.amble.ait.core.tardis.handler;
 
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.TridentEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -108,61 +107,61 @@ public class ShieldHandler extends KeyedTardisComponent implements TardisTickabl
         tardis.removeFuel(2 * travel.instability()); // idle drain of 2 fuel per tick
         CachedDirectedGlobalPos globalExteriorPos = travel.position();
 
-        World world = globalExteriorPos.getWorld();
+        Level world = globalExteriorPos.getWorld();
         BlockPos exteriorPos = globalExteriorPos.getPos();
 
         if (this.visuallyShielded().get()) {
             shieldAmbienceTicks++;
             if (shieldAmbienceTicks >= 44) {
                 shieldAmbienceTicks = 0;
-                tardis.getExterior().playSound(AITSounds.SHIELD_AMBIANCE, SoundCategory.BLOCKS, 2f, 0.7f);
+                tardis.getExterior().playSound(AITSounds.SHIELD_AMBIANCE, SoundSource.BLOCKS, 2f, 0.7f);
             }
         }
-        world.getOtherEntities(null, new Box(exteriorPos).expand(8f)).stream()
-                .filter(entity -> entity.isPushable() || entity instanceof ProjectileEntity)
+        world.getEntities(null, new AABB(exteriorPos).inflate(8f)).stream()
+                .filter(entity -> entity.isPushable() || entity instanceof Projectile)
                 .forEach(entity -> {
-                    if (entity instanceof ServerPlayerEntity player) {
+                    if (entity instanceof ServerPlayer player) {
                         if (!canPush(player)) {
-                            if (entity.isSubmergedInWater()) {
-                                player.addStatusEffect(
-                                        new StatusEffectInstance(StatusEffects.WATER_BREATHING, 15, 3, true, false, false));
+                            if (entity.isUnderWater()) {
+                                player.addEffect(
+                                        new MobEffectInstance(MobEffects.WATER_BREATHING, 15, 3, true, false, false));
                             }
-                            if (entity.getWorld().getRegistryKey().equals(AITDimensions.SPACE)) {
-                                player.addStatusEffect(
-                                        new StatusEffectInstance(AITStatusEffects.OXYGENATED, 20, 1, true, false));
+                            if (entity.level().dimension().equals(AITDimensions.SPACE)) {
+                                player.addEffect(
+                                        new MobEffectInstance(AITStatusEffects.OXYGENATED, 20, 1, true, false));
                             }
                             return;
                         }
                     }
                     if (this.visuallyShielded().get()) {
-                        Vec3d centerExteriorPos = exteriorPos.toCenterPos();
+                        Vec3 centerExteriorPos = exteriorPos.getCenter();
 
-                        if (entity.squaredDistanceTo(centerExteriorPos) <= 8f) {
-                            Vec3d motion = entity.getBlockPos().toCenterPos().subtract(centerExteriorPos).normalize()
-                                    .multiply(0.1f);
+                        if (entity.distanceToSqr(centerExteriorPos) <= 8f) {
+                            Vec3 motion = entity.blockPosition().getCenter().subtract(centerExteriorPos).normalize()
+                                    .scale(0.1f);
 
-                            if (entity instanceof ProjectileEntity projectile) {
-                                BlockPos pos = projectile.getBlockPos();
+                            if (entity instanceof Projectile projectile) {
+                                BlockPos pos = projectile.blockPosition();
 
-                                if (projectile instanceof TridentEntity) {
-                                    projectile.getVelocity().add(motion.multiply(2f));
+                                if (projectile instanceof ThrownTrident) {
+                                    projectile.getDeltaMovement().add(motion.scale(2f));
 
-                                    world.playSound(null, pos, SoundEvents.ITEM_TRIDENT_HIT, SoundCategory.BLOCKS, 1f,
+                                    world.playSound(null, pos, SoundEvents.TRIDENT_HIT, SoundSource.BLOCKS, 1f,
                                             1f);
                                     return;
                                 }
 
-                                world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_BURN, SoundCategory.BLOCKS, 1f,
+                                world.playSound(null, pos, SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 1f,
                                         1f);
 
                                 projectile.discard();
                                 return;
                             }
 
-                            entity.setVelocity(entity.getVelocity().add(motion.multiply(2f)));
+                            entity.setDeltaMovement(entity.getDeltaMovement().add(motion.scale(2f)));
 
-                            entity.velocityDirty = true;
-                            entity.velocityModified = true;
+                            entity.hasImpulse = true;
+                            entity.hurtMarked = true;
                         }
                     }
                 });
@@ -175,7 +174,7 @@ public class ShieldHandler extends KeyedTardisComponent implements TardisTickabl
      * @param entity the entity to check
      * @return true if the entity will be repulsed by the shield
      */
-    private boolean canPush(ServerPlayerEntity entity) {
+    private boolean canPush(ServerPlayer entity) {
         boolean companion = tardis.loyalty().get(entity).isOf(Loyalty.Type.COMPANION);
 
         return !(companion || SecurityControl.hasMatchingKey(entity, this.tardis()));

@@ -1,11 +1,6 @@
 package dev.amble.ait.registry.impl.console.variant;
 
 import org.joml.Vector3f;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.BedrockConsoleModel;
 import dev.amble.ait.client.models.consoles.ConsoleModel;
@@ -31,6 +26,9 @@ import dev.amble.ait.data.schema.console.variant.toyota.client.ClientToyotaLegac
 import dev.amble.ait.data.schema.console.variant.toyota.client.ClientToyotaVariant;
 import dev.amble.lib.client.bedrock.BedrockModelRegistry;
 import dev.amble.lib.register.datapack.DatapackRegistry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ClientConsoleVariantRegistry extends DatapackRegistry<ClientConsoleVariantSchema> {
     private static ClientConsoleVariantRegistry INSTANCE;
@@ -82,15 +80,15 @@ public class ClientConsoleVariantRegistry extends DatapackRegistry<ClientConsole
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
+    public void syncToClient(ServerPlayer player) {
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            this.register(convertDatapack(buf.decodeAsJson(DatapackConsole.CODEC)));
+            this.register(convertDatapack(buf.readJsonWithCodec(DatapackConsole.CODEC)));
         }
 
         AITMod.LOGGER.info("Read {} client console variants from server", size);
@@ -112,12 +110,12 @@ public class ClientConsoleVariantRegistry extends DatapackRegistry<ClientConsole
             }
 
             @Override
-            public Identifier texture() {
+            public ResourceLocation texture() {
                 return variant.texture();
             }
 
             @Override
-            public Identifier emission() {
+            public ResourceLocation emission() {
                 return variant.emission();
             }
 

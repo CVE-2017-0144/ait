@@ -1,16 +1,14 @@
 package dev.amble.ait.data.properties.integer;
 
 import java.util.function.Function;
-
-import net.minecraft.network.PacketByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.PropertyType;
 
 public class IntProperty extends Property<Integer> {
 
-    public static final PropertyType<Integer> TYPE = new PropertyType<>(Integer.class, PacketByteBuf::writeInt, PacketByteBuf::readInt);
+    public static final PropertyType<Integer> TYPE = new PropertyType<>(Integer.class, FriendlyByteBuf::writeInt, FriendlyByteBuf::readInt);
 
     public IntProperty(String name) {
         this(name, 0);

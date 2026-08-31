@@ -1,11 +1,9 @@
 package dev.amble.ait.core.tardis.handler;
 
 import java.util.Optional;
-
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.item.ControlDiscItem;
@@ -155,7 +153,7 @@ public class WaypointHandler extends KeyedTardisComponent {
         ItemEntity entity = new ItemEntity(tardis.asServer().world(), console.getX(), console.getY(),
                 console.getZ(), isDisc() ? createDiscItem(waypoint) : createWaypointItem(waypoint));
 
-        tardis.asServer().world().spawnEntity(entity);
+        tardis.asServer().world().addFreshEntity(entity);
     }
 
     public static ItemStack createWaypointItem(Waypoint waypoint) {

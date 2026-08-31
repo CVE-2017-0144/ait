@@ -2,16 +2,14 @@ package dev.amble.ait.core.tardis.control.impl;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.lock.LockedDimensionRegistry;
@@ -25,22 +23,22 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class DimensionControl extends Control {
 
-    public static final Identifier ID = AITMod.id("dimension");
+    public static final ResourceLocation ID = AITMod.id("dimension");
 
     public DimensionControl() {
         super(ID);
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         TravelHandler travel = tardis.travel();
         CachedDirectedGlobalPos dest = travel.destination();
-        List<ServerWorld> dims = WorldUtil.getTravelWorlds();
+        List<ServerLevel> dims = WorldUtil.getTravelWorlds();
 
         if (dims.isEmpty()) {
-            player.sendMessage(Text.translatableWithFallback("message.ait.tardis.control.dimension.none_available",
+            player.displayClientMessage(Component.translatableWithFallback("message.ait.tardis.control.dimension.none_available",
                     "No travel dimensions are currently allowed."), true);
             return Result.FAILURE;
         }
@@ -68,13 +66,13 @@ public class DimensionControl extends Control {
         return Result.SUCCESS;
     }
 
-    private void messagePlayer(ServerPlayerEntity player, ServerWorld world, boolean unlocked) {
-        MutableText message = Text.translatable("message.ait.tardis.control.dimension.info")
-                .append(WorldUtil.worldText(world.getRegistryKey(), false)).formatted(unlocked ? Formatting.WHITE : Formatting.GRAY);
+    private void messagePlayer(ServerPlayer player, ServerLevel world, boolean unlocked) {
+        MutableComponent message = Component.translatable("message.ait.tardis.control.dimension.info")
+                .append(WorldUtil.worldText(world.dimension(), false)).withStyle(unlocked ? ChatFormatting.WHITE : ChatFormatting.GRAY);
 
-        if (!unlocked) message.append(Text.literal(" \uD83D\uDD12"));
+        if (!unlocked) message.append(Component.literal(" \uD83D\uDD12"));
 
-        player.sendMessage(message, true);
+        player.displayClientMessage(message, true);
     }
 
     @Override

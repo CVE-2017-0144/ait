@@ -3,20 +3,20 @@ package dev.amble.lib.mixin.client;
 import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.animation.client.AnimatedEntityModel;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerEntityModel.class)
+@Mixin(PlayerModel.class)
 public abstract class PlayerEntityModelMixin<T extends LivingEntity>
-        extends BipedEntityModel<T> implements AnimatedEntityModel {
+        extends HumanoidModel<T> implements AnimatedEntityModel {
 
     @Unique
     ModelPart root;
@@ -30,19 +30,19 @@ public abstract class PlayerEntityModelMixin<T extends LivingEntity>
         this.root = root;
     }
 
-    @Inject(method = "setAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     public void animation$setAngles(T livingEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
         if (!(livingEntity instanceof AnimatedEntity player)) return;
 
-		PlayerEntityModel model = (PlayerEntityModel)(Object)this;
-	    model.hat.copyTransform(model.head);
-	    model.leftPants.copyTransform(model.leftLeg);
-	    model.rightPants.copyTransform(model.rightLeg);
-	    model.leftSleeve.copyTransform(model.leftArm);
-	    model.rightSleeve.copyTransform(model.rightArm);
-	    model.jacket.copyTransform(model.body);
+		PlayerModel model = (PlayerModel)(Object)this;
+	    model.hat.copyFrom(model.head);
+	    model.leftPants.copyFrom(model.leftLeg);
+	    model.rightPants.copyFrom(model.rightLeg);
+	    model.leftSleeve.copyFrom(model.leftArm);
+	    model.rightSleeve.copyFrom(model.rightArm);
+	    model.jacket.copyFrom(model.body);
 
-	    if (!BedrockAnimation.IS_RENDERING_PLAYER || BedrockAnimation.IS_RENDERING_HEAD == null || livingEntity != MinecraftClient.getInstance().cameraEntity) return;
+	    if (!BedrockAnimation.IS_RENDERING_PLAYER || BedrockAnimation.IS_RENDERING_HEAD == null || livingEntity != Minecraft.getInstance().cameraEntity) return;
 
 	    hat.visible = BedrockAnimation.IS_RENDERING_HEAD;
     }

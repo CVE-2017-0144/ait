@@ -1,18 +1,18 @@
 package dev.amble.ait.client.animation.controls;
 
-import net.minecraft.client.render.entity.animation.Animation;
-import net.minecraft.entity.AnimationState;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.world.entity.AnimationState;
 
 public class ControlAnimationState {
-    private final Animation animation;
+    private final AnimationDefinition animation;
     private final AnimationState state;
 
-    public ControlAnimationState(Animation animation) {
+    public ControlAnimationState(AnimationDefinition animation) {
         this.animation = animation;
         this.state = new AnimationState();
     }
 
-    public Animation getAnimation() {
+    public AnimationDefinition getAnimation() {
         return animation;
     }
 
@@ -21,7 +21,7 @@ public class ControlAnimationState {
     }
 
     public boolean isRunning() {
-        return state.isRunning();
+        return state.isStarted();
     }
 
     public void start(int age) {
@@ -29,7 +29,7 @@ public class ControlAnimationState {
     }
 
     public void startIfNotRunning(int age) {
-        state.startIfNotRunning(age);
+        state.startIfStopped(age);
     }
 
     public void stop() {

@@ -1,20 +1,18 @@
 package dev.amble.ait.core.engine.block.generic;
 
 import java.util.Optional;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.core.world.TardisServerWorld;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.DurableSubSystem;
@@ -42,44 +40,44 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
         this(AITBlockEntityTypes.GENERIC_SUBSYSTEM_BLOCK_TYPE, pos, state);
     }
 
-    public ActionResult useOn(BlockState state, World world, boolean sneaking, PlayerEntity player, ItemStack hand) {
-        if (!TardisServerWorld.isTardisDimension(world)) return ActionResult.CONSUME;
+    public InteractionResult useOn(BlockState state, Level world, boolean sneaking, Player player, ItemStack hand) {
+        if (!TardisServerWorld.isTardisDimension(world)) return InteractionResult.CONSUME;
         if (hand.isEmpty()) {
             if (this.system() != null && this.idSource != null) {
                 if (this.system() instanceof DurableSubSystem durable && (durable.isBroken() || durable.durability() < DurableSubSystem.MAX_DURABILITY)) {
-                    player.sendMessage(Text.translatable("tardis.message.engine.system_is_weakened"), true);
-                    return ActionResult.SUCCESS;
+                    player.displayClientMessage(Component.translatable("tardis.message.engine.system_is_weakened"), true);
+                    return InteractionResult.SUCCESS;
                 }
-                StackUtil.spawn(world, pos, this.idSource.copyAndEmpty());
+                StackUtil.spawn(world, worldPosition, this.idSource.copyAndClear());
                 if (this.tardis().isPresent() && this.id() != null) {
                     system().setEnabled(false);
                 }
-                world.playSound(null, this.getPos(), AITSounds.WAYPOINT_ACTIVATE, SoundCategory.BLOCKS, 1.0f, 0.1f);
-                this.markDirty();
+                world.playSound(null, this.getBlockPos(), AITSounds.WAYPOINT_ACTIVATE, SoundSource.BLOCKS, 1.0f, 0.1f);
+                this.setChanged();
                 this.id = null;
-                return ActionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
 
-        if (world.isClient())
-            return ActionResult.SUCCESS;
+        if (world.isClientSide())
+            return InteractionResult.SUCCESS;
 
         if (hand.getItem() instanceof SubSystemItem link) {
             if (this.system() != null && this.idSource != null) {
                 if (tardis() != null) {
                     system().setEnabled(false);
                 }
-                StackUtil.spawn(world, pos, this.idSource.copyAndEmpty());
+                StackUtil.spawn(world, worldPosition, this.idSource.copyAndClear());
             }
             this.setId(link.id());
             this.idSource = hand.copy();
             this.idSource.setCount(1);
-            hand.decrement(1);
-            world.playSound(null, this.getPos(), AITSounds.WAYPOINT_ACTIVATE, SoundCategory.BLOCKS, 1.0f, 1.0f);
-            return ActionResult.SUCCESS;
+            hand.shrink(1);
+            world.playSound(null, this.getBlockPos(), AITSounds.WAYPOINT_ACTIVATE, SoundSource.BLOCKS, 1.0f, 1.0f);
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     private void setId(SubSystem.IdLike id) {
@@ -95,7 +93,7 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
 
     protected void onChangeId() {
         this.processStructure();
-        this.markDirty();
+        this.setChanged();
         this.sync();
     }
 
@@ -112,14 +110,14 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
     }
 
     @Override
-    public boolean isStructureComplete(World world, BlockPos pos) {
+    public boolean isStructureComplete(Level world, BlockPos pos) {
         if (this.getStructure() == null) return false;
 
         return super.isStructureComplete(world, pos);
     }
 
     @Override
-    protected boolean shouldRefresh(ServerWorld world, BlockPos pos) {
+    protected boolean shouldRefresh(ServerLevel world, BlockPos pos) {
         if (this.getStructure() == null) return false;
 
         return super.shouldRefresh(world, pos);
@@ -133,28 +131,28 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
     }
 
     @Override
-    public void onBroken(World world, BlockPos pos) {
+    public void onBroken(Level world, BlockPos pos) {
         super.onBroken(world, pos);
 
-        if (world.isClient() || this.idSource == null) return;
-        StackUtil.spawn(world, pos, this.idSource.copyAndEmpty());
+        if (world.isClientSide() || this.idSource == null) return;
+        StackUtil.spawn(world, pos, this.idSource.copyAndClear());
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         if (this.idSource != null) {
-            nbt.put("SourceStack", this.idSource.writeNbt(new NbtCompound()));
+            nbt.put("SourceStack", this.idSource.save(new CompoundTag()));
         }
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
         if (nbt.contains("SourceStack")) {
-            this.idSource = ItemStack.fromNbt(nbt.getCompound("SourceStack"));
+            this.idSource = ItemStack.of(nbt.getCompound("SourceStack"));
         }
     }
 

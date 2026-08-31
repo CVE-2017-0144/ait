@@ -3,15 +3,14 @@ package dev.amble.lib.mixin.client;
 import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.Camera;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.BlockView;
+import net.minecraft.client.Camera;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,25 +26,25 @@ public abstract class CameraMixin {
 	protected abstract void setRotation(float yaw, float pitch);
 
 	@Shadow
-	protected abstract void setPos(Vec3d pos);
+	protected abstract void setPosition(Vec3 pos);
 
 	@Shadow
-	protected abstract void moveBy(double x, double y, double z);
+	protected abstract void move(double x, double y, double z);
 
 	@Shadow
-	public abstract float getYaw();
+	public abstract float getYRot();
 
 	@Shadow
-	public abstract Vec3d getPos();
+	public abstract Vec3 getPosition();
 
 	@Shadow
-	public abstract Quaternionf getRotation();
+	public abstract Quaternionf rotation();
 
 	@Shadow
-	protected abstract double clipToSpace(double desiredCameraDistance);
+	protected abstract double getMaxZoom(double desiredCameraDistance);
 
-	@Inject(method="update", at=@At("TAIL"))
-	private void amble$update(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
+	@Inject(method="setup", at=@At("TAIL"))
+	private void amble$update(BlockGetter area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
 		if (!(focusedEntity instanceof AnimatedEntity animated)) return;
 
 		BedrockAnimationReference ref = animated.getCurrentAnimation();
@@ -65,29 +64,29 @@ public abstract class CameraMixin {
 		float yaw;
 
 		if (thirdPerson && animation.metadata.fpsCameraCopiesHead()) {
-			yaw = (focusedEntity instanceof ClientPlayerEntity clientPlayer) ? (MathHelper.lerpAngleDegrees(tickDelta, clientPlayer.prevHeadYaw, clientPlayer.headYaw)) : focusedEntity.getHeadYaw();
+			yaw = (focusedEntity instanceof LocalPlayer clientPlayer) ? (Mth.rotLerp(tickDelta, clientPlayer.yHeadRotO, clientPlayer.yHeadRot)) : focusedEntity.getYHeadRot();
 		} else {
-			yaw = (focusedEntity instanceof ClientPlayerEntity clientPlayer) ? (MathHelper.lerpAngleDegrees(tickDelta, clientPlayer.prevBodyYaw, clientPlayer.bodyYaw)) : focusedEntity.getBodyYaw();
+			yaw = (focusedEntity instanceof LocalPlayer clientPlayer) ? (Mth.rotLerp(tickDelta, clientPlayer.yBodyRotO, clientPlayer.yBodyRot)) : focusedEntity.getVisualRotationYInDegrees();
 		}
 
-		Vec3d position = animation.boneTimelines.get(cameraPart).position().resolve(progress);
-		float height = cameraPart.equals("head") ? focusedEntity.getStandingEyeHeight() : 0;
+		Vec3 position = animation.boneTimelines.get(cameraPart).position().resolve(progress);
+		float height = cameraPart.equals("head") ? focusedEntity.getEyeHeight() : 0;
 
-		this.setPos(
-				new Vec3d(
-				MathHelper.lerp(tickDelta, focusedEntity.prevX, focusedEntity.getX()),
-				MathHelper.lerp(tickDelta, focusedEntity.prevY, focusedEntity.getY()) + (thirdPerson ? 0 : height),
-				MathHelper.lerp(tickDelta, focusedEntity.prevZ, focusedEntity.getZ()))
+		this.setPosition(
+				new Vec3(
+				Mth.lerp(tickDelta, focusedEntity.xo, focusedEntity.getX()),
+				Mth.lerp(tickDelta, focusedEntity.yo, focusedEntity.getY()) + (thirdPerson ? 0 : height),
+				Mth.lerp(tickDelta, focusedEntity.zo, focusedEntity.getZ()))
 		);
 
-		Pair<Float, Float> rots = animation.getRotations(cameraPart, (float) progress);
-		float animYaw = rots.getRight();
-		float animPitch = rots.getLeft();
+		Tuple<Float, Float> rots = animation.getRotations(cameraPart, (float) progress);
+		float animYaw = rots.getB();
+		float animPitch = rots.getA();
 
-		Vec3d pos = position.rotateY((float)Math.toRadians(90)).multiply(-1 / 16F);
+		Vec3 pos = position.yRot((float)Math.toRadians(90)).scale(-1 / 16F);
 		this.setRotation(yaw, 0);
 		// todo \/ the clipping causes the camera to break when on ground
-		this.moveBy(clipToSpace(pos.x), clipToSpace(pos.y), clipToSpace(pos.z));
+		this.move(getMaxZoom(pos.x), getMaxZoom(pos.y), getMaxZoom(pos.z));
 		this.setRotation(animYaw + yaw, animPitch);
 	}
 }

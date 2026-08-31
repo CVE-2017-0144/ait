@@ -4,23 +4,21 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 
-@Mixin(value = PlayerEntityModel.class, priority = 1001)
+@Mixin(value = PlayerModel.class, priority = 1001)
 public class PlayerEntityModelMixin<T extends LivingEntity> {
 
-    @Inject(method = "setAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("HEAD"))
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("HEAD"))
     private void ait$setAngles(T livingEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
-        PlayerEntityModel model = (PlayerEntityModel) (Object) this;
+        PlayerModel model = (PlayerModel) (Object) this;
 
-        boolean noHelmet = !(livingEntity.getEquippedStack(EquipmentSlot.HEAD).getItem() instanceof SpacesuitItem);
-        boolean noChestplate = !(livingEntity.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof SpacesuitItem);
-        boolean noPants = !(livingEntity.getEquippedStack(EquipmentSlot.LEGS).getItem() instanceof SpacesuitItem);
+        boolean noHelmet = !(livingEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof SpacesuitItem);
+        boolean noChestplate = !(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof SpacesuitItem);
+        boolean noPants = !(livingEntity.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof SpacesuitItem);
 
         // i hate this just as much as everyone else seeing this block of code.
         // the &&'s were added because mods that use playeranimator may change visibility

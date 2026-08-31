@@ -1,15 +1,5 @@
 package dev.amble.ait.core.tardis.control;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITItems;
@@ -21,22 +11,31 @@ import dev.amble.ait.core.tardis.control.sound.ControlSoundRegistry;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.lib.api.Identifiable;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 
 public class Control implements Identifiable {
 
-    private final Identifier id;
+    private final ResourceLocation id;
 
-    public Control(Identifier id) {
+    public Control(ResourceLocation id) {
         this.id = id;
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
-    protected Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    protected Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
                              boolean leftClick) throws ControlSequencedException {
         if (this.shouldBeAddedToSequence(tardis)) {
             this.addToControlSequence(tardis, player, console);
@@ -48,7 +47,7 @@ public class Control implements Identifiable {
         return Result.FAILURE;
     }
 
-    public Result handleRun(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    public Result handleRun(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
                              boolean leftClick) {
         try {
             return this.runServer(tardis, player, world, console, leftClick);
@@ -61,22 +60,22 @@ public class Control implements Identifiable {
      * The label shown for this control (e.g. when scanning it with the sonic). May vary with live
      * TARDIS state; the default implementation returns the static, translatable control name.
      */
-    public Text getName(Tardis tardis) {
-        return Text.translatable(id.toTranslationKey("control"));
+    public Component getName(Tardis tardis) {
+        return Component.translatable(id.toLanguageKey("control"));
     }
 
     protected boolean shouldBeAddedToSequence(Tardis tardis) {
         return tardis.sequence().hasActiveSequence() && tardis.sequence().controlPartOfSequence(this);
     }
 
-    public void addToControlSequence(Tardis tardis, ServerPlayerEntity player, BlockPos pos) {
+    public void addToControlSequence(Tardis tardis, ServerPlayer player, BlockPos pos) {
         tardis.sequence().add(this, player, pos);
 
         if (AITMod.RANDOM.nextInt(0, 20) == 4) {
             tardis.loyalty().addLevel(player, 1);
 
-            player.getServerWorld().spawnParticles(ParticleTypes.HEART, pos.toCenterPos().getX(),
-                    pos.toCenterPos().getY() + 1, pos.toCenterPos().getZ(), 1, 0f, 1F, 0f, 5.0F);
+            player.serverLevel().sendParticles(ParticleTypes.HEART, pos.getCenter().x(),
+                    pos.getCenter().y() + 1, pos.getCenter().z(), 1, 0f, 1F, 0f, 5.0F);
         }
     }
 
@@ -109,7 +108,7 @@ public class Control implements Identifiable {
         return SubSystem.Id.ENGINE;
     }
 
-    public void runAnimation(Tardis tardis, ServerPlayerEntity player, ServerWorld world) {
+    public void runAnimation(Tardis tardis, ServerPlayer player, ServerLevel world) {
         // no animation
     }
 
@@ -131,11 +130,11 @@ public class Control implements Identifiable {
     }
 
     // Bypass security controls when using the disc :al_clueless: - Loqorb
-    public boolean ignoresSecurity(ServerPlayerEntity user) {
-        return user.getMainHandStack().getItem() == AITItems.CONTROL_DISC;
+    public boolean ignoresSecurity(ServerPlayer user) {
+        return user.getMainHandItem().getItem() == AITItems.CONTROL_DISC;
     }
 
-    public boolean canRun(Tardis tardis, ServerPlayerEntity user) {
+    public boolean canRun(Tardis tardis, ServerPlayer user) {
         if (tardis.isGrowth())
             return false;
 
@@ -153,7 +152,7 @@ public class Control implements Identifiable {
             boolean enabled = tardis.subsystems().get(dependent).isEnabled();
 
             if (!enabled)
-                user.sendMessage(Text.translatable("warning.ait.needs_subsystem", Text.literal(WorldUtil.fakeTranslate(dependent.toString())).formatted(Formatting.RED)).formatted(Formatting.WHITE), true);
+                user.displayClientMessage(Component.translatable("warning.ait.needs_subsystem", Component.literal(WorldUtil.fakeTranslate(dependent.toString())).withStyle(ChatFormatting.RED)).withStyle(ChatFormatting.WHITE), true);
 
             return enabled;
         }
@@ -228,14 +227,14 @@ public class Control implements Identifiable {
             return this;
         }
 
-        public NbtCompound writeNbt() {
-            NbtCompound stateCompound = new NbtCompound();
+        public CompoundTag writeNbt() {
+            CompoundTag stateCompound = new CompoundTag();
             stateCompound.putFloat("Durability", this.damage);
             stateCompound.putBoolean("Sticky", this.sticky);
             return stateCompound;
         }
 
-        public ControlState readNbt(NbtCompound nbt) {
+        public ControlState readNbt(CompoundTag nbt) {
             float durability = nbt.getFloat("Durability");
             boolean sticky = nbt.getBoolean("Sticky");
             this.setDamage(durability);

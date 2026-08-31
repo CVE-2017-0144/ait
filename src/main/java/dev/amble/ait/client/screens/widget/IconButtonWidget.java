@@ -2,15 +2,14 @@ package dev.amble.ait.client.screens.widget;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.PressableWidget;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
-public class IconButtonWidget extends PressableWidget {
+public class IconButtonWidget extends AbstractButton {
 
     public enum Icon {
         PLAY, STOP, SOUND_ON, SOUND_OFF
@@ -20,7 +19,7 @@ public class IconButtonWidget extends PressableWidget {
     private final Runnable onPress;
 
     public IconButtonWidget(int x, int y, int size, Icon icon, Runnable onPress) {
-        super(x, y, size, size, Text.empty());
+        super(x, y, size, size, Component.empty());
         this.icon = icon;
         this.onPress = onPress;
     }
@@ -36,7 +35,7 @@ public class IconButtonWidget extends PressableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.visible)
             return;
 
@@ -62,7 +61,7 @@ public class IconButtonWidget extends PressableWidget {
         }
     }
 
-    private void renderSpeaker(DrawContext context, int x, int y, int w, int h, int foreground, boolean muted) {
+    private void renderSpeaker(GuiGraphics context, int x, int y, int w, int h, int foreground, boolean muted) {
         int centerY = y + h / 2;
         int bodyHalf = Math.max(1, h / 6);
         int coneStart = x + Math.max(1, w / 3);
@@ -87,7 +86,7 @@ public class IconButtonWidget extends PressableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        this.appendDefaultNarrations(builder);
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+        this.defaultButtonNarrationText(builder);
     }
 }

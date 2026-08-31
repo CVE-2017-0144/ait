@@ -3,16 +3,14 @@ package dev.amble.lib.data;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.function.Function;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 
 public class DirectedBlockPos {
 
@@ -37,10 +35,10 @@ public class DirectedBlockPos {
         return DirectedBlockPos.create(pos, this.rotation);
     }
 
-    public Vec3d offsetPos(float value) {
+    public Vec3 offsetPos(float value) {
         BlockPos pos = this.getPos();
 
-        return new Vec3d(
+        return new Vec3(
                 pos.getX() + value * this.getVector().getX(),
                 pos.getY() + value * this.getVector().getY(),
                 pos.getZ() + value * this.getVector().getZ()
@@ -48,7 +46,7 @@ public class DirectedBlockPos {
     }
 
     public DirectedBlockPos offset(int x, int y, int z) {
-        return DirectedBlockPos.create(this.pos.add(x, y, z), this.rotation);
+        return DirectedBlockPos.create(this.pos.offset(x, y, z), this.rotation);
     }
 
     public DirectedBlockPos apply(Function<Integer, Integer> func) {
@@ -72,14 +70,14 @@ public class DirectedBlockPos {
     public Vec3i getVector() {
         return switch (this.rotation) {
             default -> new Vec3i(0, 0, 0);
-            case 0 -> Direction.NORTH.getVector();
-            case 1, 2, 3 -> Direction.NORTH.getVector().add(Direction.EAST.getVector());
-            case 4 -> Direction.EAST.getVector();
-            case 5, 6, 7 -> Direction.EAST.getVector().add(Direction.SOUTH.getVector());
-            case 8 -> Direction.SOUTH.getVector();
-            case 9, 10, 11 -> Direction.SOUTH.getVector().add(Direction.WEST.getVector());
-            case 12 -> Direction.WEST.getVector();
-            case 13, 14, 15 -> Direction.NORTH.getVector().add(Direction.SOUTH.getVector());
+            case 0 -> Direction.NORTH.getNormal();
+            case 1, 2, 3 -> Direction.NORTH.getNormal().offset(Direction.EAST.getNormal());
+            case 4 -> Direction.EAST.getNormal();
+            case 5, 6, 7 -> Direction.EAST.getNormal().offset(Direction.SOUTH.getNormal());
+            case 8 -> Direction.SOUTH.getNormal();
+            case 9, 10, 11 -> Direction.SOUTH.getNormal().offset(Direction.WEST.getNormal());
+            case 12 -> Direction.WEST.getNormal();
+            case 13, 14, 15 -> Direction.NORTH.getNormal().offset(Direction.SOUTH.getNormal());
         };
     }
     public Direction toMinecraftDirection() {
@@ -92,7 +90,7 @@ public class DirectedBlockPos {
     }
 
     public DistanceInformation distanceTo(DirectedBlockPos other) {
-        double distance = Math.sqrt(this.pos.getSquaredDistance(other.pos));
+        double distance = Math.sqrt(this.pos.distSqr(other.pos));
         boolean rotChange = this.rotation != other.rotation;
         return new DistanceInformation(distance, false, rotChange);
     }
@@ -115,12 +113,12 @@ public class DirectedBlockPos {
         return this.pos + " " + this.rotation;
     }
 
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(this.getPos());
         buf.writeByte(this.rotation);
     }
 
-    public static DirectedBlockPos read(PacketByteBuf buf) {
+    public static DirectedBlockPos read(FriendlyByteBuf buf) {
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();
 

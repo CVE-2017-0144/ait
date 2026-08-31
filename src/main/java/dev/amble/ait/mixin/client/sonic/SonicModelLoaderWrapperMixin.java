@@ -7,20 +7,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.resource.ResourceFinder;
-
 import dev.amble.ait.client.sonic.SonicResourceFinder;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.resources.FileToIdConverter;
 
-@Mixin(ModelLoader.class)
+@Mixin(ModelBakery.class)
 public class SonicModelLoaderWrapperMixin {
 
     @Mutable
-    @Shadow @Final public static ResourceFinder MODELS_FINDER;
+    @Shadow @Final public static FileToIdConverter MODEL_LISTER;
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void clinit(CallbackInfo ci) {
-        MODELS_FINDER = new SonicResourceFinder(MODELS_FINDER, "models/item/sonic", ".json");
+        MODEL_LISTER = new SonicResourceFinder(MODEL_LISTER, "models/item/sonic", ".json");
     }
 }

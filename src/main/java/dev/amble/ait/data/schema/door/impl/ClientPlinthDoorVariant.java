@@ -11,6 +11,6 @@ public class ClientPlinthDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new PlinthDoorModel(PlinthDoorModel.getTexturedModelData().createModel());
+        return new PlinthDoorModel(PlinthDoorModel.getTexturedModelData().bakeRoot());
     }
 }

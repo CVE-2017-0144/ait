@@ -2,31 +2,29 @@ package dev.amble.ait.module.planet.core.space.planet;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.lib.util.ServerLifecycleHooks;
 import dev.amble.lib.util.TeleportUtil;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Represents a transition between two planets.
  * @param target the planet to be teleported to
  * @param height the height at which the player should be teleported
  */
-public record PlanetTransition(Identifier target, int height) {
+public record PlanetTransition(ResourceLocation target, int height) {
     public static final Codec<PlanetTransition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("target").forGetter(PlanetTransition::target),
+            ResourceLocation.CODEC.fieldOf("target").forGetter(PlanetTransition::target),
             Codec.INT.fieldOf("height").forGetter(PlanetTransition::height)
     ).apply(instance, PlanetTransition::new));
 
-    public ServerWorld getTargetWorld() {
-        return ServerLifecycleHooks.get().getWorld(RegistryKey.of(RegistryKeys.WORLD, target));
+    public ServerLevel getTargetWorld() {
+        return ServerLifecycleHooks.get().getLevel(ResourceKey.create(Registries.DIMENSION, target));
     }
 
     /**
@@ -38,9 +36,9 @@ public record PlanetTransition(Identifier target, int height) {
         if (this.isEmpty()) return false;
 
         // check if is to space
-        if (target.equals(AITDimensions.SPACE.getValue())) {
+        if (target.equals(AITDimensions.SPACE.location())) {
             // teleport to that planets position in space
-            Planet planet = PlanetRegistry.getInstance().get(entity.getWorld());
+            Planet planet = PlanetRegistry.getInstance().get(entity.level());
             if (planet == null || planet.render().isEmpty()) {
                 return false;
             }
@@ -50,7 +48,7 @@ public record PlanetTransition(Identifier target, int height) {
             //        FabricDimensions.teleport(entity.getVehicle(), getTargetWorld(),
             //                new TeleportTarget(planet.render().position().add(0, height, 0),
             //                        entity.getVelocity(), entity.getBodyYaw(), entity.getPitch()));
-            TeleportUtil.teleport(entity, getTargetWorld(), planet.render().position().add(0, height, 0), entity.getBodyYaw());
+            TeleportUtil.teleport(entity, getTargetWorld(), planet.render().position().add(0, height, 0), entity.getVisualRotationYInDegrees());
             return true;
         }
 
@@ -59,15 +57,15 @@ public record PlanetTransition(Identifier target, int height) {
         //        FabricDimensions.teleport(entity.getVehicle(), getTargetWorld(),
         //                new TeleportTarget(new Vec3d(entity.getX(), height, entity.getZ()),
         //                        entity.getVelocity(), entity.getBodyYaw(), entity.getPitch()));
-        TeleportUtil.teleport(entity, getTargetWorld(), new Vec3d(entity.getX(), height, entity.getZ()), entity.getBodyYaw()); // height might not be the right place to teleport here, im not sure.
+        TeleportUtil.teleport(entity, getTargetWorld(), new Vec3(entity.getX(), height, entity.getZ()), entity.getVisualRotationYInDegrees()); // height might not be the right place to teleport here, im not sure.
         return true;
     }
 
     public boolean isEmpty() {
         return this == EMPTY;
     }
-    public static final PlanetTransition EMPTY = new PlanetTransition(new Identifier("empty"), 0);
+    public static final PlanetTransition EMPTY = new PlanetTransition(new ResourceLocation("empty"), 0);
     public static PlanetTransition toSpace(int height) {
-        return new PlanetTransition(AITDimensions.SPACE.getValue(), height);
+        return new PlanetTransition(AITDimensions.SPACE.location(), height);
     }
 }

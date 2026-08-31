@@ -7,32 +7,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.effect.MobEffectInstance;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.joml.Vector3f;
-
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.codec.MoreCodec;
 import dev.amble.lib.api.Identifiable;
 
-public record Drink(Identifier id, Optional<Boolean> hasCustomColor, Optional<Vector3f> custom_color, List<DatapackPotion> potionInstances) implements Identifiable {
-    public static final Codec<Drink> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
-                    Identifier.CODEC.fieldOf("id").forGetter(Drink::id),
+public record Drink(ResourceLocation id, Optional<Boolean> hasCustomColor, Optional<Vector3f> custom_color, List<DatapackPotion> potionInstances) implements Identifiable {
+    public static final Codec<Drink> CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(
+                    ResourceLocation.CODEC.fieldOf("id").forGetter(Drink::id),
                     Codec.BOOL.optionalFieldOf("has_custom_color").forGetter(Drink::hasCustomColor),
                     MoreCodec.VECTOR3F.optionalFieldOf("custom_color").forGetter(Drink::custom_color),
                     DatapackPotion.CODEC.listOf().fieldOf("potion_instances").forGetter(Drink::potionInstances))
             .apply(instance, Drink::new)));
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -59,7 +56,7 @@ public record Drink(Identifier id, Optional<Boolean> hasCustomColor, Optional<Ve
         return created.get();
     }
 
-    public Collection<StatusEffectInstance> getEffects() {
+    public Collection<MobEffectInstance> getEffects() {
         return this.potionInstances().stream()
                 .map(DatapackPotion::getInstance)
                 .collect(Collectors.toList());

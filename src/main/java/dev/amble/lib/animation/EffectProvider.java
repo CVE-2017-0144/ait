@@ -1,17 +1,15 @@
 package dev.amble.lib.animation;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public interface EffectProvider {
-	World getWorld();
+	Level getWorld();
 	boolean isSilent();
-	SoundCategory getSoundCategory();
+	SoundSource getSoundCategory();
 	float getHeadYaw();
 	float getBodyYaw();
 	float getPitch();
-	Vec3d getEffectPosition(float tickDelta);
+	Vec3 getEffectPosition(float tickDelta);
 }

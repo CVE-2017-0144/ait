@@ -6,35 +6,42 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.core.*;
+import net.minecraft.world.phys.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 
 public class SaveLoadInteriorScreen extends ConsoleScreen {
-    private static final Identifier BACKGROUND = new Identifier(AITMod.MOD_ID,
+    private static final ResourceLocation BACKGROUND = new ResourceLocation(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/security_menu.png");
-    private final List<ButtonWidget> buttons = Lists.newArrayList();
+    private final List<Button> buttons = Lists.newArrayList();
     int bgHeight = 138;
     int bgWidth = 216;
     int left, top;
@@ -62,7 +69,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
     private static final long CACHE_UPDATE_INTERVAL = 50; // Reduced to 50ms for smoother updates
 
     // Frustum culling cache
-    private Vec3d lastCameraDir = Vec3d.ZERO;
+    private Vec3 lastCameraDir = Vec3.ZERO;
     private float lastRotationX = 0;
     private float lastRotationY = 0;
     private boolean cacheInvalidated = true;
@@ -74,16 +81,16 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
     private static final boolean AGGRESSIVE_CULLING = true;
 
     // Mutable BlockPos for iteration (reduces allocations)
-    private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
     public SaveLoadInteriorScreen(ClientTardis tardis, BlockPos console, Screen parent) {
-        super(Text.translatable("screen." + AITMod.MOD_ID + ".loadsaveinterior.title"), tardis, console);
+        super(Component.translatable("screen." + AITMod.MOD_ID + ".loadsaveinterior.title"), tardis, console);
         this.console = console;
         this.parent = parent;
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -104,36 +111,36 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         this.buttons.clear();
 
         this.addButton(new AITPressableTextWidget((int) (left + (bgWidth * 0.139f)), (int) (top + (bgHeight * 0.839f)),
-                APPLY_BAR_BUTTON_WIDTH, APPLY_BAR_BUTTON_HEIGHT, Text.empty(), button -> {
+                APPLY_BAR_BUTTON_WIDTH, APPLY_BAR_BUTTON_HEIGHT, Component.empty(), button -> {
             sendSaveInteriorPacket();
-        }, this.textRenderer));
+        }, this.font));
     }
 
     public void backToInteriorSettings() {
-        MinecraftClient.getInstance().setScreen(this.parent);
+        Minecraft.getInstance().setScreen(this.parent);
     }
 
     public void sendSaveInteriorPacket() {
-        if (!(MinecraftClient.getInstance().world.getBlockEntity(this.console) instanceof ConsoleBlockEntity consoleBlockEntity))
+        if (!(Minecraft.getInstance().level.getBlockEntity(this.console) instanceof ConsoleBlockEntity consoleBlockEntity))
             return;
     }
 
-    private <T extends ClickableWidget> void addButton(T button) {
-        this.addDrawableChild(button);
+    private <T extends AbstractWidget> void addButton(T button) {
+        this.addRenderableWidget(button);
         button.active = true;
-        this.buttons.add((ButtonWidget) button);
+        this.buttons.add((Button) button);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         // Clear buffers efficiently
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
 
         // Render GUI background first
         super.render(context, mouseX, mouseY, delta);
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        BlockPos playerPos = client.player.getBlockPos();
+        Minecraft client = Minecraft.getInstance();
+        BlockPos playerPos = client.player.blockPosition();
 
         // Setup render state
         RenderSystem.enableBlend();
@@ -143,22 +150,22 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         RenderSystem.depthMask(true);
         RenderSystem.enableCull(); // Enable backface culling for performance
 
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
+        PoseStack matrices = context.pose();
+        matrices.pushPose();
 
         // Apply transformations
         matrices.translate(this.width / 2.0 + offsetX, this.height / 2.0 + offsetY, 500);
         matrices.scale(zoom, -zoom, zoom);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotationX));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotationY));
+        matrices.mulPose(Axis.XP.rotationDegrees(rotationX));
+        matrices.mulPose(Axis.YP.rotationDegrees(rotationY));
 
         // Get vertex consumer
-        VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
-        BlockRenderManager blockRenderManager = client.getBlockRenderManager();
-        World world = client.world;
+        MultiBufferSource.BufferSource immediate = client.renderBuffers().bufferSource();
+        BlockRenderDispatcher blockRenderManager = client.getBlockRenderer();
+        Level world = client.level;
 
         // Calculate camera direction
-        Vec3d cameraDir = getCameraDirection();
+        Vec3 cameraDir = getCameraDirection();
 
         // Check if cache needs update
         long currentTime = System.currentTimeMillis();
@@ -176,7 +183,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         // Render blocks in large batches
         renderBlocks(matrices, immediate, blockRenderManager, world, playerPos, delta);
 
-        matrices.pop();
+        matrices.popPose();
 
         // Restore render state
         RenderSystem.disableDepthTest();
@@ -184,8 +191,8 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         RenderSystem.disableCull();
     }
 
-    private void renderBlocks(MatrixStack matrices, VertexConsumerProvider.Immediate immediate,
-                              BlockRenderManager blockRenderManager, World world, BlockPos playerPos, float delta) {
+    private void renderBlocks(PoseStack matrices, MultiBufferSource.BufferSource immediate,
+                              BlockRenderDispatcher blockRenderManager, Level world, BlockPos playerPos, float delta) {
         int batchSize = 0;
         int blockEntityBatch = 0;
 
@@ -194,7 +201,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
             BlockState state = world.getBlockState(pos);
 
             if (!state.isAir() && state.getBlock() != Blocks.BLACK_CONCRETE && !isFullySurrounded(world, pos)) {
-                matrices.push();
+                matrices.pushPose();
 
                 // Use relative coordinates
                 matrices.translate(
@@ -204,20 +211,20 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
                 );
 
                 // Render block
-                blockRenderManager.renderBlockAsEntity(
+                blockRenderManager.renderSingleBlock(
                         state,
                         matrices,
                         immediate,
-                        LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                        OverlayTexture.DEFAULT_UV
+                        LightTexture.FULL_BRIGHT,
+                        OverlayTexture.NO_OVERLAY
                 );
 
-                matrices.pop();
+                matrices.popPose();
                 batchSize++;
 
                 // Draw in large batches
                 if (batchSize >= MAX_BATCH_SIZE) {
-                    immediate.draw();
+                    immediate.endBatch();
                     batchSize = 0;
                 }
             }
@@ -225,7 +232,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
 
         // Flush remaining blocks
         if (batchSize > 0) {
-            immediate.draw();
+            immediate.endBatch();
         }
 
         // Render block entities separately (they need immediate drawing)
@@ -233,7 +240,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
             for (BlockPos pos : blockEntityPositions) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (blockEntity != null) {
-                    matrices.push();
+                    matrices.pushPose();
 
                     matrices.translate(
                             pos.getX() - playerPos.getX(),
@@ -243,13 +250,13 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
 
                     renderBlockEntity(blockEntity, matrices, immediate, delta);
 
-                    matrices.pop();
+                    matrices.popPose();
                 }
             }
         }
     }
 
-    private void updateVisibleBlocksCache(World world, BlockPos playerPos, Vec3d cameraDir) {
+    private void updateVisibleBlocksCache(Level world, BlockPos playerPos, Vec3 cameraDir) {
         visibleBlocks.clear();
         blockEntityPositions.clear();
 
@@ -275,7 +282,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
                     // REMOVED: Frustum culling - we want to see all blocks
 
                     // Add to visible set (immutable copy)
-                    BlockPos immutablePos = mutablePos.toImmutable();
+                    BlockPos immutablePos = mutablePos.immutable();
                     visibleBlocks.add(immutablePos);
 
                     // Track block entities separately
@@ -287,14 +294,14 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         }
     }
 
-    private void renderBlockEntity(BlockEntity blockEntity, MatrixStack matrices,
-                                   VertexConsumerProvider.Immediate immediate, float delta) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    private void renderBlockEntity(BlockEntity blockEntity, PoseStack matrices,
+                                   MultiBufferSource.BufferSource immediate, float delta) {
+        Minecraft client = Minecraft.getInstance();
         BlockEntityRenderDispatcher dispatcher = client.getBlockEntityRenderDispatcher();
 
         try {
             BlockEntityRenderer<BlockEntity> renderer =
-                    dispatcher.get(blockEntity);
+                    dispatcher.getRenderer(blockEntity);
 
             if (renderer != null) {
                 renderer.render(
@@ -302,17 +309,17 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
                         delta,
                         matrices,
                         immediate,
-                        LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                        OverlayTexture.DEFAULT_UV
+                        LightTexture.FULL_BRIGHT,
+                        OverlayTexture.NO_OVERLAY
                 );
-                immediate.draw();
+                immediate.endBatch();
             }
         } catch (Exception e) {
             // Silently ignore rendering errors
         }
     }
 
-    private Vec3d getCameraDirection() {
+    private Vec3 getCameraDirection() {
         double pitch = Math.toRadians(rotationX);
         double yaw = Math.toRadians(rotationY + 180);
 
@@ -320,12 +327,12 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         double y = Math.sin(pitch);
         double z = Math.cos(yaw) * Math.cos(pitch);
 
-        return new Vec3d(x, y, z).normalize();
+        return new Vec3(x, y, z).normalize();
     }
 
-    private boolean isBackFacing(Vec3d blockPos, Vec3d cameraDir, World world, BlockPos pos) {
+    private boolean isBackFacing(Vec3 blockPos, Vec3 cameraDir, Level world, BlockPos pos) {
         // Normalize and check dot product
-        double lengthSq = blockPos.lengthSquared();
+        double lengthSq = blockPos.lengthSqr();
         if (lengthSq < 0.001) return false;
 
         double invLength = 1.0 / Math.sqrt(lengthSq);
@@ -344,17 +351,17 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         return !hasExposedFaceTowardsCamera(world, pos, cameraDir);
     }
 
-    private boolean hasExposedFaceTowardsCamera(World world, BlockPos pos, Vec3d cameraDir) {
+    private boolean hasExposedFaceTowardsCamera(Level world, BlockPos pos, Vec3 cameraDir) {
         // Check all 6 directions efficiently
         for (Direction dir : Direction.values()) {
             mutablePos.set(pos).move(dir);
             BlockState adjacentState = world.getBlockState(mutablePos);
 
-            if (!adjacentState.isOpaqueFullCube(world, mutablePos)) {
+            if (!adjacentState.isSolidRender(world, mutablePos)) {
                 // Quick dot product check
-                int offsetX = dir.getOffsetX();
-                int offsetY = dir.getOffsetY();
-                int offsetZ = dir.getOffsetZ();
+                int offsetX = dir.getStepX();
+                int offsetY = dir.getStepY();
+                int offsetZ = dir.getStepZ();
 
                 double faceDot = offsetX * cameraDir.x + offsetY * cameraDir.y + offsetZ * cameraDir.z;
 
@@ -367,25 +374,25 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         return false;
     }
 
-    private boolean isFullySurrounded(World world, BlockPos pos) {
+    private boolean isFullySurrounded(Level world, BlockPos pos) {
         // Use mutable pos for checks
-        mutablePos.set(pos, Direction.UP);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.UP);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
-        mutablePos.set(pos, Direction.DOWN);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.DOWN);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
-        mutablePos.set(pos, Direction.NORTH);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.NORTH);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
-        mutablePos.set(pos, Direction.SOUTH);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.SOUTH);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
-        mutablePos.set(pos, Direction.EAST);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.EAST);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
-        mutablePos.set(pos, Direction.WEST);
-        if (!world.getBlockState(mutablePos).isOpaqueFullCube(world, mutablePos)) return false;
+        mutablePos.setWithOffset(pos, Direction.WEST);
+        if (!world.getBlockState(mutablePos).isSolidRender(world, mutablePos)) return false;
 
         return true;
     }
@@ -441,25 +448,25 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
         return true;
     }
 
-    private void drawBackground(DrawContext context) {
-        context.drawTexture(BACKGROUND, left, top, 0, 0, bgWidth, bgHeight);
+    private void drawBackground(GuiGraphics context) {
+        context.blit(BACKGROUND, left, top, 0, 0, bgWidth, bgHeight);
     }
 
-    public static class AITPressableTextWidget extends ButtonWidget {
-        private final TextRenderer textRenderer;
-        private final Text text;
+    public static class AITPressableTextWidget extends Button {
+        private final Font textRenderer;
+        private final Component text;
 
-        public AITPressableTextWidget(int x, int y, int width, int height, Text text, ButtonWidget.PressAction onPress,
-                                      TextRenderer textRenderer) {
-            super(x, y, width, height, text, onPress, DEFAULT_NARRATION_SUPPLIER);
+        public AITPressableTextWidget(int x, int y, int width, int height, Component text, Button.OnPress onPress,
+                                      Font textRenderer) {
+            super(x, y, width, height, text, onPress, DEFAULT_NARRATION);
             this.textRenderer = textRenderer;
             this.text = text;
         }
 
-        public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-            Text text = this.text;
-            context.drawTextWithShadow(this.textRenderer, text, this.getX(), this.getY(),
-                    16777215 | MathHelper.ceil(this.alpha * 255.0F) << 24);
+        public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+            Component text = this.text;
+            context.drawString(this.textRenderer, text, this.getX(), this.getY(),
+                    16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
         }
     }
 }

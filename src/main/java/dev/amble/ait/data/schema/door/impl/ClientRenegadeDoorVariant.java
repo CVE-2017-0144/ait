@@ -11,6 +11,6 @@ public class ClientRenegadeDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new RenegadeDoorModel(RenegadeDoorModel.getTexturedModelData().createModel());
+        return new RenegadeDoorModel(RenegadeDoorModel.getTexturedModelData().bakeRoot());
     }
 }

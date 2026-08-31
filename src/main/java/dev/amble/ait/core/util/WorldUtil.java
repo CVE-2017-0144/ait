@@ -7,28 +7,26 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.loader.api.FabricLoader;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.WorldSavePath;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldEvents;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITDimensions;
@@ -40,43 +38,43 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class WorldUtil {
 
-    private static final List<ServerWorld> PROJECTOR_WORLDS = new ArrayList<>();
-    private static final List<ServerWorld> TRAVEL_WORLDS = new ArrayList<>();
+    private static final List<ServerLevel> PROJECTOR_WORLDS = new ArrayList<>();
+    private static final List<ServerLevel> TRAVEL_WORLDS = new ArrayList<>();
 
-    private static ServerWorld OVERWORLD;
-    private static ServerWorld TIME_VORTEX;
+    private static ServerLevel OVERWORLD;
+    private static ServerLevel TIME_VORTEX;
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(WorldUtil::generateWorldCache);
         ServerLifecycleEvents.SERVER_STOPPING.register(WorldUtil::clearWorldCache);
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {
-            if (world.getRegistryKey() == World.OVERWORLD)
+            if (world.dimension() == Level.OVERWORLD)
                 OVERWORLD = null;
 
-            if (world.getRegistryKey() == AITDimensions.TIME_VORTEX_WORLD)
+            if (world.dimension() == AITDimensions.TIME_VORTEX_WORLD)
                 TIME_VORTEX = null;
         });
 
         ServerWorldEvents.LOAD.register((server, world) -> {
-            if (world.getRegistryKey() == World.OVERWORLD)
+            if (world.dimension() == Level.OVERWORLD)
                 OVERWORLD = world;
 
-            if (world.getRegistryKey() == AITDimensions.TIME_VORTEX_WORLD)
+            if (world.dimension() == AITDimensions.TIME_VORTEX_WORLD)
                 TIME_VORTEX = world;
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            OVERWORLD = server.getOverworld();
-            TIME_VORTEX = server.getWorld(AITDimensions.TIME_VORTEX_WORLD);
+            OVERWORLD = server.overworld();
+            TIME_VORTEX = server.getLevel(AITDimensions.TIME_VORTEX_WORLD);
         });
     }
 
-    public static ServerWorld getOverworld() {
+    public static ServerLevel getOverworld() {
         return OVERWORLD;
     }
 
-    public static ServerWorld getTimeVortex() {
+    public static ServerLevel getTimeVortex() {
         return TIME_VORTEX;
     }
 
@@ -86,29 +84,29 @@ public class WorldUtil {
     }
 
     private static void generateWorldCache(MinecraftServer server, String cacheName, List<String> blacklist, List<String> whitelist,
-                                           Collection<ServerWorld> worlds, boolean allowTardisWorlds) {
+                                           Collection<ServerLevel> worlds, boolean allowTardisWorlds) {
         worlds.clear();
 
-        Set<Identifier> whitelistIds = new HashSet<>();
+        Set<ResourceLocation> whitelistIds = new HashSet<>();
         boolean whitelistHasTardisFlag = collectWorldIds(whitelist, whitelistIds);
         boolean useWhitelist = whitelistHasTardisFlag || !whitelistIds.isEmpty();
 
-        Set<Identifier> blacklistIds = new HashSet<>();
+        Set<ResourceLocation> blacklistIds = new HashSet<>();
         boolean blacklistHasTardisFlag = collectWorldIds(blacklist, blacklistIds);
 
         if (useWhitelist && (blacklistHasTardisFlag || !blacklistIds.isEmpty()))
             AITMod.LOGGER.warn("Both {} blacklist and whitelist are populated - whitelist takes priority. Clear one to suppress this warning.", cacheName);
 
-        Set<Identifier> activeIds = useWhitelist ? whitelistIds : blacklistIds;
+        Set<ResourceLocation> activeIds = useWhitelist ? whitelistIds : blacklistIds;
         boolean hasTardisFlag = useWhitelist ? whitelistHasTardisFlag : blacklistHasTardisFlag;
 
-        for (ServerWorld world : server.getWorlds()) {
+        for (ServerLevel world : server.getAllLevels()) {
             boolean isTardis = TardisServerWorld.isTardisDimension(world);
 
             if (!allowTardisWorlds && isTardis)
                 continue;
 
-            Identifier worldId = world.getRegistryKey().getValue();
+            ResourceLocation worldId = world.dimension().location();
             boolean matches = idsMatch(activeIds, hasTardisFlag, worldId, isTardis);
 
             if (useWhitelist) {
@@ -124,7 +122,7 @@ public class WorldUtil {
             AITMod.LOGGER.warn("The {} whitelist is configured but does not resolve to any available worlds.", cacheName);
     }
 
-    private static boolean collectWorldIds(List<String> rawIds, Set<Identifier> ids) {
+    private static boolean collectWorldIds(List<String> rawIds, Set<ResourceLocation> ids) {
         boolean hasTardisFlag = false;
 
         for (String rawId : rawIds) {
@@ -141,7 +139,7 @@ public class WorldUtil {
                 continue;
             }
 
-            Identifier id = Identifier.tryParse(cleaned);
+            ResourceLocation id = ResourceLocation.tryParse(cleaned);
 
             if (id == null)
                 continue;
@@ -152,7 +150,7 @@ public class WorldUtil {
         return hasTardisFlag;
     }
 
-    private static boolean idsMatch(Set<Identifier> ids, boolean hasTardisFlag, Identifier worldId, boolean isTardis) {
+    private static boolean idsMatch(Set<ResourceLocation> ids, boolean hasTardisFlag, ResourceLocation worldId, boolean isTardis) {
         return (hasTardisFlag && isTardis) || ids.contains(worldId);
     }
 
@@ -165,7 +163,7 @@ public class WorldUtil {
      * @implNote This method uses a reference check (by `==`), instead of
      * {@link Object#equals(Object)}, as its {@link List} counterpart does.
      */
-    public static int travelWorldIndex(ServerWorld world) {
+    public static int travelWorldIndex(ServerLevel world) {
         for (int i = 0; i < TRAVEL_WORLDS.size(); i++) {
             if (world == TRAVEL_WORLDS.get(i))
                 return i;
@@ -174,25 +172,25 @@ public class WorldUtil {
         return -1;
     }
 
-    public static List<ServerWorld> getProjectorWorlds() {
+    public static List<ServerLevel> getProjectorWorlds() {
         return PROJECTOR_WORLDS;
     }
 
-    public static List<ServerWorld> getTravelWorlds() {
+    public static List<ServerLevel> getTravelWorlds() {
         return TRAVEL_WORLDS;
     }
 
     @Environment(EnvType.CLIENT)
     @SuppressWarnings("DataFlowIssue")
-    public static String getName(MinecraftClient client) {
-        if (client.isInSingleplayer())
-            return client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString();
+    public static String getName(Minecraft client) {
+        if (client.isLocalServer())
+            return client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString();
 
-        return client.getCurrentServerEntry().address;
+        return client.getCurrentServer().ip;
     }
 
-    public static Text worldText(RegistryKey<World> key) {
-        Text translated = Text.translatableWithFallback(key.getValue().toTranslationKey("dimension"), fakeTranslate(key));
+    public static Component worldText(ResourceKey<Level> key) {
+        Component translated = Component.translatableWithFallback(key.location().toLanguageKey("dimension"), fakeTranslate(key));
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
             return hackWorldText(translated);
@@ -201,28 +199,28 @@ public class WorldUtil {
     }
 
     @Environment(EnvType.CLIENT)
-    private static Text hackWorldText(Text existing) {
+    private static Component hackWorldText(Component existing) {
         if (ClientTardisUtil.getCurrentTardis() != null &&
                 !ClientTardisUtil.getCurrentTardis().flight().isFlying() && ClientTardisUtil.getCurrentTardis().travel().inFlight()) {
-            RegistryKey<World> timeVortex = AITDimensions.TIME_VORTEX_WORLD;
+            ResourceKey<Level> timeVortex = AITDimensions.TIME_VORTEX_WORLD;
             return
-                    Text.translatableWithFallback(
-                            timeVortex.getValue().toTranslationKey("dimension"),
+                    Component.translatableWithFallback(
+                            timeVortex.location().toLanguageKey("dimension"),
                             fakeTranslate(timeVortex)).append(" [").append(existing).append( "]");
         }
 
         return existing;
     }
 
-    public static Text worldText(RegistryKey<World> key, boolean justToSeperate) {
-        return Text.translatableWithFallback(key.getValue().toTranslationKey("dimension"), fakeTranslate(key));
+    public static Component worldText(ResourceKey<Level> key, boolean justToSeperate) {
+        return Component.translatableWithFallback(key.location().toLanguageKey("dimension"), fakeTranslate(key));
     }
 
-    private static String fakeTranslate(RegistryKey<World> id) {
-        return fakeTranslate(id.getValue());
+    private static String fakeTranslate(ResourceKey<Level> id) {
+        return fakeTranslate(id.location());
     }
 
-    private static String fakeTranslate(Identifier id) {
+    private static String fakeTranslate(ResourceLocation id) {
         return fakeTranslate(id.getPath());
     }
 
@@ -239,7 +237,7 @@ public class WorldUtil {
         return String.join(" ", words);
     }
 
-    public static Text rot2Text(int rotation) {
+    public static Component rot2Text(int rotation) {
         String key = switch (rotation) {
             case 0 -> "direction.north";
             case 1, 2, 3 -> "direction.north_east";
@@ -252,7 +250,7 @@ public class WorldUtil {
             default -> null;
         };
 
-        return Text.translatable(key);
+        return Component.translatable(key);
     }
 
     public static byte tardis2Rot(ServerTardis tardis) {
@@ -289,37 +287,37 @@ public class WorldUtil {
         };
     }
 
-    public static void onBreakHalfInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        DoubleBlockHalf doubleBlockHalf = state.get(Properties.DOUBLE_BLOCK_HALF);
+    public static void onBreakHalfInCreative(Level world, BlockPos pos, BlockState state, Player player) {
+        DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
 
         if (doubleBlockHalf != DoubleBlockHalf.UPPER)
             return;
 
-        BlockPos blockPos = pos.down();
+        BlockPos blockPos = pos.below();
         BlockState blockState = world.getBlockState(blockPos);
 
-        if (blockState.isOf(state.getBlock())
-                && blockState.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
-            BlockState withFluid = blockState.getFluidState().isOf(Fluids.WATER)
-                    ? Blocks.WATER.getDefaultState()
-                    : Blocks.AIR.getDefaultState();
+        if (blockState.is(state.getBlock())
+                && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+            BlockState withFluid = blockState.getFluidState().is(Fluids.WATER)
+                    ? Blocks.WATER.defaultBlockState()
+                    : Blocks.AIR.defaultBlockState();
 
-            world.setBlockState(blockPos, withFluid, 35);
-            world.syncWorldEvent(player, WorldEvents.BLOCK_BROKEN, blockPos, Block.getRawIdFromState(blockState));
+            world.setBlock(blockPos, withFluid, 35);
+            world.levelEvent(player, LevelEvent.PARTICLES_DESTROY_BLOCK, blockPos, Block.getId(blockState));
         }
     }
 
     public static boolean isEndDragonDead() {
-        ServerWorld end = ServerLifecycleHooks.get().getWorld(World.END);
+        ServerLevel end = ServerLifecycleHooks.get().getLevel(Level.END);
         if (end == null) return true;
-        return ((EnderDragonFightAccessor) end.getEnderDragonFight()).getDragonKilled();
+        return ((EnderDragonFightAccessor) end.getDragonFight()).getDragonKilled();
     }
 
-    public static void teleportToWorld(ServerPlayerEntity player, ServerWorld target, Vec3d pos, float yaw, float pitch) {
-        player.teleport(target, pos.x, pos.y, pos.z, yaw, pitch);
-        player.addExperience(0);
+    public static void teleportToWorld(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, float pitch) {
+        player.teleportTo(target, pos.x, pos.y, pos.z, yaw, pitch);
+        player.giveExperiencePoints(0);
 
-        player.getStatusEffects().forEach(effect -> player.networkHandler.sendPacket(
-                new EntityStatusEffectS2CPacket(player.getId(), effect)));
+        player.getActiveEffects().forEach(effect -> player.connection.send(
+                new ClientboundUpdateMobEffectPacket(player.getId(), effect)));
     }
 }

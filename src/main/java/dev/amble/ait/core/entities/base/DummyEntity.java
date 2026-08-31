@@ -1,34 +1,33 @@
 package dev.amble.ait.core.entities.base;
 
 import java.util.Collections;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public abstract class DummyEntity extends Entity {
 
     private static final Iterable<ItemStack> ARMOR = Collections.singleton(ItemStack.EMPTY);
 
-    public DummyEntity(EntityType<?> type, World world) {
+    public DummyEntity(EntityType<?> type, Level world) {
         super(type, world);
     }
 
     @Override
-    public Iterable<ItemStack> getArmorItems() {
+    public Iterable<ItemStack> getArmorSlots() {
         return ARMOR;
     }
 
     @Override
-    public boolean hasNoGravity() {
+    public boolean isNoGravity() {
         return true;
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         return false;
     }
 
@@ -43,7 +42,7 @@ public abstract class DummyEntity extends Entity {
     }
 
     @Override
-    public boolean doesRenderOnFire() {
+    public boolean displayFireAnimation() {
         return false;
     }
 
@@ -53,14 +52,14 @@ public abstract class DummyEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker() {
+    protected void defineSynchedData() {
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
+    protected void readAdditionalSaveData(CompoundTag nbt) {
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
+    protected void addAdditionalSaveData(CompoundTag nbt) {
     }
 }

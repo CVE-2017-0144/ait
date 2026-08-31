@@ -5,13 +5,11 @@ import java.util.Collection;
 import java.util.List;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
-
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.bind.KeyBind;
 import dev.amble.ait.core.entities.FlightTardisEntity;
@@ -28,13 +26,13 @@ public class AITKeyBinds {
                 bind.tick(client);
         });
 
-        register(new KeyBind.Held("snap", "main", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, client -> {
-            ClientPlayerEntity player = client.player;
+        register(new KeyBind.Held("snap", "main", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, client -> {
+            LocalPlayer player = client.player;
 
             if (player == null)
                 return;
 
-            if (player.hasVehicle()) {
+            if (player.isPassenger()) {
                 Entity entity = player.getVehicle();
                 if (entity instanceof FlightTardisEntity flightTardis) {
                     if (!flightTardis.isLinked()) return;
@@ -49,7 +47,7 @@ public class AITKeyBinds {
 
             for (ItemStack stack : keys) {
                 if (stack.getItem() instanceof KeyItem key && key.hasProtocol(KeyItem.Protocols.SNAP)) {
-                    Tardis tardis = key.getTardis(player.getWorld(), stack);
+                    Tardis tardis = key.getTardis(player.level(), stack);
 
                     if (tardis == null)
                         return;
@@ -58,10 +56,10 @@ public class AITKeyBinds {
                 }
             }
         }));
-        register(new KeyBind.Held("increase_speed", "main", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, client -> {
-            ClientPlayerEntity player = client.player;
+        register(new KeyBind.Held("increase_speed", "main", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, client -> {
+            LocalPlayer player = client.player;
 
-            if (player == null || !player.hasVehicle())
+            if (player == null || !player.isPassenger())
                 return;
 
             Entity entity = player.getVehicle();
@@ -72,10 +70,10 @@ public class AITKeyBinds {
                 ClientTardisUtil.flyingSpeedPacket(tardis, "up");
             }
         }));
-        register(new KeyBind.Held("decrease_speed", "main", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_B, client -> {
-            ClientPlayerEntity player = client.player;
+        register(new KeyBind.Held("decrease_speed", "main", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, client -> {
+            LocalPlayer player = client.player;
 
-            if (player == null || !player.hasVehicle())
+            if (player == null || !player.isPassenger())
                 return;
 
             Entity entity = player.getVehicle();
@@ -86,10 +84,10 @@ public class AITKeyBinds {
                 ClientTardisUtil.flyingSpeedPacket(tardis, "down");
             }
         }));
-        register(new KeyBind.Held("toggle_antigravs", "main", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_H, client -> {
-            ClientPlayerEntity player = client.player;
+        register(new KeyBind.Held("toggle_antigravs", "main", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, client -> {
+            LocalPlayer player = client.player;
 
-            if (player == null || !player.hasVehicle())
+            if (player == null || !player.isPassenger())
                 return;
 
             Entity entity = player.getVehicle();

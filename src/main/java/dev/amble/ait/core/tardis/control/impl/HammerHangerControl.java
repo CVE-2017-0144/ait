@@ -1,18 +1,17 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.item.HammerItem;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.handler.ExtraHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 
 public class HammerHangerControl extends Control {
 
@@ -21,28 +20,28 @@ public class HammerHangerControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
                              boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         ExtraHandler handler = tardis.extra();
 
-        if ((leftClick || player.isSneaking()) && (handler.getConsoleHammer() != null)) {
+        if ((leftClick || player.isShiftKeyDown()) && (handler.getConsoleHammer() != null)) {
             ItemStack item;
 
             item = handler.consoleHammerInserted();
 
-            player.getInventory().offerOrDrop(item);
+            player.getInventory().placeItemBackInInventory(item);
             handler.insertConsoleHammer(null);
             return Result.SUCCESS_ALT;
         }
 
-        ItemStack stack = player.getMainHandStack();
+        ItemStack stack = player.getMainHandItem();
 
         if (stack.getItem() instanceof HammerItem) {
             if (handler.getConsoleHammer() == null || handler.getConsoleHammer().isEmpty()) {
                 handler.insertConsoleHammer(stack.copy());
-                player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             }
         }
 
@@ -51,7 +50,7 @@ public class HammerHangerControl extends Control {
 
     @Override
     public SoundEvent getFallbackSound() {
-        return SoundEvents.BLOCK_CHAIN_HIT;
+        return SoundEvents.CHAIN_HIT;
     }
 
     @Override

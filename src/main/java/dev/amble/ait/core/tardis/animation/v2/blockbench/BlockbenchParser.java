@@ -18,17 +18,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Tuple;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.joml.Vector3f;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.AnimationKeyframe;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.KeyframeTracker;
@@ -39,14 +37,14 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 // TODO - replace this with the better BedrockAnimation stuff when i can be bothered.
 public class BlockbenchParser implements
         SimpleSynchronousResourceReloadListener {
-    private static final Identifier SYNC = AITMod.id("blockbench_sync");
+    private static final ResourceLocation SYNC = AITMod.id("blockbench_sync");
 
-    private final HashMap<Identifier, Result> tardisAnimations = new HashMap<>();
+    private final HashMap<ResourceLocation, Result> tardisAnimations = new HashMap<>();
     private final ConcurrentHashMap<String, List<JsonObject>> tardisAnimationsRaw = new ConcurrentHashMap<>();
     private static final BlockbenchParser instance = new BlockbenchParser();
 
     private BlockbenchParser() {
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> this.sync(player));
     }
 
@@ -65,23 +63,23 @@ public class BlockbenchParser implements
         });
     }
 
-    private PacketByteBuf toBuf() {
-        PacketByteBuf buf = PacketByteBufs.create();
+    private FriendlyByteBuf toBuf() {
+        FriendlyByteBuf buf = PacketByteBufs.create();
 
         buf.writeInt(this.tardisAnimationsRaw.size());
         for (Map.Entry<String, List<JsonObject>> entry : this.tardisAnimationsRaw.entrySet()) {
-            buf.writeString(entry.getKey());
+            buf.writeUtf(entry.getKey());
 
             buf.writeInt(entry.getValue().size());
             for (JsonObject json : entry.getValue()) {
-                buf.writeString(json.toString());
+                buf.writeUtf(json.toString());
             }
         }
 
         return buf;
     }
 
-    private void sync(ServerPlayerEntity target) {
+    private void sync(ServerPlayer target) {
         if (ServerLifecycleHooks.get() == null) return;
 
         ServerPlayNetworking.send(target, SYNC, toBuf());
@@ -90,26 +88,26 @@ public class BlockbenchParser implements
     private void sync() {
         if (ServerLifecycleHooks.get() == null) return;
 
-        PacketByteBuf buf = toBuf();
+        FriendlyByteBuf buf = toBuf();
 
-        for (ServerPlayerEntity player : ServerLifecycleHooks.get().getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : ServerLifecycleHooks.get().getPlayerList().getPlayers()) {
             ServerPlayNetworking.send(player, SYNC, buf);
         }
     }
 
-    private void receive(PacketByteBuf buf) {
+    private void receive(FriendlyByteBuf buf) {
         this.tardisAnimationsRaw.clear();
         this.tardisAnimations.clear();
 
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {
-            String namespace = buf.readString();
+            String namespace = buf.readUtf();
 
             int jsonSize = buf.readInt();
             List<JsonObject> jsons = new ArrayList<>();
 
             for (int j = 0; j < jsonSize; j++) {
-                String jsonString = buf.readString();
+                String jsonString = buf.readUtf();
                 JsonObject json = JsonParser.parseString(jsonString).getAsJsonObject();
                 jsons.add(json);
             }
@@ -123,18 +121,18 @@ public class BlockbenchParser implements
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return AITMod.id("blockbench_parser");
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         this.tardisAnimationsRaw.clear();
         this.tardisAnimations.clear();
 
-        for (Identifier id : manager
-                .findResources("fx/animation/keyframes", filename -> filename.getPath().endsWith("animation.json")).keySet()) {
-            try (InputStream stream = manager.getResource(id).get().getInputStream()) {
+        for (ResourceLocation id : manager
+                .listResources("fx/animation/keyframes", filename -> filename.getPath().endsWith("animation.json")).keySet()) {
+            try (InputStream stream = manager.getResource(id).get().open()) {
                 parseAndStore(JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject(), id.getNamespace());
                 AmbleKit.LOGGER.info("Loaded blockbench file {}", id);
             } catch (Exception e) {
@@ -151,7 +149,7 @@ public class BlockbenchParser implements
                          KeyframeTracker<Vector3f> scale) {
     }
 
-    public static Result getOrThrow(Identifier id) {
+    public static Result getOrThrow(ResourceLocation id) {
         Result result = getInstance().tardisAnimations.get(id);
 
         if (result == null) {
@@ -161,7 +159,7 @@ public class BlockbenchParser implements
         return result;
     }
 
-    public static Result getOrFallback(Identifier id) {
+    public static Result getOrFallback(ResourceLocation id) {
         try {
             return getOrThrow(id);
         } catch (IllegalStateException e) {
@@ -179,7 +177,7 @@ public class BlockbenchParser implements
             List<JsonObject> animations = entry.getValue();
 
             for (JsonObject json : animations) {
-                HashMap<Identifier, Result> map = parse(json, namespace);
+                HashMap<ResourceLocation, Result> map = parse(json, namespace);
                 this.tardisAnimations.putAll(map);
             }
         }
@@ -192,19 +190,19 @@ public class BlockbenchParser implements
         this.tardisAnimationsRaw.get(namespace).add(json);
 
         // parse and store in lookup
-        HashMap<Identifier, Result> map = parse(json, namespace);
+        HashMap<ResourceLocation, Result> map = parse(json, namespace);
         this.tardisAnimations.putAll(map);
     }
 
-    public static HashMap<Identifier, Result> parse(JsonObject json, String namespace) {
+    public static HashMap<ResourceLocation, Result> parse(JsonObject json, String namespace) {
         // get animations
         JsonObject animations = json.getAsJsonObject("animations");
 
-        HashMap<Identifier, Result> map = new HashMap<>();
+        HashMap<ResourceLocation, Result> map = new HashMap<>();
 
         for (String key : animations.keySet()) {
             JsonObject anim = animations.getAsJsonObject(key);
-            Identifier id = Identifier.of(namespace, key);
+            ResourceLocation id = ResourceLocation.tryBuild(namespace, key);
 
             Result result = parseAnimation(anim);
             map.put(id, result);
@@ -304,7 +302,7 @@ public class BlockbenchParser implements
 
         JsonObject object = element.getAsJsonObject();
 
-        TreeMap<Float, Pair<Vector3f, AnimationKeyframe.Interpolation>> map = new TreeMap<>();
+        TreeMap<Float, Tuple<Vector3f, AnimationKeyframe.Interpolation>> map = new TreeMap<>();
 
         for (String key : object.keySet()) {
             float time = Float.parseFloat(key);
@@ -321,18 +319,18 @@ public class BlockbenchParser implements
                 type = AnimationKeyframe.Interpolation.LINEAR;
             }
 
-            map.put(time, new Pair<>(vector, type));
+            map.put(time, new Tuple<>(vector, type));
         }
 
-        for (Map.Entry<Float, Pair<Vector3f, AnimationKeyframe.Interpolation>> current : map.entrySet()) {
+        for (Map.Entry<Float, Tuple<Vector3f, AnimationKeyframe.Interpolation>> current : map.entrySet()) {
             Float currentTime = current.getKey();
-            Vector3f currentVector = current.getValue().getLeft();
-            AnimationKeyframe.Interpolation currentType = current.getValue().getRight();
-            Map.Entry<Float, Pair<Vector3f, AnimationKeyframe.Interpolation>> nextEntry = map.higherEntry(currentTime);
+            Vector3f currentVector = current.getValue().getA();
+            AnimationKeyframe.Interpolation currentType = current.getValue().getB();
+            Map.Entry<Float, Tuple<Vector3f, AnimationKeyframe.Interpolation>> nextEntry = map.higherEntry(currentTime);
 
             if (nextEntry != null) {
                 Float nextTime = nextEntry.getKey();
-                Vector3f nextVector = nextEntry.getValue().getLeft();
+                Vector3f nextVector = nextEntry.getValue().getA();
 
                 AnimationKeyframe<Vector3f> frame = new AnimationKeyframe<>((nextTime - currentTime) * 20, currentType, new AnimationKeyframe.InterpolatedVector3f(currentVector, nextVector));
                 list.add(frame);

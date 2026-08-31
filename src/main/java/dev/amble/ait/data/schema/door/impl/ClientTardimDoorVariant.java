@@ -11,6 +11,6 @@ public class ClientTardimDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new TardimDoorModel(TardimDoorModel.getTexturedModelData().createModel());
+        return new TardimDoorModel(TardimDoorModel.getTexturedModelData().bakeRoot());
     }
 }

@@ -1,23 +1,20 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.handler.distress.DistressCall;
@@ -26,50 +23,50 @@ public class HypercubeItem extends Item {
 
     private static final String DISTRESS_CALL_KEY = "DistressCall";
 
-    public HypercubeItem(Settings settings) {
-        super(settings.maxDamageIfAbsent(100));
+    public HypercubeItem(Properties settings) {
+        super(settings.defaultDurability(100));
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
         if (!AITMod.CONFIG.hypercubesEnabled) {
-            user.sendMessage(Text.translatable("message.ait.hypercubes.disabled").formatted(Formatting.RED), true);
-            return TypedActionResult.fail(new ItemStack(this));
+            user.displayClientMessage(Component.translatable("message.ait.hypercubes.disabled").withStyle(ChatFormatting.RED), true);
+            return InteractionResultHolder.fail(new ItemStack(this));
         }
-        if (hand != Hand.MAIN_HAND) return TypedActionResult.fail(user.getStackInHand(hand));
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.fail(user.getItemInHand(hand));
 
-        ItemStack held = user.getMainHandStack();
+        ItemStack held = user.getMainHandItem();
 
-        if (!(world instanceof ServerWorld serverWorld)) {
-            MinecraftClient.getInstance().gameRenderer.showFloatingItem(held);
+        if (!(world instanceof ServerLevel serverWorld)) {
+            Minecraft.getInstance().gameRenderer.displayItemActivation(held);
 
-            return TypedActionResult.success(user.getStackInHand(hand));
+            return InteractionResultHolder.success(user.getItemInHand(hand));
         }
 
-        DistressCall call = getCall(held, serverWorld.getServer().getTicks());
+        DistressCall call = getCall(held, serverWorld.getServer().getTickCount());
         if (call == null) {
-            call = DistressCall.create(user, held.hasCustomName() ? held.getName().getString() : "SOS", true);
+            call = DistressCall.create(user, held.hasCustomHoverName() ? held.getHoverName().getString() : "SOS", true);
             setCall(held, call);
         }
 
-        boolean success = call.send(user.getUuid(), held);
+        boolean success = call.send(user.getUUID(), held);
 
-        user.getItemCooldownManager().set(this, 15 * 20);
+        user.getCooldowns().addCooldown(this, 15 * 20);
 
-        return success ? TypedActionResult.success(held) : TypedActionResult.fail(held);
+        return success ? InteractionResultHolder.success(held) : InteractionResultHolder.fail(held);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
 
-        if (!(world instanceof ServerWorld serverWorld)) return;
+        if (!(world instanceof ServerLevel serverWorld)) return;
 
-        DistressCall call = getCall(stack, serverWorld.getServer().getTicks());
+        DistressCall call = getCall(stack, serverWorld.getServer().getTickCount());
         if (call == null) return;
         if (call.isSourceCall()) return;
 
-        stack.setDamage((int) ((1f - (((float) call.getTimeLeft() / (call.lifetime())))) * stack.getMaxDamage()));
+        stack.setDamageValue((int) ((1f - (((float) call.getTimeLeft() / (call.lifetime())))) * stack.getMaxDamage()));
 
         if (call.isValid()) return;
 
@@ -77,8 +74,8 @@ public class HypercubeItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
         if (world == null) return;
 
@@ -86,23 +83,23 @@ public class HypercubeItem extends Item {
         if (call == null) return;
 
         if (call.isSourceCall()) {
-            tooltip.add(Text.translatable("tooltip.ait.distresscall.source").formatted(Formatting.BOLD, Formatting.GOLD));
+            tooltip.add(Component.translatable("tooltip.ait.distresscall.source").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD));
         }
-        tooltip.add(Text.literal(call.message()).formatted(Formatting.ITALIC, Formatting.RED));
+        tooltip.add(Component.literal(call.message()).withStyle(ChatFormatting.ITALIC, ChatFormatting.RED));
         tooltip.add(call.sender().getTooltip());
     }
 
     public static DistressCall getCall(ItemStack stack, int ticks) {
-        NbtCompound data = stack.getOrCreateNbt();
+        CompoundTag data = stack.getOrCreateTag();
         if (!data.contains(DISTRESS_CALL_KEY)) return null;
 
         return DistressCall.fromNbt(data.getCompound(DISTRESS_CALL_KEY), ticks);
     }
 
     public static void setCall(ItemStack stack, DistressCall call) {
-        stack.getOrCreateNbt().put(DISTRESS_CALL_KEY, call.toNbt());
+        stack.getOrCreateTag().put(DISTRESS_CALL_KEY, call.toNbt());
 
-        stack.removeCustomName();
+        stack.resetHoverName();
     }
 
     public static ItemStack create(DistressCall call) {

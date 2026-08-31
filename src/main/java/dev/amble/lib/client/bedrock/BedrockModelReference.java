@@ -4,19 +4,18 @@ import com.mojang.serialization.Codec;
 import dev.amble.lib.api.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import java.util.Optional;
 
 public record BedrockModelReference(String fileName, String animationName) implements Identifiable {
-	public static Codec<BedrockModelReference> CODEC = Identifier.CODEC.xmap(
+	public static Codec<BedrockModelReference> CODEC = ResourceLocation.CODEC.xmap(
 			BedrockModelReference::parse,
 			BedrockModelReference::id
 	);
 
 	@Override
-	public Identifier id() {
-		return Identifier.of(fileName, animationName);
+	public ResourceLocation id() {
+		return ResourceLocation.tryBuild(fileName, animationName);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -25,7 +24,7 @@ public record BedrockModelReference(String fileName, String animationName) imple
 		return Optional.ofNullable(animation);
 	}
 
-	public static BedrockModelReference parse(Identifier id) {
+	public static BedrockModelReference parse(ResourceLocation id) {
 		return new BedrockModelReference(id.getNamespace(), id.getPath());
 	}
 }

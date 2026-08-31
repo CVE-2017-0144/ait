@@ -2,9 +2,7 @@ package dev.amble.ait.core.tardis.handler;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.core.likes.ItemOpinionRegistry;
 import dev.amble.ait.core.likes.Opinion;
@@ -13,7 +11,7 @@ import dev.amble.ait.data.Exclude;
 
 public class OpinionHandler extends KeyedTardisComponent {
     private static final int MAX_ITEM_LIKES = 4;
-    private final ArrayList<Identifier> opinions;
+    private final ArrayList<ResourceLocation> opinions;
     @Exclude
     private OpinionCache cache;
 

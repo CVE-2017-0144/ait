@@ -2,41 +2,38 @@ package dev.amble.ait.mixin;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.world.item.UseAnim;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.gen.Invoker;
-
-import net.minecraft.util.UseAction;
-
 import dev.amble.ait.api.AITUseActions;
 
-@Mixin(UseAction.class)
+@Mixin(UseAnim.class)
 public class UseActionMixin implements AITUseActions {
 
     @Shadow
     @Final
     @Mutable
-    private static UseAction[] field_8948;
+    private static UseAnim[] $VALUES;
 
-    private static final UseAction SONIC = register("SONIC");
+    private static final UseAnim SONIC = register("SONIC");
 
     @Invoker("<init>")
-    private static UseAction init(String name, int ordinal) {
+    private static UseAnim init(String name, int ordinal) {
         throw new AssertionError();
     }
 
     @Override
-    public UseAction ait$sonic() {
+    public UseAnim ait$sonic() {
         return SONIC;
     }
 
-    @Unique private static UseAction register(String name) {
-        UseAction result = init(name, UseAction.values().length);
+    @Unique private static UseAnim register(String name) {
+        UseAnim result = init(name, UseAnim.values().length);
 
-        List<UseAction> actions = new ArrayList<>(List.of(field_8948));
+        List<UseAnim> actions = new ArrayList<>(List.of($VALUES));
         actions.add(result);
 
-        field_8948 = actions.toArray(new UseAction[0]);
+        $VALUES = actions.toArray(new UseAnim[0]);
         return result;
     }
 }

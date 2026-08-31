@@ -2,24 +2,22 @@ package dev.amble.ait.core.entities.base;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.World;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.api.tardis.link.v2.entity.AbstractLinkableEntity;
 
 public class LinkableDummyEntity extends DummyEntity implements AbstractLinkableEntity {
 
-    private static final TrackedData<Optional<UUID>> TARDIS = AbstractLinkableEntity
+    private static final EntityDataAccessor<Optional<UUID>> TARDIS = AbstractLinkableEntity
             .register(LinkableDummyEntity.class);
 
     private TardisRef tardis;
 
-    public LinkableDummyEntity(EntityType<?> type, World world) {
+    public LinkableDummyEntity(EntityType<?> type, Level world) {
         super(type, world);
     }
 
@@ -27,20 +25,20 @@ public class LinkableDummyEntity extends DummyEntity implements AbstractLinkable
      * Used by {@link AbstractLinkableEntity}, do not remove.
      */
     @Override
-    public World getWorld() {
-        return super.getWorld();
+    public Level level() {
+        return super.level();
     }
 
     /**
      * Used by {@link AbstractLinkableEntity}, do not remove.
      */
     @Override
-    public DataTracker getDataTracker() {
-        return super.getDataTracker();
+    public SynchedEntityData getEntityData() {
+        return super.getEntityData();
     }
 
     @Override
-    public TrackedData<Optional<UUID>> getTracked() {
+    public EntityDataAccessor<Optional<UUID>> getTracked() {
         return TARDIS;
     }
 
@@ -55,26 +53,26 @@ public class LinkableDummyEntity extends DummyEntity implements AbstractLinkable
     }
 
     @Override
-    public void initDataTracker() {
-        super.initDataTracker();
+    public void defineSynchedData() {
+        super.defineSynchedData();
         AbstractLinkableEntity.super.initDataTracker();
     }
 
     @Override
-    public void onTrackedDataSet(TrackedData<?> data) {
-        super.onTrackedDataSet(data);
+    public void onSyncedDataUpdated(EntityDataAccessor<?> data) {
+        super.onSyncedDataUpdated(data);
         AbstractLinkableEntity.super.onTrackedDataSet(data);
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
         AbstractLinkableEntity.super.readCustomDataFromNbt(nbt);
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
         AbstractLinkableEntity.super.writeCustomDataToNbt(nbt);
     }
 }

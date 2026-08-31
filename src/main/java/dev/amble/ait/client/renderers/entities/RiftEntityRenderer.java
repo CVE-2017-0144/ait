@@ -3,17 +3,15 @@ package dev.amble.ait.client.renderers.entities;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.client.AITModClient;
@@ -25,63 +23,63 @@ import org.joml.Matrix4f;
 @Environment(EnvType.CLIENT)
 public class RiftEntityRenderer extends EntityRenderer<RiftEntity> {
 
-    public static final Identifier RIFT_TEXTURE = AITMod.id("textures/entity/rift/rift.png");
-    public static final Identifier CIRCLE_TEXTURE = AITMod.id("textures/entity/rift/circle_rift.png");
+    public static final ResourceLocation RIFT_TEXTURE = AITMod.id("textures/entity/rift/rift.png");
+    public static final ResourceLocation CIRCLE_TEXTURE = AITMod.id("textures/entity/rift/circle_rift.png");
 
-    public RiftEntityRenderer(EntityRendererFactory.Context context) {
+    public RiftEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void render(RiftEntity riftEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+    public void render(RiftEntity riftEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
         if (AITModClient.CONFIG.enableTardisBOTI && !DependencyChecker.hasPortals()) {
             BOTI.RIFT_RENDERING_QUEUE.add(riftEntity);
             return;
         }
 
-        matrixStack.push();
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(riftEntity.getYaw() + 180));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Axis.YP.rotationDegrees(riftEntity.getYRot() + 180));
         matrixStack.translate(0, 0.3, 0);
         matrixStack.scale(1, 1, 1);
 
         renderCircleQuad(
                 matrixStack,
-                vertexConsumerProvider.getBuffer(RenderLayer.getEndGateway()),
+                vertexConsumerProvider.getBuffer(RenderType.endGateway()),
                 0xf000f0,
-                OverlayTexture.DEFAULT_UV,
+                OverlayTexture.NO_OVERLAY,
                 1, 1, 1, 1,
                 4.5f
         );
 
         // The endGateway renderLayer culls the backface so rendering it twice is fine
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(180f));
         renderCircleQuad(
                 matrixStack,
-                vertexConsumerProvider.getBuffer(RenderLayer.getEndGateway()),
+                vertexConsumerProvider.getBuffer(RenderType.endGateway()),
                 0xf000f0,
-                OverlayTexture.DEFAULT_UV,
+                OverlayTexture.NO_OVERLAY,
                 1, 1, 1.0f, 1.0f,
                 4.5f
         );
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
-    private static void renderCircleQuad(MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, float size) {
-        MatrixStack.Entry entry = matrixStack.peek();
-        Matrix4f positionMatrix = entry.getPositionMatrix();
-        Matrix3f normalMatrix = entry.getNormalMatrix();
+    private static void renderCircleQuad(PoseStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, float size) {
+        PoseStack.Pose entry = matrixStack.last();
+        Matrix4f positionMatrix = entry.pose();
+        Matrix3f normalMatrix = entry.normal();
 
         float half = size / 2.0f;
 
-        vertexConsumer.vertex(positionMatrix, -half, -half, 0).color(red, green, blue, alpha).texture(0.0f, 0.5f).overlay(overlay).light(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).next();
-        vertexConsumer.vertex(positionMatrix, half, -half, 0).color(red, green, blue, alpha).texture(0.5f, 0.5f).overlay(overlay).light(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).next();
-        vertexConsumer.vertex(positionMatrix, half, half, 0).color(red, green, blue, alpha).texture(0.5f, 0.0f).overlay(overlay).light(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).next();
-        vertexConsumer.vertex(positionMatrix, -half, half, 0).color(red, green, blue, alpha).texture(0.0f, 0.0f).overlay(overlay).light(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).next();
+        vertexConsumer.vertex(positionMatrix, -half, -half, 0).color(red, green, blue, alpha).uv(0.0f, 0.5f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(positionMatrix, half, -half, 0).color(red, green, blue, alpha).uv(0.5f, 0.5f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(positionMatrix, half, half, 0).color(red, green, blue, alpha).uv(0.5f, 0.0f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(positionMatrix, -half, half, 0).color(red, green, blue, alpha).uv(0.0f, 0.0f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
     }
 
     @Override
-    public Identifier getTexture(RiftEntity entity) {
+    public ResourceLocation getTextureLocation(RiftEntity entity) {
         return null;
     }
 }

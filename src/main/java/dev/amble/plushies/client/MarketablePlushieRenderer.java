@@ -1,73 +1,72 @@
 package dev.amble.plushies.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.lib.animation.client.BedrockBlockEntityRenderer;
 import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.plushies.MarketablePlushieBlock;
 import dev.amble.plushies.MarketablePlushieBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.world.LightType;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class MarketablePlushieRenderer<T extends MarketablePlushieBlockEntity> extends BedrockBlockEntityRenderer<T> {
 
     private static final float MAX_SCALE = 3.0f;
     private static final float NORMAL_SCALE = 1.5f;
 
-    public MarketablePlushieRenderer(BlockEntityRendererFactory.Context context) {
+    public MarketablePlushieRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        BlockState state = entity.getCachedState();
+    public void render(T entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        BlockState state = entity.getBlockState();
         Block block = state.getBlock();
 
         if (!(block instanceof MarketablePlushieBlock plushieBlock)) return;
 
         BedrockEntityModel<?> model = plushieBlock.model == null ? plushieBlock.model = refreshModel(entity) : plushieBlock.model;
 
-        BlockState downState = entity.getWorld().getBlockState(entity.getPos().down());
+        BlockState downState = entity.getLevel().getBlockState(entity.getBlockPos().below());
         Block downBlock = downState.getBlock();
-        if (downBlock instanceof MarketablePlushieBlock && downState.get(MarketablePlushieBlock.STACKED))
+        if (downBlock instanceof MarketablePlushieBlock && downState.getValue(MarketablePlushieBlock.STACKED))
             return;
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0.5D, 0.0D, 0.5D);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180F));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.getRenderYaw()));
+        matrices.mulPose(Axis.XP.rotationDegrees(180F));
+        matrices.mulPose(Axis.YP.rotationDegrees(entity.getRenderYaw()));
 
-        boolean stacked = state.get(MarketablePlushieBlock.STACKED);
+        boolean stacked = state.getValue(MarketablePlushieBlock.STACKED);
         float scale = stacked ? MAX_SCALE : NORMAL_SCALE;
         matrices.scale(scale, scale, scale);
 
         model.setAngles(entity, entity.getAge() + tickDelta);
 
-        model.render(
+        model.renderToBuffer(
                 matrices,
-                vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity))),
+                vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(getTexture(entity))),
                 light,
                 overlay,
                 1.0f, 1.0f, 1.0f, 1.0f
         );
 
-        Identifier emission = entity.getEmissionTexture();
+        ResourceLocation emission = entity.getEmissionTexture();
         if (emission != null) {
-            model.render(
+            model.renderToBuffer(
                     matrices,
-                    vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(emission)),
-                    LightmapTextureManager.MAX_LIGHT_COORDINATE,
+                    vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)),
+                    LightTexture.FULL_BRIGHT,
                     overlay,
                     1.0f, 1.0f, 1.0f, 1.0f
             );
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 }

@@ -3,26 +3,24 @@ package dev.amble.ait.module.planet.core.space.planet;
 import java.util.function.Predicate;
 
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.dimension.DimensionOptions;
-
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.dimension.LevelStem;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITDimensions;
 
 public class PlanetBiomeSelectors {
-    private static final RegistryKey<Registry<DimensionOptions>> DIMENSION_KEY =
-            RegistryKey.ofRegistry(AITMod.id("dimension"));
+    private static final ResourceKey<Registry<LevelStem>> DIMENSION_KEY =
+            ResourceKey.createRegistryKey(AITMod.id("dimension"));
 
-    public static final RegistryKey<DimensionOptions> MARS_DIMENSION_OPTIONS =
-            RegistryKey.of(DIMENSION_KEY, AITDimensions.MARS.getValue());
+    public static final ResourceKey<LevelStem> MARS_DIMENSION_OPTIONS =
+            ResourceKey.create(DIMENSION_KEY, AITDimensions.MARS.location());
 
-    public static final RegistryKey<DimensionOptions> MOON_DIMENSION_OPTIONS =
-            RegistryKey.of(DIMENSION_KEY, AITDimensions.MOON.getValue());
+    public static final ResourceKey<LevelStem> MOON_DIMENSION_OPTIONS =
+            ResourceKey.create(DIMENSION_KEY, AITDimensions.MOON.location());
 
-    public static final RegistryKey<DimensionOptions> SPACE_DIMENSION_OPTIONS =
-            RegistryKey.of(DIMENSION_KEY, AITDimensions.SPACE.getValue());
+    public static final ResourceKey<LevelStem> SPACE_DIMENSION_OPTIONS =
+            ResourceKey.create(DIMENSION_KEY, AITDimensions.SPACE.location());
 
     public static Predicate<BiomeSelectionContext> foundInMars() {
         return context -> context.canGenerateIn(MARS_DIMENSION_OPTIONS);

@@ -1,46 +1,51 @@
 package dev.amble.ait.client.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import org.joml.Matrix4f;
-
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.phys.Vec3;
 
 public class TriangleTestingUtil {
 
     public static void renderTriangle(WorldRenderContext context) {
         Camera camera = context.camera();
 
-        Vec3d targetPosition = new Vec3d(-67, 67, 108);
-        Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
+        Vec3 targetPosition = new Vec3(-67, 67, 108);
+        Vec3 transformedPosition = targetPosition.subtract(camera.getPosition());
 
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+        PoseStack matrixStack = new PoseStack();
+        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
         matrixStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
         matrixStack.scale(1f, 8f, 1f);
 
-        Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        Matrix4f positionMatrix = matrixStack.last().pose();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
 
-        buffer.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+        buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         for (int i = 0; i < 6; ++i) {
-            matrixStack.multiply(
-                    RotationAxis.POSITIVE_Y.rotationDegrees(i * ((i > 1f && i < 3f) || i == 4 ? 120f : 60F)), 0, 0, 0);
-            buffer.vertex(positionMatrix, -0.5f, 1, -0.865625f).color(1f, 1f, 1f, 1f).texture(0f, 0f).next();
-            buffer.vertex(positionMatrix, 0, 0, /*-0.865625f*/ 0).color(1f, 0f, 0f, 1f).texture(0f, 1f).next();
-            buffer.vertex(positionMatrix, 0.5f, 1, -0.865625f).color(0f, 0f, 1f, 1f).texture(1f, 0f).next();
+            matrixStack.rotateAround(
+                    Axis.YP.rotationDegrees(i * ((i > 1f && i < 3f) || i == 4 ? 120f : 60F)), 0, 0, 0);
+            buffer.vertex(positionMatrix, -0.5f, 1, -0.865625f).color(1f, 1f, 1f, 1f).uv(0f, 0f).endVertex();
+            buffer.vertex(positionMatrix, 0, 0, /*-0.865625f*/ 0).color(1f, 0f, 0f, 1f).uv(0f, 1f).endVertex();
+            buffer.vertex(positionMatrix, 0.5f, 1, -0.865625f).color(0f, 0f, 1f, 1f).uv(1f, 0f).endVertex();
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableCull();
 
-        tessellator.draw();
+        tessellator.end();
 
         RenderSystem.enableCull();
     }

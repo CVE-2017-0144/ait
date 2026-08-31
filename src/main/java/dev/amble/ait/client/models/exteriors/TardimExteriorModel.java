@@ -1,11 +1,19 @@
 package dev.amble.ait.client.models.exteriors;
 
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.entity.Entity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -19,105 +27,105 @@ public class TardimExteriorModel extends SimpleExteriorModel {
     private final ModelPart tardis;
 
     public TardimExteriorModel(ModelPart root) {
-        super(RenderLayer::getEntityCutoutNoCull);
+        super(RenderType::entityCutoutNoCull);
         this.tardis = root.getChild("tardis");
     }
 
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData tardis = modelPartData.addChild("tardis",
-                ModelPartBuilder.create().uv(62, 58)
-                        .cuboid(-11.0F, -32.0F, -8.0F, 3.0F, 32.0F, 16.0F, new Dilation(0.0F)).uv(0, 0)
-                        .cuboid(-8.0F, -40.0F, -8.0F, 16.0F, 8.0F, 16.0F, new Dilation(0.0F)).uv(78, 26)
-                        .cuboid(-8.0F, -0.02F, -8.0F, 16.0F, 0.0F, 16.0F, new Dilation(0.0F)).uv(62, 9)
-                        .cuboid(-8.0F, 0.02F, -8.0F, 16.0F, 0.0F, 16.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition tardis = modelPartData.addOrReplaceChild("tardis",
+                CubeListBuilder.create().texOffs(62, 58)
+                        .addBox(-11.0F, -32.0F, -8.0F, 3.0F, 32.0F, 16.0F, new CubeDeformation(0.0F)).texOffs(0, 0)
+                        .addBox(-8.0F, -40.0F, -8.0F, 16.0F, 8.0F, 16.0F, new CubeDeformation(0.0F)).texOffs(78, 26)
+                        .addBox(-8.0F, -0.02F, -8.0F, 16.0F, 0.0F, 16.0F, new CubeDeformation(0.0F)).texOffs(62, 9)
+                        .addBox(-8.0F, 0.02F, -8.0F, 16.0F, 0.0F, 16.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData cube_r1 = tardis.addChild("cube_r1", ModelPartBuilder.create().uv(0, 25).cuboid(-11.0F, -32.0F,
-                -8.0F, 3.0F, 32.0F, 16.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+        PartDefinition cube_r1 = tardis.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 25).addBox(-11.0F, -32.0F,
+                -8.0F, 3.0F, 32.0F, 16.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
 
-        ModelPartData cube_r2 = tardis.addChild("cube_r2", ModelPartBuilder.create().uv(39, 25).cuboid(-11.0F, -32.0F,
-                -8.0F, 3.0F, 32.0F, 16.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+        PartDefinition cube_r2 = tardis.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(39, 25).addBox(-11.0F, -32.0F,
+                -8.0F, 3.0F, 32.0F, 16.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
-        ModelPartData left_door = tardis.addChild("left_door", ModelPartBuilder.create().uv(23, 74).cuboid(-6.5F,
-                -32.0F, -1.5F, 8.0F, 32.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(6.5F, 0.0F, -9.5F));
+        PartDefinition left_door = tardis.addOrReplaceChild("left_door", CubeListBuilder.create().texOffs(23, 74).addBox(-6.5F,
+                -32.0F, -1.5F, 8.0F, 32.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(6.5F, 0.0F, -9.5F));
 
-        ModelPartData right_door = tardis.addChild("right_door",
-                ModelPartBuilder.create().uv(0, 74).cuboid(-1.5F, -32.0F, -1.5F, 8.0F, 32.0F, 3.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-6.5F, 0.0F, -9.5F));
-        return TexturedModelData.of(modelData, 256, 256);
+        PartDefinition right_door = tardis.addOrReplaceChild("right_door",
+                CubeListBuilder.create().texOffs(0, 74).addBox(-1.5F, -32.0F, -1.5F, 8.0F, 32.0F, 3.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-6.5F, 0.0F, -9.5F));
+        return LayerDefinition.create(modelData, 256, 256);
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
             float green, float blue, float alpha) {
         tardis.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return tardis;
     }
 
     @Override
-    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices,
+    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, -1.5f, 0);
 
         this.renderDoors(tardis, exterior, root, matrices, vertices, light, overlay, red, green, blue, pAlpha, false);
 
         super.renderWithAnimations(tardis, exterior, root, matrices, vertices, light, overlay, red, green, blue, pAlpha);
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
+    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
         if (!AITModClient.CONFIG.animateDoors) {
             DoorHandler handler = tardis.door();
 
-            this.tardis.getChild("left_door").yaw = (handler.isLeftOpen() || handler.isOpen()) ? -1.575f : 0.0F;
-            this.tardis.getChild("right_door").yaw = (handler.isRightOpen() || handler.areBothOpen()) ? 1.575f : 0.0F;
+            this.tardis.getChild("left_door").yRot = (handler.isLeftOpen() || handler.isOpen()) ? -1.575f : 0.0F;
+            this.tardis.getChild("right_door").yRot = (handler.isRightOpen() || handler.areBothOpen()) ? 1.575f : 0.0F;
         } else {
             float maxRot = 90f;
-            this.tardis.getChild("left_door").yaw = -(float) Math.toRadians(maxRot * tardis.door().getLeftRot());
-            this.tardis.getChild("right_door").yaw = (float) Math.toRadians(maxRot * tardis.door().getRightRot());
+            this.tardis.getChild("left_door").yRot = -(float) Math.toRadians(maxRot * tardis.door().getLeftRot());
+            this.tardis.getChild("right_door").yRot = (float) Math.toRadians(maxRot * tardis.door().getRightRot());
         }
 
         if (isBOTI) {
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(0, -1.5f, 0);
             this.tardis.getChild("left_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
             this.tardis.getChild("right_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
-            matrices.pop();
+            matrices.popPose();
         }
     }
 
     @Override
-    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, MatrixStack matrices,
+    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, PoseStack matrices,
                                                            VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         if (falling.tardis().isEmpty())
             return;
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, -1.5f, 0);
 
         if (!AITModClient.CONFIG.animateDoors) {
             DoorHandler handler = falling.tardis().get().door();
 
-            this.tardis.getChild("left_door").yaw = (handler.isLeftOpen() || handler.isOpen()) ? -1.575f : 0.0F;
-            this.tardis.getChild("right_door").yaw = (handler.isRightOpen() || handler.areBothOpen()) ? 1.575f : 0.0F;
+            this.tardis.getChild("left_door").yRot = (handler.isLeftOpen() || handler.isOpen()) ? -1.575f : 0.0F;
+            this.tardis.getChild("right_door").yRot = (handler.isRightOpen() || handler.areBothOpen()) ? 1.575f : 0.0F;
         } else {
             float maxRot = 90f;
-            this.tardis.getChild("left_door").yaw = -(float) Math.toRadians(maxRot * falling.tardis().get().door().getLeftRot());
-            this.tardis.getChild("right_door").yaw = (float) Math.toRadians(maxRot * falling.tardis().get().door().getRightRot());
+            this.tardis.getChild("left_door").yRot = -(float) Math.toRadians(maxRot * falling.tardis().get().door().getLeftRot());
+            this.tardis.getChild("right_door").yRot = (float) Math.toRadians(maxRot * falling.tardis().get().door().getRightRot());
         }
 
         super.renderEntity(falling, root, matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        matrices.pop();
+        matrices.popPose();
     }
 }

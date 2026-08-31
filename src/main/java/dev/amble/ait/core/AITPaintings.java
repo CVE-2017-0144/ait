@@ -1,9 +1,8 @@
 package dev.amble.ait.core;
 
 
-import net.minecraft.entity.decoration.painting.PaintingVariant;
-
 import dev.amble.lib.container.impl.PaintingContainer;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 
 public class AITPaintings implements PaintingContainer {
     public static final PaintingVariant CRAB_THROWER = new PaintingVariant(48, 32);

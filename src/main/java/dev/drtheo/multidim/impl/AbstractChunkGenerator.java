@@ -1,22 +1,21 @@
 package dev.drtheo.multidim.impl;
 
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkRegion;
-import net.minecraft.world.HeightLimitView;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.StructureAccessor;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.noise.NoiseConfig;
-
 import java.util.List;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 
 public abstract class AbstractChunkGenerator extends ChunkGenerator {
 
@@ -24,21 +23,21 @@ public abstract class AbstractChunkGenerator extends ChunkGenerator {
         super(biomeSource);
     }
 
-    public AbstractChunkGenerator(BiomeSource biomeSource, Function<RegistryEntry<Biome>, GenerationSettings> generationSettingsGetter) {
+    public AbstractChunkGenerator(BiomeSource biomeSource, Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter) {
         super(biomeSource, generationSettingsGetter);
     }
 
     @Override
-    public void carve(ChunkRegion chunkRegion, long seed, NoiseConfig noiseConfig, BiomeAccess biomeAccess, StructureAccessor structureAccessor, Chunk chunk, GenerationStep.Carver carverStep) { }
+    public void applyCarvers(WorldGenRegion chunkRegion, long seed, RandomState noiseConfig, BiomeManager biomeAccess, StructureManager structureAccessor, ChunkAccess chunk, GenerationStep.Carving carverStep) { }
 
     @Override
-    public void buildSurface(ChunkRegion region, StructureAccessor structures, NoiseConfig noiseConfig, Chunk chunk) { }
+    public void buildSurface(WorldGenRegion region, StructureManager structures, RandomState noiseConfig, ChunkAccess chunk) { }
 
     @Override
-    public void populateEntities(ChunkRegion region) { }
+    public void spawnOriginalMobs(WorldGenRegion region) { }
 
     @Override
-    public int getWorldHeight() {
+    public int getGenDepth() {
         return 0;
     }
 
@@ -48,15 +47,15 @@ public abstract class AbstractChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public int getMinimumY() {
+    public int getMinY() {
         return 0;
     }
 
     @Override
-    public int getHeight(int x, int z, Heightmap.Type heightmap, HeightLimitView world, NoiseConfig noiseConfig) {
+    public int getBaseHeight(int x, int z, Heightmap.Types heightmap, LevelHeightAccessor world, RandomState noiseConfig) {
         return 0;
     }
 
     @Override
-    public void getDebugHudText(List<String> text, NoiseConfig noiseConfig, BlockPos pos) { }
+    public void addDebugScreenInfo(List<String> text, RandomState noiseConfig, BlockPos pos) { }
 }

@@ -5,15 +5,25 @@ import java.util.List;
 import java.util.Optional;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-
-import net.minecraft.block.Block;
-import net.minecraft.data.client.*;
-import net.minecraft.item.Item;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.core.Direction;
+import net.minecraft.data.models.*;
+import net.minecraft.data.models.blockstates.*;
+import net.minecraft.data.models.model.*;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.blockstates.Condition;
+import net.minecraft.data.models.blockstates.MultiPartGenerator;
+import net.minecraft.data.models.blockstates.Variant;
+import net.minecraft.data.models.blockstates.VariantProperties;
+import net.minecraft.data.models.model.ModelLocationUtils;
+import net.minecraft.data.models.model.ModelTemplate;
+import net.minecraft.data.models.model.TextureMapping;
+import net.minecraft.data.models.model.TextureSlot;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
@@ -24,52 +34,52 @@ import dev.amble.lib.datagen.model.AmbleModelProvider;
 public class AITModelProvider extends AmbleModelProvider {
     private final List<Block> directionalBlocksToRegister = new ArrayList<>();
     private final List<Block> simpleBlocksToRegister = new ArrayList<>();
-    private final List<Pair<Block, Block>> coralFanBlocksToRegister = new ArrayList<>();
+    private final List<Tuple<Block, Block>> coralFanBlocksToRegister = new ArrayList<>();
     private final List<Block> pillarBlocksToRegister = new ArrayList<>();
 
     public AITModelProvider(FabricDataOutput output) {
         super(output);
     }
 
-    private static Model item(String modid, String parent, TextureKey... requiredTextureKeys) {
-        return new Model(Optional.of(new Identifier(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
+    private static ModelTemplate item(String modid, String parent, TextureSlot... requiredTextureKeys) {
+        return new ModelTemplate(Optional.of(new ResourceLocation(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
     }
 
-    private static Model item(String parent, TextureKey... requiredTextureKeys) {
+    private static ModelTemplate item(String parent, TextureSlot... requiredTextureKeys) {
         return item(AITMod.MOD_ID, parent, requiredTextureKeys);
     }
 
-    private static Model item(TextureKey... requiredTextureKeys) {
+    private static ModelTemplate item(TextureSlot... requiredTextureKeys) {
         return item("minecraft", "generated", requiredTextureKeys);
     }
 
-    private static Model item(String name) {
-        return item(name, TextureKey.LAYER0);
+    private static ModelTemplate item(String name) {
+        return item(name, TextureSlot.LAYER0);
     }
 
     private static String getItemName(Item item) {
-        return item.getTranslationKey().split("\\.")[2];
+        return item.getDescriptionId().split("\\.")[2];
     }
 
     @Override
-    public void generateBlockStateModels(BlockStateModelGenerator generator) {
+    public void generateBlockStateModels(BlockModelGenerators generator) {
         for (Block block : directionalBlocksToRegister) {
             // Identifier identifier = new
             // Identifier(block.getTranslationKey().split("\\.")[1]);
-            generator.blockStateCollector.accept(MultipartBlockStateSupplier.create(block).with(
-                    When.create().set(Properties.HORIZONTAL_FACING, Direction.NORTH),
-                    BlockStateVariant.create().put(VariantSettings.X, VariantSettings.Rotation.R0)));
+            generator.blockStateOutput.accept(MultiPartGenerator.multiPart(block).with(
+                    Condition.condition().term(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH),
+                    Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R0)));
         }
         for (Block block : simpleBlocksToRegister) {
-            generator.registerSimpleCubeAll(block);
+            generator.createTrivialCube(block);
         }
 
-        for (Pair<Block, Block> pair : coralFanBlocksToRegister) {
-            generator.registerCoralFan(pair.getLeft(), pair.getRight());
+        for (Tuple<Block, Block> pair : coralFanBlocksToRegister) {
+            generator.createCoralFans(pair.getA(), pair.getB());
         }
 
         for (Block block : pillarBlocksToRegister) {
-            generator.registerCubeWithCustomTextures(block, block, (a, b) -> TextureMap.sideAndTop(block));
+            generator.createCraftingTableLike(block, block, (a, b) -> TextureMapping.cubeTop(block));
         }
 
         ModuleRegistry.instance().iterator().forEachRemaining(module -> {
@@ -77,7 +87,7 @@ public class AITModelProvider extends AmbleModelProvider {
             module.getBlockRegistry().ifPresent(this::withBlocks);
         });
 
-        BlockStateModelGenerator.BlockTexturePool tardis_coral_pool = generator.registerCubeAllModelTexturePool(AITBlocks.TARDIS_CORAL_BLOCK);
+        BlockModelGenerators.BlockFamilyProvider tardis_coral_pool = generator.family(AITBlocks.TARDIS_CORAL_BLOCK);
         tardis_coral_pool.stairs(AITBlocks.TARDIS_CORAL_STAIRS);
         tardis_coral_pool.slab(AITBlocks.TARDIS_CORAL_SLAB);
         tardis_coral_pool.wall(AITBlocks.TARDIS_CORAL_WALL);
@@ -88,7 +98,7 @@ public class AITModelProvider extends AmbleModelProvider {
     }
 
     @Override
-    public void generateItemModels(ItemModelGenerator generator) {
+    public void generateItemModels(ItemModelGenerators generator) {
         ModuleRegistry.instance().iterator().forEachRemaining(module -> {
             module.getItemRegistry().ifPresent(this::withItems);
             module.getBlockRegistry().ifPresent(this::withBlocks);
@@ -106,7 +116,7 @@ public class AITModelProvider extends AmbleModelProvider {
     }
 
     public void registerCoralFanBlock(Block fanBlock, Block wallFanBlock) {
-        coralFanBlocksToRegister.add(new Pair<>(fanBlock, wallFanBlock));
+        coralFanBlocksToRegister.add(new Tuple<>(fanBlock, wallFanBlock));
     }
 
     public void registerSimpleBlock(Block block) {
@@ -117,21 +127,21 @@ public class AITModelProvider extends AmbleModelProvider {
         pillarBlocksToRegister.add(block);
     }
 
-    private void registerItem(ItemModelGenerator generator, Item item, String modid) {
-        Model model = item(TextureKey.LAYER0);
-        model.upload(ModelIds.getItemModelId(item), createTextureMap(item, modid), generator.writer);
+    private void registerItem(ItemModelGenerators generator, Item item, String modid) {
+        ModelTemplate model = item(TextureSlot.LAYER0);
+        model.create(ModelLocationUtils.getModelLocation(item), createTextureMap(item, modid), generator.output);
     }
 
-    private TextureMap createTextureMap(Item item, String modid) {
-        Identifier texture = new Identifier(modid, "item/" + getItemName(item));
+    private TextureMapping createTextureMap(Item item, String modid) {
+        ResourceLocation texture = new ResourceLocation(modid, "item/" + getItemName(item));
         if (!(doesTextureExist(texture))) {
             texture = AITMod.id("item/error");
         }
 
-        return new TextureMap().put(TextureKey.LAYER0, texture);
+        return new TextureMapping().put(TextureSlot.LAYER0, texture);
     }
 
-    public boolean doesTextureExist(Identifier texture) {
+    public boolean doesTextureExist(ResourceLocation texture) {
         return this.output.getModContainer().findPath("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
     }
 }

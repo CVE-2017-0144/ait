@@ -3,7 +3,7 @@ package dev.amble.plushies;
 import dev.amble.lib.animation.HasBedrockModel;
 import dev.amble.lib.container.impl.BlockEntityContainer;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class PlushieBlockEntities implements BlockEntityContainer {
 

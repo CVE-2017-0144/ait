@@ -1,22 +1,21 @@
 package dev.amble.ait.core;
 
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.FoodComponent;
-
 import dev.amble.lib.datagen.util.NoEnglish;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 
 public class AITFoodComponents  {
     @NoEnglish
-    public static final FoodComponent FOOD_CUBE = new FoodComponent.Builder().hunger(3).saturationModifier(0.3f).snack()
+    public static final FoodProperties FOOD_CUBE = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).fast()
             .build();
 
     @NoEnglish
-    public static final FoodComponent OVERCHARGED_FOOD_CUBE = new FoodComponent.Builder().hunger(4).saturationModifier(0.5f).snack()
-            .alwaysEdible()
-            .statusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 50, 1), 1.0f)
-            .statusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 1200, 3), 1.0f)
-            .statusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 1500, 0), 1.0f)
-            .statusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 1500, 0), 1.0f)
+    public static final FoodProperties OVERCHARGED_FOOD_CUBE = new FoodProperties.Builder().nutrition(4).saturationMod(0.5f).fast()
+            .alwaysEat()
+            .effect(new MobEffectInstance(MobEffects.REGENERATION, 50, 1), 1.0f)
+            .effect(new MobEffectInstance(MobEffects.ABSORPTION, 1200, 3), 1.0f)
+            .effect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1500, 0), 1.0f)
+            .effect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 1500, 0), 1.0f)
             .build();
 }

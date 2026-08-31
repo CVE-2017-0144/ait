@@ -3,27 +3,27 @@ package dev.amble.ait.core.item;
 
 
 
-import net.minecraft.item.DyeableItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.world.item.ItemStack;
 
 
-public class WaypointItem extends AbstractCoordinateModifierItem implements DyeableItem {
+public class WaypointItem extends AbstractCoordinateModifierItem implements DyeableLeatherItem {
 
-    public static final int DEFAULT_COLOR = 16777215;
+    public static final int DEFAULT_LEATHER_COLOR = 16777215;
 
-    public WaypointItem(Settings settings) {
+    public WaypointItem(Properties settings) {
         super(settings);
     }
 
     @Override
     public int getColor(ItemStack stack) {
-        NbtCompound nbt = stack.getSubNbt(DISPLAY_KEY);
+        CompoundTag nbt = stack.getTagElement(TAG_DISPLAY);
 
-        if (nbt != null && nbt.contains(COLOR_KEY, NbtElement.NUMBER_TYPE))
-            return nbt.getInt(COLOR_KEY);
+        if (nbt != null && nbt.contains(TAG_COLOR, Tag.TAG_ANY_NUMERIC))
+            return nbt.getInt(TAG_COLOR);
 
-        return DEFAULT_COLOR; // white
+        return DEFAULT_LEATHER_COLOR; // white
     }
 }

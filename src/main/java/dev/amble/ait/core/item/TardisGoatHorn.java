@@ -1,28 +1,32 @@
 package dev.amble.ait.core.item;
 
-import static net.minecraft.block.entity.BeaconBlockEntity.playSound;
+import static net.minecraft.world.level.block.entity.BeaconBlockEntity.playSound;
 
 import java.util.Iterator;
 import java.util.Optional;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Instrument;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.resources.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
@@ -36,8 +40,8 @@ public class TardisGoatHorn extends LinkableItem {
     private final TagKey<Instrument> instrumentTag;
     private final EnumSet<TardisGoatHorn.Protocols> protocols;
 
-    public TardisGoatHorn(Settings settings, TagKey<Instrument> instrumentTag, TardisGoatHorn.Protocols... abs) {
-        super(settings.maxCount(1), true);
+    public TardisGoatHorn(Properties settings, TagKey<Instrument> instrumentTag, TardisGoatHorn.Protocols... abs) {
+        super(settings.stacksTo(1), true);
         this.instrumentTag = instrumentTag;
 
         this.protocols = new EnumSet<>(TardisGoatHorn.Protocols::values);
@@ -54,13 +58,13 @@ public class TardisGoatHorn extends LinkableItem {
     }
 
     @Override
-    public void onItemEntityDestroyed(ItemEntity entity) {
+    public void onDestroyed(ItemEntity entity) {
         Entity owner = entity.getOwner();
 
-        if (!(owner instanceof ServerPlayerEntity player))
+        if (!(owner instanceof ServerPlayer player))
             return;
 
-        Tardis tardis = KeyItem.getTardisStatic(entity.getWorld(), entity.getStack());
+        Tardis tardis = KeyItem.getTardisStatic(entity.level(), entity.getItem());
 
         if (tardis == null)
             return;
@@ -69,55 +73,55 @@ public class TardisGoatHorn extends LinkableItem {
         tardis.getDesktop().playSoundAtEveryConsole(AITSounds.CLOISTER);
     }
 
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        Optional<? extends RegistryEntry<Instrument>> optional = this.getInstrument(itemStack);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
+        Optional<? extends Holder<Instrument>> optional = this.getInstrument(itemStack);
         if (optional.isPresent()) {
-            Instrument instrument = (Instrument)((RegistryEntry<?>) optional.get()).value();
-            user.setCurrentHand(hand);
-            playSound(world, user.getBlockPos(), instrument.soundEvent().value());
-            user.getItemCooldownManager().set(this, instrument.useDuration());
-            user.incrementStat(Stats.USED.getOrCreateStat(this));
+            Instrument instrument = (Instrument)((Holder<?>) optional.get()).value();
+            user.startUsingItem(hand);
+            playSound(world, user.blockPosition(), instrument.soundEvent().value());
+            user.getCooldowns().addCooldown(this, instrument.useDuration());
+            user.awardStat(Stats.ITEM_USED.get(this));
 
-            Tardis tardis = TardisGoatHorn.getTardisStatic(world, user.getStackInHand(hand));
-            if (tardis == null || tardis.travel() == null) return TypedActionResult.fail(itemStack);
+            Tardis tardis = TardisGoatHorn.getTardisStatic(world, user.getItemInHand(hand));
+            if (tardis == null || tardis.travel() == null) return InteractionResultHolder.fail(itemStack);
             CachedDirectedGlobalPos abpd = tardis.travel().destination();
             BlockPos abpdPos = abpd.getPos();
-            Text message = Text.translatable("message.ait.tardis_goat_horn.destination", abpdPos.getX(),
+            Component message = Component.translatable("message.ait.tardis_goat_horn.destination", abpdPos.getX(),
                     abpdPos.getY(), abpdPos.getZ(), WorldUtil.worldText(abpd.getDimension(), false))
-                    .formatted(Formatting.GRAY);
+                    .withStyle(ChatFormatting.GRAY);
 
-            user.sendMessage(message, true);
+            user.displayClientMessage(message, true);
 
-            return TypedActionResult.consume(itemStack);
+            return InteractionResultHolder.consume(itemStack);
         } else {
-            return TypedActionResult.fail(itemStack);
+            return InteractionResultHolder.fail(itemStack);
         }
     }
 
-    public int getMaxUseTime(ItemStack stack) {
-        Optional<? extends RegistryEntry<Instrument>> optional = this.getInstrument(stack);
+    public int getUseDuration(ItemStack stack) {
+        Optional<? extends Holder<Instrument>> optional = this.getInstrument(stack);
         return optional.map((instrument) -> instrument.value().useDuration()).orElse(0);
     }
 
-    private Optional<RegistryEntry<Instrument>> getInstrument(ItemStack stack) {
-        NbtCompound nbtCompound = stack.getNbt();
+    private Optional<Holder<Instrument>> getInstrument(ItemStack stack) {
+        CompoundTag nbtCompound = stack.getTag();
         if (nbtCompound != null && nbtCompound.contains("instrument", 8)) {
-            Identifier identifier = Identifier.tryParse(nbtCompound.getString("instrument"));
+            ResourceLocation identifier = ResourceLocation.tryParse(nbtCompound.getString("instrument"));
             if (identifier != null) {
                 // Cast the reference to the expected type
-                return Registries.INSTRUMENT.getEntry(
-                        RegistryKey.of(RegistryKeys.INSTRUMENT, identifier)
+                return BuiltInRegistries.INSTRUMENT.getHolder(
+                        ResourceKey.create(Registries.INSTRUMENT, identifier)
                 ).map(entryRef -> entryRef);
             }
         }
 
-        Iterator<RegistryEntry<Instrument>> iterator = Registries.INSTRUMENT.iterateEntries(this.instrumentTag).iterator();
+        Iterator<Holder<Instrument>> iterator = BuiltInRegistries.INSTRUMENT.getTagOrEmpty(this.instrumentTag).iterator();
         return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
     }
 
 
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.TOOT_HORN;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.TOOT_HORN;
     }
 }

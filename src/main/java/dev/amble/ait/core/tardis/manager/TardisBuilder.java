@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -61,7 +59,7 @@ public class TardisBuilder {
         return this;
     }
 
-    public TardisBuilder owner(ServerPlayerEntity player) {
+    public TardisBuilder owner(ServerPlayer player) {
         return this.<StatsHandler>with(TardisComponent.Id.STATS, stats -> {
             stats.setPlayerCreatorName(player.getName().getString());
             stats.markPlayerCreatorName();

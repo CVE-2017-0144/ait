@@ -10,19 +10,17 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
@@ -54,12 +52,12 @@ import dev.amble.lib.data.DirectedBlockPos;
 import dev.amble.lib.data.DirectedGlobalPos;
 
 public abstract class TardisManager<T extends Tardis, C> {
-    public static final Identifier SEND = AITMod.id("tardis/send");
-    public static final Identifier SEND_BULK = AITMod.id("tardis/send_bulk");
+    public static final ResourceLocation SEND = AITMod.id("tardis/send");
+    public static final ResourceLocation SEND_BULK = AITMod.id("tardis/send_bulk");
 
-    public static final Identifier REMOVE = AITMod.id("tardis/remove");
+    public static final ResourceLocation REMOVE = AITMod.id("tardis/remove");
 
-    public static final Identifier SEND_COMPONENT = AITMod.id("tardis/send_component");
+    public static final ResourceLocation SEND_COMPONENT = AITMod.id("tardis/send_component");
 
     public static final boolean DEMENTIA = false;
 
@@ -98,12 +96,12 @@ public abstract class TardisManager<T extends Tardis, C> {
                 .registerTypeAdapter(PermissionLike.class, Permission.serializer())
                 .registerTypeAdapter(DirectedGlobalPos.class, DirectedGlobalPos.serializer())
                 .registerTypeAdapter(DirectedBlockPos.class, DirectedBlockPos.serializer())
-                .registerTypeAdapter(NbtCompound.class, new NbtSerializer())
+                .registerTypeAdapter(CompoundTag.class, new NbtSerializer())
                 .registerTypeAdapter(ItemStack.class, new ItemStackSerializer())
-                .registerTypeAdapter(Identifier.class, new IdentifierSerializer())
+                .registerTypeAdapter(ResourceLocation.class, new IdentifierSerializer())
                 .registerTypeAdapter(GlobalPos.class, new GlobalPosSerializer())
                 .registerTypeAdapter(BlockPos.class, new BlockPosSerializer())
-                .registerTypeAdapter(RegistryKey.class, new RegistryKeySerializer())
+                .registerTypeAdapter(ResourceKey.class, new RegistryKeySerializer())
                 .registerTypeAdapter(TardisHandlersManager.class, TardisHandlersManager.serializer())
                 .registerTypeAdapter(TardisComponent.IdLike.class, TardisComponentRegistry.idSerializer())
                 .registerTypeAdapter(SubSystemHandler.class, SubSystemHandler.serializer())
@@ -129,15 +127,15 @@ public abstract class TardisManager<T extends Tardis, C> {
     }
 
     public static TardisManager<?, ?> getInstance(Entity entity) {
-        return TardisManager.getInstance(entity.getWorld());
+        return TardisManager.getInstance(entity.level());
     }
 
     public static TardisManager<?, ?> getInstance(BlockEntity entity) {
-        return TardisManager.getInstance(entity.getWorld());
+        return TardisManager.getInstance(entity.getLevel());
     }
 
-    public static TardisManager<?, ?> getInstance(World world) {
-        return TardisManager.getInstance(!world.isClient());
+    public static TardisManager<?, ?> getInstance(Level world) {
+        return TardisManager.getInstance(!world.isClientSide());
     }
 
     public static TardisManager<?, ?> getInstance(Tardis tardis) {
@@ -149,15 +147,15 @@ public abstract class TardisManager<T extends Tardis, C> {
     }
 
     public static <C, R> R with(BlockEntity entity, ContextManager<C, R> consumer) {
-        return TardisManager.with(entity.getWorld(), consumer);
+        return TardisManager.with(entity.getLevel(), consumer);
     }
 
     public static <C, R> R with(Entity entity, ContextManager<C, R> consumer) {
-        return TardisManager.with(entity.getWorld(), consumer);
+        return TardisManager.with(entity.level(), consumer);
     }
 
-    public static <C, R> R with(World world, ContextManager<C, R> consumer) {
-        return TardisManager.with(world.isClient(), consumer, world::getServer);
+    public static <C, R> R with(Level world, ContextManager<C, R> consumer) {
+        return TardisManager.with(world.isClientSide(), consumer, world::getServer);
     }
 
     @SuppressWarnings("unchecked")
@@ -165,7 +163,7 @@ public abstract class TardisManager<T extends Tardis, C> {
         TardisManager<?, C> manager = (TardisManager<?, C>) TardisManager.getInstance(!isClient);
 
         if (isClient) {
-            return consumer.run((C) MinecraftClient.getInstance(), manager);
+            return consumer.run((C) Minecraft.getInstance(), manager);
         } else {
             return consumer.run((C) server.get(), manager);
         }

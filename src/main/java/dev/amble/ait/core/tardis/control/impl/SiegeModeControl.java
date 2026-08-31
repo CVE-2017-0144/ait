@@ -1,31 +1,30 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class SiegeModeControl extends Control {
-    public static final Identifier ID = AITMod.id("protocol_1913");
+    public static final ResourceLocation ID = AITMod.id("protocol_1913");
 
-    private static final Text ENABLED = Text.translatable("tardis.message.control.siege.enabled");
-    private static final Text DISABLED = Text.translatable("tardis.message.control.siege.disabled");
+    private static final Component ENABLED = Component.translatable("tardis.message.control.siege.enabled");
+    private static final Component DISABLED = Component.translatable("tardis.message.control.siege.disabled");
 
     public SiegeModeControl() {
         super(ID);
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         if (tardis.travel().isCrashing() || tardis.travel().getState() != TravelHandlerBase.State.LANDED)
@@ -33,7 +32,7 @@ public class SiegeModeControl extends Control {
 
         tardis.siege().setActive(!tardis.siege().isActive());
         tardis.alarm().disable();
-        player.sendMessage(tardis.siege().isActive() ? ENABLED : DISABLED, true);
+        player.displayClientMessage(tardis.siege().isActive() ? ENABLED : DISABLED, true);
 
         return tardis.siege().isActive() ? Result.SUCCESS : Result.SUCCESS_ALT;
     }

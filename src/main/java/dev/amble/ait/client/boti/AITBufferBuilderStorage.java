@@ -5,27 +5,25 @@ import java.util.SortedMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferBuilderStorage;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.util.Util;
-
+import net.minecraft.Util;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderType;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 
 @Environment(value=EnvType.CLIENT)
-public class AITBufferBuilderStorage extends BufferBuilderStorage {
-    private final SortedMap<RenderLayer, BufferBuilder> botiBuilder = Util.make(new Object2ObjectLinkedOpenHashMap(), map -> {
-        AITBufferBuilderStorage.assignBufferBuilder(map, AITRenderLayers.getBoti());
+public class AITBufferBuilderStorage extends RenderBuffers {
+    private final SortedMap<RenderType, BufferBuilder> botiBuilder = Util.make(new Object2ObjectLinkedOpenHashMap(), map -> {
+        AITBufferBuilderStorage.put(map, AITRenderLayers.getBoti());
     });
-    private final VertexConsumerProvider.Immediate botiVertexConsumer = VertexConsumerProvider.immediate(this.botiBuilder, new BufferBuilder(256));
+    private final MultiBufferSource.BufferSource botiVertexConsumer = MultiBufferSource.immediateWithBuffers(this.botiBuilder, new BufferBuilder(256));
 
-    private static void assignBufferBuilder(Object2ObjectLinkedOpenHashMap<RenderLayer, BufferBuilder> builderStorage, RenderLayer layer) {
-        builderStorage.put(layer, new BufferBuilder(layer.getExpectedBufferSize()));
+    private static void put(Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder> builderStorage, RenderType layer) {
+        builderStorage.put(layer, new BufferBuilder(layer.bufferSize()));
     }
 
-    public VertexConsumerProvider.Immediate getBotiVertexConsumer() {
+    public MultiBufferSource.BufferSource getBotiVertexConsumer() {
         return this.botiVertexConsumer;
     }
 }

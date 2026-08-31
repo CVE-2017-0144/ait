@@ -13,8 +13,7 @@ import com.mojang.datafixers.util.Either;
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.WorldSavePath;
-
+import net.minecraft.world.level.storage.LevelResource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
@@ -37,7 +36,7 @@ public class TardisFileManager<T extends Tardis> {
     }
 
     public static Path getRootSavePath(MinecraftServer server) {
-        return TardisFileManager.getRootSavePath(server.getSavePath(WorldSavePath.ROOT));
+        return TardisFileManager.getRootSavePath(server.getWorldPath(LevelResource.ROOT));
     }
 
     private static Path getSavePath(MinecraftServer server, UUID uuid, String suffix) throws IOException {

@@ -3,25 +3,22 @@ package dev.amble.ait.core.likes;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.ItemStack;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.lib.api.Identifiable;
 
-public record ItemOpinion(Identifier id, ItemStack stack, int cost, int loyalty) implements Identifiable, Opinion {
-    public static final Codec<ItemOpinion> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
-                    Identifier.CODEC.fieldOf("id").forGetter(ItemOpinion::id),
+public record ItemOpinion(ResourceLocation id, ItemStack stack, int cost, int loyalty) implements Identifiable, Opinion {
+    public static final Codec<ItemOpinion> CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(
+                    ResourceLocation.CODEC.fieldOf("id").forGetter(ItemOpinion::id),
                     ItemStack.CODEC.fieldOf("stack").forGetter(ItemOpinion::stack),
                     Codec.INT.optionalFieldOf("cost", -1).forGetter(ItemOpinion::cost),
                     Codec.INT.fieldOf("loyalty").forGetter(ItemOpinion::loyalty))
@@ -34,21 +31,21 @@ public record ItemOpinion(Identifier id, ItemStack stack, int cost, int loyalty)
         }
     }
 
-    public ItemOpinion(Identifier id, ItemStack stack, int loyalty) {
+    public ItemOpinion(ResourceLocation id, ItemStack stack, int loyalty) {
         this(id, stack, loyalty * 10, loyalty);
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
     @Override
-    public void apply(ServerTardis tardis, ServerPlayerEntity target) {
+    public void apply(ServerTardis tardis, ServerPlayer target) {
         Opinion.super.apply(tardis, target);
 
-        target.getInventory().getMainHandStack().decrement(this.stack().getCount()); // assume its in the main hand
-        target.addExperience(-this.cost);
+        target.getInventory().getSelected().shrink(this.stack().getCount()); // assume its in the main hand
+        target.giveExperiencePoints(-this.cost);
     }
 
     @Override

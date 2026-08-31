@@ -3,11 +3,8 @@ package dev.amble.ait.core.tardis.animation.v2;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
-
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.*;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.animation.v2.datapack.TardisAnimationRegistry;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
@@ -32,7 +29,7 @@ public class TardisAnimationMap extends EnumMap.Compliant<TravelHandlerBase.Stat
         return this;
     }
 
-    public TardisAnimationMap of(TravelHandlerBase.State state, Identifier id) {
+    public TardisAnimationMap of(TravelHandlerBase.State state, ResourceLocation id) {
         return this.of(state, TardisAnimationRegistry.getInstance().instantiate(id));
     }
 

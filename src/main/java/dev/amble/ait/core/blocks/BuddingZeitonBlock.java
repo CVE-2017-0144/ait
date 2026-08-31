@@ -1,50 +1,56 @@
 package dev.amble.ait.core.blocks;
 
-import net.minecraft.block.*;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.AmethystBlock;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import dev.amble.ait.core.AITBlocks;
 
 public class BuddingZeitonBlock extends AmethystBlock {
     public static final int GROW_CHANCE = 5;
     private static final Direction[] DIRECTIONS = Direction.values();
 
-    public BuddingZeitonBlock(AbstractBlock.Settings settings) {
+    public BuddingZeitonBlock(BlockBehaviour.Properties settings) {
         super(settings);
     }
 
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (random.nextInt(5) == 0) {
-            Direction direction = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
-            BlockPos blockPos = pos.offset(direction);
+            Direction direction = UPDATE_SHAPE_ORDER[random.nextInt(UPDATE_SHAPE_ORDER.length)];
+            BlockPos blockPos = pos.relative(direction);
             BlockState blockState = world.getBlockState(blockPos);
             Block block = null;
             if (canGrowIn(blockState)) {
                 block = AITBlocks.SMALL_ZEITON_BUD;
-            } else if (blockState.isOf(AITBlocks.SMALL_ZEITON_BUD)
-                    && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(AITBlocks.SMALL_ZEITON_BUD)
+                    && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 block = AITBlocks.MEDIUM_ZEITON_BUD;
-            } else if (blockState.isOf(AITBlocks.MEDIUM_ZEITON_BUD)
-                    && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(AITBlocks.MEDIUM_ZEITON_BUD)
+                    && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 block = AITBlocks.LARGE_ZEITON_BUD;
-            } else if (blockState.isOf(AITBlocks.LARGE_ZEITON_BUD)
-                    && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(AITBlocks.LARGE_ZEITON_BUD)
+                    && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 block = AITBlocks.ZEITON_CLUSTER;
             }
 
             if (block != null) {
-                BlockState blockState2 = block.getDefaultState().with(AmethystClusterBlock.FACING, direction)
-                        .with(AmethystClusterBlock.WATERLOGGED, blockState.getFluidState().getFluid() == Fluids.WATER);
-                world.setBlockState(blockPos, blockState2);
+                BlockState blockState2 = block.defaultBlockState().setValue(AmethystClusterBlock.FACING, direction)
+                        .setValue(AmethystClusterBlock.WATERLOGGED, blockState.getFluidState().getType() == Fluids.WATER);
+                world.setBlockAndUpdate(blockPos, blockState2);
             }
         }
     }
 
     public static boolean canGrowIn(BlockState state) {
-        return state.isAir() || state.isOf(Blocks.WATER) && state.getFluidState().getLevel() == 8;
+        return state.isAir() || state.is(Blocks.WATER) && state.getFluidState().getAmount() == 8;
     }
 }

@@ -8,83 +8,89 @@ import dev.amble.ait.core.engine.DurableSubSystem;
 import dev.amble.ait.core.engine.block.SubSystemBlockEntity;
 import dev.amble.ait.core.entities.ConsoleControlEntity;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.item.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.*;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 
 public class RepairToolItem extends Item {
-    public RepairToolItem(Settings settings) {
+    public RepairToolItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
-        addMultilineTooltip(tooltip, Text.translatable("tooltip.ait.repair_tool")
-                .formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+        addMultilineTooltip(tooltip, Component.translatable("tooltip.ait.repair_tool")
+                .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
+    public int getUseDuration(ItemStack stack) {
         return 72000;
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.BOW;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
+        user.startUsingItem(hand);
+        return InteractionResultHolder.consume(itemStack);
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+    public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
         float f;
-        if (!(user instanceof PlayerEntity playerEntity)) {
+        if (!(user instanceof Player playerEntity)) {
             return;
         }
-        if ((double)(f = RepairToolItem.getPullProgress(this.getMaxUseTime(stack) - remainingUseTicks)) < 0.1) {
+        if ((double)(f = RepairToolItem.getPullProgress(this.getUseDuration(stack) - remainingUseTicks)) < 0.1) {
             return;
         }
 
-        HitResult hitResult = playerEntity.raycast(16, 0.0f, false);
+        HitResult hitResult = playerEntity.pick(16, 0.0f, false);
         if (hitResult instanceof BlockHitResult blockHitResult) {
             BlockPos pos = blockHitResult.getBlockPos();
             BlockEntity blockEntity = world.getBlockEntity(pos);
 
             if (blockEntity instanceof SubSystemBlockEntity subSystem) {
                 if (subSystem.system() instanceof DurableSubSystem durable) {
-                    playerEntity.sendMessage(Text.literal(Math.round(durable.durability()) + "/" + DurableSubSystem.MAX_DURABILITY).setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)), true);
-                    world.playSound(null, pos, SoundEvents.BLOCK_ANCIENT_DEBRIS_HIT, SoundCategory.BLOCKS, 0.5f, 0.8f);
+                    playerEntity.displayClientMessage(Component.literal(Math.round(durable.durability()) + "/" + DurableSubSystem.MAX_DURABILITY).setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withBold(true)), true);
+                    world.playSound(null, pos, SoundEvents.ANCIENT_DEBRIS_HIT, SoundSource.BLOCKS, 0.5f, 0.8f);
                     if (durable.durability() < DurableSubSystem.MAX_DURABILITY) {
-                        float val = world.getRandom().nextBetween(2, 10) * DurableSubSystem.MAX_DURABILITY / 100f;
+                        float val = world.getRandom().nextIntBetweenInclusive(2, 10) * DurableSubSystem.MAX_DURABILITY / 100f;
                         durable.addDurability(val);
-                        stack.damage(1, playerEntity, p -> p.sendToolBreakStatus(playerEntity.getActiveHand()));
+                        stack.hurtAndBreak(1, playerEntity, p -> p.broadcastBreakEvent(playerEntity.getUsedItemHand()));
 
-                        world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.BLOCKS, 0.5f, 1.5f);
+                        world.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.5f, 1.5f);
 
                         for (int i = 0; i < (val / 2); i++) {
-                            world.addImportantParticle(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 0, 0.1f, 0);
+                            world.addAlwaysVisibleParticle(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 0, 0.1f, 0);
                         }
                         return;
                     }
@@ -92,24 +98,24 @@ public class RepairToolItem extends Item {
             }
         } else if (hitResult instanceof EntityHitResult result) {
             if (result.getEntity() instanceof ConsoleControlEntity consoleControl) {
-                playerEntity.sendMessage(Text.literal(consoleControl.getDurability() + "/" + ConsoleControlEntity.MAX_DURABILITY).setStyle(Style.EMPTY.withColor(Formatting.GOLD).withBold(true)), true);
-                world.playSound(null, consoleControl.getBlockPos(), SoundEvents.BLOCK_ANCIENT_DEBRIS_HIT, SoundCategory.BLOCKS, 0.5f, 0.8f);
+                playerEntity.displayClientMessage(Component.literal(consoleControl.getDurability() + "/" + ConsoleControlEntity.MAX_DURABILITY).setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withBold(true)), true);
+                world.playSound(null, consoleControl.blockPosition(), SoundEvents.ANCIENT_DEBRIS_HIT, SoundSource.BLOCKS, 0.5f, 0.8f);
                 if (consoleControl.getDurability() < DurableSubSystem.MAX_DURABILITY) {
                     consoleControl.addDurability(world.getRandom().nextFloat());
-                    stack.damage(1, playerEntity, p -> p.sendToolBreakStatus(playerEntity.getActiveHand()));
+                    stack.hurtAndBreak(1, playerEntity, p -> p.broadcastBreakEvent(playerEntity.getUsedItemHand()));
 
-                    world.playSound(null, consoleControl.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.BLOCKS, 0.5f, 1.5f);
+                    world.playSound(null, consoleControl.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.5f, 1.5f);
 
-                    for (int i = 0; i < (world.getRandom().nextBetween(2, 5) / 2); i++) {
-                        world.addImportantParticle(ParticleTypes.ENCHANT, consoleControl.getX() + 0.5, consoleControl.getY() + 1, consoleControl.getZ() + 0.5, 0, 0.1f, 0);
+                    for (int i = 0; i < (world.getRandom().nextIntBetweenInclusive(2, 5) / 2); i++) {
+                        world.addAlwaysVisibleParticle(ParticleTypes.ENCHANT, consoleControl.getX() + 0.5, consoleControl.getY() + 1, consoleControl.getZ() + 0.5, 0, 0.1f, 0);
                     }
                     return;
                 }
             }
         }
 
-        world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.BLOCK_CHAIN_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f / (world.getRandom().nextFloat() * 0.4f + 1.2f) + f * 0.5f);
-        playerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
+        world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 1.0f, 1.0f / (world.getRandom().nextFloat() * 0.4f + 1.2f) + f * 0.5f);
+        playerEntity.awardStat(Stats.ITEM_USED.get(this));
     }
 
     public static float getPullProgress(int useTicks) {

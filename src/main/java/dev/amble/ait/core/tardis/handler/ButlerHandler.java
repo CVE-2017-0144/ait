@@ -1,13 +1,11 @@
 package dev.amble.ait.core.tardis.handler;
 
 import java.util.function.Consumer;
-
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -60,9 +58,9 @@ public class ButlerHandler extends KeyedTardisComponent implements ArtronHolderI
         });
     }
 
-    public static void spawnItem(World world, BlockPos pos, ItemStack handles) {
+    public static void spawnItem(Level world, BlockPos pos, ItemStack handles) {
         ItemEntity entity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), handles);
-        world.spawnEntity(entity);
+        world.addFreshEntity(entity);
     }
 
     @Override
@@ -72,7 +70,7 @@ public class ButlerHandler extends KeyedTardisComponent implements ArtronHolderI
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 10 != 0)
+        if (server.getTickCount() % 10 != 0)
             return;
 
         ItemStack handlesItem = this.handles.get();

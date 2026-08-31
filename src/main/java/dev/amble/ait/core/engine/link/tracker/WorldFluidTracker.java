@@ -6,25 +6,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-
 import dev.amble.ait.core.engine.link.IFluidLink;
 
 public class WorldFluidTracker {
-    public static HashMap<Direction, IFluidLink> getConnections(ServerWorld world, BlockPos pos, @Nullable Direction ignore) {
+    public static HashMap<Direction, IFluidLink> getConnections(ServerLevel world, BlockPos pos, @Nullable Direction ignore) {
         // get all fluid links around the given position
         HashMap<Direction, IFluidLink> connections = new HashMap<>();
 
         for (Direction dir : Direction.values()) {
             if (dir == ignore) continue;
 
-            IFluidLink found = query(world, pos.offset(dir));
+            IFluidLink found = query(world, pos.relative(dir));
             if (found == null) continue;
 
             connections.put(dir, found);
@@ -32,7 +29,7 @@ public class WorldFluidTracker {
 
         return connections;
     }
-    public static LinkedList<IFluidLink> getAllConnections(ServerWorld world, BlockPos pos, @Nullable Direction ignore, HashSet<BlockPos> checkedPositions) {
+    public static LinkedList<IFluidLink> getAllConnections(ServerLevel world, BlockPos pos, @Nullable Direction ignore, HashSet<BlockPos> checkedPositions) {
         LinkedList<IFluidLink> list = new LinkedList<>();
         HashMap<Direction, IFluidLink> connections;
 
@@ -54,7 +51,7 @@ public class WorldFluidTracker {
             for (Direction direction : connections.keySet()) {
                 if (direction == ignore) continue;
 
-                BlockPos newPos = currentPos.offset(direction);
+                BlockPos newPos = currentPos.relative(direction);
                 if (checkedPositions.contains(newPos)) continue;
                 if (checkedPositions.add(newPos)) {
                     toCheck.add(newPos);
@@ -65,7 +62,7 @@ public class WorldFluidTracker {
 
         return list;
     }
-    public static IFluidLink query(ServerWorld world, BlockPos pos) {
+    public static IFluidLink query(ServerLevel world, BlockPos pos) {
         BlockEntity be = world.getBlockEntity(pos);
         if (be instanceof IFluidLink link && !(be.isRemoved())) {
             return link;
@@ -81,9 +78,9 @@ public class WorldFluidTracker {
      *
      * The returned map is mutable and owned by the caller. Keys are stored as immutable {@link BlockPos}.
      */
-    public static LinkedHashMap<BlockPos, IFluidLink> bfs(ServerWorld world, BlockPos start, int maxNodes) {
+    public static LinkedHashMap<BlockPos, IFluidLink> bfs(ServerLevel world, BlockPos start, int maxNodes) {
         LinkedHashMap<BlockPos, IFluidLink> visited = new LinkedHashMap<>();
-        BlockPos rootPos = start.toImmutable();
+        BlockPos rootPos = start.immutable();
         IFluidLink first = query(world, rootPos);
         if (first == null) return visited;
 
@@ -94,7 +91,7 @@ public class WorldFluidTracker {
         while (!queue.isEmpty() && visited.size() < maxNodes) {
             BlockPos cur = queue.poll();
             for (Direction dir : Direction.values()) {
-                BlockPos next = cur.offset(dir).toImmutable();
+                BlockPos next = cur.relative(dir).immutable();
                 if (visited.containsKey(next)) continue;
                 IFluidLink link = query(world, next);
                 if (link == null) continue;

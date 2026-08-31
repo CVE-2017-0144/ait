@@ -11,44 +11,49 @@ import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Equipment;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.block.Waterloggable;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class MarketablePlushieBlock extends AWaterloggableBlock implements BlockEntityProvider, BedrockModelProvider, Equipment {
+public class MarketablePlushieBlock extends AWaterloggableBlock implements EntityBlock, BedrockModelProvider, Equipable {
 
-    public static final IntProperty ROTATION = Properties.ROTATION;
-    public static final int MAX_ROTATION_INDEX = RotationPropertyHelper.getMax();
+    public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
+    public static final int MAX_ROTATION_INDEX = RotationSegment.getMaxSegmentIndex();
     private static final int MAX_ROTATIONS = MAX_ROTATION_INDEX + 1;
 
-    public static final BooleanProperty STACKED = BooleanProperty.of("stacked");
-    protected static final VoxelShape SHAPE = Block.createCuboidShape(4.0F, 0.0F, 4.0F, 12.0F, 8.0F, 12.0F);
+    public static final BooleanProperty STACKED = BooleanProperty.create("stacked");
+    protected static final VoxelShape SHAPE = Block.box(4.0F, 0.0F, 4.0F, 12.0F, 8.0F, 12.0F);
 
     private final BedrockModelReference modelRef;
 
@@ -59,10 +64,10 @@ public class MarketablePlushieBlock extends AWaterloggableBlock implements Block
         super(settings, new BlockWithEntityBehavior.Ticking(MarketablePlushieBlockEntity::new));
         
         this.modelRef = new BedrockModelReference(AmbleKit.MOD_ID, modelId);
-        this.setDefaultState(this.stateManager.getDefaultState()
-                .with(ROTATION, 0)
-                .with(STACKED, false)
-                .with(Properties.WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(ROTATION, 0)
+                .setValue(STACKED, false)
+                .setValue(BlockStateProperties.WATERLOGGED, false));
     }
 
     @Override
@@ -76,119 +81,119 @@ public class MarketablePlushieBlock extends AWaterloggableBlock implements Block
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    public EquipmentSlot getSlotType() {
+    public EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new MarketablePlushieBlockEntity(PlushieBlockEntities.MARKETABLE_PLUSHIE_BLOCK_ENTITY_TYPE, pos, state);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (world.getBlockEntity(pos) instanceof MarketablePlushieBlockEntity be)
             return be.onUse(state, world, pos, player, hand, hit);
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.use(state, world, pos, player, hand, hit);
     }
 
     @Override
-    public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos) {
-        return VoxelShapes.empty();
+    public VoxelShape getOcclusionShape(BlockState state, BlockGetter world, BlockPos pos) {
+        return Shapes.empty();
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos pos = ctx.getBlockPos();
-        World world = ctx.getWorld();
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockPos pos = ctx.getClickedPos();
+        Level world = ctx.getLevel();
 
-        FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
+        FluidState fluidState = ctx.getLevel().getFluidState(ctx.getClickedPos());
         
-        boolean sameAbove = world.getBlockState(pos.up()).isOf(this);
+        boolean sameAbove = world.getBlockState(pos.above()).is(this);
 
-        return this.getDefaultState()
-                .with(ROTATION, RotationPropertyHelper.fromYaw(ctx.getPlayerYaw()))
-                .with(STACKED, sameAbove)
-                .with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+        return this.defaultBlockState()
+                .setValue(ROTATION, RotationSegment.convertToSegment(ctx.getRotation()))
+                .setValue(STACKED, sameAbove)
+                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
-    public BlockState rotate(BlockState state, BlockRotation rotation) {
-        return state.with(ROTATION, rotation.rotate(state.get(ROTATION), MAX_ROTATIONS));
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(ROTATION, rotation.rotate(state.getValue(ROTATION), MAX_ROTATIONS));
     }
 
     @Override
-    public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return state.with(ROTATION, mirror.mirror(state.get(ROTATION), MAX_ROTATIONS));
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.setValue(ROTATION, mirror.mirror(state.getValue(ROTATION), MAX_ROTATIONS));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(ROTATION, STACKED, Properties.WATERLOGGED);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(ROTATION, STACKED, BlockStateProperties.WATERLOGGED);
     }
 
     @Override
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-        if (world.isClient()) return;
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+        if (world.isClientSide()) return;
 
-        boolean sameAbove = world.getBlockState(pos.up()).isOf(this);
-        if (state.get(STACKED) != sameAbove) {
-            world.setBlockState(pos, state.with(STACKED, sameAbove), Block.NOTIFY_LISTENERS);
+        boolean sameAbove = world.getBlockState(pos.above()).is(this);
+        if (state.getValue(STACKED) != sameAbove) {
+            world.setBlock(pos, state.setValue(STACKED, sameAbove), Block.UPDATE_CLIENTS);
         }
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (world.getBlockEntity(pos) instanceof MarketablePlushieBlockEntity be)
             be.onPlaced(world, pos, state, placer, itemStack);
-        if (world.isClient()) return;
-        boolean sameAbove = world.getBlockState(pos.up()).isOf(this);
-        if (state.get(STACKED) != sameAbove) {
-            world.setBlockState(pos, state.with(STACKED, sameAbove), Block.NOTIFY_LISTENERS);
+        if (world.isClientSide()) return;
+        boolean sameAbove = world.getBlockState(pos.above()).is(this);
+        if (state.getValue(STACKED) != sameAbove) {
+            world.setBlock(pos, state.setValue(STACKED, sameAbove), Block.UPDATE_CLIENTS);
         }
 
-        BlockPos below = pos.down();
+        BlockPos below = pos.below();
         BlockState belowState = world.getBlockState(below);
-        if (belowState.isOf(this)) {
-            boolean belowSameAbove = world.getBlockState(below.up()).isOf(this);
-            world.setBlockState(below, belowState.with(STACKED, belowSameAbove), Block.NOTIFY_LISTENERS);
+        if (belowState.is(this)) {
+            boolean belowSameAbove = world.getBlockState(below.above()).is(this);
+            world.setBlock(below, belowState.setValue(STACKED, belowSameAbove), Block.UPDATE_CLIENTS);
         }
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (state.isOf(newState.getBlock())) return;
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
+        if (state.is(newState.getBlock())) return;
 
-        if (!world.isClient()) {
-            BlockPos below = pos.down();
+        if (!world.isClientSide()) {
+            BlockPos below = pos.below();
             BlockState belowState = world.getBlockState(below);
-            if (belowState.isOf(this)) {
-                boolean belowSameAbove = world.getBlockState(below.up()).isOf(this);
-                world.setBlockState(below, belowState.with(STACKED, belowSameAbove), Block.NOTIFY_LISTENERS);
+            if (belowState.is(this)) {
+                boolean belowSameAbove = world.getBlockState(below.above()).is(this);
+                world.setBlock(below, belowState.setValue(STACKED, belowSameAbove), Block.UPDATE_CLIENTS);
             }
         }
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onRemove(state, world, pos, newState, moved);
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if (state.get(WATERLOGGED)) world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(WATERLOGGED)) world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+        return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
     }
 }

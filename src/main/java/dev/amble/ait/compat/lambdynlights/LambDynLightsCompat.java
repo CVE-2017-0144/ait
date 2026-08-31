@@ -2,8 +2,7 @@ package dev.amble.ait.compat.lambdynlights;
 
 import dev.lambdaurora.lambdynlights.api.DynamicLightsContext;
 import dev.lambdaurora.lambdynlights.api.DynamicLightsInitializer;
-
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 
 public class LambDynLightsCompat implements DynamicLightsInitializer {
 

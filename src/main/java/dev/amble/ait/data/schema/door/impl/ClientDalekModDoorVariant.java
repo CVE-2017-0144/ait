@@ -11,6 +11,6 @@ public class ClientDalekModDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new DalekModDoorModel(DalekModDoorModel.getTexturedModelData().createModel());
+        return new DalekModDoorModel(DalekModDoorModel.getTexturedModelData().bakeRoot());
     }
 }

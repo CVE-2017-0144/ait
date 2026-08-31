@@ -12,6 +12,6 @@ public class ClientBlueBoxDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new BlueBoxDoorModel(BlueBoxDoorModel.getTexturedModelData().createModel());
+        return new BlueBoxDoorModel(BlueBoxDoorModel.getTexturedModelData().bakeRoot());
     }
 }

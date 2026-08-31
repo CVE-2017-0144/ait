@@ -5,15 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import dev.amble.lib.block.ABlockSettings;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.item.AItem;
@@ -35,21 +33,21 @@ public abstract class BlockContainer implements RegistryContainer<Block> {
 
     @Override
     public Registry<Block> getRegistry() {
-        return Registries.BLOCK;
+        return BuiltInRegistries.BLOCK;
     }
 
     @Override
-    public void postProcessField(Identifier identifier, Block value, Field field) {
+    public void postProcessField(ResourceLocation identifier, Block value, Field field) {
         if (field.isAnnotationPresent(NoBlockItem.class))
             return;
 
-        Item.Settings itemSettings = null;
+        Item.Properties itemSettings = null;
 
-        if (((AbstractBlockAccessor) value).getSettings() instanceof ABlockSettings abs)
+        if (((AbstractBlockAccessor) value).getProperties() instanceof ABlockSettings abs)
             itemSettings = abs.itemSettings();
 
         Item item = this.createBlockItem(value, itemSettings);
-        Registry.register(Registries.ITEM, identifier, item);
+        Registry.register(BuiltInRegistries.ITEM, identifier, item);
 
         this.items.add(item);
     }
@@ -59,16 +57,16 @@ public abstract class BlockContainer implements RegistryContainer<Block> {
         ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
             for (Item item : items) {
                 if (((AItem) item).amble$group() == group)
-                    entries.add(item);
+                    entries.accept(item);
             }
         });
     }
 
-    public BlockItem createBlockItem(Block block, @Nullable Item.Settings settings) {
+    public BlockItem createBlockItem(Block block, @Nullable Item.Properties settings) {
         return new BlockItem(block, settings == null ? this.createBlockItemSettings(block) : settings);
     }
 
-    public Item.Settings createBlockItemSettings(Block block) {
-        return new Item.Settings();
+    public Item.Properties createBlockItemSettings(Block block) {
+        return new Item.Properties();
     }
 }

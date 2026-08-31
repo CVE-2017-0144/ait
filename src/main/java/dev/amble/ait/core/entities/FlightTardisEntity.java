@@ -3,26 +3,29 @@ package dev.amble.ait.core.entities;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.entity.*;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Arm;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PlayerRideableJumping;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableLivingEntity;
 import dev.amble.ait.client.util.ClientShakeUtil;
@@ -39,19 +42,19 @@ import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
-public class FlightTardisEntity extends LinkableLivingEntity implements JumpingMount {
+public class FlightTardisEntity extends LinkableLivingEntity implements PlayerRideableJumping {
 
     private static final List<ItemStack> EMPTY = List.of();
     private static final ItemStack AIR = new ItemStack(Items.AIR);
     public float speedPitch;
-    private Vec3d lastVelocity;
+    private Vec3 lastVelocity;
     private BlockPos interiorPos;
 
-    public FlightTardisEntity(EntityType<? extends LivingEntity> entityType, World world) {
+    public FlightTardisEntity(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
 
         this.setInvulnerable(true);
-        this.lastVelocity = Vec3d.ZERO;
+        this.lastVelocity = Vec3.ZERO;
     }
 
     private FlightTardisEntity(BlockPos riderPos, CachedDirectedGlobalPos pos, ServerTardis tardis) {
@@ -60,46 +63,46 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
         this.interiorPos = riderPos;
 
         this.link(tardis);
-        this.setPosition(pos.getPos().toCenterPos());
-        this.setVelocity(Vec3d.ZERO);
+        this.setPos(pos.getPos().getCenter());
+        this.setDeltaMovement(Vec3.ZERO);
 
-        this.setRotation(RotationPropertyHelper.toDegrees(
+        this.setRot(RotationSegment.convertToDegrees(
                 DirectionControl.getGeneralizedRotation(pos.getRotation())
         ), 0);
     }
 
-    public static FlightTardisEntity createAndSpawn(ServerPlayerEntity player, ServerTardis tardis) {
+    public static FlightTardisEntity createAndSpawn(ServerPlayer player, ServerTardis tardis) {
         CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
 
         FlightTardisEntity entity = new FlightTardisEntity(
-                player.getBlockPos(), exteriorPos, tardis
+                player.blockPosition(), exteriorPos, tardis
         );
 
-        exteriorPos.getWorld().spawnEntity(entity);
+        exteriorPos.getWorld().addFreshEntity(entity);
         return entity;
     }
 
     @Override
-    public boolean hasNoGravity() {
+    public boolean isNoGravity() {
         return true;
     }
 
     @Override
-    protected float getOffGroundSpeed() {
+    protected float getFlyingSpeed() {
         if (this.isLinked()  && this.tardis().get().travel() != null) {
-            float spaceSpeed = this.getWorld().getRegistryKey().equals(AITDimensions.SPACE) ? 0.1f : 0.05f;
-            return this.getMovementSpeed() * (this.tardis().get().travel().speed() * spaceSpeed);
+            float spaceSpeed = this.level().dimension().equals(AITDimensions.SPACE) ? 0.1f : 0.05f;
+            return this.getSpeed() * (this.tardis().get().travel().speed() * spaceSpeed);
         }
-        return super.getOffGroundSpeed();
+        return super.getFlyingSpeed();
     }
 
     @Override
     public void tick() {
-        this.lastVelocity = this.getVelocity();
-        this.setRotation(0, 0);
+        this.lastVelocity = this.getDeltaMovement();
+        this.setRot(0, 0);
         super.tick();
 
-        PlayerEntity player = this.getPlayer();
+        Player player = this.getPlayer();
 
         if (player == null)
             return;
@@ -109,18 +112,18 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
 
         Tardis tardis = this.tardis().get();
 
-        if (player.isSneaking() && (this.isOnGround() || tardis.travel().antigravs().get())
-                && this.getWorld().isInBuildLimit(this.getBlockPos()))
+        if (player.isShiftKeyDown() && (this.onGround() || tardis.travel().antigravs().get())
+                && this.level().isInWorldBounds(this.blockPosition()))
             this.finishLand(tardis, player);
 
-        if (this.getWorld().isClient()) {
-            MinecraftClient client = MinecraftClient.getInstance();
+        if (this.level().isClientSide()) {
+            Minecraft client = Minecraft.getInstance();
 
             if (client.player == this.getControllingPassenger()) {
-                client.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+                client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 
-                if (!this.groundCollision)
-                    ClientShakeUtil.shake((float) (tardis.travel().speed() + this.getVelocity().horizontalLength()) / tardis.travel().maxSpeed().get());
+                if (!this.verticalCollisionBelow)
+                    ClientShakeUtil.shake((float) (tardis.travel().speed() + this.getDeltaMovement().horizontalDistance()) / tardis.travel().maxSpeed().get());
             }
 
             return;
@@ -132,10 +135,10 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
         if (!player.isInvulnerable())
             player.setInvulnerable(true);
 
-        tardis.flight().tickFlight((ServerPlayerEntity) player);
+        tardis.flight().tickFlight((ServerPlayer) player);
 
         if (tardis.door().isOpen()) {
-            this.getWorld().getOtherEntities(this, this.getBoundingBox(), entity
+            this.level().getEntities(this, this.getBoundingBox(), entity
                     -> !entity.isSpectator() && entity != player && entity instanceof LivingEntity).forEach(
                     entity -> TardisUtil.teleportInside(tardis.asServer(), entity)
             );
@@ -143,34 +146,34 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
     }
 
     @Override
-    public void setOnGround(boolean onGround, Vec3d movement) {
-        if (!this.isOnGround() && onGround)
+    public void setOnGroundWithKnownMovement(boolean onGround, Vec3 movement) {
+        if (!this.onGround() && onGround)
             this.playThud();
 
-        super.setOnGround(onGround, movement);
+        super.setOnGroundWithKnownMovement(onGround, movement);
     }
 
     @Override
     public void setOnGround(boolean onGround) {
-        if (!this.isOnGround() && onGround)
+        if (!this.onGround() && onGround)
             this.playThud();
 
         super.setOnGround(onGround);
     }
 
     private void playThud() {
-        this.getWorld().playSound(null, this.getBlockPos(), AITSounds.LAND_THUD, SoundCategory.BLOCKS, 2F, 1F / (AITMod.RANDOM.nextFloat() * 0.4F + 0.8F));
+        this.level().playSound(null, this.blockPosition(), AITSounds.LAND_THUD, SoundSource.BLOCKS, 2F, 1F / (AITMod.RANDOM.nextFloat() * 0.4F + 0.8F));
     }
 
-    private void finishLand(Tardis tardis, PlayerEntity player) {
-        if (this.getWorld().isClient()) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            client.options.setPerspective(Perspective.THIRD_PERSON_BACK);
-            client.options.hudHidden = false;
+    private void finishLand(Tardis tardis, Player player) {
+        if (this.level().isClientSide()) {
+            Minecraft client = Minecraft.getInstance();
+            client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            client.options.hideGui = false;
             return;
         }
 
-        if (!(player instanceof ServerPlayerEntity serverPlayer))
+        if (!(player instanceof ServerPlayer serverPlayer))
             return;
 
         if (this.interiorPos == null) {
@@ -185,30 +188,30 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
     }
 
     @Override
-    public boolean doesRenderOnFire() {
+    public boolean displayFireAnimation() {
         return false;
     }
 
     @Override
-    public Iterable<ItemStack> getArmorItems() {
+    public Iterable<ItemStack> getArmorSlots() {
         return EMPTY;
     }
 
     @Override
-    public ItemStack getEquippedStack(EquipmentSlot slot) {
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
         return AIR;
     }
 
     @Override
-    public void equipStack(EquipmentSlot slot, ItemStack stack) { }
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) { }
 
     @Override
-    public Arm getMainArm() {
-        return Arm.RIGHT;
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.RIGHT;
     }
 
-    public PlayerEntity getPlayer() {
-        if (this.getControllingPassenger() instanceof PlayerEntity player)
+    public Player getPlayer() {
+        if (this.getControllingPassenger() instanceof Player player)
             return player;
 
         return null;
@@ -225,72 +228,72 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
     }
 
     @Override
-    protected Vec3d getControlledMovementInput(PlayerEntity controllingPlayer, Vec3d movementInput) {
-        if (!this.isLinked() || !this.tardis().get().fuel().hasPower()) return new Vec3d(0, 0, 0);
-        float f = controllingPlayer.sidewaysSpeed * this.tardis().get().travel().speed();
-        float g = controllingPlayer.forwardSpeed * this.tardis().get().travel().speed();
+    protected Vec3 getRiddenInput(Player controllingPlayer, Vec3 movementInput) {
+        if (!this.isLinked() || !this.tardis().get().fuel().hasPower()) return new Vec3(0, 0, 0);
+        float f = controllingPlayer.xxa * this.tardis().get().travel().speed();
+        float g = controllingPlayer.zza * this.tardis().get().travel().speed();
 
-        float speedVal = this.isSubmergedInWater() ? 30f : 10f;
+        float speedVal = this.isUnderWater() ? 30f : 10f;
 
-        Planet planet = PlanetRegistry.getInstance().get(this.getWorld());
+        Planet planet = PlanetRegistry.getInstance().get(this.level());
         boolean canFall = this.tardis().get().travel().antigravs().get() || planet != null && planet.zeroGravity();
 
         double v = ((LivingEntityAccessor) controllingPlayer).getJumping() ? speedVal :
-                controllingPlayer.isSneaking() ? -speedVal :
+                controllingPlayer.isShiftKeyDown() ? -speedVal :
                         canFall ? 0.0f : f > 0 || g > 0 ? -0.5f : -2f;
 
-        if (v < 0 && this.isOnGround())
-            return Vec3d.ZERO.add(0, -0.4f, 0);
-        Vec3d yourmom = new Vec3d(f, v, g);
+        if (v < 0 && this.onGround())
+            return Vec3.ZERO.add(0, -0.4f, 0);
+        Vec3 yourmom = new Vec3(f, v, g);
         return yourmom;//return this.isOnGround() ? new Vec3d(0, 0, 0) : new Vec3d(f, v * 4f, g);
     }
 
     @Override
-    protected float getSaddledSpeed(PlayerEntity controllingPlayer) {
-        return (float) this.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+    protected float getRiddenSpeed(Player controllingPlayer) {
+        return (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
     }
 
     @Override
-    public double getMountedHeightOffset() {
+    public double getPassengersRidingOffset() {
         return 0.5f;
     }
 
     public float getRotation(float tickDelta) {
-        return ((float) this.age + tickDelta) / 20.0f;
+        return ((float) this.tickCount + tickDelta) / 20.0f;
     }
 
-    public Vec3d lerpVelocity(float tickDelta) {
-        return this.lastVelocity.lerp(this.getVelocity(), tickDelta);
-    }
-
-    @Override
-    protected void tickControlled(PlayerEntity controllingPlayer, Vec3d movementInput) {
-        Vec2f vec2f = new Vec2f(0, controllingPlayer.getYaw());
-        this.setRotation(vec2f.y, vec2f.x);
-
-        this.setBodyYaw(180.0f - this.getRotation(0.5f) / (float) Math.PI * 180f);
+    public Vec3 lerpVelocity(float tickDelta) {
+        return this.lastVelocity.lerp(this.getDeltaMovement(), tickDelta);
     }
 
     @Override
-    public boolean isCollidable() {
+    protected void tickRidden(Player controllingPlayer, Vec3 movementInput) {
+        Vec2 vec2f = new Vec2(0, controllingPlayer.getYRot());
+        this.setRot(vec2f.y, vec2f.x);
+
+        this.setYBodyRot(180.0f - this.getRotation(0.5f) / (float) Math.PI * 180f);
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
         return true;
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
 
         if (nbt.contains("InteriorPos")) {
-            this.interiorPos = BlockPos.fromLong(nbt.getLong("InteriorPos"));
+            this.interiorPos = BlockPos.of(nbt.getLong("InteriorPos"));
         } else {
-            this.interiorPos = BlockPos.ORIGIN;
+            this.interiorPos = BlockPos.ZERO;
         }
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        if (this.getWorld().isClient()) return;
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        if (this.level().isClientSide()) return;
         if (!this.isLinked()) return;
 
 
@@ -308,14 +311,14 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
         nbt.putLong("InteriorPos", interiorPos.asLong());
     }
 
-    public static DefaultAttributeContainer.Builder createDummyAttributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 0)
-                .add(EntityAttributes.GENERIC_FLYING_SPEED, 5);
+    public static AttributeSupplier.Builder createDummyAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 1)
+                .add(Attributes.MAX_HEALTH, 20.0).add(Attributes.ATTACK_DAMAGE, 0)
+                .add(Attributes.FLYING_SPEED, 5);
     }
 
     @Override
-    public void setJumpStrength(int strength) {
+    public void onPlayerJump(int strength) {
     }
 
     @Override
@@ -324,8 +327,8 @@ public class FlightTardisEntity extends LinkableLivingEntity implements JumpingM
     }
 
     @Override
-    public void startJumping(int height) { }
+    public void handleStartJump(int height) { }
 
     @Override
-    public void stopJumping() { }
+    public void handleStopJump() { }
 }

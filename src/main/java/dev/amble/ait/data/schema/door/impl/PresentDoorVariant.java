@@ -1,14 +1,13 @@
 package dev.amble.ait.data.schema.door.impl;
 
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 
 public class PresentDoorVariant extends DoorSchema {
-    public static final Identifier REFERENCE = AITMod.id("door/present");
+    public static final ResourceLocation REFERENCE = AITMod.id("door/present");
 
     public PresentDoorVariant() {
         super(REFERENCE);
@@ -21,12 +20,12 @@ public class PresentDoorVariant extends DoorSchema {
 
     @Override
     public SoundEvent openSound() {
-        return SoundEvents.BLOCK_BARREL_OPEN;
+        return SoundEvents.BARREL_OPEN;
     }
 
     @Override
     public SoundEvent closeSound() {
-        return SoundEvents.BLOCK_BARREL_CLOSE;
+        return SoundEvents.BARREL_CLOSE;
     }
 
 }

@@ -3,13 +3,11 @@ package dev.amble.ait.client.sounds.hum.interior;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.sounds.LoopingSound;
@@ -47,7 +45,7 @@ public class ClientCreakHandler extends SoundHandler {
         List<SoundInstance> list = new ArrayList<>();
 
         for (CreakSound sound : CreakRegistry.REGISTRY) {
-            list.add(new PlayerFollowingLoopingSound(sound.sound(), SoundCategory.AMBIENT,
+            list.add(new PlayerFollowingLoopingSound(sound.sound(), SoundSource.AMBIENT,
                     AITModClient.CONFIG.interiorHumVolume));
         }
 
@@ -55,7 +53,7 @@ public class ClientCreakHandler extends SoundHandler {
     }
 
     public BlockPos randomNearConsolePos(BlockPos consolePos) {
-        return consolePos.add(random.nextInt(8) - 1, 0, random.nextInt(8) - 1);
+        return consolePos.offset(random.nextInt(8) - 1, 0, random.nextInt(8) - 1);
     }
 
     public void playRandomCreak(ClientTardis current) {
@@ -64,20 +62,20 @@ public class ClientCreakHandler extends SoundHandler {
         if (current.siege().isActive() && chosen.equals(CreakRegistry.WHISPER)) {
             current.getDesktop().getConsolePos()
                     .forEach(console -> startIfNotPlaying(
-                            new PositionedSoundInstance(chosen.sound(), SoundCategory.HOSTILE, 0.5f, 1.0f,
-                                    net.minecraft.util.math.random.Random.create(), randomNearConsolePos(console))));
+                            new SimpleSoundInstance(chosen.sound(), SoundSource.HOSTILE, 0.5f, 1.0f,
+                                    net.minecraft.util.RandomSource.create(), randomNearConsolePos(console))));
 
             return;
         } else if (chosen.equals(CreakRegistry.WHISPER)) {
             return;
         }
 
-        PlayerFollowingSound following = new PlayerFollowingSound(chosen.sound(), SoundCategory.AMBIENT,
+        PlayerFollowingSound following = new PlayerFollowingSound(chosen.sound(), SoundSource.AMBIENT,
                 AITModClient.CONFIG.interiorHumVolume);
         startIfNotPlaying(following);
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         if (this.sounds == null)
             this.generateCreaks();
 

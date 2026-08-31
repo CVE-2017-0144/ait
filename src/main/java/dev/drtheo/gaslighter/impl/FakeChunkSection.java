@@ -1,12 +1,12 @@
 package dev.drtheo.gaslighter.impl;
 
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 
-public class FakeChunkSection extends ChunkSection {
+public class FakeChunkSection extends LevelChunkSection {
 
-    public FakeChunkSection(ServerWorld world) {
-        super(world.getRegistryManager().get(RegistryKeys.BIOME));
+    public FakeChunkSection(ServerLevel world) {
+        super(world.registryAccess().registryOrThrow(Registries.BIOME));
     }
 }

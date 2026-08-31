@@ -1,9 +1,5 @@
 package dev.amble.ait.client.sounds.lava;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.sounds.LoopingSound;
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
@@ -12,6 +8,9 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.tardis.handler.ExteriorEnvironmentHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 
 public class ClientLavaSoundHandler extends SoundHandler {
 
@@ -28,7 +27,7 @@ public class ClientLavaSoundHandler extends SoundHandler {
         if (tardis == null || tardis.getDesktop().getDoorPos().getPos() == null)
             return null;
 
-        return new PositionedLoopingSound(SoundEvents.BLOCK_LAVA_AMBIENT, SoundCategory.BLOCKS,
+        return new PositionedLoopingSound(SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS,
                 tardis.getDesktop().getDoorPos().getPos(), 0.2f);
     }
 
@@ -55,7 +54,7 @@ public class ClientLavaSoundHandler extends SoundHandler {
         return tardis != null && tardis.door().isOpen();
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.sounds == null)

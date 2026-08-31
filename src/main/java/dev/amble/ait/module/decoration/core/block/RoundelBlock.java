@@ -1,37 +1,35 @@
 package dev.amble.ait.module.decoration.core.block;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
-
 public class RoundelBlock extends Block {
-    public static final EnumProperty<Direction> FACING = EnumProperty.of("facing", Direction.class);
+    public static final EnumProperty<Direction> FACING = EnumProperty.create("facing", Direction.class);
     private final String id;
 
-    public RoundelBlock(Settings settings, String RoundelID) {
+    public RoundelBlock(Properties settings, String RoundelID) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
         this.id = RoundelID;
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         // Get the player's facing direction (this will set the block to face the direction the player is facing)
-        return this.getDefaultState().with(FACING, context.getPlayer().getHorizontalFacing());
+        return this.defaultBlockState().setValue(FACING, context.getPlayer().getDirection());
     }
 
     public String RoundelID() {
@@ -39,24 +37,24 @@ public class RoundelBlock extends Block {
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction facing, BlockState facingState, WorldAccess world, BlockPos pos, BlockPos facingPos) {
+    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
         // Update the facing if a neighboring block is adjacent
-        if (facing == state.get(FACING).getOpposite()) {
-            return state.with(FACING, facing);
+        if (facing == state.getValue(FACING).getOpposite()) {
+            return state.setValue(FACING, facing);
         }
-        return super.getStateForNeighborUpdate(state, facing, facingState, world, pos, facingPos);
+        return super.updateShape(state, facing, facingState, world, pos, facingPos);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        super.appendTooltip(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, world, tooltip, options);
 
-        tooltip.add(Text.translatable("tooltip.ait.roundel_type").formatted(Formatting.BLUE, Formatting.ITALIC));
-        tooltip.add(Text.literal(RoundelID()).formatted(Formatting.DARK_GRAY));
+        tooltip.add(Component.translatable("tooltip.ait.roundel_type").withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC));
+        tooltip.add(Component.literal(RoundelID()).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         // Add the facing property to the block's state manager
         builder.add(FACING);
     }

@@ -1,17 +1,15 @@
 package dev.amble.ait.core.tardis.handler;
 
 import org.joml.Vector3f;
-
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.DustColorTransitionParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -81,7 +79,7 @@ public class TardisCrashHandler extends KeyedTardisComponent implements TardisTi
         }
 
         CachedDirectedGlobalPos exteriorPosition = tardis.travel().position();
-        ServerWorld exteriorWorld = exteriorPosition.getWorld();
+        ServerLevel exteriorWorld = exteriorPosition.getWorld();
 
         DoorHandler door = tardis.door();
         door.setDoorParticles(state != State.NORMAL ? ParticleTypes.CAMPFIRE_COSY_SMOKE : null);
@@ -89,13 +87,13 @@ public class TardisCrashHandler extends KeyedTardisComponent implements TardisTi
         if (state != State.TOXIC)
             return;
 
-        exteriorWorld.spawnParticles(
-                new DustColorTransitionParticleEffect(new Vector3f(0.75f, 0.85f, 0.75f),
+        exteriorWorld.sendParticles(
+                new DustColorTransitionOptions(new Vector3f(0.75f, 0.85f, 0.75f),
                         new Vector3f(0.15f, 0.25f, 0.15f), 3),
-                exteriorPosition.getPos().toCenterPos().x, exteriorPosition.getPos().getY() + 0.1f,
-                exteriorPosition.getPos().toCenterPos().z, 1, 0.05D, 0.75D, 0.05D, 0.01D);
+                exteriorPosition.getPos().getCenter().x, exteriorPosition.getPos().getY() + 0.1f,
+                exteriorPosition.getPos().getCenter().z, 1, 0.05D, 0.75D, 0.05D, 0.01D);
 
-        if (server.getTicks() % 40 != 0)
+        if (server.getTickCount() % 40 != 0)
             return;
 
         if (TardisUtil.isInteriorEmpty(tardis.asServer()))
@@ -103,18 +101,18 @@ public class TardisCrashHandler extends KeyedTardisComponent implements TardisTi
 
         int loyaltySubAmount = AITMod.RANDOM.nextInt(10, 25);
 
-        for (ServerPlayerEntity serverPlayerEntity : tardisWorld.getPlayers()) {
-            ItemStack stack = serverPlayerEntity.getEquippedStack(EquipmentSlot.HEAD);
+        for (ServerPlayer serverPlayerEntity : tardisWorld.players()) {
+            ItemStack stack = serverPlayerEntity.getItemBySlot(EquipmentSlot.HEAD);
 
-            if (stack.isIn(AITTags.Items.FULL_RESPIRATORS) || stack.isIn(AITTags.Items.HALF_RESPIRATORS))
+            if (stack.is(AITTags.Items.FULL_RESPIRATORS) || stack.is(AITTags.Items.HALF_RESPIRATORS))
                 continue;
 
             // serverPlayerEntity.playSound(AITSounds.CLOISTER, 1f, 1f);
-            serverPlayerEntity.damage(exteriorWorld.getDamageSources().magic(), 3f);
+            serverPlayerEntity.hurt(exteriorWorld.damageSources().magic(), 3f);
             serverPlayerEntity
-                    .addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 100, 3, true, false, false));
+                    .addEffect(new MobEffectInstance(MobEffects.HUNGER, 100, 3, true, false, false));
             serverPlayerEntity
-                    .addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 100, 5, true, false, false));
+                    .addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 5, true, false, false));
 
             tardis.loyalty().get(serverPlayerEntity).subtract(loyaltySubAmount);
         }

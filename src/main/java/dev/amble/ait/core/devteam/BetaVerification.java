@@ -11,12 +11,9 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-
+import net.minecraft.Util;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
-
-import net.minecraft.util.Util;
-
 import dev.amble.ait.AITMod;
 
 public class BetaVerification {
@@ -120,7 +117,7 @@ public class BetaVerification {
             SERVER.start();
         }
 
-        Util.getOperatingSystem().open(new URI(getAuthUrl()));
+        Util.getPlatform().openUri(new URI(getAuthUrl()));
 
         long waitingFor = 0L;
         while (RECEIVED_TOKEN == null) {

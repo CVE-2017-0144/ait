@@ -1,16 +1,14 @@
 package dev.amble.ait.core.item.blueprint;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.loot.function.LootFunctionType;
-import net.minecraft.resource.ResourceType;
-
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import dev.amble.ait.AITMod;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 
 public class BlueprintRegistry extends SimpleDatapackRegistry<BlueprintSchema> {
-    public static LootFunctionType BLUEPRINT_TYPE;
+    public static LootItemFunctionType BLUEPRINT_TYPE;
 
     private static final BlueprintRegistry instance = new BlueprintRegistry();
 
@@ -22,7 +20,7 @@ public class BlueprintRegistry extends SimpleDatapackRegistry<BlueprintSchema> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override

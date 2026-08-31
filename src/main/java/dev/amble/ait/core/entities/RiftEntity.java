@@ -1,22 +1,30 @@
 package dev.amble.ait.core.entities;
 
-import net.minecraft.block.*;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.*;
-import net.minecraft.world.chunk.Chunk;
-
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.*;
 import dev.amble.ait.core.advancement.TardisCriterions;
@@ -38,109 +46,109 @@ public class RiftEntity extends DummyAmbientEntity implements ISpaceImmune {
     };
 
     @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        return super.canSpawn(world, spawnReason);
+    public boolean checkSpawnRules(LevelAccessor world, MobSpawnType spawnReason) {
+        return super.checkSpawnRules(world, spawnReason);
     }
 
     private static final int[] RIFT_DURATIONS = {
             20,
     };
 
-    public RiftEntity(EntityType<RiftEntity> type, World world) {
+    public RiftEntity(EntityType<RiftEntity> type, Level world) {
         super(type, world);
     }
 
-    public RiftEntity(World world) {
+    public RiftEntity(Level world) {
         this(AITEntityTypes.RIFT_ENTITY, world);
     }
 
     @Override
-    public void onPlayerCollision(PlayerEntity player) {
-        if (player.getBoundingBox().intersects(this.getBoundingBox().shrink(0.5f, 0.5f, 0.5f))) {
+    public void playerTouch(Player player) {
+        if (player.getBoundingBox().intersects(this.getBoundingBox().contract(0.5f, 0.5f, 0.5f))) {
             if (WorldUtil.getTimeVortex() == null) return;
-            TeleportUtil.teleport(player, WorldUtil.getTimeVortex(), player.getPos(), player.bodyYaw);
+            TeleportUtil.teleport(player, WorldUtil.getTimeVortex(), player.position(), player.yBodyRot);
         }
     }
 
     @Override
-    public final ActionResult interactMob(PlayerEntity player, Hand hand) {
-        if (this.getWorld().isClient()) return ActionResult.SUCCESS;
+    public final InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (this.level().isClientSide()) return InteractionResult.SUCCESS;
 
-        ItemStack stack = player.getStackInHand(hand);
+        ItemStack stack = player.getItemInHand(hand);
 
         if (stack.getItem() instanceof SonicItem sonic) {
-            if (!this.getWorld().isClient()) {
+            if (!this.level().isClientSide()) {
                 sonic.addFuel(1000, stack);
-                this.getWorld().playSound(null, this.getBlockPos(), AITSounds.RIFT_SONIC, SoundCategory.AMBIENT, 1f, 1f);
-                StackUtil.spawn(this.getWorld(), this.getBlockPos(), new ItemStack(AITItems.CORAL_FRAGMENT));
+                this.level().playSound(null, this.blockPosition(), AITSounds.RIFT_SONIC, SoundSource.AMBIENT, 1f, 1f);
+                StackUtil.spawn(this.level(), this.blockPosition(), new ItemStack(AITItems.CORAL_FRAGMENT));
                 this.discard();
             }
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
 
         }
         interactAmount += 1;
 
         if (interactAmount == 1) {
-            TardisCriterions.FIRST_RIFT.trigger((ServerPlayerEntity) player);
+            TardisCriterions.FIRST_RIFT.trigger((ServerPlayer) player);
         }
 
         if (interactAmount >= 3) {
-            boolean gotFragment = this.getWorld().getRandom().nextBoolean();
+            boolean gotFragment = this.level().getRandom().nextBoolean();
 
-            player.damage(this.getWorld().getDamageSources().hotFloor(), 7);
+            player.hurt(this.level().damageSources().hotFloor(), 7);
             if (gotFragment) {
 
                 Item randomItem = TagsUtil.getRandomItemFromTag(
-                        this.getWorld(),
+                        this.level(),
                         AITTags.Items.RIFT_SUCCESS_EXTRA_ITEM
                 );
 
                 // Since we don't really wanna have to use 3 billion charged zeiton crystals, just spawn more coral fragments. - Loqor
                 ItemStack coralFragments = new ItemStack(AITItems.CORAL_FRAGMENT);
 
-                coralFragments.setCount(this.getWorld().random.nextBetween(3, 8));
-                StackUtil.spawn(this.getWorld(), this.getBlockPos(), coralFragments);
+                coralFragments.setCount(this.level().random.nextIntBetweenInclusive(3, 8));
+                StackUtil.spawn(this.level(), this.blockPosition(), coralFragments);
 
-                StackUtil.spawn(this.getWorld(), this.getBlockPos(), new ItemStack(randomItem));
-                this.getWorld().playSound(null, player.getBlockPos(), AITSounds.RIFT_SUCCESS, SoundCategory.AMBIENT, 1f, 1f);
+                StackUtil.spawn(this.level(), this.blockPosition(), new ItemStack(randomItem));
+                this.level().playSound(null, player.blockPosition(), AITSounds.RIFT_SUCCESS, SoundSource.AMBIENT, 1f, 1f);
             } else {
                 Item randomItem = TagsUtil.getRandomItemFromTag(
-                        this.getWorld(),
+                        this.level(),
                         AITTags.Items.RIFT_FAIL_ITEM
                 );
 
-                StackUtil.spawn(this.getWorld(), this.getBlockPos(), new ItemStack(randomItem));
-                this.getWorld().playSound(null, this.getBlockPos(), AITSounds.RIFT_FAIL, SoundCategory.AMBIENT, 1f, 1f);
-                spreadTardisCoral(this.getWorld(), this.getBlockPos());
+                StackUtil.spawn(this.level(), this.blockPosition(), new ItemStack(randomItem));
+                this.level().playSound(null, this.blockPosition(), AITSounds.RIFT_FAIL, SoundSource.AMBIENT, 1f, 1f);
+                spreadTardisCoral(this.level(), this.blockPosition());
             }
 
             this.discard();
 
-            return gotFragment ? ActionResult.SUCCESS : ActionResult.FAIL;
+            return gotFragment ? InteractionResult.SUCCESS : InteractionResult.FAIL;
         }
 
-        return ActionResult.CONSUME;
+        return InteractionResult.CONSUME;
     }
 
-    private void spreadTardisCoral(World world, BlockPos pos) {
+    private void spreadTardisCoral(Level world, BlockPos pos) {
         int radius = 4;
 
-        Chunk chunk = world.getChunk(pos);
-        for (BlockPos targetPos : BlockPos.iterate(pos.add(-radius, 0, -radius), pos.add(radius, 0, radius))) {
-            if (world.random.nextBetween(0, 10) < 3) { // 30% chance per block
-                targetPos = targetPos.withY(chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+        ChunkAccess chunk = world.getChunk(pos);
+        for (BlockPos targetPos : BlockPos.betweenClosed(pos.offset(-radius, 0, -radius), pos.offset(radius, 0, radius))) {
+            if (world.random.nextIntBetweenInclusive(0, 10) < 3) { // 30% chance per block
+                targetPos = targetPos.atY(chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                         targetPos.getX() & 15, targetPos.getZ() & 15));
 
                 BlockState currentState = world.getBlockState(targetPos);
                 BlockState newState = getReplacementBlock(currentState);
                 if (newState != null) {
-                    world.setBlockState(targetPos, newState, Block.NOTIFY_ALL);
+                    world.setBlock(targetPos, newState, Block.UPDATE_ALL);
 
                     world.addParticle(AITMod.CORAL_PARTICLE,
                             targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5,
                             0, 0, 0);
 
-                    if (newState.isOf(AITBlocks.TARDIS_CORAL_BLOCK)) {
+                    if (newState.is(AITBlocks.TARDIS_CORAL_BLOCK)) {
                         placeCoralFans(world, targetPos);
                     }
                 }
@@ -151,16 +159,16 @@ public class RiftEntity extends DummyAmbientEntity implements ISpaceImmune {
     private BlockState getReplacementBlock(BlockState currentState) {
         Block block = currentState.getBlock();
 
-        if (block instanceof SlabBlock) return AITBlocks.TARDIS_CORAL_SLAB.getDefaultState()
-                .with(Properties.SLAB_TYPE, currentState.get(Properties.SLAB_TYPE));
+        if (block instanceof SlabBlock) return AITBlocks.TARDIS_CORAL_SLAB.defaultBlockState()
+                .setValue(BlockStateProperties.SLAB_TYPE, currentState.getValue(BlockStateProperties.SLAB_TYPE));
 
-        if (block instanceof StairsBlock) return AITBlocks.TARDIS_CORAL_STAIRS.getDefaultState()
-                .with(Properties.HORIZONTAL_FACING, currentState.get(Properties.HORIZONTAL_FACING))
-                .with(Properties.SLAB_TYPE, currentState.get(Properties.SLAB_TYPE))
-                .with(Properties.STAIR_SHAPE, currentState.get(Properties.STAIR_SHAPE));
+        if (block instanceof StairBlock) return AITBlocks.TARDIS_CORAL_STAIRS.defaultBlockState()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, currentState.getValue(BlockStateProperties.HORIZONTAL_FACING))
+                .setValue(BlockStateProperties.SLAB_TYPE, currentState.getValue(BlockStateProperties.SLAB_TYPE))
+                .setValue(BlockStateProperties.STAIRS_SHAPE, currentState.getValue(BlockStateProperties.STAIRS_SHAPE));
 
 
-        if (canTransform(block)) return AITBlocks.TARDIS_CORAL_BLOCK.getDefaultState();
+        if (canTransform(block)) return AITBlocks.TARDIS_CORAL_BLOCK.defaultBlockState();
 
         return null;
     }
@@ -170,30 +178,30 @@ public class RiftEntity extends DummyAmbientEntity implements ISpaceImmune {
                 block == Blocks.SAND || block == Blocks.DEEPSLATE;
     }
 
-    private void placeCoralFans(World world, BlockPos pos) {
+    private void placeCoralFans(Level world, BlockPos pos) {
         for (Direction dir : Direction.values()) {
-            BlockPos adjacent = pos.offset(dir);
+            BlockPos adjacent = pos.relative(dir);
             if (world.getBlockState(adjacent).isAir() && isCoralBlock(world.getBlockState(pos))) {
-                world.setBlockState(adjacent, AITBlocks.TARDIS_CORAL_FAN.getDefaultState()
-                        .with(Properties.WATERLOGGED,false)
-                        .with(Properties.FACING, dir), Block.NOTIFY_ALL);
+                world.setBlock(adjacent, AITBlocks.TARDIS_CORAL_FAN.defaultBlockState()
+                        .setValue(BlockStateProperties.WATERLOGGED,false)
+                        .setValue(BlockStateProperties.FACING, dir), Block.UPDATE_ALL);
             }
         }
     }
 
     private boolean isCoralBlock(BlockState state) {
-        return state.isOf(AITBlocks.TARDIS_CORAL_BLOCK);
+        return state.is(AITBlocks.TARDIS_CORAL_BLOCK);
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isClient()) {
+        if (!this.level().isClientSide()) {
             if (ambientSoundCooldown > 0) {
                 ambientSoundCooldown--;
             } else {
-                this.getWorld().playSound(null, this.getBlockPos(), RIFT_SOUNDS[currentSoundIndex], SoundCategory.AMBIENT, 0.7f, 1.0f);
+                this.level().playSound(null, this.blockPosition(), RIFT_SOUNDS[currentSoundIndex], SoundSource.AMBIENT, 0.7f, 1.0f);
                 ambientSoundCooldown = RIFT_DURATIONS[currentSoundIndex];
                 currentSoundIndex = (currentSoundIndex + 1) % RIFT_SOUNDS.length;
             }

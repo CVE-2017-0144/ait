@@ -4,37 +4,35 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.world.TardisServerWorld;
 
 public class CommandUtil {
 
-    public static final SuggestionProvider<ServerCommandSource> NON_TARDIS_DIM_SUGGESTIONS =
-            (CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) -> {
+    public static final SuggestionProvider<CommandSourceStack> NON_TARDIS_DIM_SUGGESTIONS =
+            (CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) -> {
                 MinecraftServer server = ctx.getSource().getServer();
 
-                for (RegistryKey<World> key : server.getWorldRegistryKeys()) {
-                    ServerWorld world = server.getWorld(key);
+                for (ResourceKey<Level> key : server.levelKeys()) {
+                    ServerLevel world = server.getLevel(key);
                     if (world == null)
                         continue;
 
                     if (!TardisServerWorld.isTardisDimension(world)
-                            && !key.getValue().equals(AITDimensions.TIME_VORTEX_WORLD.getValue())
-                            && !key.getValue().toString().equals("ait:tardis_dimension_type")) {
-                        builder.suggest(key.getValue().toString());
+                            && !key.location().equals(AITDimensions.TIME_VORTEX_WORLD.location())
+                            && !key.location().toString().equals("ait:tardis_dimension_type")) {
+                        builder.suggest(key.location().toString());
                     }
                 }
                 return builder.buildFuture();
             };
 
-    public static final SuggestionProvider<ServerCommandSource> DIRECTION = (ctx, b) -> {
+    public static final SuggestionProvider<CommandSourceStack> DIRECTION = (ctx, b) -> {
         String[] opts = {
                 "north",
                 "north_east",
@@ -49,8 +47,8 @@ public class CommandUtil {
         return b.buildFuture();
     };
 
-    public static boolean hasArgument(CommandContext<ServerCommandSource> context, String name) {
-        for (ParsedCommandNode<ServerCommandSource> node : context.getNodes()) {
+    public static boolean hasArgument(CommandContext<CommandSourceStack> context, String name) {
+        for (ParsedCommandNode<CommandSourceStack> node : context.getNodes()) {
             if (node.getNode().getName().equals(name))
                 return true;
         }

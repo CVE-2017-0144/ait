@@ -1,21 +1,19 @@
 package dev.amble.ait.data.schema.exterior.variant.box.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.PoliceBoxModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class ClientPoliceBoxVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/police_box";
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/police_box.png");
-    protected static final Identifier BIOME_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/police_box.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/police_box_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()
@@ -32,16 +30,16 @@ public abstract class ClientPoliceBoxVariant extends ClientExteriorVariantSchema
 
     @Override
     public SimpleExteriorModel model() {
-        return new PoliceBoxModel(PoliceBoxModel.getTexturedModelData().createModel());
+        return new PoliceBoxModel(PoliceBoxModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return AITMod.id(TEXTURE_PATH + name + "_emission" + ".png");
     }
 

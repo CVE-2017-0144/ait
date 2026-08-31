@@ -1,13 +1,11 @@
 package dev.amble.ait.core.tardis.control.sound;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.control.Control;
@@ -19,8 +17,8 @@ import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
     private static final ControlSoundRegistry instance = new ControlSoundRegistry();
 
-    public static final SimpleRegistry<ControlSound> FALLBACKS = FabricRegistryBuilder
-            .createSimple(RegistryKey.<ControlSound>ofRegistry(AITMod.id("control_sound_fallback")))
+    public static final MappedRegistry<ControlSound> FALLBACKS = FabricRegistryBuilder
+            .createSimple(ResourceKey.<ControlSound>createRegistryKey(AITMod.id("control_sound_fallback")))
             .buildAndRegister();
 
     public ControlSoundRegistry() {
@@ -40,7 +38,7 @@ public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
 
     @Override
     protected void defaults() {
-        EMPTY = new ControlSound(AITMod.id("empty"), AITMod.id("empty"), AITSounds.ERROR.getId(), AITSounds.ERROR.getId());
+        EMPTY = new ControlSound(AITMod.id("empty"), AITMod.id("empty"), AITSounds.ERROR.getLocation(), AITSounds.ERROR.getLocation());
     }
 
     /**
@@ -58,7 +56,7 @@ public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
      * Will return
      * - the sound for the specific control and console
      * OR
-     * - the fallback sound for the specific console as defined & registered using {@linkplain ControlSound#forFallback(Identifier, SoundEvent, SoundEvent)}
+     * - the fallback sound for the specific console as defined & registered using {@linkplain ControlSound#forFallback(ResourceLocation, SoundEvent, SoundEvent)}
      * OR
      * - the fallback sound for the specific control as defined from {@linkplain Control#getFallbackSound()}
      * OR
@@ -67,7 +65,7 @@ public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
      * @param controlId control id to look for
      * @return the control sound
      */
-    public ControlSound get(Identifier consoleId, Identifier controlId) {
+    public ControlSound get(ResourceLocation consoleId, ResourceLocation controlId) {
         ControlSound possible = this.get(ControlSound.mergeIdentifiers(controlId, consoleId));
         if (possible != null) {
             return possible;

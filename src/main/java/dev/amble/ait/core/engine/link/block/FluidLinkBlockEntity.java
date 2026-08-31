@@ -1,26 +1,24 @@
 package dev.amble.ait.core.engine.link.block;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.link.IFluidLink;
 import dev.amble.ait.core.engine.link.IFluidSource;
 import dev.amble.ait.core.engine.link.tracker.FluidNetwork;
 import dev.amble.ait.core.util.SoundData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public abstract class FluidLinkBlockEntity extends InteriorLinkableBlockEntity implements IFluidLink {
     private boolean powered = false;
@@ -33,28 +31,28 @@ public abstract class FluidLinkBlockEntity extends InteriorLinkableBlockEntity i
     }
 
     @Nullable @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public void onGainFluid() {
-        if (this.hasWorld() && this.getGainPowerSound() != null) {
-            this.getGainPowerSound().play((ServerWorld) this.getWorld(), this.getPos());
+        if (this.hasLevel() && this.getGainPowerSound() != null) {
+            this.getGainPowerSound().play((ServerLevel) this.getLevel(), this.getBlockPos());
         }
     }
 
     @Override
     public void onLoseFluid() {
-        if (this.hasWorld() && this.getLosePowerSound() != null) {
-            this.getLosePowerSound().play((ServerWorld) this.getWorld(), this.getPos());
+        if (this.hasLevel() && this.getLosePowerSound() != null) {
+            this.getLosePowerSound().play((ServerLevel) this.getLevel(), this.getBlockPos());
         }
     }
     protected SoundData getLosePowerSound() {
-        return new SoundData(AITSounds.SLOT_IN, SoundCategory.BLOCKS, 0.1F, 0.75F);
+        return new SoundData(AITSounds.SLOT_IN, SoundSource.BLOCKS, 0.1F, 0.75F);
     }
     protected SoundData getGainPowerSound() {
-        return new SoundData(AITSounds.FLUID_LINK_CONNECT, SoundCategory.BLOCKS, 0.1F, 0.75F);
+        return new SoundData(AITSounds.FLUID_LINK_CONNECT, SoundSource.BLOCKS, 0.1F, 0.75F);
     }
 
     public boolean isPowered() {
@@ -123,15 +121,15 @@ public abstract class FluidLinkBlockEntity extends InteriorLinkableBlockEntity i
     }
 
     private void broadcastState() {
-        if (!this.hasWorld()) return;
+        if (!this.hasLevel()) return;
 
-        this.world.emitGameEvent(GameEvent.BLOCK_CHANGE, this.getPos(), GameEvent.Emitter.of(this.getCachedState()));
-        this.markDirty();
-        this.getWorld().updateListeners(this.getPos(), this.getCachedState(), this.getCachedState(), Block.NOTIFY_ALL);
+        this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), GameEvent.Context.of(this.getBlockState()));
+        this.setChanged();
+        this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
     }
 
-    public void onBroken(World world, BlockPos pos) {
-        if (world.isClient())
+    public void onBroken(Level world, BlockPos pos) {
+        if (world.isClientSide())
             return;
         if (this.isPowered())
             this.onLoseFluid();
@@ -141,18 +139,18 @@ public abstract class FluidLinkBlockEntity extends InteriorLinkableBlockEntity i
         this.lastPos = null;
         this.powered = false;
 
-        FluidNetwork.rebuildAround((ServerWorld) world, pos);
+        FluidNetwork.rebuildAround((ServerLevel) world, pos);
     }
 
-    public void onPlaced(World world, BlockPos pos, @Nullable LivingEntity placer) {
-        if (world.isClient())
+    public void onPlaced(Level world, BlockPos pos, @Nullable LivingEntity placer) {
+        if (world.isClientSide())
             return;
 
-        FluidNetwork.rebuildFrom((ServerWorld) world, pos);
+        FluidNetwork.rebuildFrom((ServerLevel) world, pos);
     }
 
-    public void onNeighborUpdate(World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos) {
-        if (world.isClient())
+    public void onNeighborUpdate(Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos) {
+        if (world.isClientSide())
             return;
 
         // Only react to changes from blocks that participate in the fluid-link graph;
@@ -161,6 +159,6 @@ public abstract class FluidLinkBlockEntity extends InteriorLinkableBlockEntity i
             return;
         }
 
-        FluidNetwork.rebuildFrom((ServerWorld) world, pos);
+        FluidNetwork.rebuildFrom((ServerLevel) world, pos);
     }
 }

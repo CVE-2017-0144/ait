@@ -4,28 +4,26 @@ import static dev.amble.ait.core.blocks.RadioBlock.*;
 import static java.lang.Double.NaN;
 
 import java.util.function.Function;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.World;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import dev.amble.ait.core.AITBlockEntityTypes;
 
 public class AITRadioBlockEntity extends BlockEntity {
 
-    public PlayerEntity player;
+    public Player player;
     public float tickRotT, tickRotV;
 
     private int timeInSeconds;
@@ -37,7 +35,7 @@ public class AITRadioBlockEntity extends BlockEntity {
         toggleRadio(true);
     }
 
-    public static void tick(World world1, BlockPos pos, BlockState state, AITRadioBlockEntity be) {
+    public static void tick(Level world1, BlockPos pos, BlockState state, AITRadioBlockEntity be) {
         be.timeInSeconds++;
         if (be.getTickRot("volume") > 0 && be.hasSecondPassed()) {
             be.timeInSeconds = 0;
@@ -49,52 +47,52 @@ public class AITRadioBlockEntity extends BlockEntity {
         return this.timeInSeconds >= 20;
     }
 
-    private void spawnNoteParticle(World world, BlockPos pos) {
-        if (world instanceof ServerWorld serverWorld) {
-            Vec3d vec3d = Vec3d.ofBottomCenter(pos).add(0.0, 1.2f, 0.0);
-            serverWorld.spawnParticles(ParticleTypes.NOTE, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0, NaN, 0.0, 0.0,
+    private void spawnNoteParticle(Level world, BlockPos pos) {
+        if (world instanceof ServerLevel serverWorld) {
+            Vec3 vec3d = Vec3.atBottomCenterOf(pos).add(0.0, 1.2f, 0.0);
+            serverWorld.sendParticles(ParticleTypes.NOTE, vec3d.x(), vec3d.y(), vec3d.z(), 0, NaN, 0.0, 0.0,
                     1.0F);
         }
     }
 
-    public void useOn(BlockHitResult hit, BlockState state, PlayerEntity player, World world, boolean isSneaking) {
+    public void useOn(BlockHitResult hit, BlockState state, Player player, Level world, boolean isSneaking) {
         this.player = player;
-        double mouseX = (hit.getPos().x * 16) - (hit.getBlockPos().getX() * 16);
-        double mouseY = (hit.getPos().y * 16) - (hit.getBlockPos().getY() * 16);
-        double mouseZ = (hit.getPos().z * 16) - (hit.getBlockPos().getZ() * 16);
+        double mouseX = (hit.getLocation().x * 16) - (hit.getBlockPos().getX() * 16);
+        double mouseY = (hit.getLocation().y * 16) - (hit.getBlockPos().getY() * 16);
+        double mouseZ = (hit.getLocation().z * 16) - (hit.getBlockPos().getZ() * 16);
 
-        double[] xTuner = {0, 0, PZ_AXIS_TUNER.getMin(Direction.Axis.X), NZ_AXIS_TUNER.getMin(Direction.Axis.X),
-                PX_AXIS_TUNER.getMin(Direction.Axis.X), NX_AXIS_TUNER.getMin(Direction.Axis.X)};
-        double[] yTuner = {0, 0, PZ_AXIS_TUNER.getMin(Direction.Axis.Y), NZ_AXIS_TUNER.getMin(Direction.Axis.Y),
-                PX_AXIS_TUNER.getMin(Direction.Axis.Y), NX_AXIS_TUNER.getMin(Direction.Axis.Y)};
-        double[] zTuner = {0, 0, PZ_AXIS_TUNER.getMin(Direction.Axis.Z), NZ_AXIS_TUNER.getMin(Direction.Axis.Z),
-                PX_AXIS_TUNER.getMin(Direction.Axis.Z), NX_AXIS_TUNER.getMin(Direction.Axis.Z)};
+        double[] xTuner = {0, 0, PZ_AXIS_TUNER.min(Direction.Axis.X), NZ_AXIS_TUNER.min(Direction.Axis.X),
+                PX_AXIS_TUNER.min(Direction.Axis.X), NX_AXIS_TUNER.min(Direction.Axis.X)};
+        double[] yTuner = {0, 0, PZ_AXIS_TUNER.min(Direction.Axis.Y), NZ_AXIS_TUNER.min(Direction.Axis.Y),
+                PX_AXIS_TUNER.min(Direction.Axis.Y), NX_AXIS_TUNER.min(Direction.Axis.Y)};
+        double[] zTuner = {0, 0, PZ_AXIS_TUNER.min(Direction.Axis.Z), NZ_AXIS_TUNER.min(Direction.Axis.Z),
+                PX_AXIS_TUNER.min(Direction.Axis.Z), NX_AXIS_TUNER.min(Direction.Axis.Z)};
 
-        double[] xVolume = {0, 0, PZ_AXIS_VOLUME.getMin(Direction.Axis.X), NZ_AXIS_VOLUME.getMin(Direction.Axis.X),
-                PX_AXIS_VOLUME.getMin(Direction.Axis.X), NX_AXIS_VOLUME.getMin(Direction.Axis.X)};
-        double[] yVolume = {0, 0, PZ_AXIS_VOLUME.getMin(Direction.Axis.Y), NZ_AXIS_VOLUME.getMin(Direction.Axis.Y),
-                PX_AXIS_VOLUME.getMin(Direction.Axis.Y), NX_AXIS_VOLUME.getMin(Direction.Axis.Y)};
-        double[] zVolume = {0, 0, PZ_AXIS_VOLUME.getMin(Direction.Axis.Z), NZ_AXIS_VOLUME.getMin(Direction.Axis.Z),
-                PX_AXIS_VOLUME.getMin(Direction.Axis.Z), NX_AXIS_VOLUME.getMin(Direction.Axis.Z)};
+        double[] xVolume = {0, 0, PZ_AXIS_VOLUME.min(Direction.Axis.X), NZ_AXIS_VOLUME.min(Direction.Axis.X),
+                PX_AXIS_VOLUME.min(Direction.Axis.X), NX_AXIS_VOLUME.min(Direction.Axis.X)};
+        double[] yVolume = {0, 0, PZ_AXIS_VOLUME.min(Direction.Axis.Y), NZ_AXIS_VOLUME.min(Direction.Axis.Y),
+                PX_AXIS_VOLUME.min(Direction.Axis.Y), NX_AXIS_VOLUME.min(Direction.Axis.Y)};
+        double[] zVolume = {0, 0, PZ_AXIS_VOLUME.min(Direction.Axis.Z), NZ_AXIS_VOLUME.min(Direction.Axis.Z),
+                PX_AXIS_VOLUME.min(Direction.Axis.Z), NX_AXIS_VOLUME.min(Direction.Axis.Z)};
 
         double width = 2;
         double height = 2;
         double length = 2;
         float multiVal = 36; // 22.5;
 
-        boolean tmx = mouseX >= (xTuner[state.get(FACING).ordinal()] * 16)
-                && mouseY >= (yTuner[state.get(FACING).ordinal()] * 16)
-                && mouseZ >= (zTuner[state.get(FACING).ordinal()] * 16)
-                && mouseX <= ((xTuner[state.get(FACING).ordinal()] * 16) + width)
-                && mouseY <= ((yTuner[state.get(FACING).ordinal()] * 16) + height)
-                && mouseZ <= ((zTuner[state.get(FACING).ordinal()] * 16) + length);
+        boolean tmx = mouseX >= (xTuner[state.getValue(FACING).ordinal()] * 16)
+                && mouseY >= (yTuner[state.getValue(FACING).ordinal()] * 16)
+                && mouseZ >= (zTuner[state.getValue(FACING).ordinal()] * 16)
+                && mouseX <= ((xTuner[state.getValue(FACING).ordinal()] * 16) + width)
+                && mouseY <= ((yTuner[state.getValue(FACING).ordinal()] * 16) + height)
+                && mouseZ <= ((zTuner[state.getValue(FACING).ordinal()] * 16) + length);
 
-        boolean vmx = mouseX >= (xVolume[state.get(FACING).ordinal()] * 16)
-                && mouseY >= (yVolume[state.get(FACING).ordinal()] * 16)
-                && mouseZ >= (zVolume[state.get(FACING).ordinal()] * 16)
-                && mouseX <= ((xVolume[state.get(FACING).ordinal()] * 16) + width)
-                && mouseY <= ((yVolume[state.get(FACING).ordinal()] * 16) + height)
-                && mouseZ <= ((zVolume[state.get(FACING).ordinal()] * 16) + length);
+        boolean vmx = mouseX >= (xVolume[state.getValue(FACING).ordinal()] * 16)
+                && mouseY >= (yVolume[state.getValue(FACING).ordinal()] * 16)
+                && mouseZ >= (zVolume[state.getValue(FACING).ordinal()] * 16)
+                && mouseX <= ((xVolume[state.getValue(FACING).ordinal()] * 16) + width)
+                && mouseY <= ((yVolume[state.getValue(FACING).ordinal()] * 16) + height)
+                && mouseZ <= ((zVolume[state.getValue(FACING).ordinal()] * 16) + length);
 
         if (tmx && this.isRadioOn() && !isSneaking) {
             if (this.tickRotT < (360F - 22.5F) * ((float) Math.PI / 180f))
@@ -102,8 +100,8 @@ public class AITRadioBlockEntity extends BlockEntity {
             else if (this.tickRotT >= (360F - 22.5F) * ((float) Math.PI / 180f))
                 this.tickRotT = 0;
             if (player != null)
-                player.sendMessage(Text.translatable("message.ait.radio.changing_frequency"), true);
-            world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.1F,
+                player.displayClientMessage(Component.translatable("message.ait.radio.changing_frequency"), true);
+            world.playSound(null, worldPosition, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 0.1F,
                     this.tickRotT * this.tickRotT);
         }
         if (vmx && this.isRadioOn() && !isSneaking) {
@@ -112,7 +110,7 @@ public class AITRadioBlockEntity extends BlockEntity {
             else if (this.tickRotV <= 360F * ((float) Math.PI / 180f))
                 this.tickRotV = 0;
 
-            world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.1F,
+            world.playSound(null, worldPosition, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 0.1F,
                     this.tickRotV * this.tickRotV);
         }
 
@@ -136,14 +134,14 @@ public class AITRadioBlockEntity extends BlockEntity {
             if (isSneaking && !vmx && !tmx) {
                 this.toggleRadio(!this.isRadioOn());
                 if (player != null)
-                    player.sendMessage(Text.translatable("message.ait.radio.off"), true);
-                world.playSound(null, pos, SoundEvents.BLOCK_CHAIN_HIT, SoundCategory.MASTER, 0.2F, 1F);
+                    player.displayClientMessage(Component.translatable("message.ait.radio.off"), true);
+                world.playSound(null, worldPosition, SoundEvents.CHAIN_HIT, SoundSource.MASTER, 0.2F, 1F);
             }
         } else {
             this.toggleRadio(!this.isRadioOn());
             if (player != null)
-                player.sendMessage(Text.translatable("message.ait.radio.on"), true);
-            world.playSound(null, pos, SoundEvents.BLOCK_CHAIN_HIT, SoundCategory.MASTER, 0.2F, 2F);
+                player.displayClientMessage(Component.translatable("message.ait.radio.on"), true);
+            world.playSound(null, worldPosition, SoundEvents.CHAIN_HIT, SoundSource.MASTER, 0.2F, 2F);
         }
     }
 
@@ -170,30 +168,30 @@ public class AITRadioBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
     }
 
     record Handle(Function<Direction, VoxelShape> shape) {
 
         public boolean check(BlockHitResult hit, BlockState state) {
-            double mouseX = (hit.getPos().x * 16) - (hit.getBlockPos().getX() * 16);
-            double mouseY = (hit.getPos().y * 16) - (hit.getBlockPos().getY() * 16);
-            double mouseZ = (hit.getPos().z * 16) - (hit.getBlockPos().getZ() * 16);
+            double mouseX = (hit.getLocation().x * 16) - (hit.getBlockPos().getX() * 16);
+            double mouseY = (hit.getLocation().y * 16) - (hit.getBlockPos().getY() * 16);
+            double mouseZ = (hit.getLocation().z * 16) - (hit.getBlockPos().getZ() * 16);
 
-            VoxelShape s = shape.apply(state.get(FACING));
+            VoxelShape s = shape.apply(state.getValue(FACING));
 
-            double minX = s.getMin(Direction.Axis.X);
-            double maxX = s.getMax(Direction.Axis.X);
-            double minY = s.getMin(Direction.Axis.Y);
-            double maxY = s.getMax(Direction.Axis.Y);
-            double minZ = s.getMin(Direction.Axis.Z);
-            double maxZ = s.getMax(Direction.Axis.Z);
+            double minX = s.min(Direction.Axis.X);
+            double maxX = s.max(Direction.Axis.X);
+            double minY = s.min(Direction.Axis.Y);
+            double maxY = s.max(Direction.Axis.Y);
+            double minZ = s.min(Direction.Axis.Z);
+            double maxZ = s.max(Direction.Axis.Z);
 
             // DOWN: >= 0 <= 0 + 2
             // UP: >= 16 <= 18

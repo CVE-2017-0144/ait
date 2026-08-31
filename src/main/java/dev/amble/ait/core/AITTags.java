@@ -1,13 +1,12 @@
 package dev.amble.ait.core;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.world.event.GameEvent;
-
 import dev.amble.ait.AITMod;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class AITTags {
 
@@ -18,7 +17,7 @@ public class AITTags {
         public static final TagKey<Block> WOODEN_BLOCKS = createTag("wooden_blocks");
 
         private static TagKey<Block> createTag(String name) {
-            return TagKey.of(RegistryKeys.BLOCK, AITMod.id(name));
+            return TagKey.create(Registries.BLOCK, AITMod.id(name));
         }
     }
 
@@ -39,7 +38,7 @@ public class AITTags {
         public static final TagKey<Item> RIFT_FAIL_ITEM = createTag("rift_fail_item");
 
         private static TagKey<Item> createTag(String name) {
-            return TagKey.of(RegistryKeys.ITEM, AITMod.id(name));
+            return TagKey.create(Registries.ITEM, AITMod.id(name));
         }
     }
 
@@ -49,7 +48,7 @@ public class AITTags {
         public static final TagKey<EntityType<?>> NON_DISMOUNTABLE = createTag("non_dismountable");
 
         private static TagKey<EntityType<?>> createTag(String name) {
-            return TagKey.of(RegistryKeys.ENTITY_TYPE, AITMod.id(name));
+            return TagKey.create(Registries.ENTITY_TYPE, AITMod.id(name));
         }
     }
 
@@ -57,7 +56,7 @@ public class AITTags {
         public static final TagKey<GameEvent> MATRIX_CAN_LISTEN = createTag("matrix_can_listen");
 
         public static TagKey<GameEvent> createTag(String name) {
-            return TagKey.of(RegistryKeys.GAME_EVENT, AITMod.id(name));
+            return TagKey.create(Registries.GAME_EVENT, AITMod.id(name));
         }
     }
 }

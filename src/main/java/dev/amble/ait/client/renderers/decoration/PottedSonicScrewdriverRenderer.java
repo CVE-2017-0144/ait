@@ -1,17 +1,15 @@
 package dev.amble.ait.client.renderers.decoration;
 
 import java.util.List;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.ait.core.blockentities.PottedSonicScrewdriverBlockEntity;
 
 public class PottedSonicScrewdriverRenderer implements BlockEntityRenderer<PottedSonicScrewdriverBlockEntity> {
@@ -21,29 +19,29 @@ public class PottedSonicScrewdriverRenderer implements BlockEntityRenderer<Potte
     private static final float[][] SLOTS = {{ 0.00f,  0.00f,  10f, 0f,   0f },
             { -0.07f, -0.04f, 60f, 1f, -20f }, { 0.07f,  0.04f, -40f, 1f,  20f }, {0.03f,  0.07f, 150f, 0f, -20f }, { -0.05f, 0.06f, -110f, 0f,  20f }, { 0.05f, -0.06f, 100f, 1f, -15f }};
 
-    public PottedSonicScrewdriverRenderer(BlockEntityRendererFactory.Context ctx) {
+    public PottedSonicScrewdriverRenderer(BlockEntityRendererProvider.Context ctx) {
     }
 
     @Override
-    public void render(PottedSonicScrewdriverBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(PottedSonicScrewdriverBlockEntity entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
         List<ItemStack> sonics = entity.getSonics();
-        ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         for (int i = 0; i < sonics.size(); i++) {
             ItemStack stack = sonics.get(i);
             float[] slot = SLOTS[Math.min(i, SLOTS.length - 1)];
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(0.5f + slot[0], BASE_Y, 0.5f + slot[1]);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(slot[2]));
+            matrices.mulPose(Axis.YP.rotationDegrees(slot[2]));
             if (slot[4] != 0f) {
                 if (slot[3] != 0f)
-                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(slot[4]));
+                    matrices.mulPose(Axis.ZP.rotationDegrees(slot[4]));
                 else
-                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(slot[4]));
+                    matrices.mulPose(Axis.XP.rotationDegrees(slot[4]));
             }
             matrices.scale(SCALE, SCALE, SCALE);
             matrices.translate(0f, LIFT, 0f);
-            itemRenderer.renderItem(stack, ModelTransformationMode.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-            matrices.pop();
+            itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getLevel(), 0);
+            matrices.popPose();
         }
     }
 }

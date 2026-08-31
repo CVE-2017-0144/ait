@@ -7,9 +7,7 @@ import java.util.Queue;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
-
-import net.minecraft.block.Block;
-
+import net.minecraft.world.level.block.Block;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.datagen.util.NoBlockDrop;
 import dev.amble.lib.util.ReflectionUtil;
@@ -39,17 +37,17 @@ public class AmbleBlockLootTable extends FabricBlockLootTableProvider {
     }
 
     protected void process(Block block, Optional<NoBlockDrop> annotation) {
-        this.addDrop(block);
+        this.dropSelf(block);
 
 
         NoBlockDrop drop = annotation.orElse(null);
         if (drop != null) {
             if (drop.requireSilkTouch()) {
-                this.addDropWithSilkTouch(block);
+                this.dropWhenSilkTouch(block);
             }
 
             if (drop.slabDrops()) {
-                this.slabDrops(block);
+                this.createSlabItemTable(block);
             }
         }
     }

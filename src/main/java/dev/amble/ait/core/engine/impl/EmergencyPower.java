@@ -1,9 +1,5 @@
 package dev.amble.ait.core.engine.impl;
 
-import net.minecraft.item.Item;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-
 import dev.amble.ait.api.ArtronHolder;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITItems;
@@ -13,6 +9,9 @@ import dev.amble.ait.core.engine.block.multi.MultiBlockStructure;
 import dev.amble.ait.core.item.RiftScannerItem;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ChunkPos;
 
 public class EmergencyPower extends SubSystem implements ArtronHolder, StructureHolder {
     private double fuel;
@@ -25,7 +24,7 @@ public class EmergencyPower extends SubSystem implements ArtronHolder, Structure
             if (power > 200) return;
             TravelHandler travel = tdis.travel();
             RiftScannerItem.findNearestRift(travel.position().getWorld(), new ChunkPos(travel.position().getPos()), pos -> {
-                travel.destination(CachedDirectedGlobalPos.create(travel.position().getWorld(), pos.getCenterAtY(70), (byte) 0));
+                travel.destination(CachedDirectedGlobalPos.create(travel.position().getWorld(), pos.getMiddleBlockPosition(70), (byte) 0));
                 travel.autopilot(true);
                 travel.dematerialize();
             });
@@ -43,7 +42,7 @@ public class EmergencyPower extends SubSystem implements ArtronHolder, Structure
 
     @Override
     public void setCurrentFuel(double var) {
-        fuel = MathHelper.clamp(var, 0, getMaxFuel());
+        fuel = Mth.clamp(var, 0, getMaxFuel());
         this.sync();
     }
 

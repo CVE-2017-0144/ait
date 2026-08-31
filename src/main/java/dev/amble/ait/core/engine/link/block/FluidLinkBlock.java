@@ -1,29 +1,26 @@
 package dev.amble.ait.core.engine.link.block;
 
-import net.minecraft.block.BlockEntityProvider;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.engine.link.IFluidLink;
 import dev.amble.ait.core.engine.link.IFluidSource;
 import dev.amble.ait.core.world.TardisServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class FluidLinkBlock extends Block implements IFluidLink, BlockEntityProvider {
-    public FluidLinkBlock(Settings settings) {
+public abstract class FluidLinkBlock extends Block implements IFluidLink, EntityBlock {
+    public FluidLinkBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        super.setPlacedBy(world, pos, state, placer, itemStack);
 
         if (!TardisServerWorld.isTardisDimension(world)) return;
 
@@ -33,21 +30,21 @@ public abstract class FluidLinkBlock extends Block implements IFluidLink, BlockE
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
         if (state.getBlock() != newState.getBlock()) { // on break
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof FluidLinkBlockEntity be) {
-                be.markRemoved();
+                be.setRemoved();
                 be.onBroken(world, pos);
             }
         }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onRemove(state, world, pos, newState, moved);
     }
 
     @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+        super.neighborChanged(state, world, pos, sourceBlock, sourcePos, notify);
 
         if (world.getBlockEntity(pos) instanceof FluidLinkBlockEntity be) {
             be.onNeighborUpdate(world, pos, sourceBlock, sourcePos);
@@ -55,7 +52,7 @@ public abstract class FluidLinkBlock extends Block implements IFluidLink, BlockE
     }
 
     @Override
-    public abstract FluidLinkBlockEntity createBlockEntity(BlockPos pos, BlockState state);
+    public abstract FluidLinkBlockEntity newBlockEntity(BlockPos pos, BlockState state);
 
     @Override
     public IFluidSource source(boolean search) {

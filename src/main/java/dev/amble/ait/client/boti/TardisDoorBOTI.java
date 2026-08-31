@@ -1,21 +1,10 @@
 package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.AnimatedModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
@@ -29,30 +18,39 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.ait.registry.impl.CategoryRegistry;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 public class TardisDoorBOTI extends BOTI {
-    public static void renderInteriorDoorBoti(ClientTardis tardis, DoorBlockEntity door, ClientExteriorVariantSchema variant, MatrixStack stack, VertexConsumerProvider consumers, Identifier frameTex, AnimatedModel frame, ModelPart mask, int light, float tickDelta) {
+    public static void renderInteriorDoorBoti(ClientTardis tardis, DoorBlockEntity door, ClientExteriorVariantSchema variant, PoseStack stack, MultiBufferSource consumers, ResourceLocation frameTex, AnimatedModel frame, ModelPart mask, int light, float tickDelta) {
         ExteriorVariantSchema parent = variant.parent();
 
-        if (client.world == null
+        if (client.level == null
                 || client.player == null) return;
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.pushPose();
+        stack.mulPose(Axis.YP.rotationDegrees(180));
 
-        client.getFramebuffer().endWrite();
+        client.getMainRenderTarget().unbindWrite();
 
         BOTI_HANDLER.setupFramebuffer();
 
-        Vec3d skyColor = client.world.getSkyColor(client.player.getPos(), client.getTickDelta());
+        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getFrameTime());
         if (AITModClient.CONFIG.greenScreenBOTI)
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, 0, 1, 0, 1);
         else
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1);
 
-        BOTI.copyFramebuffer(client.getFramebuffer(), BOTI_HANDLER.afbo);
+        BOTI.copyFramebuffer(client.getMainRenderTarget(), BOTI_HANDLER.afbo);
 
-        VertexConsumerProvider.Immediate botiProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
+        MultiBufferSource.BufferSource botiProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         GL11.glStencilMask(0xFF);
@@ -61,49 +59,49 @@ public class TardisDoorBOTI extends BOTI {
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 
         RenderSystem.depthMask(true);
-        stack.push();
+        stack.pushPose();
         StatsHandler stats = tardis.stats();
         Vector3f scale = tardis.travel().getScale();
-        Vec3d vec = parent.door().getPortalPosition();
-        if (vec == null) vec = Vec3d.ZERO;
+        Vec3 vec = parent.door().getPortalPosition();
+        if (vec == null) vec = Vec3.ZERO;
 
         stack.translate(vec.x, -vec.y - parent.portalHeight() / 2f, vec.z);
         stack.scale((float) parent.portalWidth() * scale.x(),
                 (float) parent.portalHeight() * scale.y(), scale.z());
 
-        if (client.getEntityRenderDispatcher().shouldRenderHitboxes()) {
-            stack.push();
+        if (client.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+            stack.pushPose();
             stack.translate(0, 0, 0.8);
-            client.getItemRenderer().renderItem(Items.BLUE_STAINED_GLASS_PANE.getDefaultStack(), ModelTransformationMode.FIXED, LightmapTextureManager.MAX_LIGHT_COORDINATE, 0, stack, consumers, client.world, 0);
-            stack.pop();
+            client.getItemRenderer().renderStatic(Items.BLUE_STAINED_GLASS_PANE.getDefaultInstance(), ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, 0, stack, consumers, client.level, 0);
+            stack.popPose();
         }
 
         if (tardis.travel().getState() == TravelHandlerBase.State.LANDED) {
-            RenderLayer whichOne = AITModClient.CONFIG.greenScreenBOTI ?
-                    RenderLayer.getDebugFilledBox() : RenderLayer.getEndGateway();
+            RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
+                    RenderType.debugFilledBox() : RenderType.endGateway();
             float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-            mask.render(stack, botiProvider.getBuffer(whichOne), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
+            mask.render(stack, botiProvider.getBuffer(whichOne), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
         } else {
-            mask.render(stack, botiProvider.getBuffer(RenderLayer.getEntityTranslucentCull(frameTex)), LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
+            mask.render(stack, botiProvider.getBuffer(RenderType.entityTranslucentCull(frameTex)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
         }
-        botiProvider.draw();
-        stack.pop();
-        copyDepth(BOTI_HANDLER.afbo, client.getFramebuffer());
+        botiProvider.endBatch();
+        stack.popPose();
+        copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
-        BOTI_HANDLER.afbo.beginWrite(false);
+        BOTI_HANDLER.afbo.bindWrite(false);
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
-        stack.push();
-        float delta = client.getTickDelta() + client.player.age;
+        stack.pushPose();
+        float delta = client.getFrameTime() + client.player.tickCount;
         if (!tardis.travel().autopilot() && tardis.travel().getState() != TravelHandlerBase.State.LANDED)
-            stack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees((delta) * (tardis.travel().speed() * 0.7f)));
+            stack.mulPose(Axis.YN.rotationDegrees((delta) * (tardis.travel().speed() * 0.7f)));
         if (!tardis.crash().isNormal())
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees((delta)));
-        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((delta) * (tardis.travel().speed() + 1)));
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+            stack.mulPose(Axis.XP.rotationDegrees((delta)));
+        stack.mulPose(Axis.ZP.rotationDegrees((delta) * (tardis.travel().speed() + 1)));
+        stack.mulPose(Axis.YP.rotationDegrees(180));
         stack.translate(0, 0, 500);
         stack.scale(1.5f, 1.5f, 1.5f);
         VortexRender util = stats.getVortexEffects().toRender();
@@ -116,22 +114,22 @@ public class TardisDoorBOTI extends BOTI {
             util.renderVortex(stack);
             stack.pop();*/
         }
-        botiProvider.draw();
-        stack.pop();
+        botiProvider.endBatch();
+        stack.popPose();
 
         if (!tardis.getExterior().getCategory().equals(CategoryRegistry.GEOMETRIC)) {
-            stack.push();
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+            stack.pushPose();
+            stack.mulPose(Axis.YP.rotationDegrees(180));
             stack.scale(scale.x, scale.y, scale.z);
 
             // TODO: use DoorRenderer/ClientLightUtil instead.
-            frame.renderWithAnimations(tardis, door, frame.getPart(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.DEFAULT_UV, 1, 1F, 1.0F, 1.0F, tickDelta);
+            frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, tickDelta);
             //((DoorModel) frame).render(stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.DEFAULT_UV, 1, 1F, 1.0F, 1.0F);
-            botiProvider.draw();
-            stack.pop();
+            botiProvider.endBatch();
+            stack.popPose();
 
-            stack.push();
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+            stack.pushPose();
+            stack.mulPose(Axis.YP.rotationDegrees(180));
             stack.scale(scale.x, scale.y, scale.z);
             if (variant.emission() != null) {
                 float u = 1;
@@ -153,20 +151,20 @@ public class TardisDoorBOTI extends BOTI {
                 float green = power ? alarm ? 0.3f : t : 0;
                 float blue = power ? alarm ? 0.3f : u:  0;
 
-                frame.renderWithAnimations(tardis, door, frame.getPart(), stack, botiProvider.getBuffer((DependencyChecker.hasIris() ? AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true) : AITRenderLayers.getText(variant.emission()))), 0xf000f0, OverlayTexture.DEFAULT_UV, red, green, blue, 1.0F, tickDelta);
-                botiProvider.draw();
+                frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer((DependencyChecker.hasIris() ? AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true) : AITRenderLayers.text(variant.emission()))), 0xf000f0, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F, tickDelta);
+                botiProvider.endBatch();
             }
-            stack.pop();
+            stack.popPose();
         }
 
-        client.getFramebuffer().beginWrite(true);
+        client.getMainRenderTarget().bindWrite(true);
 
-        BOTI.copyColor(BOTI_HANDLER.afbo, client.getFramebuffer());
+        BOTI.copyColor(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
 
         RenderSystem.depthMask(true);
 
-        stack.pop();
+        stack.popPose();
     }
 }

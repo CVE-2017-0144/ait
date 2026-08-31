@@ -2,23 +2,22 @@ package dev.amble.ait.client.sounds;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.sound.MovingSoundInstance;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 
 // Referencing how music which loops is done but in our own way
 @Environment(EnvType.CLIENT)
-public abstract class LoopingSound extends MovingSoundInstance {
-    public LoopingSound(SoundEvent soundEvent, SoundCategory soundCategory) {
-        super(soundEvent, soundCategory, Random.create());
-        this.repeat = true;
+public abstract class LoopingSound extends AbstractTickableSoundInstance {
+    public LoopingSound(SoundEvent soundEvent, SoundSource soundCategory) {
+        super(soundEvent, soundCategory, RandomSource.create());
+        this.looping = true;
     }
 
     @Override
-    public boolean isRepeatable() {
+    public boolean isLooping() {
         return true;
     }
 

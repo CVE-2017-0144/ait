@@ -1,29 +1,27 @@
 package dev.amble.ait.data;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.phys.AABB;
 import com.google.gson.*;
-
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 
 public class Corners {
     @Exclude
-    private final Box box;
+    private final AABB box;
 
     private final BlockPos first;
     private final BlockPos second;
 
     public Corners(BlockPos first, BlockPos second) {
-        this.box = new Box(first, second);
+        this.box = new AABB(first, second);
 
         this.first = first;
         this.second = second;
     }
 
-    public Box getBox() {
+    public AABB getBox() {
         return box;
     }
 
@@ -44,17 +42,17 @@ public class Corners {
         return new Serializer();
     }
 
-    public NbtCompound toNbt() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
 
-        nbt.put("first", NbtHelper.fromBlockPos(first));
-        nbt.put("second", NbtHelper.fromBlockPos(second));
+        nbt.put("first", NbtUtils.writeBlockPos(first));
+        nbt.put("second", NbtUtils.writeBlockPos(second));
 
         return nbt;
     }
 
-    public static Corners fromNbt(NbtCompound nbt) {
-        return new Corners(NbtHelper.toBlockPos(nbt.getCompound("first")), NbtHelper.toBlockPos(nbt.getCompound("second")));
+    public static Corners fromNbt(CompoundTag nbt) {
+        return new Corners(NbtUtils.readBlockPos(nbt.getCompound("first")), NbtUtils.readBlockPos(nbt.getCompound("second")));
     }
 
     private static class Serializer implements JsonDeserializer<Corners> {

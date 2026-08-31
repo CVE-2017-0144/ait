@@ -1,20 +1,17 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -29,7 +26,7 @@ public class ListCommand {
             "name", tardis -> tardis.stats().getName()
     );
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(AITMod.MOD_ID).then(literal("list")
                 .requires(source -> PermissionAPICompat.hasPermission(source, "ait.command.list", 2)).executes(ListCommand::list)
                 .then(argument("search-args", StringArgumentType.greedyString())
@@ -37,19 +34,19 @@ public class ListCommand {
         ));
     }
 
-    public static int list(CommandContext<ServerCommandSource> context) {
-        ServerCommandSource source = context.getSource();
-        source.sendMessage(Text.translatable("command.ait.list.header"));
+    public static int list(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        source.sendSystemMessage(Component.translatable("command.ait.list.header"));
 
         ServerTardisManager.getInstance().forEach(tardis -> sendTardis(source, tardis));
         return Command.SINGLE_SUCCESS;
     }
 
-    public static int search(CommandContext<ServerCommandSource> context) {
+    public static int search(CommandContext<CommandSourceStack> context) {
         String args = StringArgumentType.getString(context, "search-args");
 
-        ServerCommandSource source = context.getSource();
-        source.sendMessage(Text.translatable("command.ait.list.tardises"));
+        CommandSourceStack source = context.getSource();
+        source.sendSystemMessage(Component.translatable("command.ait.list.tardises"));
 
         String[] parts = args.split(":");
 
@@ -70,14 +67,14 @@ public class ListCommand {
                     sendTardis(source, tardis);
             });
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            context.getSource().sendError(Text.translatable("command.ait.list.pattern.error", args));
+            context.getSource().sendFailure(Component.translatable("command.ait.list.pattern.error", args));
             return 0;
         }
 
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void sendTardis(ServerCommandSource source, ServerTardis tardis) {
-        source.sendMessage(Text.literal("  - ").append(TextUtil.forTardis(tardis)));
+    private static void sendTardis(CommandSourceStack source, ServerTardis tardis) {
+        source.sendSystemMessage(Component.literal("  - ").append(TextUtil.forTardis(tardis)));
     }
 }

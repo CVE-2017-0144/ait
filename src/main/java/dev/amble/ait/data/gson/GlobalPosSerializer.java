@@ -1,13 +1,11 @@
 package dev.amble.ait.data.gson;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import com.google.gson.*;
-
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.World;
 
 public class GlobalPosSerializer implements JsonDeserializer<GlobalPos>, JsonSerializer<GlobalPos> {
 
@@ -16,23 +14,23 @@ public class GlobalPosSerializer implements JsonDeserializer<GlobalPos>, JsonSer
             throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
 
-        RegistryKey<World> dimension = context.deserialize(obj.get("dimension"), RegistryKey.class);
+        ResourceKey<Level> dimension = context.deserialize(obj.get("dimension"), ResourceKey.class);
 
         int x = obj.get("x").getAsInt();
         int y = obj.get("y").getAsInt();
         int z = obj.get("z").getAsInt();
 
-        return GlobalPos.create(dimension, new BlockPos(x, y, z));
+        return GlobalPos.of(dimension, new BlockPos(x, y, z));
     }
 
     @Override
     public JsonElement serialize(GlobalPos src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
 
-        result.add("dimension", context.serialize(src.getDimension().getValue()));
-        result.addProperty("x", src.getPos().getX());
-        result.addProperty("y", src.getPos().getY());
-        result.addProperty("z", src.getPos().getZ());
+        result.add("dimension", context.serialize(src.dimension().location()));
+        result.addProperty("x", src.pos().getX());
+        result.addProperty("y", src.pos().getY());
+        result.addProperty("z", src.pos().getZ());
 
         return result;
     }

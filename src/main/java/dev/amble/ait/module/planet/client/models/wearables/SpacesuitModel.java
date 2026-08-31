@@ -1,10 +1,18 @@
 package dev.amble.ait.module.planet.client.models.wearables;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.LivingEntity;
 
 public class SpacesuitModel extends EntityModel<LivingEntity> {
     public final ModelPart bone;
@@ -51,152 +59,152 @@ public class SpacesuitModel extends EntityModel<LivingEntity> {
         this.wirex6 = this.bodyreal.getChild("wirex6");
         this.Head = this.bone.getChild("Head");
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData bone = modelPartData.addChild("bone", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition bone = modelPartData.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData RightLeg = bone.addChild("RightLeg", ModelPartBuilder.create(), ModelTransform.pivot(-1.9F, -12.0F, 0.0F));
+        PartDefinition RightLeg = bone.addOrReplaceChild("RightLeg", CubeListBuilder.create(), PartPose.offset(-1.9F, -12.0F, 0.0F));
 
-        ModelPartData right_leg_pant = RightLeg.addChild("right_leg_pant", ModelPartBuilder.create().uv(50, 17).cuboid(-3.9F, -4.75F, -2.0F, 4.0F, 8.0F, 4.0F, new Dilation(0.25F))
-                .uv(58, 0).cuboid(-3.9F, -5.0F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(1.9F, 4.75F, 0.0F));
+        PartDefinition right_leg_pant = RightLeg.addOrReplaceChild("right_leg_pant", CubeListBuilder.create().texOffs(50, 17).addBox(-3.9F, -4.75F, -2.0F, 4.0F, 8.0F, 4.0F, new CubeDeformation(0.25F))
+                .texOffs(58, 0).addBox(-3.9F, -5.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(1.9F, 4.75F, 0.0F));
 
-        ModelPartData RightFoot = RightLeg.addChild("RightFoot", ModelPartBuilder.create().uv(75, 0).cuboid(-3.9F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.25F))
-                .uv(54, 34).cuboid(-3.9F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.5F)), ModelTransform.pivot(1.9F, 11.75F, 0.0F));
+        PartDefinition RightFoot = RightLeg.addOrReplaceChild("RightFoot", CubeListBuilder.create().texOffs(75, 0).addBox(-3.9F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.25F))
+                .texOffs(54, 34).addBox(-3.9F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.5F)), PartPose.offset(1.9F, 11.75F, 0.0F));
 
-        ModelPartData LeftLeg = bone.addChild("LeftLeg", ModelPartBuilder.create(), ModelTransform.pivot(1.9F, -12.125F, 0.0F));
+        PartDefinition LeftLeg = bone.addOrReplaceChild("LeftLeg", CubeListBuilder.create(), PartPose.offset(1.9F, -12.125F, 0.0F));
 
-        ModelPartData left_leg_pant = LeftLeg.addChild("left_leg_pant", ModelPartBuilder.create().uv(58, 0).mirrored().cuboid(-0.1F, -12.25F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.0F)).mirrored(false)
-                .uv(50, 17).mirrored().cuboid(-0.1F, -12.0F, -2.0F, 4.0F, 8.0F, 4.0F, new Dilation(0.25F)).mirrored(false), ModelTransform.pivot(-1.9F, 12.125F, 0.0F));
+        PartDefinition left_leg_pant = LeftLeg.addOrReplaceChild("left_leg_pant", CubeListBuilder.create().texOffs(58, 0).mirror().addBox(-0.1F, -12.25F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
+                .texOffs(50, 17).mirror().addBox(-0.1F, -12.0F, -2.0F, 4.0F, 8.0F, 4.0F, new CubeDeformation(0.25F)).mirror(false), PartPose.offset(-1.9F, 12.125F, 0.0F));
 
-        ModelPartData LeftFoot = LeftLeg.addChild("LeftFoot", ModelPartBuilder.create().uv(75, 0).mirrored().cuboid(-0.1F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.25F)).mirrored(false)
-                .uv(54, 34).mirrored().cuboid(-0.1F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.5F)).mirrored(false), ModelTransform.pivot(-1.9F, 11.875F, 0.0F));
+        PartDefinition LeftFoot = LeftLeg.addOrReplaceChild("LeftFoot", CubeListBuilder.create().texOffs(75, 0).mirror().addBox(-0.1F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.25F)).mirror(false)
+                .texOffs(54, 34).mirror().addBox(-0.1F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.5F)).mirror(false), PartPose.offset(-1.9F, 11.875F, 0.0F));
 
-        ModelPartData RightArm = bone.addChild("RightArm", ModelPartBuilder.create().uv(47, 47).mirrored().cuboid(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.0F)).mirrored(false)
-                .uv(30, 47).mirrored().cuboid(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.25F)).mirrored(false), ModelTransform.pivot(-5.0F, -22.0F, 0.0F));
+        PartDefinition RightArm = bone.addOrReplaceChild("RightArm", CubeListBuilder.create().texOffs(47, 47).mirror().addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
+                .texOffs(30, 47).mirror().addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.25F)).mirror(false), PartPose.offset(-5.0F, -22.0F, 0.0F));
 
-        ModelPartData LeftArm = bone.addChild("LeftArm", ModelPartBuilder.create().uv(47, 47).cuboid(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.0F))
-                .uv(30, 47).cuboid(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new Dilation(0.25F))
-                .uv(122, 1).cuboid(3.3F, -0.65F, -1.5F, 0.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                .uv(122, 11).cuboid(3.3F, -1.15F, -1.5F, 0.0F, 3.0F, 3.0F, new Dilation(0.0F))
-                .uv(122, 62).cuboid(3.1F, -1.15F, -1.53F, 0.0F, 3.0F, 3.0F, new Dilation(-0.3F))
-                .uv(122, 66).cuboid(3.12F, -1.15F, -1.53F, 0.0F, 3.0F, 3.0F, new Dilation(-0.2F)), ModelTransform.pivot(5.0F, -22.0F, 0.0F));
+        PartDefinition LeftArm = bone.addOrReplaceChild("LeftArm", CubeListBuilder.create().texOffs(47, 47).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(30, 47).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.25F))
+                .texOffs(122, 1).addBox(3.3F, -0.65F, -1.5F, 0.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(122, 11).addBox(3.3F, -1.15F, -1.5F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(122, 62).addBox(3.1F, -1.15F, -1.53F, 0.0F, 3.0F, 3.0F, new CubeDeformation(-0.3F))
+                .texOffs(122, 66).addBox(3.12F, -1.15F, -1.53F, 0.0F, 3.0F, 3.0F, new CubeDeformation(-0.2F)), PartPose.offset(5.0F, -22.0F, 0.0F));
 
-        ModelPartData Body = bone.addChild("Body", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, -24.0F, 0.0F));
+        PartDefinition Body = bone.addOrReplaceChild("Body", CubeListBuilder.create(), PartPose.offset(0.0F, -24.0F, 0.0F));
 
-        ModelPartData bodyreal = Body.addChild("bodyreal", ModelPartBuilder.create().uv(33, 0).cuboid(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new Dilation(0.0F))
-                .uv(79, 14).cuboid(-4.0F, -3.0F, 2.0F, 8.0F, 15.0F, 4.0F, new Dilation(0.5F))
-                .uv(79, 35).cuboid(-4.0F, -3.0F, 2.0F, 8.0F, 15.0F, 4.0F, new Dilation(0.4F))
-                .uv(0, 5).mirrored().cuboid(-3.0F, 8.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F)).mirrored(false)
-                .uv(0, 5).cuboid(1.0F, 8.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F))
-                .uv(2, 2).cuboid(1.0F, 6.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F))
-                .uv(2, 2).cuboid(1.0F, 4.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F))
-                .uv(2, 2).mirrored().cuboid(-3.0F, 4.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F)).mirrored(false)
-                .uv(2, 2).mirrored().cuboid(-3.0F, 6.0F, -3.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.2F)).mirrored(false)
-                .uv(18, 1).cuboid(-2.0F, 0.7F, -2.8F, 4.0F, 3.0F, 1.0F, new Dilation(0.1F))
-                .uv(29, 30).cuboid(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new Dilation(0.275F))
-                .uv(1, 35).cuboid(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new Dilation(0.4F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        PartDefinition bodyreal = Body.addOrReplaceChild("bodyreal", CubeListBuilder.create().texOffs(33, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(79, 14).addBox(-4.0F, -3.0F, 2.0F, 8.0F, 15.0F, 4.0F, new CubeDeformation(0.5F))
+                .texOffs(79, 35).addBox(-4.0F, -3.0F, 2.0F, 8.0F, 15.0F, 4.0F, new CubeDeformation(0.4F))
+                .texOffs(0, 5).mirror().addBox(-3.0F, 8.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F)).mirror(false)
+                .texOffs(0, 5).addBox(1.0F, 8.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F))
+                .texOffs(2, 2).addBox(1.0F, 6.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F))
+                .texOffs(2, 2).addBox(1.0F, 4.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F))
+                .texOffs(2, 2).mirror().addBox(-3.0F, 4.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F)).mirror(false)
+                .texOffs(2, 2).mirror().addBox(-3.0F, 6.0F, -3.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(-0.2F)).mirror(false)
+                .texOffs(18, 1).addBox(-2.0F, 0.7F, -2.8F, 4.0F, 3.0F, 1.0F, new CubeDeformation(0.1F))
+                .texOffs(29, 30).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.275F))
+                .texOffs(1, 35).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.4F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        ModelPartData BodyLayer_r1 = bodyreal.addChild("BodyLayer_r1", ModelPartBuilder.create().uv(40, 65).cuboid(-6.0F, 0.0F, -2.0F, 7.0F, 4.0F, 2.0F, new Dilation(0.0F)), ModelTransform.of(2.5F, 0.25F, 0.0F, 0.3491F, 0.0F, 0.0F));
+        PartDefinition BodyLayer_r1 = bodyreal.addOrReplaceChild("BodyLayer_r1", CubeListBuilder.create().texOffs(40, 65).addBox(-6.0F, 0.0F, -2.0F, 7.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.5F, 0.25F, 0.0F, 0.3491F, 0.0F, 0.0F));
 
-        ModelPartData flagsize2 = bodyreal.addChild("flagsize2", ModelPartBuilder.create().uv(116, 24).cuboid(-3.0F, -27.4F, 6.5F, 6.0F, 3.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+        PartDefinition flagsize2 = bodyreal.addOrReplaceChild("flagsize2", CubeListBuilder.create().texOffs(116, 24).addBox(-3.0F, -27.4F, 6.5F, 6.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData flagsize1 = bodyreal.addChild("flagsize1", ModelPartBuilder.create().uv(118, 0).cuboid(-2.5F, -27.4F, 6.5F, 5.0F, 3.0F, 0.0F, new Dilation(0.0F))
-                .uv(116, 20).mirrored().cuboid(-0.7F, -27.8F, 6.12F, 4.0F, 4.0F, 0.0F, new Dilation(-0.4F)).mirrored(false)
-                .uv(116, 24).cuboid(-3.3F, -27.8F, 6.12F, 4.0F, 4.0F, 0.0F, new Dilation(-0.4F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+        PartDefinition flagsize1 = bodyreal.addOrReplaceChild("flagsize1", CubeListBuilder.create().texOffs(118, 0).addBox(-2.5F, -27.4F, 6.5F, 5.0F, 3.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(116, 20).mirror().addBox(-0.7F, -27.8F, 6.12F, 4.0F, 4.0F, 0.0F, new CubeDeformation(-0.4F)).mirror(false)
+                .texOffs(116, 24).addBox(-3.3F, -27.8F, 6.12F, 4.0F, 4.0F, 0.0F, new CubeDeformation(-0.4F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData agencylogo1 = flagsize1.addChild("agencylogo1", ModelPartBuilder.create().uv(124, 11).mirrored().cuboid(-3.9F, -22.9F, -2.3F, 2.0F, 2.0F, 0.0F, new Dilation(0.0F)).mirrored(false)
-                .uv(124, 37).cuboid(-3.9F, -22.4F, -2.31F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F))
-                .uv(124, 11).cuboid(-1.0F, -22.9F, 6.5F, 2.0F, 2.0F, 0.0F, new Dilation(0.0F))
-                .uv(124, 37).cuboid(-1.0F, -22.4F, 6.51F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        PartDefinition agencylogo1 = flagsize1.addOrReplaceChild("agencylogo1", CubeListBuilder.create().texOffs(124, 11).mirror().addBox(-3.9F, -22.9F, -2.3F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false)
+                .texOffs(124, 37).addBox(-3.9F, -22.4F, -2.31F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(124, 11).addBox(-1.0F, -22.9F, 6.5F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(124, 37).addBox(-1.0F, -22.4F, 6.51F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        ModelPartData Body_r1 = agencylogo1.addChild("Body_r1", ModelPartBuilder.create().uv(92, 73).cuboid(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -21.9F, 6.51F, 0.0F, 0.0F, 1.5708F));
+        PartDefinition Body_r1 = agencylogo1.addOrReplaceChild("Body_r1", CubeListBuilder.create().texOffs(92, 73).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -21.9F, 6.51F, 0.0F, 0.0F, 1.5708F));
 
-        ModelPartData Body_r2 = agencylogo1.addChild("Body_r2", ModelPartBuilder.create().uv(124, 7).cuboid(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -21.9F, 6.51F, 0.0F, 0.0F, 0.7854F));
+        PartDefinition Body_r2 = agencylogo1.addOrReplaceChild("Body_r2", CubeListBuilder.create().texOffs(124, 7).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -21.9F, 6.51F, 0.0F, 0.0F, 0.7854F));
 
-        ModelPartData Body_r3 = agencylogo1.addChild("Body_r3", ModelPartBuilder.create().uv(124, 7).cuboid(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-2.9F, -21.9F, -2.31F, 0.0F, 0.0F, 2.3126F));
+        PartDefinition Body_r3 = agencylogo1.addOrReplaceChild("Body_r3", CubeListBuilder.create().texOffs(124, 7).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.9F, -21.9F, -2.31F, 0.0F, 0.0F, 2.3126F));
 
-        ModelPartData wirex = bodyreal.addChild("wirex", ModelPartBuilder.create(), ModelTransform.pivot(4.5036F, 7.2208F, 0.6127F));
+        PartDefinition wirex = bodyreal.addOrReplaceChild("wirex", CubeListBuilder.create(), PartPose.offset(4.5036F, 7.2208F, 0.6127F));
 
-        ModelPartData Body_r4 = wirex.addChild("Body_r4", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
+        PartDefinition Body_r4 = wirex.addOrReplaceChild("Body_r4", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
 
-        ModelPartData Body_r5 = wirex.addChild("Body_r5", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
+        PartDefinition Body_r5 = wirex.addOrReplaceChild("Body_r5", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
 
-        ModelPartData Body_r6 = wirex.addChild("Body_r6", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
+        PartDefinition Body_r6 = wirex.addOrReplaceChild("Body_r6", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
 
-        ModelPartData Body_r7 = wirex.addChild("Body_r7", ModelPartBuilder.create().uv(4, 15).cuboid(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
+        PartDefinition Body_r7 = wirex.addOrReplaceChild("Body_r7", CubeListBuilder.create().texOffs(4, 15).addBox(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
 
-        ModelPartData Body_r8 = wirex.addChild("Body_r8", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
+        PartDefinition Body_r8 = wirex.addOrReplaceChild("Body_r8", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
 
-        ModelPartData wirex2 = bodyreal.addChild("wirex2", ModelPartBuilder.create(), ModelTransform.pivot(4.5036F, 9.2208F, 0.6127F));
+        PartDefinition wirex2 = bodyreal.addOrReplaceChild("wirex2", CubeListBuilder.create(), PartPose.offset(4.5036F, 9.2208F, 0.6127F));
 
-        ModelPartData Body_r9 = wirex2.addChild("Body_r9", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
+        PartDefinition Body_r9 = wirex2.addOrReplaceChild("Body_r9", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
 
-        ModelPartData Body_r10 = wirex2.addChild("Body_r10", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
+        PartDefinition Body_r10 = wirex2.addOrReplaceChild("Body_r10", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
 
-        ModelPartData Body_r11 = wirex2.addChild("Body_r11", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
+        PartDefinition Body_r11 = wirex2.addOrReplaceChild("Body_r11", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
 
-        ModelPartData Body_r12 = wirex2.addChild("Body_r12", ModelPartBuilder.create().uv(4, 15).cuboid(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
+        PartDefinition Body_r12 = wirex2.addOrReplaceChild("Body_r12", CubeListBuilder.create().texOffs(4, 15).addBox(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
 
-        ModelPartData Body_r13 = wirex2.addChild("Body_r13", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
+        PartDefinition Body_r13 = wirex2.addOrReplaceChild("Body_r13", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
 
-        ModelPartData wirex3 = bodyreal.addChild("wirex3", ModelPartBuilder.create(), ModelTransform.pivot(4.5036F, 11.2208F, 0.6127F));
+        PartDefinition wirex3 = bodyreal.addOrReplaceChild("wirex3", CubeListBuilder.create(), PartPose.offset(4.5036F, 11.2208F, 0.6127F));
 
-        ModelPartData Body_r14 = wirex3.addChild("Body_r14", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
+        PartDefinition Body_r14 = wirex3.addOrReplaceChild("Body_r14", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, -0.9599F, -2.3562F));
 
-        ModelPartData Body_r15 = wirex3.addChild("Body_r15", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
+        PartDefinition Body_r15 = wirex3.addOrReplaceChild("Body_r15", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.2626F, -0.2626F, 0.148F, -3.1416F, -1.2217F, -2.3562F));
 
-        ModelPartData Body_r16 = wirex3.addChild("Body_r16", ModelPartBuilder.create().uv(4, 15).cuboid(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
+        PartDefinition Body_r16 = wirex3.addOrReplaceChild("Body_r16", CubeListBuilder.create().texOffs(4, 15).addBox(1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-0.3272F, -0.3272F, -3.3839F, 0.0F, -1.4399F, 0.7854F));
 
-        ModelPartData Body_r17 = wirex3.addChild("Body_r17", ModelPartBuilder.create().uv(4, 15).cuboid(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
+        PartDefinition Body_r17 = wirex3.addOrReplaceChild("Body_r17", CubeListBuilder.create().texOffs(4, 15).addBox(0.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(-2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, 0.7854F));
 
-        ModelPartData Body_r18 = wirex3.addChild("Body_r18", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
+        PartDefinition Body_r18 = wirex3.addOrReplaceChild("Body_r18", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(-0.634F, -0.634F, -2.4918F, 0.0F, -0.5672F, 0.7854F));
 
-        ModelPartData wirex4 = bodyreal.addChild("wirex4", ModelPartBuilder.create(), ModelTransform.pivot(-4.5036F, 9.2208F, 0.6127F));
+        PartDefinition wirex4 = bodyreal.addOrReplaceChild("wirex4", CubeListBuilder.create(), PartPose.offset(-4.5036F, 9.2208F, 0.6127F));
 
-        ModelPartData Body_r19 = wirex4.addChild("Body_r19", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
+        PartDefinition Body_r19 = wirex4.addOrReplaceChild("Body_r19", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
 
-        ModelPartData Body_r20 = wirex4.addChild("Body_r20", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
+        PartDefinition Body_r20 = wirex4.addOrReplaceChild("Body_r20", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
 
-        ModelPartData Body_r21 = wirex4.addChild("Body_r21", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
+        PartDefinition Body_r21 = wirex4.addOrReplaceChild("Body_r21", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
 
-        ModelPartData Body_r22 = wirex4.addChild("Body_r22", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
+        PartDefinition Body_r22 = wirex4.addOrReplaceChild("Body_r22", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
 
-        ModelPartData Body_r23 = wirex4.addChild("Body_r23", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
+        PartDefinition Body_r23 = wirex4.addOrReplaceChild("Body_r23", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
 
-        ModelPartData wirex5 = bodyreal.addChild("wirex5", ModelPartBuilder.create(), ModelTransform.pivot(-4.5036F, 7.2208F, 0.6127F));
+        PartDefinition wirex5 = bodyreal.addOrReplaceChild("wirex5", CubeListBuilder.create(), PartPose.offset(-4.5036F, 7.2208F, 0.6127F));
 
-        ModelPartData Body_r24 = wirex5.addChild("Body_r24", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
+        PartDefinition Body_r24 = wirex5.addOrReplaceChild("Body_r24", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
 
-        ModelPartData Body_r25 = wirex5.addChild("Body_r25", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
+        PartDefinition Body_r25 = wirex5.addOrReplaceChild("Body_r25", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
 
-        ModelPartData Body_r26 = wirex5.addChild("Body_r26", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
+        PartDefinition Body_r26 = wirex5.addOrReplaceChild("Body_r26", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
 
-        ModelPartData Body_r27 = wirex5.addChild("Body_r27", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
+        PartDefinition Body_r27 = wirex5.addOrReplaceChild("Body_r27", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
 
-        ModelPartData Body_r28 = wirex5.addChild("Body_r28", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
+        PartDefinition Body_r28 = wirex5.addOrReplaceChild("Body_r28", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
 
-        ModelPartData wirex6 = bodyreal.addChild("wirex6", ModelPartBuilder.create(), ModelTransform.pivot(-4.5036F, 11.2208F, 0.6127F));
+        PartDefinition wirex6 = bodyreal.addOrReplaceChild("wirex6", CubeListBuilder.create(), PartPose.offset(-4.5036F, 11.2208F, 0.6127F));
 
-        ModelPartData Body_r29 = wirex6.addChild("Body_r29", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
+        PartDefinition Body_r29 = wirex6.addOrReplaceChild("Body_r29", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.634F, -0.634F, -2.4918F, 0.0F, 0.5672F, -0.7854F));
 
-        ModelPartData Body_r30 = wirex6.addChild("Body_r30", ModelPartBuilder.create().uv(4, 15).cuboid(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
+        PartDefinition Body_r30 = wirex6.addOrReplaceChild("Body_r30", CubeListBuilder.create().texOffs(4, 15).addBox(-1.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.2626F, -0.2626F, 0.148F, -3.1416F, 1.2217F, 2.3562F));
 
-        ModelPartData Body_r31 = wirex6.addChild("Body_r31", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
+        PartDefinition Body_r31 = wirex6.addOrReplaceChild("Body_r31", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, 0.9599F, 2.3562F));
 
-        ModelPartData Body_r32 = wirex6.addChild("Body_r32", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
+        PartDefinition Body_r32 = wirex6.addOrReplaceChild("Body_r32", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-3.0F, -0.5F, -0.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(0.3272F, -0.3272F, -3.3839F, 0.0F, 1.4399F, -0.7854F));
 
-        ModelPartData Body_r33 = wirex6.addChild("Body_r33", ModelPartBuilder.create().uv(4, 15).mirrored().cuboid(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new Dilation(-0.1F)).mirrored(false), ModelTransform.of(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
+        PartDefinition Body_r33 = wirex6.addOrReplaceChild("Body_r33", CubeListBuilder.create().texOffs(4, 15).mirror().addBox(-2.0F, -0.7F, -0.3F, 2.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)).mirror(false), PartPose.offsetAndRotation(2.5036F, -2.2208F, -3.1127F, 0.0F, 0.0F, -0.7854F));
 
-        ModelPartData Head = bone.addChild("Head", ModelPartBuilder.create().uv(0, 63).cuboid(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new Dilation(0.0F))
-                .uv(0, 17).cuboid(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new Dilation(0.2F)), ModelTransform.pivot(0.0F, -24.0F, 0.0F));
-        return TexturedModelData.of(modelData, 128, 128);
+        PartDefinition Head = bone.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 63).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 17).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.2F)), PartPose.offset(0.0F, -24.0F, 0.0F));
+        return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void setAngles(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         bone.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 }

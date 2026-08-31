@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.With;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.AnimationState;
 import org.jetbrains.annotations.Nullable;
 
 /**

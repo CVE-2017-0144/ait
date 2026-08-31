@@ -1,78 +1,76 @@
 package dev.amble.ait.core.blocks.control;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.blockentities.control.RedstoneControlBlockEntity;
 import dev.amble.ait.core.tardis.Tardis;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class RedstoneControlBlock extends ControlBlock {
-    private static final BooleanProperty POWERED = Properties.POWERED;
-    private static final IntProperty MODE = IntProperty.of("mode", 0, Mode.values().length - 1);
+    private static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    private static final IntegerProperty MODE = IntegerProperty.create("mode", 0, Mode.values().length - 1);
 
-    public RedstoneControlBlock(Settings settings) {
+    public RedstoneControlBlock(Properties settings) {
         super(settings);
 
-        this.setDefaultState(
-                this.getStateManager().getDefaultState().with(POWERED, false).with(MODE, 0)
+        this.registerDefaultState(
+                this.getStateDefinition().any().setValue(POWERED, false).setValue(MODE, 0)
         );
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new RedstoneControlBlockEntity(pos, state);
     }
 
     @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
         if (!(world.getBlockEntity(pos) instanceof RedstoneControlBlockEntity entity))
             return;
 
-        if (world.isClient())
+        if (world.isClientSide())
             return;
 
         if (!entity.isLinked())
             return;
 
         Tardis tardis = entity.tardis().get();
-        PlayerEntity user = tardis.loyalty().getLoyalPlayerInside();
+        Player user = tardis.loyalty().getLoyalPlayerInside();
 
         if (user == null)
             return;
 
-        boolean wasPowered = state.get(POWERED);
-        boolean powered = world.isReceivingRedstonePower(pos) || world.isReceivingRedstonePower(pos.up());
+        boolean wasPowered = state.getValue(POWERED);
+        boolean powered = world.hasNeighborSignal(pos) || world.hasNeighborSignal(pos.above());
 
         if (wasPowered == powered)
             return;
 
-        state = state.with(POWERED, powered);
-        world.setBlockState(pos, state, Block.NOTIFY_ALL);
+        state = state.setValue(POWERED, powered);
+        world.setBlock(pos, state, Block.UPDATE_ALL);
 
         if (!powered)
             return;
 
-        entity.run((ServerPlayerEntity) user, Mode.get(state));
+        entity.run((ServerPlayer) user, Mode.get(state));
     }
 
     @Override
@@ -82,36 +80,36 @@ public class RedstoneControlBlock extends ControlBlock {
 
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
 
         builder.add(POWERED, MODE);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient())
-            return ActionResult.SUCCESS;
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (world.isClientSide())
+            return InteractionResult.SUCCESS;
 
         if (isHoldingScanningSonic(player)) {
-            sendSonicMessage((ServerPlayerEntity) player, (RedstoneControlBlockEntity) world.getBlockEntity(pos));
-            return ActionResult.SUCCESS;
+            sendSonicMessage((ServerPlayer) player, (RedstoneControlBlockEntity) world.getBlockEntity(pos));
+            return InteractionResult.SUCCESS;
         }
 
-        world.setBlockState(pos, Mode.set(state, Mode.get(state).next())); // set to next mode
-        world.playSound(null, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.1f, 0.5f);
+        world.setBlockAndUpdate(pos, Mode.set(state, Mode.get(state).next())); // set to next mode
+        world.playSound(null, pos, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS, 0.1f, 0.5f);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    public void attack(BlockState state, Level world, BlockPos pos, Player player) {
         // dont run control
     }
 
     @Override
-    public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
-        return super.getPlacementState(ctx).with(FACING, Direction.NORTH); // i cba
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return super.getStateForPlacement(ctx).setValue(FACING, Direction.NORTH); // i cba
     }
 
     public enum Mode {
@@ -123,10 +121,10 @@ public class RedstoneControlBlock extends ControlBlock {
         }
 
         static Mode get(BlockState state) {
-            return Mode.values()[state.get(MODE)];
+            return Mode.values()[state.getValue(MODE)];
         }
         static BlockState set(BlockState state, Mode mode) {
-            return state.with(MODE, mode.ordinal());
+            return state.setValue(MODE, mode.ordinal());
         }
     }
 }

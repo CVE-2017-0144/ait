@@ -3,18 +3,15 @@ package dev.amble.ait.core.tardis.control.sound;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.control.Control;
@@ -33,16 +30,16 @@ import dev.amble.lib.api.Identifiable;
  * @see ConsoleTypeSchema
  * @author duzo
  */
-public record ControlSound(Identifier controlId, Identifier consoleId, Identifier successId, Identifier altId) implements Identifiable {
+public record ControlSound(ResourceLocation controlId, ResourceLocation consoleId, ResourceLocation successId, ResourceLocation altId) implements Identifiable {
     public static final Codec<ControlSound> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("control").forGetter(ControlSound::controlId),
-            Identifier.CODEC.fieldOf("console").forGetter(ControlSound::consoleId),
-            Identifier.CODEC.fieldOf("success_sound").forGetter(ControlSound::successId),
-            Identifier.CODEC.optionalFieldOf("alt_sound", SoundEvents.INTENTIONALLY_EMPTY.getId()).forGetter(ControlSound::altId)
+            ResourceLocation.CODEC.fieldOf("control").forGetter(ControlSound::controlId),
+            ResourceLocation.CODEC.fieldOf("console").forGetter(ControlSound::consoleId),
+            ResourceLocation.CODEC.fieldOf("success_sound").forGetter(ControlSound::successId),
+            ResourceLocation.CODEC.optionalFieldOf("alt_sound", SoundEvents.EMPTY.getLocation()).forGetter(ControlSound::altId)
     ).apply(instance, ControlSound::new));
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return mergeIdentifiers(controlId, consoleId);
     }
 
@@ -57,7 +54,7 @@ public record ControlSound(Identifier controlId, Identifier consoleId, Identifie
     }
 
     public SoundEvent successSound() {
-        SoundEvent sfx = Registries.SOUND_EVENT.get(this.successId());
+        SoundEvent sfx = BuiltInRegistries.SOUND_EVENT.get(this.successId());
 
         if (sfx == null) {
             AITMod.LOGGER.error("Unknown success sound event: {} in control sfx {}", this.successId(), this.id());
@@ -67,9 +64,9 @@ public record ControlSound(Identifier controlId, Identifier consoleId, Identifie
         return sfx;
     }
     public SoundEvent altSound() {
-        SoundEvent sfx = Registries.SOUND_EVENT.get(this.altId());
+        SoundEvent sfx = BuiltInRegistries.SOUND_EVENT.get(this.altId());
 
-        if (sfx == null || this.altId() == SoundEvents.INTENTIONALLY_EMPTY.getId()) {
+        if (sfx == null || this.altId() == SoundEvents.EMPTY.getLocation()) {
             AITMod.LOGGER.error("Unknown alt sound event: {} in control sfx {}", this.altId(), this.id());
             sfx = successSound();
         }
@@ -77,8 +74,8 @@ public record ControlSound(Identifier controlId, Identifier consoleId, Identifie
         return sfx;
     }
 
-    public static ControlSound forFallback(Identifier controlId, SoundEvent success, SoundEvent alt) {
-        return new ControlSound(controlId, AITMod.id("fallback"), success.getId(), alt.getId());
+    public static ControlSound forFallback(ResourceLocation controlId, SoundEvent success, SoundEvent alt) {
+        return new ControlSound(controlId, AITMod.id("fallback"), success.getLocation(), alt.getLocation());
     }
 
     /**
@@ -91,8 +88,8 @@ public record ControlSound(Identifier controlId, Identifier consoleId, Identifie
      * @param consoleId id of the console
      * @return Merged identifier
      */
-    public static Identifier mergeIdentifiers(Identifier controlId, Identifier consoleId) {
-        return Identifier.of(consoleId.getNamespace(), consoleId.getPath() + "/" + controlId.getNamespace() + "/" + controlId.getPath());
+    public static ResourceLocation mergeIdentifiers(ResourceLocation controlId, ResourceLocation consoleId) {
+        return ResourceLocation.tryBuild(consoleId.getNamespace(), consoleId.getPath() + "/" + controlId.getNamespace() + "/" + controlId.getPath());
     }
 
     public static ControlSound fromInputStream(InputStream stream) {

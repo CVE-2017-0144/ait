@@ -1,77 +1,76 @@
 package dev.amble.lib.data;
 
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.data.Exclude;
 
 public class CachedDirectedGlobalPos extends DirectedGlobalPos {
 
     @Exclude
-    private ServerWorld world;
+    private ServerLevel world;
 
-    private CachedDirectedGlobalPos(RegistryKey<World> key, BlockPos pos, byte rotation) {
+    private CachedDirectedGlobalPos(ResourceKey<Level> key, BlockPos pos, byte rotation) {
         super(key, pos, rotation);
     }
 
-    private CachedDirectedGlobalPos(ServerWorld world, BlockPos pos, byte rotation) {
-        this(world.getRegistryKey(), pos, rotation);
+    private CachedDirectedGlobalPos(ServerLevel world, BlockPos pos, byte rotation) {
+        this(world.dimension(), pos, rotation);
         this.world = world;
     }
 
-    public static CachedDirectedGlobalPos create(ServerWorld world, BlockPos pos, byte rotation) {
+    public static CachedDirectedGlobalPos create(ServerLevel world, BlockPos pos, byte rotation) {
         return new CachedDirectedGlobalPos(world, pos, rotation);
     }
 
-    public static CachedDirectedGlobalPos create(RegistryKey<World> world, BlockPos pos, byte rotation) {
+    public static CachedDirectedGlobalPos create(ResourceKey<Level> world, BlockPos pos, byte rotation) {
         return new CachedDirectedGlobalPos(world, pos, rotation);
     }
 
-    private static CachedDirectedGlobalPos createSame(ServerWorld world, RegistryKey<World> dimension, BlockPos pos, byte rotation) {
+    private static CachedDirectedGlobalPos createSame(ServerLevel world, ResourceKey<Level> dimension, BlockPos pos, byte rotation) {
         if (world == null)
             return new CachedDirectedGlobalPos(dimension, pos, rotation);
 
         return CachedDirectedGlobalPos.create(world, pos, rotation);
     }
 
-    private static CachedDirectedGlobalPos createNew(ServerWorld lastWorld, RegistryKey<World> newWorldKey, BlockPos pos,
+    private static CachedDirectedGlobalPos createNew(ServerLevel lastWorld, ResourceKey<Level> newWorldKey, BlockPos pos,
                                                      byte rotation) {
         if (lastWorld == null)
             return new CachedDirectedGlobalPos(newWorldKey, pos, rotation);
 
-        ServerWorld newWorld = lastWorld;
+        ServerLevel newWorld = lastWorld;
 
-        if (lastWorld.getRegistryKey() != newWorldKey)
-            newWorld = lastWorld.getServer().getWorld(newWorldKey);
+        if (lastWorld.dimension() != newWorldKey)
+            newWorld = lastWorld.getServer().getLevel(newWorldKey);
 
         return CachedDirectedGlobalPos.create(newWorld, pos, rotation);
     }
 
     public void init(MinecraftServer server) {
         if (this.world == null)
-            this.world = server.getWorld(this.getDimension());
+            this.world = server.getLevel(this.getDimension());
     }
 
-    public ServerWorld getWorld() { // TODO - this is often null
+    public ServerLevel getWorld() { // TODO - this is often null
         return world;
     }
 
     @Override
     public CachedDirectedGlobalPos offset(int x, int y, int z) {
-        return pos(this.getPos().add(x, y, z));
+        return pos(this.getPos().offset(x, y, z));
     }
 
     @Override
-    public CachedDirectedGlobalPos world(RegistryKey<World> dimension) {
+    public CachedDirectedGlobalPos world(ResourceKey<Level> dimension) {
         return CachedDirectedGlobalPos.createNew(this.world, dimension, this.getPos(), this.getRotation());
     }
 
@@ -90,21 +89,21 @@ public class CachedDirectedGlobalPos extends DirectedGlobalPos {
         return CachedDirectedGlobalPos.createSame(this.world, this.getDimension(), this.getPos(), rotation);
     }
 
-    public CachedDirectedGlobalPos world(ServerWorld world) {
+    public CachedDirectedGlobalPos world(ServerLevel world) {
         return CachedDirectedGlobalPos.create(world, this.getPos(), this.getRotation());
     }
 
-    public static CachedDirectedGlobalPos fromNbt(NbtCompound compound) {
-        BlockPos pos = NbtHelper.toBlockPos(compound);
-        RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD,
-                new Identifier(compound.getString("dimension")));
+    public static CachedDirectedGlobalPos fromNbt(CompoundTag compound) {
+        BlockPos pos = NbtUtils.readBlockPos(compound);
+        ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
+                new ResourceLocation(compound.getString("dimension")));
 
         byte rotation = compound.getByte("rotation");
         return createNew(null, dimension, pos, rotation);
     }
 
-    public static CachedDirectedGlobalPos read(PacketByteBuf buf) {
-        RegistryKey<World> registryKey = buf.readRegistryKey(RegistryKeys.WORLD);
+    public static CachedDirectedGlobalPos read(FriendlyByteBuf buf) {
+        ResourceKey<Level> registryKey = buf.readResourceKey(Registries.DIMENSION);
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();
 

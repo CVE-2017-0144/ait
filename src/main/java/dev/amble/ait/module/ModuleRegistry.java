@@ -2,10 +2,8 @@ package dev.amble.ait.module;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.module.decoration.DecorationModule;
 import dev.amble.ait.module.gun.GunModule;
 import dev.amble.ait.module.planet.PlanetModule;
@@ -47,12 +45,12 @@ public class ModuleRegistry extends DatapackRegistry<Module> {
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
+    public void syncToClient(ServerPlayer player) {
 
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
 
     }
 

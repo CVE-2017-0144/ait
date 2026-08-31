@@ -1,29 +1,27 @@
 package dev.amble.ait.data.gson;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.*;
 
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
-
-public class RegistryKeySerializer implements JsonSerializer<RegistryKey<?>>, JsonDeserializer<RegistryKey<?>> {
+public class RegistryKeySerializer implements JsonSerializer<ResourceKey<?>>, JsonDeserializer<ResourceKey<?>> {
 
     @Override
-    public RegistryKey<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public ResourceKey<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
         JsonObject object = json.getAsJsonObject();
-        Identifier registry = context.deserialize(object.get("registry"), Identifier.class);
-        Identifier value = context.deserialize(object.get("value"), Identifier.class);
+        ResourceLocation registry = context.deserialize(object.get("registry"), ResourceLocation.class);
+        ResourceLocation value = context.deserialize(object.get("value"), ResourceLocation.class);
 
-        return RegistryKey.of(RegistryKey.ofRegistry(registry), value);
+        return ResourceKey.create(ResourceKey.createRegistryKey(registry), value);
     }
 
     @Override
-    public JsonElement serialize(RegistryKey<?> src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(ResourceKey<?> src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject object = new JsonObject();
-        object.add("registry", context.serialize(src.getRegistry()));
-        object.add("value", context.serialize(src.getValue()));
+        object.add("registry", context.serialize(src.registry()));
+        object.add("value", context.serialize(src.location()));
 
         return object;
     }

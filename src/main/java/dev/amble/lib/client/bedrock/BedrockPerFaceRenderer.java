@@ -1,26 +1,25 @@
 package dev.amble.lib.client.bedrock;
 
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
 import org.joml.Vector3f;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.model.geom.ModelPart;
 
 public final class BedrockPerFaceRenderer {
 
     public static void render(ModelPart root,
                               List<BedrockModel.PerFaceCube> deferred,
-                              MatrixStack matrices,
+                              PoseStack matrices,
                               VertexConsumer vertices,
                               int light, int overlay,
                               float red, float green, float blue, float alpha,
                               int textureWidth, int textureHeight) {
 
-        matrices.push();
+        matrices.pushPose();
         matrices.scale(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
 
         Map<String, ModelPart> boneMap = BedrockAnimation.getBoneMap(root);
@@ -28,7 +27,7 @@ public final class BedrockPerFaceRenderer {
             ModelPart bonePart = boneMap.get(cube.partName());
             if (bonePart == null) continue;
 
-            matrices.push();
+            matrices.pushPose();
 
             float px = cube.cubePivot().get(0);
             float py = cube.cubePivot().get(1);
@@ -41,19 +40,19 @@ public final class BedrockPerFaceRenderer {
             matrices.scale(bonePart.xScale, bonePart.yScale, bonePart.zScale);
             matrices.translate(px, -py, pz);
 
-            matrices.multiply(RotationAxis.POSITIVE_X.rotation(bonePart.pitch == 0 ? (float) Math.toRadians(rx) : bonePart.pitch));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotation(bonePart.yaw == 0 ? (float) Math.toRadians(ry) : bonePart.yaw));
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotation(bonePart.roll == 0 ? (float) Math.toRadians(rz) : bonePart.roll));
+            matrices.mulPose(Axis.XP.rotation(bonePart.xRot == 0 ? (float) Math.toRadians(rx) : bonePart.xRot));
+            matrices.mulPose(Axis.YP.rotation(bonePart.yRot == 0 ? (float) Math.toRadians(ry) : bonePart.yRot));
+            matrices.mulPose(Axis.ZP.rotation(bonePart.zRot == 0 ? (float) Math.toRadians(rz) : bonePart.zRot));
 
-            MatrixStack.Entry entry = matrices.peek();
+            PoseStack.Pose entry = matrices.last();
             for (BedrockPerFaceQuad q : buildQuads(cube, textureWidth, textureHeight)) {
                 q.render(entry, vertices, light, overlay, red, green, blue, alpha);
             }
 
-            matrices.pop();
+            matrices.popPose();
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static List<BedrockPerFaceQuad> buildQuads(BedrockModel.PerFaceCube cube, int texW, int texH) {

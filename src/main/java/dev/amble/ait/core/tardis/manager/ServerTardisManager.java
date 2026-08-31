@@ -8,12 +8,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.ChunkPos;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisComponent;
@@ -73,7 +71,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
                 if (!tardis.hasDelta())
                     continue;
 
-                PacketByteBuf buf = this.prepareSendDelta(tardis);
+                FriendlyByteBuf buf = this.prepareSendDelta(tardis);
                 tardis.consumeDelta(component -> this.writeComponent(component, buf));
 
                 NetworkUtil.getSubscribedPlayers(tardis).forEach(
@@ -95,40 +93,40 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
         return result;
     }
 
-    private void sendTardis(ServerPlayerEntity player, PacketByteBuf data) {
+    private void sendTardis(ServerPlayer player, FriendlyByteBuf data) {
         ServerPlayNetworking.send(player, SEND, data);
     }
 
-    private void writeSend(ServerTardis tardis, PacketByteBuf buf) {
-        buf.writeUuid(tardis.getUuid());
-        buf.writeString(this.networkGson.toJson(tardis, ServerTardis.class));
+    private void writeSend(ServerTardis tardis, FriendlyByteBuf buf) {
+        buf.writeUUID(tardis.getUuid());
+        buf.writeUtf(this.networkGson.toJson(tardis, ServerTardis.class));
     }
 
-    private void writeComponent(TardisComponent component, PacketByteBuf buf) {
+    private void writeComponent(TardisComponent component, FriendlyByteBuf buf) {
         String rawId = TardisComponentRegistry.getInstance().get(component);
 
-        buf.writeString(rawId);
-        buf.writeString(this.networkGson.toJson(component));
+        buf.writeUtf(rawId);
+        buf.writeUtf(this.networkGson.toJson(component));
     }
 
-    private PacketByteBuf prepareSend(ServerTardis tardis) {
-        PacketByteBuf data = PacketByteBufs.create();
+    private FriendlyByteBuf prepareSend(ServerTardis tardis) {
+        FriendlyByteBuf data = PacketByteBufs.create();
         this.writeSend(tardis, data);
 
         return data;
     }
 
-    private PacketByteBuf prepareSendDelta(ServerTardis tardis) {
-        PacketByteBuf data = PacketByteBufs.create();
+    private FriendlyByteBuf prepareSendDelta(ServerTardis tardis) {
+        FriendlyByteBuf data = PacketByteBufs.create();
 
-        data.writeUuid(tardis.getUuid());
+        data.writeUUID(tardis.getUuid());
         data.writeShort(tardis.getDeltaSize());
 
         return data;
     }
 
-    protected void sendTardisBulk(ServerPlayerEntity player, Set<ServerTardis> set) {
-        PacketByteBuf data = PacketByteBufs.create();
+    protected void sendTardisBulk(ServerPlayer player, Set<ServerTardis> set) {
+        FriendlyByteBuf data = PacketByteBufs.create();
         data.writeInt(set.size());
 
         for (ServerTardis tardis : set) {
@@ -141,7 +139,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
         ServerPlayNetworking.send(player, SEND_BULK, data);
     }
 
-    protected void sendTardisAll(ServerPlayerEntity player, Set<ServerTardis> set) {
+    protected void sendTardisAll(ServerPlayer player, Set<ServerTardis> set) {
         for (ServerTardis tardis : set) {
             if (isInvalid(tardis))
                 continue;
@@ -156,7 +154,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
             if (isInvalid(tardis))
                 continue;
 
-            PacketByteBuf buf = this.prepareSend(tardis);
+            FriendlyByteBuf buf = this.prepareSend(tardis);
 
             NetworkUtil.getSubscribedPlayers(tardis).forEach(
                     watching -> {
@@ -167,14 +165,14 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
         }
     }
 
-    public void mark(ServerWorld world, ServerTardis tardis, ChunkPos chunk) {
+    public void mark(ServerLevel world, ServerTardis tardis, ChunkPos chunk) {
         ((WorldWithTardis) world).ait$lookup().put(chunk, tardis);
 
         NetworkUtil.getSubscribedPlayers(tardis).forEach(player ->
                 TardisEvents.SYNC_TARDIS.invoker().sync(player, chunk));
     }
 
-    public void unmark(ServerWorld world, ServerTardis tardis, ChunkPos chunk) {
+    public void unmark(ServerLevel world, ServerTardis tardis, ChunkPos chunk) {
         ((WorldWithTardis) world).ait$withLookup(lookup -> lookup.remove(chunk, tardis));
     }
 

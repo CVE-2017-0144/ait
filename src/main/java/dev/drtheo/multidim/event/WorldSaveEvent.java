@@ -2,8 +2,7 @@ package dev.drtheo.multidim.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 public class WorldSaveEvent {
 
@@ -15,6 +14,6 @@ public class WorldSaveEvent {
 
     @FunctionalInterface
     public interface Save {
-        void onWorldSave(ServerWorld world);
+        void onWorldSave(ServerLevel world);
     }
 }

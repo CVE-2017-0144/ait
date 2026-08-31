@@ -2,36 +2,6 @@ package dev.amble.ait.core.blocks;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
@@ -41,72 +11,100 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.console.type.CopperType;
 import dev.amble.ait.data.schema.console.type.CrystallineType;
 import dev.amble.lib.api.ICantBreak;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEntityProvider, ICantBreak {
+public class ConsoleBlock extends HorizontalDirectionalBlock implements EntityBlock, ICantBreak {
 
     private static final VoxelShape SHAPE;
 
     static {
-        VoxelShape shape = VoxelShapes.empty();
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0, 0, 0, 1, 0.875, 1), BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0, 0.875, -0.25, 1, 1, 1.25), BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0, 1, 0, 1, 1.125, 1), BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(-0.25, 0.875, 0, 1.25, 1, 1), BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(-0.1875, 0.875, -0.125, 1.1875, 1, 0),
-                BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(-0.1875, 0.875, 1, 1.1875, 1, 1.125),
-                BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(1, 0.875, -0.1875, 1.125, 1, 1.1875),
-                BooleanBiFunction.OR);
-        shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(-0.125, 0.875, -0.1875, 0, 1, 1.1875),
-                BooleanBiFunction.OR);
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(0, 0, 0, 1, 0.875, 1), BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(0, 0.875, -0.25, 1, 1, 1.25), BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(0, 1, 0, 1, 1.125, 1), BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(-0.25, 0.875, 0, 1.25, 1, 1), BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(-0.1875, 0.875, -0.125, 1.1875, 1, 0),
+                BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(-0.1875, 0.875, 1, 1.1875, 1, 1.125),
+                BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(1, 0.875, -0.1875, 1.125, 1, 1.1875),
+                BooleanOp.OR);
+        shape = Shapes.joinUnoptimized(shape, Shapes.box(-0.125, 0.875, -0.1875, 0, 1, 1.1875),
+                BooleanOp.OR);
 
         SHAPE = shape;
     }
 
-    public ConsoleBlock(Settings settings) {
+    public ConsoleBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ConsoleBlockEntity(pos, state);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
                               BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ConsoleBlockEntity consoleBlockEntity) {
-            if (world.getRegistryKey().equals(World.OVERWORLD)) return ActionResult.FAIL;
-            consoleBlockEntity.useOn(world, player.isSneaking(), player);
-            ItemStack itemStack = player.getStackInHand(hand);
+            if (world.dimension().equals(Level.OVERWORLD)) return InteractionResult.FAIL;
+            consoleBlockEntity.useOn(world, player.isShiftKeyDown(), player);
+            ItemStack itemStack = player.getItemInHand(hand);
             if (itemStack.getItem() instanceof HammerItem) {
-                itemStack.getItem().useOnBlock(new ItemUsageContext(world, player, hand, itemStack, hit));
+                itemStack.getItem().useOn(new UseOnContext(world, player, hand, itemStack, hit));
             }
         }
 
-        if (world.isClient()) {
-            return ActionResult.SUCCESS;
+        if (world.isClientSide()) {
+            return InteractionResult.SUCCESS;
         }
 
         if (blockEntity instanceof ConsoleBlockEntity consoleBlockEntity) {
             if (!consoleBlockEntity.isEmpty()) { // This is to ensure that the console doesnt get used as an extra chest and accidental misclicks
-                player.openHandledScreen(consoleBlockEntity);
-                world.playSound(null, pos, AITSounds.DOOM_DOOR_OPEN, SoundCategory.BLOCKS, 1.0f, 0.7f);
+                player.openMenu(consoleBlockEntity);
+                world.playSound(null, pos, AITSounds.DOOM_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, 0.7f);
             }
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull World world, @NotNull BlockState state,
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level world, @NotNull BlockState state,
                                                                   @NotNull BlockEntityType<T> type) {
         return (world1, blockPos, blockState, ticker) -> {
             if (ticker instanceof ConsoleBlockEntity console) {
@@ -116,12 +114,12 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEnt
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
                          ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
+        super.setPlacedBy(world, pos, state, placer, itemStack);
 
         if (world.getBlockEntity(pos) instanceof ConsoleBlockEntity consoleBlockEntity) {
-            if (world.getRegistryKey().equals(World.OVERWORLD)) {
+            if (world.dimension().equals(Level.OVERWORLD)) {
                 return;
             }
             consoleBlockEntity.markNeedsControl();
@@ -129,12 +127,12 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEnt
     }
 
     @Override
-    public boolean emitsRedstonePower(BlockState state) {
+    public boolean isSignalSource(BlockState state) {
         return true;
     }
 
     @Override
-    public int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+    public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ConsoleBlockEntity console && console.isLinked()) {
             Tardis tardis = console.tardis().get();
@@ -146,50 +144,50 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEnt
     }
 
     @Override
-    public int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
-        return getWeakRedstonePower(state, world, pos, direction);
+    public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
+        return getSignal(state, world, pos, direction);
     }
 
 
     @Override
-    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
+    public void stepOn(Level world, BlockPos pos, BlockState state, Entity entity) {
         if (!TardisServerWorld.isTardisDimension(world)) return;
-        if (entity instanceof PlayerEntity player) {
-            Random random = world.random;
-            int x_random = random.nextBetween(1, 10);
-            int y_random = random.nextBetween(1, 10);
-            int z_random = random.nextBetween(1, 10);
+        if (entity instanceof Player player) {
+            RandomSource random = world.random;
+            int x_random = random.nextIntBetweenInclusive(1, 10);
+            int y_random = random.nextIntBetweenInclusive(1, 10);
+            int z_random = random.nextIntBetweenInclusive(1, 10);
 
             boolean is_x_negative = false;
             boolean is_z_negative = false;
-            if (random.nextBetween(1, 3) == 1) {
+            if (random.nextIntBetweenInclusive(1, 3) == 1) {
                 is_x_negative = true;
             }
-            if (random.nextBetween(1, 3) == 1) {
+            if (random.nextIntBetweenInclusive(1, 3) == 1) {
                 is_z_negative = true;
             }
 
-            world.playSound(null, pos, AITSounds.CLOISTER, SoundCategory.BLOCKS, 4f, 1f);
+            world.playSound(null, pos, AITSounds.CLOISTER, SoundSource.BLOCKS, 4f, 1f);
 
-            player.addVelocity(0.15f * x_random * (is_x_negative ? -1 : 1), 0.1f * y_random,
+            player.push(0.15f * x_random * (is_x_negative ? -1 : 1), 0.1f * y_random,
                     0.15f * z_random * (is_z_negative ? -1 : 1));
 
-            if (player instanceof ServerPlayerEntity) {
+            if (player instanceof ServerPlayer) {
                 for (int i = 0; i < 100; i++) {
-                    ((ServerWorld) world).spawnParticles(ParticleTypes.ANGRY_VILLAGER,
-                            pos.getX() + MathHelper.nextFloat(random, -2.0F, 3.0F), pos.getY() + MathHelper.nextFloat(random, 0.0F, 2.0F),
-                            pos.getZ() + MathHelper.nextFloat(random, -2.0F, 3.0F), 1, MathHelper.nextFloat(random, -5.0F, 5.0F), MathHelper.nextFloat(random, -5.0F, 5.0F),
-                            MathHelper.nextFloat(random, -5.0F, 5.0F), 1f);
+                    ((ServerLevel) world).sendParticles(ParticleTypes.ANGRY_VILLAGER,
+                            pos.getX() + Mth.nextFloat(random, -2.0F, 3.0F), pos.getY() + Mth.nextFloat(random, 0.0F, 2.0F),
+                            pos.getZ() + Mth.nextFloat(random, -2.0F, 3.0F), 1, Mth.nextFloat(random, -5.0F, 5.0F), Mth.nextFloat(random, -5.0F, 5.0F),
+                            Mth.nextFloat(random, -5.0F, 5.0F), 1f);
                 }
             }
         }
-        super.onSteppedOn(world, pos, state, entity);
+        super.stepOn(world, pos, state, entity);
     }
 
     // This will literally never happen
     @Override
-    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
-        super.onBroken(world, pos, state);
+    public void destroy(LevelAccessor world, BlockPos pos, BlockState state) {
+        super.destroy(world, pos, state);
 
         if (world.getBlockEntity(pos) instanceof ConsoleBlockEntity console) {
             console.onBroken();
@@ -197,7 +195,7 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEnt
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, net.minecraft.util.math.random.Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, net.minecraft.util.RandomSource random) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
         if (blockEntity instanceof ConsoleBlockEntity consoleBlockEntity) {
@@ -259,9 +257,9 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements BlockEnt
 
 
     @Override
-    public void onTryBreak(World world, BlockPos pos, BlockState state) {
+    public void onTryBreak(Level world, BlockPos pos, BlockState state) {
         if (TardisServerWorld.isTardisDimension(world)) return;
 
-        world.breakBlock(pos, true);
+        world.destroyBlock(pos, true);
     }
 }

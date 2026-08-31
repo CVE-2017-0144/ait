@@ -6,33 +6,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-
 import dev.amble.ait.core.events.WorldSaveEvent;
 import dev.amble.ait.core.item.SiegeTardisItem;
 import dev.amble.ait.core.tardis.Tardis;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(ServerWorld.class)
+@Mixin(ServerLevel.class)
 public class ServerWorldMixin {
 
-    @Inject(method = "saveLevel", at = @At("HEAD"))
+    @Inject(method = "saveLevelData", at = @At("HEAD"))
     private void saveLevel(CallbackInfo ci) {
-        WorldSaveEvent.EVENT.invoker().onWorldSave((ServerWorld) (Object) this);
+        WorldSaveEvent.EVENT.invoker().onWorldSave((ServerLevel) (Object) this);
     }
 
-    @Inject(method = "spawnEntity", at = @At("RETURN"))
+    @Inject(method = "addFreshEntity", at = @At("RETURN"))
     public void spawnEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValueZ()) return;
         if (!(entity instanceof ItemEntity itemEntity)) return;
 
-        ItemStack stack = itemEntity.getStack();
+        ItemStack stack = itemEntity.getItem();
 
         if (stack.getItem() instanceof SiegeTardisItem item) {
-            Tardis found = item.getTardis(entity.getWorld(), stack);
+            Tardis found = item.getTardis(entity.level(), stack);
 
             if (found == null)
                 return;

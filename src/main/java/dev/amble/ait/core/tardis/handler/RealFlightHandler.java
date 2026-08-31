@@ -7,16 +7,14 @@ import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.block.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -31,8 +29,8 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 
 public class RealFlightHandler extends KeyedTardisComponent implements TardisTickable {
 
-    private static final Identifier ENTER_FLIGHT = AITMod.id("enter_flight");
-    private static final Identifier EXIT_FLIGHT = AITMod.id("exit_flight");
+    private static final ResourceLocation ENTER_FLIGHT = AITMod.id("enter_flight");
+    private static final ResourceLocation EXIT_FLIGHT = AITMod.id("exit_flight");
 
     private static final BoolProperty IS_FALLING = new BoolProperty("falling", false);
     private static final BoolProperty FLYING = new BoolProperty("flying", false);
@@ -70,10 +68,10 @@ public class RealFlightHandler extends KeyedTardisComponent implements TardisTic
             this.tardis.door().setLocked(true);
     }
 
-    public void tickFlight(ServerPlayerEntity player) {
-        tardis.travel().forcePosition(cached -> cached.pos(player.getBlockPos())
-                .rotation((byte) RotationPropertyHelper.fromYaw(player.getYaw())));
-        if (player.age % 20 != 0) {
+    public void tickFlight(ServerPlayer player) {
+        tardis.travel().forcePosition(cached -> cached.pos(player.blockPosition())
+                .rotation((byte) RotationSegment.convertToSegment(player.getYRot())));
+        if (player.tickCount % 20 != 0) {
             GravitationalCircuit circuit = tardis.subsystems().get(GRAVITATIONAL);
             if (circuit.isEnabled()) {
                 circuit.removeDurability(0.5f);
@@ -81,27 +79,27 @@ public class RealFlightHandler extends KeyedTardisComponent implements TardisTic
         }
     }
 
-    public void onLanding(ServerWorld world, BlockPos pos) {
-        this.tardis.travel().forcePosition(cached -> cached.world(world.getRegistryKey()).pos(pos));
+    public void onLanding(ServerLevel world, BlockPos pos) {
+        this.tardis.travel().forcePosition(cached -> cached.world(world.dimension()).pos(pos));
 
         this.falling.set(false);
         this.tardis.door().setLocked(this.tardis.door().previouslyLocked().get());
         this.tardis.door().setDeadlocked(false);
 
-        world.playSound(null, pos, AITSounds.LAND_THUD, SoundCategory.BLOCKS);
+        world.playSound(null, pos, AITSounds.LAND_THUD, SoundSource.BLOCKS);
 
-        tardis.getDesktop().playSoundAtEveryConsole(AITSounds.LAND_THUD, SoundCategory.BLOCKS);
+        tardis.getDesktop().playSoundAtEveryConsole(AITSounds.LAND_THUD, SoundSource.BLOCKS);
         TardisEvents.LANDED.invoker().onLanded(tardis);
     }
 
-    public void onStartFalling(ServerWorld world, BlockState state, BlockPos pos) {
+    public void onStartFalling(ServerLevel world, BlockState state, BlockPos pos) {
         this.falling.set(true);
         TardisEvents.START_FALLING.invoker().onStartFall(tardis);
 
         FallingTardisEntity.spawnFromBlock(world, pos, state);
     }
 
-    public void enterFlight(ServerPlayerEntity player) {
+    public void enterFlight(ServerPlayer player) {
         if (!AITMod.CONFIG.rwfEnabled) return;
         this.tardis.door().closeDoors();
         this.tardis().travel().autopilot(false);
@@ -121,25 +119,25 @@ public class RealFlightHandler extends KeyedTardisComponent implements TardisTic
         tardis.travel().finishDemat();
     }
 
-    private void sendEnterFlightPacket(ServerPlayerEntity player) {
+    private void sendEnterFlightPacket(ServerPlayer player) {
         if (!AITMod.CONFIG.rwfEnabled) return;
         ServerPlayNetworking.send(player, ENTER_FLIGHT, PacketByteBufs.create());
   }
 
-    public void exitFlight(ServerPlayerEntity player) {
+    public void exitFlight(ServerPlayer player) {
         this.flying.set(false);
 
         player.setInvisible(false);
         player.setInvulnerable(false);
         this.sendExitFlightPacket(player);
 
-        tardis.travel().forcePosition(cached -> cached.rotation((byte) RotationPropertyHelper.fromYaw(player.getYaw())));
+        tardis.travel().forcePosition(cached -> cached.rotation((byte) RotationSegment.convertToSegment(player.getYRot())));
         tardis.travel().placeExterior(false);
 
         tardis.travel().finishRemat();
     }
 
-    private void sendExitFlightPacket(ServerPlayerEntity player) {
+    private void sendExitFlightPacket(ServerPlayer player) {
         ServerPlayNetworking.send(player, EXIT_FLIGHT, PacketByteBufs.create());
     }
 

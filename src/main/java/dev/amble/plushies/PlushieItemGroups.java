@@ -3,8 +3,8 @@ package dev.amble.plushies;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.container.impl.ItemGroupContainer;
 import dev.amble.lib.itemgroup.AItemGroup;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 public class PlushieItemGroups implements ItemGroupContainer {
 

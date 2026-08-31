@@ -5,18 +5,15 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.joml.Vector3f;
-
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.control.ControlTypes;
 import dev.amble.ait.data.codec.MoreCodec;
@@ -34,32 +31,32 @@ import dev.amble.ait.registry.impl.console.ConsoleRegistry;
 }
  */
 public class DatapackConsole extends ConsoleVariantSchema implements TravelAnimationMap.Holder {
-    public static final Identifier EMPTY = AITMod.id("intentionally_empty");
+    public static final ResourceLocation EMPTY = AITMod.id("intentionally_empty");
 
-    protected final Identifier texture;
-    protected final Identifier emission;
-    protected final Identifier id;
+    protected final ResourceLocation texture;
+    protected final ResourceLocation emission;
+    protected final ResourceLocation id;
     protected final List<Float> sonicRotation;
     protected final Vector3f sonicTranslation;
     protected final List<Float> handlesRotation;
     protected final Vector3f handlesTranslation;
-    protected final Identifier model;
-    protected final Vec3d scale;
-    protected final Vec3d offset;
+    protected final ResourceLocation model;
+    protected final Vec3 scale;
+    protected final Vec3 offset;
     public static final Codec<DatapackConsole> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(Identifier.CODEC.fieldOf("id").forGetter(ConsoleVariantSchema::id),
-                    Identifier.CODEC.optionalFieldOf("parent").forGetter(c -> Optional.ofNullable(c.parentId())),
-                    Identifier.CODEC.fieldOf("texture").forGetter(DatapackConsole::texture),
-                    Identifier.CODEC.optionalFieldOf("emission", EMPTY).forGetter(DatapackConsole::emission),
+            .group(ResourceLocation.CODEC.fieldOf("id").forGetter(ConsoleVariantSchema::id),
+                    ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(c -> Optional.ofNullable(c.parentId())),
+                    ResourceLocation.CODEC.fieldOf("texture").forGetter(DatapackConsole::texture),
+                    ResourceLocation.CODEC.optionalFieldOf("emission", EMPTY).forGetter(DatapackConsole::emission),
                     Codec.list(Codec.FLOAT).optionalFieldOf("sonic_rotation", List.of())
                             .forGetter(DatapackConsole::sonicRotation),
                     MoreCodec.VECTOR3F.optionalFieldOf("sonic_translation", new Vector3f()).forGetter(DatapackConsole::sonicTranslation),
                     Codec.list(Codec.FLOAT).optionalFieldOf("handles_rotation", List.of())
                             .forGetter(DatapackConsole::handlesRotation),
                     MoreCodec.VECTOR3F.optionalFieldOf("handles_translation", new Vector3f()).forGetter(DatapackConsole::handlesTranslation),
-                    Identifier.CODEC.optionalFieldOf("model").forGetter(DatapackConsole::model),
-                    Vec3d.CODEC.optionalFieldOf("scale", new Vec3d(1, 1, 1)).forGetter(DatapackConsole::getScale),
-                    Vec3d.CODEC.optionalFieldOf("offset", new Vec3d(0, 0, 0)).forGetter(DatapackConsole::getOffset),
+                    ResourceLocation.CODEC.optionalFieldOf("model").forGetter(DatapackConsole::model),
+                    Vec3.CODEC.optionalFieldOf("scale", new Vec3(1, 1, 1)).forGetter(DatapackConsole::getScale),
+                    Vec3.CODEC.optionalFieldOf("offset", new Vec3(0, 0, 0)).forGetter(DatapackConsole::getOffset),
                     TravelAnimationMap.CODEC.optionalFieldOf("animations", new TravelAnimationMap())
                             .forGetter(DatapackConsole::getAnimations),
                     SimpleType.CODEC.optionalFieldOf("type").forGetter(DatapackConsole::getCustomType),
@@ -68,17 +65,17 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
     protected boolean initiallyDatapack;
     protected final TravelAnimationMap animations;
 
-    public DatapackConsole(Identifier id,
-                           Optional<Identifier> category,
-                           Identifier texture,
-                           Identifier emission,
+    public DatapackConsole(ResourceLocation id,
+                           Optional<ResourceLocation> category,
+                           ResourceLocation texture,
+                           ResourceLocation emission,
                            List<Float> sonicRot,
                            Vector3f sonicTranslation,
                            List<Float> handlesRot,
                            Vector3f handlesTranslation,
-                           Optional<Identifier> model,
-                           Vec3d scale,
-                           Vec3d offset,
+                           Optional<ResourceLocation> model,
+                           Vec3 scale,
+                           Vec3 offset,
                            TravelAnimationMap animations,
                            Optional<SimpleType> type,
                            boolean isDatapack) {
@@ -97,7 +94,7 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
         this.animations = animations != null ? animations : new TravelAnimationMap();
     }
 
-    private static Identifier resolveParentId(Optional<Identifier> parent, Optional<SimpleType> type) {
+    private static ResourceLocation resolveParentId(Optional<ResourceLocation> parent, Optional<SimpleType> type) {
         if (parent.isPresent()) {
             return parent.get();
         } else if (type.isPresent()) {
@@ -112,15 +109,15 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
         return this.initiallyDatapack;
     }
 
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return this.texture;
     }
 
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return this.emission;
     }
 
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -138,15 +135,15 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
         return this.handlesTranslation;
     }
 
-    public Optional<Identifier> model() {
+    public Optional<ResourceLocation> model() {
         return Optional.ofNullable(model);
     }
 
-    public Vec3d getScale() {
+    public Vec3 getScale() {
         return scale;
     }
 
-    public Vec3d getOffset() {
+    public Vec3 getOffset() {
         return offset;
     }
 
@@ -179,14 +176,14 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
 
     public static class SimpleType extends ConsoleTypeSchema {
         public static final Codec<SimpleType> CODEC = RecordCodecBuilder.create(instance -> instance
-                .group(Identifier.CODEC.fieldOf("id").forGetter(SimpleType::id),
+                .group(ResourceLocation.CODEC.fieldOf("id").forGetter(SimpleType::id),
                         Codec.STRING.fieldOf("name").forGetter(SimpleType::name),
                         ControlTypes.CODEC.listOf().fieldOf("controls").forGetter(c -> c.controls))
                 .apply(instance, SimpleType::new));
 
         private final List<ControlTypes> controls;
 
-        protected SimpleType(Identifier id, String name, List<ControlTypes> controls) {
+        protected SimpleType(ResourceLocation id, String name, List<ControlTypes> controls) {
             super(id, name);
 
             this.controls = controls;
@@ -198,8 +195,8 @@ public class DatapackConsole extends ConsoleVariantSchema implements TravelAnima
         }
 
         @Override
-        public Text text() {
-            return Text.literal(this.name());
+        public Component text() {
+            return Component.literal(this.name());
         }
 
         public void register() {

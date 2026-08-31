@@ -7,11 +7,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.engine.link.IFluidLink;
 import dev.amble.ait.core.engine.link.IFluidSource;
@@ -20,7 +18,7 @@ import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
 /**
  * Synchronous, in-place rebuild of a fluid-link connected component.
  *
- * Cables / subsystems / engines call {@link #rebuildFrom(ServerWorld, BlockPos)} from their
+ * Cables / subsystems / engines call {@link #rebuildFrom(ServerLevel, BlockPos)} from their
  * own block-update callbacks; the rebuild walks the component once via BFS, picks a
  * deterministic source, then assigns {@code source} / {@code last} / {@code lastPos} /
  * {@code powered} to every connected node via {@link FluidLinkBlockEntity#applyNetworkAssignment}.
@@ -36,9 +34,9 @@ public final class FluidNetwork {
     /**
      * Rebuild the component containing {@code seed}. If {@code seed} no longer holds an
      * {@link IFluidLink} block entity (e.g. the source caller is mid-break), use
-     * {@link #rebuildAround(ServerWorld, BlockPos)} instead.
+     * {@link #rebuildAround(ServerLevel, BlockPos)} instead.
      */
-    public static void rebuildFrom(ServerWorld world, BlockPos seed) {
+    public static void rebuildFrom(ServerLevel world, BlockPos seed) {
         if (world == null || seed == null) return;
         LinkedHashMap<BlockPos, IFluidLink> component = WorldFluidTracker.bfs(world, seed, MAX_NETWORK_SIZE);
         if (component.isEmpty()) return;
@@ -50,11 +48,11 @@ public final class FluidNetwork {
      * each component exactly once. Use when {@code center} itself no longer holds a fluid-link
      * block entity (i.e. on-break).
      */
-    public static void rebuildAround(ServerWorld world, BlockPos center) {
+    public static void rebuildAround(ServerLevel world, BlockPos center) {
         if (world == null || center == null) return;
         Set<BlockPos> handled = new HashSet<>();
         for (Direction dir : Direction.values()) {
-            BlockPos n = center.offset(dir);
+            BlockPos n = center.relative(dir);
             if (handled.contains(n)) continue;
             if (WorldFluidTracker.query(world, n) == null) continue;
             LinkedHashMap<BlockPos, IFluidLink> component = WorldFluidTracker.bfs(world, n, MAX_NETWORK_SIZE);
@@ -127,7 +125,7 @@ public final class FluidNetwork {
         while (!queue.isEmpty()) {
             BlockPos cur = queue.poll();
             for (Direction dir : Direction.values()) {
-                BlockPos next = cur.offset(dir);
+                BlockPos next = cur.relative(dir);
                 if (!component.containsKey(next)) continue;
                 if (parent.containsKey(next)) continue;
                 parent.put(next, cur);

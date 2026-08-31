@@ -1,24 +1,21 @@
 package dev.amble.ait.client.renderers.machines;
 
 import java.util.Locale;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.profiler.Profiler;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.machines.FabricatorModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
@@ -28,102 +25,102 @@ import dev.amble.ait.core.item.blueprint.Blueprint;
 
 public class FabricatorRenderer<T extends FabricatorBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final Identifier FABRICATOR_TEXTURE = AITMod.id("textures/block/fabricator.png");
-    public static final Identifier EMISSIVE_FABRICATOR_TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation FABRICATOR_TEXTURE = AITMod.id("textures/block/fabricator.png");
+    public static final ResourceLocation EMISSIVE_FABRICATOR_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/block/fabricator_emission.png");
     private final FabricatorModel fabricatorModel;
 
-    public FabricatorRenderer(BlockEntityRendererFactory.Context ctx) {
-        this.fabricatorModel = new FabricatorModel(FabricatorModel.getTexturedModelData().createModel());
+    public FabricatorRenderer(BlockEntityRendererProvider.Context ctx) {
+        this.fabricatorModel = new FabricatorModel(FabricatorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public void render(FabricatorBlockEntity entity, float tickDelta, MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        Profiler profiler = entity.getWorld().getProfiler();
+    public void render(FabricatorBlockEntity entity, float tickDelta, PoseStack matrices,
+            MultiBufferSource vertexConsumers, int light, int overlay) {
+        ProfilerFiller profiler = entity.getLevel().getProfiler();
         profiler.push("fabricator");
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0.5f, 1.5f, 0.5f);
 
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-        matrices.multiply(RotationAxis.POSITIVE_Y
-                .rotationDegrees(entity.getCachedState().get(FabricatorBlock.FACING).asRotation()));
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.mulPose(Axis.YP
+                .rotationDegrees(entity.getBlockState().getValue(FabricatorBlock.FACING).toYRot()));
 
-        this.fabricatorModel.render(matrices,
-                vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(FABRICATOR_TEXTURE)), light, overlay, 1.0F,
+        this.fabricatorModel.renderToBuffer(matrices,
+                vertexConsumers.getBuffer(RenderType.entityTranslucent(FABRICATOR_TEXTURE)), light, overlay, 1.0F,
                 1.0F, 1.0F, 1.0F);
 
         if (entity.isValid()) {
-            this.fabricatorModel.render(matrices,
+            this.fabricatorModel.renderToBuffer(matrices,
                     vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(EMISSIVE_FABRICATOR_TEXTURE, true)), 0xf000f0, overlay, 1.0F,
                     1.0F, 1.0F, 1.0F);
         }
 
-        matrices.pop();
-        matrices.push();
+        matrices.popPose();
+        matrices.pushPose();
 
         ItemStack stack = entity.getShowcaseStack();
 
         // Apply the same rotation as the block
         matrices.translate(0.5, 1.5, 0.5);
-        float rotation = entity.getCachedState().get(FabricatorBlock.FACING).asRotation();
-        if (entity.getCachedState().get(FabricatorBlock.FACING) == Direction.NORTH ||
-                entity.getCachedState().get(FabricatorBlock.FACING) == Direction.SOUTH) {
+        float rotation = entity.getBlockState().getValue(FabricatorBlock.FACING).toYRot();
+        if (entity.getBlockState().getValue(FabricatorBlock.FACING) == Direction.NORTH ||
+                entity.getBlockState().getValue(FabricatorBlock.FACING) == Direction.SOUTH) {
             rotation += 180;
         }
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+        matrices.mulPose(Axis.YP.rotationDegrees(rotation));
         matrices.translate(-0.5, -1.5, -0.5);
 
         if (!stack.isEmpty()) {
-            matrices.push();
-            double offset = Math.sin((entity.getWorld().getTime() + tickDelta) / 8.0) / 18.0;
+            matrices.pushPose();
+            double offset = Math.sin((entity.getLevel().getGameTime() + tickDelta) / 8.0) / 18.0;
 
             matrices.translate(0.5f, 0.35f + (offset / 2), 0.5f);
 
-            Vector3f scale = MinecraftClient.getInstance().getItemRenderer().getModel(stack, entity.getWorld(), null, 0).getTransformation().firstPersonRightHand.scale;
+            Vector3f scale = Minecraft.getInstance().getItemRenderer().getModel(stack, entity.getLevel(), null, 0).getTransforms().firstPersonRightHand.scale;
             matrices.scale(0.7f, 0.7f, 0.7f);
             matrices.scale(scale.x, scale.y, scale.z);
 
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND, 0xf000f0,
-                    overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-            matrices.pop();
+            Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.GROUND, 0xf000f0,
+                    overlay, matrices, vertexConsumers, entity.getLevel(), 0);
+            matrices.popPose();
         }
         renderText(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
-        matrices.pop();
+        matrices.popPose();
         profiler.pop();
     }
 
-    private void renderText(FabricatorBlockEntity entity, float tickDelta, MatrixStack matrices,
-                            VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        TextRenderer renderer = MinecraftClient.getInstance().textRenderer;
-        matrices.push();
+    private void renderText(FabricatorBlockEntity entity, float tickDelta, PoseStack matrices,
+                            MultiBufferSource vertexConsumers, int light, int overlay) {
+        Font renderer = Minecraft.getInstance().font;
+        matrices.pushPose();
 
         matrices.translate(0.93, 0.1255, 0.315);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90f));
+        matrices.mulPose(Axis.YP.rotationDegrees(180f));
+        matrices.mulPose(Axis.XP.rotationDegrees(90f));
         matrices.scale(0.005f, 0.005f, 0.005f);
 
         // display "COLLECT OUTPUT" if enough materials
-        Text text = Text.translatable("block.ait.fabricator.status.collect_output");
+        Component text = Component.translatable("block.ait.fabricator.status.collect_output");
 
         // if does not have blueprint, text is "INSERT BLUEPRINT"
         if (!entity.hasBlueprint()) {
-            text = Text.translatable("block.ait.fabricator.status.insert_blueprint");
+            text = Component.translatable("block.ait.fabricator.status.insert_blueprint");
         }
 
         Blueprint print = entity.getBlueprint().orElse(null);
         ItemStack stack = entity.getShowcaseStack();
         // display "INSERT (COUNT) MATERIAL" if not enough materials
         if (print != null && !print.isComplete()) {
-            String material = Text.translatable(stack.getTranslationKey()).getString().toUpperCase(Locale.ROOT);
-            text = Text.translatable("block.ait.fabricator.status.insert_material", print.getCountLeftFor(stack),
+            String material = Component.translatable(stack.getDescriptionId()).getString().toUpperCase(Locale.ROOT);
+            text = Component.translatable("block.ait.fabricator.status.insert_material", print.getCountLeftFor(stack),
                     material);
         }
 
-        renderer.drawWithOutline(text.asOrderedText(), 0, 40, 0x60eaf0, 0x108fb3,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        matrices.pop();
+        renderer.drawInBatch8xOutline(text.getVisualOrderText(), 0, 40, 0x60eaf0, 0x108fb3,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        matrices.popPose();
     }
 }

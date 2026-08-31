@@ -8,15 +8,13 @@ import java.util.function.Consumer;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import org.jetbrains.annotations.NotNull;
-
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.structure.Structure;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import dev.amble.ait.AITMod;
 
 /**
@@ -68,10 +66,10 @@ public class AsyncLocatorUtil {
 
     /**
      * Queues a task to locate a feature using
-     * {@link ServerWorld#locateStructure(TagKey, BlockPos, int, boolean)} and
+     * {@link ServerLevel#findNearestMapStructure(TagKey, BlockPos, int, boolean)} and
      * returns a {@link LocateTask} with the futures for it.
      */
-    public static LocateTask<BlockPos> locate(ServerWorld level, TagKey<Structure> structureTag, BlockPos pos,
+    public static LocateTask<BlockPos> locate(ServerLevel level, TagKey<Structure> structureTag, BlockPos pos,
             int searchRadius, boolean skipKnownStructures) {
         AITMod.LOGGER.trace("Creating locate task for {} in {} around {} within {} chunks", structureTag, level, pos,
                 searchRadius);
@@ -83,25 +81,25 @@ public class AsyncLocatorUtil {
 
     /**
      * Queues a task to locate a feature using
-     * {@link net.minecraft.world.gen.chunk.ChunkGenerator#locateStructure(ServerWorld, RegistryEntryList, BlockPos, int, boolean)}
+     * {@link net.minecraft.world.level.chunk.ChunkGenerator#findNearestMapStructure(ServerLevel, HolderSet, BlockPos, int, boolean)}
      * and returns a {@link LocateTask} with the futures for it.
      */
-    public static LocateTask<Pair<BlockPos, RegistryEntry<Structure>>> locate(ServerWorld level,
-            RegistryEntryList<Structure> structureSet, BlockPos pos, int searchRadius, boolean skipKnownStructures) {
+    public static LocateTask<Pair<BlockPos, Holder<Structure>>> locate(ServerLevel level,
+            HolderSet<Structure> structureSet, BlockPos pos, int searchRadius, boolean skipKnownStructures) {
         AITMod.LOGGER.trace("Creating locate task for {} in {} around {} within {} chunks", structureSet, level, pos,
                 searchRadius);
-        CompletableFuture<Pair<BlockPos, RegistryEntry<Structure>>> completableFuture = new CompletableFuture<>();
+        CompletableFuture<Pair<BlockPos, Holder<Structure>>> completableFuture = new CompletableFuture<>();
         Future<?> future = LOCATING_EXECUTOR_SERVICE.submit(() -> doLocateChunkGenerator(completableFuture, level,
                 structureSet, pos, searchRadius, skipKnownStructures));
         return new LocateTask<>(level.getServer(), completableFuture, future);
     }
 
-    private static void doLocateLevel(CompletableFuture<BlockPos> completableFuture, ServerWorld level,
+    private static void doLocateLevel(CompletableFuture<BlockPos> completableFuture, ServerLevel level,
             TagKey<Structure> structureTag, BlockPos pos, int searchRadius, boolean skipExistingChunks) {
         AITMod.LOGGER.trace("Trying to locate {} in {} around {} within {} chunks", structureTag, level, pos,
                 searchRadius);
         long start = System.nanoTime();
-        BlockPos foundPos = level.locateStructure(structureTag, pos, searchRadius, skipExistingChunks);
+        BlockPos foundPos = level.findNearestMapStructure(structureTag, pos, searchRadius, skipExistingChunks);
         String time = NumberFormat.getNumberInstance().format(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
         if (foundPos == null) {
             AITMod.LOGGER.trace("No {} found (took {}ms)", structureTag, time);
@@ -112,13 +110,13 @@ public class AsyncLocatorUtil {
     }
 
     private static void doLocateChunkGenerator(
-            CompletableFuture<Pair<BlockPos, RegistryEntry<Structure>>> completableFuture, ServerWorld level,
-            RegistryEntryList<Structure> structureSet, BlockPos pos, int searchRadius, boolean skipExistingChunks) {
+            CompletableFuture<Pair<BlockPos, Holder<Structure>>> completableFuture, ServerLevel level,
+            HolderSet<Structure> structureSet, BlockPos pos, int searchRadius, boolean skipExistingChunks) {
         AITMod.LOGGER.info("Trying to locate {} in {} around {} within {} chunks", structureSet, level, pos,
                 searchRadius);
         long start = System.nanoTime();
-        Pair<BlockPos, RegistryEntry<Structure>> foundPair = level.getChunkManager().getChunkGenerator()
-                .locateStructure(level, structureSet, pos, searchRadius, skipExistingChunks);
+        Pair<BlockPos, Holder<Structure>> foundPair = level.getChunkSource().getGenerator()
+                .findNearestMapStructure(level, structureSet, pos, searchRadius, skipExistingChunks);
         String time = NumberFormat.getNumberInstance().format(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
         if (foundPair == null) {
             AITMod.LOGGER.trace("No {} found (took {}ms)", structureSet, time);
@@ -132,7 +130,7 @@ public class AsyncLocatorUtil {
     /**
      * Holder of the futures for an async locate task as well as providing some
      * helper functions. The completableFuture will be completed once the call to
-     * {@link ServerWorld#locateStructure(TagKey, BlockPos, int, boolean)} has
+     * {@link ServerLevel#findNearestMapStructure(TagKey, BlockPos, int, boolean)} has
      * completed, and will hold the result of it. The taskFuture is the future for
      * the {@link Runnable} itself in the executor service.
      */

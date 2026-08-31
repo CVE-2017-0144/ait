@@ -2,20 +2,17 @@ package dev.amble.ait.core.tardis.control.sequences;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 
 // should this be an interface? - No :)
 public class Sequence {
-    public Identifier id() {
+    public ResourceLocation id() {
         return AITMod.id("sequence");
     }
 
@@ -40,20 +37,20 @@ public class Sequence {
         return recent.equals(this.getControls());
     }
 
-    public void execute(Tardis tardis, @Nullable ServerPlayerEntity player) {
+    public void execute(Tardis tardis, @Nullable ServerPlayer player) {
         if (player != null) {
             tardis.loyalty().get(player).add(1);
         }
     }
 
-    public void executeMissed(Tardis tardis, @Nullable ServerPlayerEntity player) {
+    public void executeMissed(Tardis tardis, @Nullable ServerPlayer player) {
         if (player != null) {
             tardis.loyalty().get(player).subtract(2);
         }
     }
 
-    public Text sequenceStartMessage() {
-        return Text.of("");
+    public Component sequenceStartMessage() {
+        return Component.nullToEmpty("");
     }
 
     public boolean wasMissed(RecentControls recent, int ticks) {
@@ -67,11 +64,11 @@ public class Sequence {
         return this.getControls().contains(control);
     }
 
-    public void sendMessageToInteriorPlayers(List<ServerPlayerEntity> playersInInterior) {
+    public void sendMessageToInteriorPlayers(List<ServerPlayer> playersInInterior) {
         if (playersInInterior.isEmpty())
             return;
-        for (ServerPlayerEntity player : playersInInterior) {
-            player.sendMessage(this.sequenceStartMessage(), true);
+        for (ServerPlayer player : playersInInterior) {
+            player.displayClientMessage(this.sequenceStartMessage(), true);
         }
     }
 
@@ -81,15 +78,15 @@ public class Sequence {
 
     public static class Builder extends Sequence {
 
-        private final Identifier id;
+        private final ResourceLocation id;
         private final List<Control> controls;
         private final ExecuteSequence execute;
         private final ExecuteSequence executeMissed;
         private final Long timeToFail;
-        private final Text sequenceStartMessage;
+        private final Component sequenceStartMessage;
 
-        private Builder(Identifier id, ExecuteSequence execute, ExecuteSequence executeMissed, Long timeToFail,
-                Text sequenceStartMessage, Control... controls) {
+        private Builder(ResourceLocation id, ExecuteSequence execute, ExecuteSequence executeMissed, Long timeToFail,
+                Component sequenceStartMessage, Control... controls) {
             this.id = id;
             this.controls = List.of(controls);
             this.execute = execute;
@@ -98,13 +95,13 @@ public class Sequence {
             this.sequenceStartMessage = sequenceStartMessage;
         }
 
-        public static Sequence create(Identifier id, ExecuteSequence execute, ExecuteSequence executeMissed,
-                Long timeToFail, Text sequenceStartMessage, Control... controls) {
+        public static Sequence create(ResourceLocation id, ExecuteSequence execute, ExecuteSequence executeMissed,
+                Long timeToFail, Component sequenceStartMessage, Control... controls) {
             return new Builder(id, execute, executeMissed, timeToFail, sequenceStartMessage, controls);
         }
 
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return this.id;
         }
 
@@ -114,12 +111,12 @@ public class Sequence {
         }
 
         @Override
-        public void execute(Tardis tardis, @Nullable ServerPlayerEntity player) {
+        public void execute(Tardis tardis, @Nullable ServerPlayer player) {
             this.execute.run(tardis);
         }
 
         @Override
-        public void executeMissed(Tardis tardis, @Nullable ServerPlayerEntity player) {
+        public void executeMissed(Tardis tardis, @Nullable ServerPlayer player) {
             tardis.travel().missEvent();
             this.executeMissed.run(tardis);
         }
@@ -130,7 +127,7 @@ public class Sequence {
         }
 
         @Override
-        public Text sequenceStartMessage() {
+        public Component sequenceStartMessage() {
             return this.sequenceStartMessage;
         }
     }

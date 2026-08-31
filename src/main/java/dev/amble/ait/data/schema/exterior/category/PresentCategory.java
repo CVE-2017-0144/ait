@@ -1,13 +1,12 @@
 package dev.amble.ait.data.schema.exterior.category;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 public class PresentCategory extends ExteriorCategorySchema {
-    public static final Identifier REFERENCE = AITMod.id("exterior/present");
+    public static final ResourceLocation REFERENCE = AITMod.id("exterior/present");
 
     public PresentCategory() {
         super(REFERENCE, "present");

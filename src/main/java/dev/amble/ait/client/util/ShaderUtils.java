@@ -1,22 +1,20 @@
 package dev.amble.ait.client.util;
 
 import java.io.IOException;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.PostEffectProcessor;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.PostChain;
 import dev.amble.ait.AITMod;
 
 public class ShaderUtils {
-    public static MinecraftClient client = MinecraftClient.getInstance();
-    public static PostEffectProcessor shader;
+    public static Minecraft client = Minecraft.getInstance();
+    public static PostChain shader;
     public static boolean enabled = false;
 
-    private static PostEffectProcessor getCurrent() {
+    private static PostChain getCurrent() {
         try {
             // "values": [ 0.3, 0.59, 0.11 ]
-            return new PostEffectProcessor(client.getTextureManager(), client.getResourceManager(),
-                    client.getFramebuffer(), AITMod.id("shaders/post/red_tinted.json"));
+            return new PostChain(client.getTextureManager(), client.getResourceManager(),
+                    client.getMainRenderTarget(), AITMod.id("shaders/post/red_tinted.json"));
         } catch (IOException e) {
             return null;
         }
@@ -27,7 +25,7 @@ public class ShaderUtils {
             shader.close();
         shader = getCurrent();
         if (shader != null) {
-            shader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
+            shader.resize(client.getWindow().getWidth(), client.getWindow().getHeight());
             enabled = true;
             return;
         }

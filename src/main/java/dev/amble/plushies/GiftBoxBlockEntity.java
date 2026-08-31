@@ -8,18 +8,11 @@ import dev.amble.lib.client.bedrock.BedrockModelReference;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class GiftBoxBlockEntity extends ABlockEntity implements AnimatedBlockEntity {
@@ -40,8 +33,8 @@ public class GiftBoxBlockEntity extends ABlockEntity implements AnimatedBlockEnt
     @Override
     @Environment(EnvType.CLIENT)
     public int getAge() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        return client.player != null ? client.player.age : 0;
+        Minecraft client = Minecraft.getInstance();
+        return client.player != null ? client.player.tickCount : 0;
     }
 
     @Override
@@ -61,6 +54,6 @@ public class GiftBoxBlockEntity extends ABlockEntity implements AnimatedBlockEnt
 
     @Override
     public float getRenderYaw() {
-        return this.getCachedState().get(GiftBoxBlock.ROTATION) * 22.5f;
+        return this.getBlockState().getValue(GiftBoxBlock.ROTATION) * 22.5f;
     }
 }

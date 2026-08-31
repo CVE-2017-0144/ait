@@ -4,16 +4,14 @@ import java.util.function.BiFunction;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.client.models.doors.DoorModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
@@ -55,15 +53,15 @@ public class AddonExterior extends ExteriorVariantSchema {
     private Door door;
     private float portalWidth = -1f;
     private float portalHeight = -1f;
-    @Nullable private Vec3d portalTranslations;
+    @Nullable private Vec3 portalTranslations;
     @Environment(EnvType.CLIENT)
     private Vector3f sonicItemTranslations;
     @Environment(EnvType.CLIENT)
     private boolean hasTransparentDoors;
-    private Vec3d seatTranslations;
+    private Vec3 seatTranslations;
 
-    public AddonExterior(Identifier category, String modid, String name) {
-        super(category, new Identifier(modid, "exterior/" + name), Loyalty.fromLevel(Loyalty.Type.OWNER.level));
+    public AddonExterior(ResourceLocation category, String modid, String name) {
+        super(category, new ResourceLocation(modid, "exterior/" + name), Loyalty.fromLevel(Loyalty.Type.OWNER.level));
 
         this.modid = modid;
         this.name = name;
@@ -126,7 +124,7 @@ public class AddonExterior extends ExteriorVariantSchema {
     }
 
     @Override
-    public Vec3d seatTranslations() {
+    public Vec3 seatTranslations() {
         return this.seatTranslations = seatTranslations();
     }
 
@@ -191,7 +189,7 @@ public class AddonExterior extends ExteriorVariantSchema {
     }
 
     @Override
-    public @Nullable Vec3d getPortalPosition() {
+    public @Nullable Vec3 getPortalPosition() {
         return portalTranslations;
     }
 
@@ -200,7 +198,7 @@ public class AddonExterior extends ExteriorVariantSchema {
      * @param translations (pos, dir) -> (pos)
      * @return this
      */
-    public AddonExterior setPortalTranslations(Vec3d translations) {
+    public AddonExterior setPortalTranslations(Vec3 translations) {
         this.portalTranslations = translations;
 
         return this;
@@ -213,8 +211,8 @@ public class AddonExterior extends ExteriorVariantSchema {
      * @deprecated
      */
     @Deprecated
-    public AddonExterior setPortalTranslations(BiFunction<Vec3d, Byte, Vec3d> translations) {
-        return this.setPortalTranslations(translations.apply(Vec3d.ZERO, (byte) 0));
+    public AddonExterior setPortalTranslations(BiFunction<Vec3, Byte, Vec3> translations) {
+        return this.setPortalTranslations(translations.apply(Vec3.ZERO, (byte) 0));
     }
 
     @Override
@@ -260,15 +258,15 @@ public class AddonExterior extends ExteriorVariantSchema {
                     new Vector3f(0, 0, 0), BiomeOverrides.builder().build(), parent.hasTransparentDoors);
         }
         @Override
-        public Identifier texture() {
-            return new Identifier(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + ".png");
+        public ResourceLocation texture() {
+            return new ResourceLocation(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + ".png");
         }
 
         @Override
-        public Identifier emission() {
-            Identifier id = new Identifier(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + "_emission.png");
+        public ResourceLocation emission() {
+            ResourceLocation id = new ResourceLocation(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + "_emission.png");
 
-            if (!checkedEmission && MinecraftClient.getInstance().getResourceManager() != null) {
+            if (!checkedEmission && Minecraft.getInstance().getResourceManager() != null) {
                 this.hasEmission = InteriorSettingsScreen.doesTextureExist(id);
                 checkedEmission = true;
             }
@@ -312,7 +310,7 @@ public class AddonExterior extends ExteriorVariantSchema {
         private final SoundEvent open;
         private final SoundEvent close;
 
-        @Nullable private Vec3d portalTranslations;
+        @Nullable private Vec3 portalTranslations;
 
         @Environment(EnvType.CLIENT)
         private ClientDoor client;
@@ -327,7 +325,7 @@ public class AddonExterior extends ExteriorVariantSchema {
         }
 
         @Override
-        public @Nullable Vec3d getPortalPosition() {
+        public @Nullable Vec3 getPortalPosition() {
             return portalTranslations;
         }
 
@@ -336,7 +334,7 @@ public class AddonExterior extends ExteriorVariantSchema {
          * @param translations (pos, dir) -> (pos)
          * @return this
          */
-        public Door setPortalTranslations(Vec3d translations) {
+        public Door setPortalTranslations(Vec3 translations) {
             this.portalTranslations = translations;
 
             return this;
@@ -349,8 +347,8 @@ public class AddonExterior extends ExteriorVariantSchema {
          * @deprecated
          */
         @Deprecated
-        public Door setPortalTranslations(BiFunction<Vec3d, Byte, Vec3d> translations) {
-            return this.setPortalTranslations(translations.apply(Vec3d.ZERO, (byte) 0));
+        public Door setPortalTranslations(BiFunction<Vec3, Byte, Vec3> translations) {
+            return this.setPortalTranslations(translations.apply(Vec3.ZERO, (byte) 0));
         }
 
         @Override

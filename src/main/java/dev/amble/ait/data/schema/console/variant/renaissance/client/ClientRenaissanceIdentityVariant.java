@@ -2,19 +2,17 @@ package dev.amble.ait.data.schema.console.variant.renaissance.client;
 
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.RenaissanceConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.renaissance.RenaissanceIdentityVariant;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientRenaissanceIdentityVariant extends ClientConsoleVariantSchema {
-    public static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/renaissance_identity.png"));
-    public static final Identifier EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/renaissance_identity_emission.png"));
 
     public ClientRenaissanceIdentityVariant() {
@@ -22,18 +20,18 @@ public class ClientRenaissanceIdentityVariant extends ClientConsoleVariantSchema
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return EMISSION;
     }
 
     @Override
     public SimpleConsoleModel model() {
-        return new RenaissanceConsoleModel(RenaissanceConsoleModel.getTexturedModelData().createModel());
+        return new RenaissanceConsoleModel(RenaissanceConsoleModel.getTexturedModelData().bakeRoot());
     }
 
     @Override

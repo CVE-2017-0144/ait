@@ -1,10 +1,9 @@
 package dev.amble.ait.core.tardis.handler;
 
-import net.minecraft.block.Blocks;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -43,11 +42,11 @@ public class ExteriorEnvironmentHandler extends KeyedTardisComponent implements 
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 20 != 0)
+        if (server.getTickCount() % 20 != 0)
             return;
 
         TravelHandler travel = this.tardis.travel();
-        World exterior = travel.position().getWorld();
+        Level exterior = travel.position().getWorld();
 
         if (exterior == null) return;
 
@@ -61,7 +60,7 @@ public class ExteriorEnvironmentHandler extends KeyedTardisComponent implements 
             isThundering = !snowy && exterior.isThundering();
 
             if (isRaining || isThundering) {
-                boolean hasRain = exterior.hasRain(travel.position().getPos());
+                boolean hasRain = exterior.isRainingAt(travel.position().getPos());
 
                 isRaining = isRaining && hasRain;
                 isThundering = isThundering && hasRain;
@@ -103,12 +102,12 @@ public class ExteriorEnvironmentHandler extends KeyedTardisComponent implements 
 
         CachedDirectedGlobalPos cached = tardis.travel().position();
 
-        World world = cached.getWorld();
+        Level world = cached.getWorld();
         BlockPos tardisPos = cached.getPos();
 
         for (int xOffset = -1; xOffset <= 1; xOffset++) {
             for (int zOffset = -1; zOffset <= 1; zOffset++) {
-                BlockPos blockPos = tardisPos.add(xOffset, 0, zOffset);
+                BlockPos blockPos = tardisPos.offset(xOffset, 0, zOffset);
 
                 if (world.getBlockState(blockPos).getBlock() == Blocks.LAVA)
                     return true;

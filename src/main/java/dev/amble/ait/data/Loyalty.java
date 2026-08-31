@@ -1,12 +1,10 @@
 package dev.amble.ait.data;
 
 import java.util.Optional;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
 
 public record Loyalty(int level, Type type) {
 
@@ -105,8 +103,8 @@ public record Loyalty(int level, Type type) {
             };
         }
 
-        public MutableText text() {
-            return Text.translatable("tardis.loyalty.name." + this.name().toLowerCase());
+        public MutableComponent text() {
+            return Component.translatable("tardis.loyalty.name." + this.name().toLowerCase());
         }
     }
 }

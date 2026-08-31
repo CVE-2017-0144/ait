@@ -1,22 +1,20 @@
 package dev.amble.ait.core.item.sonic;
 
 import java.util.function.Function;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.advancement.TardisCriterions;
 import dev.amble.ait.data.enummap.Ordered;
@@ -100,23 +98,23 @@ public abstract class SonicMode implements Ordered {
         return Modes.previous(this);
     }
 
-    public abstract Text text();
+    public abstract Component text();
 
     public abstract int maxTime();
 
-    public boolean startUsing(ItemStack stack, World world, PlayerEntity user, Hand hand) {
+    public boolean startUsing(ItemStack stack, Level world, Player user, InteractionHand hand) {
         return true;
     }
 
-    public void tick(ItemStack stack, World world, LivingEntity user, int ticks, int ticksLeft) { }
+    public void tick(ItemStack stack, Level world, LivingEntity user, int ticks, int ticksLeft) { }
 
-    public void stopUsing(ItemStack stack, World world, LivingEntity user, int ticks, int ticksLeft) { }
+    public void stopUsing(ItemStack stack, Level world, LivingEntity user, int ticks, int ticksLeft) { }
 
-    public void finishUsing(ItemStack stack, World world, LivingEntity user) {
+    public void finishUsing(ItemStack stack, Level world, LivingEntity user) {
         this.stopUsing(stack, world, user, this.maxTime(), 0);
     }
 
-    public abstract Identifier model(SonicSchema.Models models);
+    public abstract ResourceLocation model(SonicSchema.Models models);
 
     public int fuelCost() {
         return 1;
@@ -128,11 +126,11 @@ public abstract class SonicMode implements Ordered {
     public static HitResult getHitResultForOutline(LivingEntity user, double distance) {
         BlockHitResult hitResult = null;
 
-        if (user instanceof PlayerEntity player) {
-            Vec3d eyePos = player.getCameraPosVec(1.0F);
-            Vec3d rotation = player.getRotationVec(1.0F);
-            Vec3d end = eyePos.add(rotation.multiply(distance));
-            hitResult = player.getWorld().raycast(new RaycastContext(eyePos, end, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player));
+        if (user instanceof Player player) {
+            Vec3 eyePos = player.getEyePosition(1.0F);
+            Vec3 rotation = player.getViewVector(1.0F);
+            Vec3 end = eyePos.add(rotation.scale(distance));
+            hitResult = player.level().clip(new ClipContext(eyePos, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
         }
 
         return hitResult;
@@ -141,16 +139,16 @@ public abstract class SonicMode implements Ordered {
         return getHitResult(user, MAX_DISTANCE);
     }
     public static HitResult getHitResult(LivingEntity user, double distance) {
-        return ProjectileUtil.getCollision(user, entity -> !entity.isSpectator() && entity.canHit(), distance);
+        return ProjectileUtil.getHitResultOnViewVector(user, entity -> !entity.isSpectator() && entity.isPickable(), distance);
     }
-    public static void checkSonicWoodAdvancementConditions(World world, LivingEntity user, HitResult hitResult) {
-        if (!(user instanceof ServerPlayerEntity player))
+    public static void checkSonicWoodAdvancementConditions(Level world, LivingEntity user, HitResult hitResult) {
+        if (!(user instanceof ServerPlayer player))
             return;
 
         if (hitResult instanceof BlockHitResult blockHit) {
             BlockState state = world.getBlockState(blockHit.getBlockPos());
 
-            if (state.isIn(AITTags.Blocks.WOODEN_BLOCKS)) {
+            if (state.is(AITTags.Blocks.WOODEN_BLOCKS)) {
                 TardisCriterions.SONIC_WOOD.trigger(player);
             }
         }

@@ -1,13 +1,12 @@
 package dev.amble.lib.mixin;
 
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.block.AbstractBlock;
-
-@Mixin(AbstractBlock.class)
+@Mixin(BlockBehaviour.class)
 public interface AbstractBlockAccessor {
 
     @Accessor
-    AbstractBlock.Settings getSettings();
+    BlockBehaviour.Properties getProperties();
 }

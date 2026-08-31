@@ -1,21 +1,21 @@
 package dev.amble.lib.mixin.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.lib.animation.client.AnimationMetadata;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.HeldItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(HeldItemRenderer.class)
+@Mixin(ItemInHandRenderer.class)
 public class HeldItemRendererMixin {
-	@Inject(method="renderFirstPersonItem", at=@At("HEAD"), cancellable = true)
-	private void amblekit$renderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+	@Inject(method="renderArmWithItem", at=@At("HEAD"), cancellable = true)
+	private void amblekit$renderFirstPersonItem(AbstractClientPlayer player, float tickDelta, float pitch, InteractionHand hand, float swingProgress, ItemStack item, float equipProgress, PoseStack matrices, MultiBufferSource vertexConsumers, int light, CallbackInfo ci) {
 		AnimationMetadata metadata = AnimationMetadata.getFor((dev.amble.lib.animation.AnimatedEntity) player);
 		if (metadata == null || !metadata.fpsCamera()) return;
 

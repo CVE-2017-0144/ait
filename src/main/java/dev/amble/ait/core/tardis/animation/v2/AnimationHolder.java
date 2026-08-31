@@ -9,15 +9,13 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import org.joml.Math;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.world.entity.player.Player;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -36,7 +34,7 @@ import dev.amble.ait.data.Loyalty;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class AnimationHolder implements TardisTickable, Disposable, Linkable {
-    public static final Identifier UPDATE_PACKET = AITMod.id("sync/ext_anim");
+    public static final ResourceLocation UPDATE_PACKET = AITMod.id("sync/ext_anim");
 
     protected final TardisAnimationMap map;
     private TardisAnimation current;
@@ -112,7 +110,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         this.isServer = false;
 
         if (this.current == null) return;
@@ -225,7 +223,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
 
     @Environment(EnvType.CLIENT)
     private float getCloakAlpha(Tardis tardis) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (player == null)
             return 0f;
@@ -246,10 +244,10 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
         return distanceAlpha * base;
     }
 
-    public static double distanceFromTardis(PlayerEntity player, Tardis tardis) {
-        BlockPos pPos = player.getBlockPos();
+    public static double distanceFromTardis(Player player, Tardis tardis) {
+        BlockPos pPos = player.blockPosition();
         BlockPos tPos = tardis.travel().position().getPos();
-        return Math.sqrt(tPos.getSquaredDistance(pPos));
+        return Math.sqrt(tPos.distSqr(pPos));
     }
 
     /**
@@ -314,11 +312,11 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
 
         ServerTardis tardis = this.tardis().get().asServer();
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
 
-        buf.writeEnumConstant(state);
-        buf.writeIdentifier(this.current.id());
-        buf.writeUuid(tardis.getUuid());
+        buf.writeEnum(state);
+        buf.writeResourceLocation(this.current.id());
+        buf.writeUUID(tardis.getUuid());
 
         NetworkUtil.getSubscribedPlayers(tardis).forEach(player -> {;
             NetworkUtil.send(player, UPDATE_PACKET, buf);

@@ -4,8 +4,9 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
 import static org.lwjgl.opengl.GL30.GL_DEPTH24_STENCIL8;
 import static org.lwjgl.opengl.GL30.GL_UNSIGNED_INT_24_8;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import java.util.Objects;
-
+import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.ARBFramebufferObject;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL30C;
@@ -17,21 +18,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-
 import dev.amble.ait.client.boti.StencilFrameBuffer;
 
-@Mixin(Framebuffer.class)
+@Mixin(RenderTarget.class)
 public abstract class MixinRenderFramebufferTarget implements StencilFrameBuffer {
 
     @Unique private boolean isStencilBufferEnabled;
 
     @Shadow
-    public int viewportWidth;
+    public int viewWidth;
     @Shadow
-    public int viewportHeight;
+    public int viewHeight;
 
 
     @Shadow
@@ -42,7 +39,7 @@ public abstract class MixinRenderFramebufferTarget implements StencilFrameBuffer
         isStencilBufferEnabled = false;
     }
 
-    @ModifyArgs(method = "initFbo", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false)
+    @ModifyArgs(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texImage2D(IIIIIIIILjava/nio/IntBuffer;)V", remap = false)
     )
     private void ait$modifyTexImage2D(Args args) {
         if (Objects.equals(args.get(2), GL_DEPTH_COMPONENT)) {
@@ -54,7 +51,7 @@ public abstract class MixinRenderFramebufferTarget implements StencilFrameBuffer
         }
     }
 
-    @ModifyArgs(method = "initFbo", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false))
+    @ModifyArgs(method = "createBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_glFramebufferTexture2D(IIIII)V", remap = false))
     private void ait$modifyFrameBufferTexture2D(Args args) {
         if (Objects.equals(args.get(1), GL30C.GL_DEPTH_ATTACHMENT)) {
             if (isStencilBufferEnabled) {
@@ -77,7 +74,7 @@ public abstract class MixinRenderFramebufferTarget implements StencilFrameBuffer
     public void ait$setIsStencilBufferEnabledAndReload(boolean cond) {
         if (isStencilBufferEnabled != cond) {
             isStencilBufferEnabled = cond;
-            resize(viewportWidth, viewportHeight, MinecraftClient.IS_SYSTEM_MAC);
+            resize(viewWidth, viewHeight, Minecraft.ON_OSX);
         }
     }
 }

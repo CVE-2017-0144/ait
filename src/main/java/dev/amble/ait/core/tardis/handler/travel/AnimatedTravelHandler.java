@@ -8,11 +8,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
 import dev.amble.ait.core.tardis.animation.v2.AnimationHolder;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
@@ -23,10 +21,10 @@ import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 
 public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
-    private static final Property<Identifier> DEMAT_FX = new Property<>(Property.IDENTIFIER, "demat_fx", TardisAnimationRegistry.DEFAULT_DEMAT);
-    private static final Property<Identifier> MAT_FX = new Property<>(Property.IDENTIFIER, "mat_fx", TardisAnimationRegistry.DEFAULT_MAT);
-    private final Value<Identifier> dematId = DEMAT_FX.create(this);
-    private final Value<Identifier> matId = MAT_FX.create(this);
+    private static final Property<ResourceLocation> DEMAT_FX = new Property<>(Property.IDENTIFIER, "demat_fx", TardisAnimationRegistry.DEFAULT_DEMAT);
+    private static final Property<ResourceLocation> MAT_FX = new Property<>(Property.IDENTIFIER, "mat_fx", TardisAnimationRegistry.DEFAULT_MAT);
+    private final Value<ResourceLocation> dematId = DEMAT_FX.create(this);
+    private final Value<ResourceLocation> matId = MAT_FX.create(this);
 
     @Exclude
     private boolean isAnimationInvalidated;
@@ -38,9 +36,9 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
     @Environment(EnvType.CLIENT)
     public static void initClient() {
         ClientPlayNetworking.registerGlobalReceiver(AnimationHolder.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
-            State state = buf.readEnumConstant(State.class);
-            Identifier id = buf.readIdentifier();
-            UUID uuid = buf.readUuid();
+            State state = buf.readEnum(State.class);
+            ResourceLocation id = buf.readResourceLocation();
+            UUID uuid = buf.readUUID();
 
             ClientTardisManager.getInstance().getTardis(uuid, tardis -> {
                 if (state == State.LANDED) {
@@ -95,7 +93,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         super.tick(client);
 
         if (this.shouldTickAnimation()) {
@@ -184,7 +182,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         return this.animations;
     }
 
-    @Nullable public Identifier getAnimationIdFor(State state) {
+    @Nullable public ResourceLocation getAnimationIdFor(State state) {
         return switch (state) {
             case LANDED, FLIGHT -> null;
             case DEMAT -> this.dematId.get();
@@ -196,7 +194,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         return TardisAnimationRegistry.getInstance().getOrFallback(this.getAnimationIdFor(state));
     }
 
-    public void setAnimationFor(State state, Identifier id) {
+    public void setAnimationFor(State state, ResourceLocation id) {
         switch (state) {
             case DEMAT -> this.dematId.set(id);
             case MAT -> this.matId.set(id);
@@ -205,7 +203,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         this.invalidateAnimations();
     }
 
-    public boolean setTemporaryAnimation(Identifier animId) {
+    public boolean setTemporaryAnimation(ResourceLocation animId) {
         TardisAnimation anim = TardisAnimationRegistry.getInstance().getOrFallback(animId);
 
         return this.getAnimations().setAnimation(anim);

@@ -1,6 +1,6 @@
 package dev.amble.ait.module.planet;
 
-import static net.minecraft.data.server.recipe.RecipeProvider.*;
+import static net.minecraft.data.recipes.RecipeProvider.*;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -8,28 +8,26 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.advancement.criterion.ChangedDimensionCriterion;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.data.client.Models;
-import net.minecraft.data.server.recipe.CookingRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelTemplates;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.advancement.TardisCriterions;
 import dev.amble.ait.core.util.SpaceUtils;
@@ -54,7 +52,7 @@ import dev.amble.lib.register.AmbleRegistries;
 public class PlanetModule extends Module {
     private static final PlanetModule INSTANCE = new PlanetModule();
 
-    public static final Identifier ID = AITMod.id("planet");
+    public static final ResourceLocation ID = AITMod.id("planet");
 
     @Override
     public void init() {
@@ -80,7 +78,7 @@ public class PlanetModule extends Module {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return ID;
     }
 
@@ -185,648 +183,648 @@ public class PlanetModule extends Module {
                 provider.addStonecutting(PlanetBlocks.POLISHED_ANORTHOSITE, PlanetBlocks.POLISHED_ANORTHOSITE_SLAB);
                 provider.addStonecutting(PlanetBlocks.POLISHED_ANORTHOSITE, PlanetBlocks.POLISHED_ANORTHOSITE_STAIRS);
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, PlanetBlocks.FLAG, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, PlanetBlocks.FLAG, 1)
                         .pattern("GBR")
                         .pattern("IWW")
                         .pattern("I  ")
-                        .input('G', Items.GOLD_INGOT)
-                        .input('I', Items.IRON_INGOT)
-                        .input('B', Items.BLUE_WOOL)
-                        .input('R', Items.RED_WOOL)
-                        .input('W', Items.WHITE_WOOL)
-                        .criterion(hasItem(Items.GOLD_INGOT), conditionsFromItem(Items.GOLD_INGOT))
-                        .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                        .criterion(hasItem(Items.RED_WOOL), conditionsFromItem(Items.RED_WOOL))
-                        .criterion(hasItem(Items.BLUE_WOOL), conditionsFromItem(Items.BLUE_WOOL))
-                        .criterion(hasItem(Items.WHITE_WOOL), conditionsFromItem(Items.WHITE_WOOL)));
+                        .define('G', Items.GOLD_INGOT)
+                        .define('I', Items.IRON_INGOT)
+                        .define('B', Items.BLUE_WOOL)
+                        .define('R', Items.RED_WOOL)
+                        .define('W', Items.WHITE_WOOL)
+                        .unlockedBy(getHasName(Items.GOLD_INGOT), has(Items.GOLD_INGOT))
+                        .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                        .unlockedBy(getHasName(Items.RED_WOOL), has(Items.RED_WOOL))
+                        .unlockedBy(getHasName(Items.BLUE_WOOL), has(Items.BLUE_WOOL))
+                        .unlockedBy(getHasName(Items.WHITE_WOOL), has(Items.WHITE_WOOL)));
 
                 // tendo count your fucking days
 
                 // anorthosite section
                 // polished anorthosite
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE, 4)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE_SLAB, 6)
+                        .define('#', PlanetBlocks.ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.POLISHED_ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_ANORTHOSITE), conditionsFromItem(PlanetBlocks.POLISHED_ANORTHOSITE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE_STAIRS, 4)
+                        .define('#', PlanetBlocks.POLISHED_ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_ANORTHOSITE), has(PlanetBlocks.POLISHED_ANORTHOSITE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_ANORTHOSITE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.POLISHED_ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_ANORTHOSITE), conditionsFromItem(PlanetBlocks.POLISHED_ANORTHOSITE)));
+                        .define('#', PlanetBlocks.POLISHED_ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_ANORTHOSITE), has(PlanetBlocks.POLISHED_ANORTHOSITE)));
                 // smooth anorthosite
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_ANORTHOSITE, 0.3f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE)),
-                new Identifier("ait", "smooth_anorthosite_from_anorthosite_smelted"));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_ANORTHOSITE_SLAB, 6)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)),
+                new ResourceLocation("ait", "smooth_anorthosite_from_anorthosite_smelted"));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_ANORTHOSITE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.SMOOTH_ANORTHOSITE), conditionsFromItem(PlanetBlocks.SMOOTH_ANORTHOSITE)));
+                        .define('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.SMOOTH_ANORTHOSITE), has(PlanetBlocks.SMOOTH_ANORTHOSITE)));
                 //normal anorthosite
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_WALL, 6)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_SLAB, 6)
+                        .define('#', PlanetBlocks.ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_STAIRS, 4)
+                        .define('#', PlanetBlocks.ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE)));
+                        .define('#', PlanetBlocks.ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)));
                 // anorthosite bricks
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICKS, 4)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICKS, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.SMOOTH_ANORTHOSITE), conditionsFromItem(PlanetBlocks.SMOOTH_ANORTHOSITE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_SLAB, 6)
+                        .define('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.SMOOTH_ANORTHOSITE), has(PlanetBlocks.SMOOTH_ANORTHOSITE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_BRICKS), conditionsFromItem(PlanetBlocks.ANORTHOSITE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_STAIRS, 4)
+                        .define('#', PlanetBlocks.ANORTHOSITE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_BRICKS), has(PlanetBlocks.ANORTHOSITE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_BRICKS), conditionsFromItem(PlanetBlocks.ANORTHOSITE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_WALL, 6)
+                        .define('#', PlanetBlocks.ANORTHOSITE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_BRICKS), has(PlanetBlocks.ANORTHOSITE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_BRICK_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.ANORTHOSITE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_BRICKS), conditionsFromItem(PlanetBlocks.ANORTHOSITE_BRICKS)));
+                        .define('#', PlanetBlocks.ANORTHOSITE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_BRICKS), has(PlanetBlocks.ANORTHOSITE_BRICKS)));
                 //chiseled anorthosite, anorthosite pillar, cracked anorthosite brick
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_ANORTHOSITE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_ANORTHOSITE, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.ANORTHOSITE_SLAB)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_SLAB), conditionsFromItem(PlanetBlocks.ANORTHOSITE_SLAB)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_PILLAR, 1)
+                        .define('#', PlanetBlocks.ANORTHOSITE_SLAB)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_SLAB), has(PlanetBlocks.ANORTHOSITE_SLAB)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.ANORTHOSITE_PILLAR, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
-                        .criterion(hasItem(PlanetBlocks.SMOOTH_ANORTHOSITE), conditionsFromItem(PlanetBlocks.SMOOTH_ANORTHOSITE)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_BRICKS),
+                        .define('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
+                        .unlockedBy(getHasName(PlanetBlocks.SMOOTH_ANORTHOSITE), has(PlanetBlocks.SMOOTH_ANORTHOSITE)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_BRICKS),
                                         RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_ANORTHOSITE_BRICKS, 0.7f, 200)
-                                .criterion(hasItem(PlanetBlocks.ANORTHOSITE_BRICKS), conditionsFromItem(PlanetBlocks.ANORTHOSITE_BRICKS)),
-                        new Identifier("ait", "cracked_anorthosite_bricks_from_anorthosite_bricks_smelted"));
+                                .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_BRICKS), has(PlanetBlocks.ANORTHOSITE_BRICKS)),
+                        new ResourceLocation("ait", "cracked_anorthosite_bricks_from_anorthosite_bricks_smelted"));
 
                 // anorthosite ores
                 //coal
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_COAL_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_COAL_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
-                new Identifier("ait", "coal_from_anorthosite_smelted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COAL_ORE), has(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
+                new ResourceLocation("ait", "coal_from_anorthosite_smelted"));
 
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_COAL_ORE),
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_COAL_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
-                new Identifier("ait", "coal_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COAL_ORE), has(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
+                new ResourceLocation("ait", "coal_from_anorthosite_blasted"));
                 //copper
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_COPPER_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
-                new Identifier("ait", "copper_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COPPER_ORE), has(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
+                new ResourceLocation("ait", "copper_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_COPPER_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
-                new Identifier("ait", "copper_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COPPER_ORE), has(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
+                new ResourceLocation("ait", "copper_from_anorthosite_blasted"));
                 //iron
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_IRON_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_IRON_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
-                new Identifier("ait", "iron_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_IRON_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_IRON_ORE), has(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
+                new ResourceLocation("ait", "iron_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_IRON_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
-                new Identifier("ait", "iron_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_IRON_ORE), has(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
+                new ResourceLocation("ait", "iron_from_anorthosite_blasted"));
                 //gold
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_GOLD_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
-                new Identifier("ait", "gold_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_GOLD_ORE), has(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
+                new ResourceLocation("ait", "gold_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_GOLD_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
-                new Identifier("ait", "gold_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_GOLD_ORE), has(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
+                new ResourceLocation("ait", "gold_from_anorthosite_blasted"));
                 //redstone
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
-                new Identifier("ait", "redstone_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), has(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
+                new ResourceLocation("ait", "redstone_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
-                new Identifier("ait", "redstone_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), has(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
+                new ResourceLocation("ait", "redstone_from_anorthosite_blasted"));
                 //lapis
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
-                new Identifier("ait", "lapis_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), has(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
+                new ResourceLocation("ait", "lapis_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
-                new Identifier("ait", "lapis_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), has(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
+                new ResourceLocation("ait", "lapis_from_anorthosite_blasted"));
                 //diamond
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
-                new Identifier("ait", "diamond_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), has(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
+                new ResourceLocation("ait", "diamond_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
-                new Identifier("ait", "diamond_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), has(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
+                new ResourceLocation("ait", "diamond_from_anorthosite_blasted"));
                 //emerald
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
-                new Identifier("ait", "emerald_from_anorthosite_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), has(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
+                new ResourceLocation("ait", "emerald_from_anorthosite_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), conditionsFromItem(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
-                new Identifier("ait", "emerald_from_anorthosite_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), has(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
+                new ResourceLocation("ait", "emerald_from_anorthosite_blasted"));
 
                 // moon sandstone section
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_WALL, 6)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_SLAB, 6)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_STAIRS, 4)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MOON_SANDSTONE, 4)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MOON_SANDSTONE, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICKS, 4)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICKS, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.POLISHED_MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.POLISHED_MOON_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_WALL, 6)
+                        .define('#', PlanetBlocks.POLISHED_MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MOON_SANDSTONE), has(PlanetBlocks.POLISHED_MOON_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_SLAB, 6)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_BRICKS), has(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_STAIRS, 4)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_BRICKS), has(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_BRICK_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MOON_SANDSTONE, 1)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_BRICKS), has(PlanetBlocks.MOON_SANDSTONE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MOON_SANDSTONE, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.MOON_SANDSTONE_SLAB)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE_SLAB), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE_SLAB)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_PILLAR, 1)
+                        .define('#', PlanetBlocks.MOON_SANDSTONE_SLAB)
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_SLAB), has(PlanetBlocks.MOON_SANDSTONE_SLAB)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_PILLAR, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.POLISHED_MOON_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.POLISHED_MOON_SANDSTONE)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MOON_SANDSTONE_BRICKS),
+                        .define('#', PlanetBlocks.POLISHED_MOON_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MOON_SANDSTONE), has(PlanetBlocks.POLISHED_MOON_SANDSTONE)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MOON_SANDSTONE_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MOON_SANDSTONE_BRICKS, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE_BRICKS)),
-                new Identifier("ait", "cracked_moon_sandstone_bricks_from_moon_sandstone_bricks_smelted"));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MOON_SANDSTONE),
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_BRICKS), has(PlanetBlocks.MOON_SANDSTONE_BRICKS)),
+                new ResourceLocation("ait", "cracked_moon_sandstone_bricks_from_moon_sandstone_bricks_smelted"));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MOON_SANDSTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MOON_SANDSTONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MOON_SANDSTONE), conditionsFromItem(PlanetBlocks.MOON_SANDSTONE)),
-                new Identifier("ait", "cracked_moon_sandstone_from_moon_sandstone_smelted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)),
+                new ResourceLocation("ait", "cracked_moon_sandstone_from_moon_sandstone_smelted"));
 
                 // martian section
 
                 // martian ores
                 //coal
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_COAL_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COAL_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_COAL_ORE)),
-                new Identifier("ait", "coal_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_COAL_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COAL_ORE), has(PlanetBlocks.MARTIAN_COAL_ORE)),
+                new ResourceLocation("ait", "coal_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COAL_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_COAL_ORE)),
-                new Identifier("ait", "coal_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COAL_ORE), has(PlanetBlocks.MARTIAN_COAL_ORE)),
+                new ResourceLocation("ait", "coal_from_martian_blasted"));
                 //copper
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_COPPER_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COPPER_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_COPPER_ORE)),
-                new Identifier("ait", "copper_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_COPPER_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COPPER_ORE), has(PlanetBlocks.MARTIAN_COPPER_ORE)),
+                new ResourceLocation("ait", "copper_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COPPER_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_COPPER_ORE)),
-                new Identifier("ait", "copper_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COPPER_ORE), has(PlanetBlocks.MARTIAN_COPPER_ORE)),
+                new ResourceLocation("ait", "copper_from_martian_blasted"));
                 //iron
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_IRON_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_IRON_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_IRON_ORE)),
-                new Identifier("ait", "iron_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_IRON_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_IRON_ORE), has(PlanetBlocks.MARTIAN_IRON_ORE)),
+                new ResourceLocation("ait", "iron_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_IRON_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_IRON_ORE)),
-                new Identifier("ait", "iron_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_IRON_ORE), has(PlanetBlocks.MARTIAN_IRON_ORE)),
+                new ResourceLocation("ait", "iron_from_martian_blasted"));
                 //gold
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_GOLD_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_GOLD_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_GOLD_ORE)),
-                new Identifier("ait", "gold_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_GOLD_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_GOLD_ORE), has(PlanetBlocks.MARTIAN_GOLD_ORE)),
+                new ResourceLocation("ait", "gold_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_GOLD_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_GOLD_ORE)),
-                new Identifier("ait", "gold_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_GOLD_ORE), has(PlanetBlocks.MARTIAN_GOLD_ORE)),
+                new ResourceLocation("ait", "gold_from_martian_blasted"));
                 //redstone
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_REDSTONE_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_REDSTONE_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
-                new Identifier("ait", "redstone_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_REDSTONE_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_REDSTONE_ORE), has(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
+                new ResourceLocation("ait", "redstone_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_REDSTONE_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
-                new Identifier("ait", "redstone_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_REDSTONE_ORE), has(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
+                new ResourceLocation("ait", "redstone_from_martian_blasted"));
                 //lapis
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_LAPIS_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_LAPIS_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_LAPIS_ORE)),
-                new Identifier("ait", "lapis_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_LAPIS_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_LAPIS_ORE), has(PlanetBlocks.MARTIAN_LAPIS_ORE)),
+                new ResourceLocation("ait", "lapis_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_LAPIS_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_LAPIS_ORE)),
-                new Identifier("ait", "lapis_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_LAPIS_ORE), has(PlanetBlocks.MARTIAN_LAPIS_ORE)),
+                new ResourceLocation("ait", "lapis_from_martian_blasted"));
                 //diamond
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_DIAMOND_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_DIAMOND_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
-                new Identifier("ait", "diamond_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_DIAMOND_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_DIAMOND_ORE), has(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
+                new ResourceLocation("ait", "diamond_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_DIAMOND_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
-                new Identifier("ait", "diamond_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_DIAMOND_ORE), has(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
+                new ResourceLocation("ait", "diamond_from_martian_blasted"));
                 //emerald
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_EMERALD_ORE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_EMERALD_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_EMERALD_ORE)),
-                new Identifier("ait", "emerald_from_martian_smelted"));
-                provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(PlanetBlocks.MARTIAN_EMERALD_ORE),
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_EMERALD_ORE), has(PlanetBlocks.MARTIAN_EMERALD_ORE)),
+                new ResourceLocation("ait", "emerald_from_martian_smelted"));
+                provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 100)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_EMERALD_ORE), conditionsFromItem(PlanetBlocks.MARTIAN_EMERALD_ORE)),
-                new Identifier("ait", "emerald_from_martian_blasted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_EMERALD_ORE), has(PlanetBlocks.MARTIAN_EMERALD_ORE)),
+                new ResourceLocation("ait", "emerald_from_martian_blasted"));
 
                 // martian stones
-                provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.REDSTONE, PlanetBlocks.MARTIAN_STONE_BUTTON, 1)
-                        .input(PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_PRESSURE_PLATE, 1)
+                provider.addShapelessRecipe(ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, PlanetBlocks.MARTIAN_STONE_BUTTON, 1)
+                        .requires(PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_PRESSURE_PLATE, 1)
                         .pattern("##")
-                        .input('#', PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_COBBLESTONE),
+                        .define('#', PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COBBLESTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE)),
-                new Identifier("ait", "martian_stone_from_martian_cobblestone_smelted"));
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE)),
+                new ResourceLocation("ait", "martian_stone_from_martian_cobblestone_smelted"));
                 // martian cobblestones
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_WALL, 6)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_SLAB, 6)
+                        .define('#', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_STAIRS, 4)
+                        .define('#', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE)));
+                        .define('#', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE)));
                 // polished martian stone
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE, 4)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE_SLAB, 6)
+                        .define('#', PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MARTIAN_STONE), conditionsFromItem(PlanetBlocks.POLISHED_MARTIAN_STONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE_STAIRS, 4)
+                        .define('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MARTIAN_STONE), has(PlanetBlocks.POLISHED_MARTIAN_STONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_STONE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MARTIAN_STONE), conditionsFromItem(PlanetBlocks.POLISHED_MARTIAN_STONE)));
+                        .define('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MARTIAN_STONE), has(PlanetBlocks.POLISHED_MARTIAN_STONE)));
                 // smooth martian stone
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_STONE),
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_STONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_MARTIAN_STONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)),
-                new Identifier("ait", "smooth_martian_stone_from_martian_stone_smelted"));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB, 6)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)),
+                new ResourceLocation("ait", "smooth_martian_stone_from_martian_stone_smelted"));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.SMOOTH_MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.SMOOTH_MARTIAN_STONE), conditionsFromItem(PlanetBlocks.SMOOTH_MARTIAN_STONE)));
+                        .define('#', PlanetBlocks.SMOOTH_MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.SMOOTH_MARTIAN_STONE), has(PlanetBlocks.SMOOTH_MARTIAN_STONE)));
                 // martian sandstone
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE, 1)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.MARTIAN_SAND)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SAND), conditionsFromItem(PlanetBlocks.MARTIAN_SAND)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_SANDSTONE, 4)
+                        .define('#', PlanetBlocks.MARTIAN_SAND)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SAND), has(PlanetBlocks.MARTIAN_SAND)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.POLISHED_MARTIAN_SANDSTONE, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_SANDSTONE),
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_SANDSTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_SANDSTONE, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE)),
-                new Identifier("ait", "cracked_martian_sandstone_from_martian_sandstone_smelted"));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_WALL, 6)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)),
+                new ResourceLocation("ait", "cracked_martian_sandstone_from_martian_sandstone_smelted"));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_SLAB, 6)
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_STAIRS, 4)
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_PILLAR, 1)
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_PILLAR, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)));
+                        .define('#', PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE), has(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)));
                 // martian sandstone bricks, martian sandstone brick wall, slab, stairs, cracked, chiseled
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICKS, 4)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICKS, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE), conditionsFromItem(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_WALL, 6)
+                        .define('#', PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE), has(PlanetBlocks.POLISHED_MARTIAN_SANDSTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_SLAB, 6)
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), has(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_STAIRS, 4)
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), has(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_BRICK_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS),
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), has(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_SANDSTONE_BRICKS, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)),
-                new Identifier("ait", "cracked_martian_sandstone_bricks_from_martian_sandstone_bricks_smelted"));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MARTIAN_SANDSTONE, 1)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), has(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)),
+                new ResourceLocation("ait", "cracked_martian_sandstone_bricks_from_martian_sandstone_bricks_smelted"));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MARTIAN_SANDSTONE, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.MARTIAN_SANDSTONE_SLAB)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_SANDSTONE_SLAB), conditionsFromItem(PlanetBlocks.MARTIAN_SANDSTONE_SLAB)));
+                        .define('#', PlanetBlocks.MARTIAN_SANDSTONE_SLAB)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_SLAB), has(PlanetBlocks.MARTIAN_SANDSTONE_SLAB)));
                 // martian bricks
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICKS, 4)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICKS, 4)
                         .pattern("##")
                         .pattern("##")
-                        .input('#', PlanetBlocks.SMOOTH_MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.SMOOTH_MARTIAN_STONE), conditionsFromItem(PlanetBlocks.SMOOTH_MARTIAN_STONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_WALL, 6)
+                        .define('#', PlanetBlocks.SMOOTH_MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.SMOOTH_MARTIAN_STONE), has(PlanetBlocks.SMOOTH_MARTIAN_STONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_SLAB, 6)
+                        .define('#', PlanetBlocks.MARTIAN_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICKS), has(PlanetBlocks.MARTIAN_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_BRICKS)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_STAIRS, 4)
+                        .define('#', PlanetBlocks.MARTIAN_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICKS), has(PlanetBlocks.MARTIAN_BRICKS)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_BRICK_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MARTIAN_BRICKS)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_BRICKS)));
-                provider.addFurnaceRecipe(CookingRecipeJsonBuilder.createSmelting(Ingredient.ofItems(PlanetBlocks.MARTIAN_BRICKS),
+                        .define('#', PlanetBlocks.MARTIAN_BRICKS)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICKS), has(PlanetBlocks.MARTIAN_BRICKS)));
+                provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_BRICKS, 0.7f, 200)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_BRICKS), conditionsFromItem(PlanetBlocks.MARTIAN_BRICKS)),
-                new Identifier("ait", "cracked_martian_bricks_from_martian_bricks_smelted"));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_PILLAR, 1)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICKS), has(PlanetBlocks.MARTIAN_BRICKS)),
+                new ResourceLocation("ait", "cracked_martian_bricks_from_martian_bricks_smelted"));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_PILLAR, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.POLISHED_MARTIAN_STONE), conditionsFromItem(PlanetBlocks.POLISHED_MARTIAN_STONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MARTIAN_STONE, 1)
+                        .define('#', PlanetBlocks.POLISHED_MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.POLISHED_MARTIAN_STONE), has(PlanetBlocks.POLISHED_MARTIAN_STONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MARTIAN_STONE, 1)
                         .pattern("#")
                         .pattern("#")
-                        .input('#', PlanetBlocks.MARTIAN_BRICK_SLAB)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_BRICK_SLAB), conditionsFromItem(PlanetBlocks.MARTIAN_BRICK_SLAB)));
+                        .define('#', PlanetBlocks.MARTIAN_BRICK_SLAB)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICK_SLAB), has(PlanetBlocks.MARTIAN_BRICK_SLAB)));
                 // mossy martian cobblestone
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE, 1)
                         .pattern("#M")
-                        .input('#', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('M', Ingredient.ofItems(Items.MOSS_BLOCK, Items.VINE))
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.MOSS_BLOCK), conditionsFromItem(Items.MOSS_BLOCK))
-                        .criterion(hasItem(Items.VINE), conditionsFromItem(Items.VINE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_WALL, 6)
+                        .define('#', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('M', Ingredient.of(Items.MOSS_BLOCK, Items.VINE))
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.MOSS_BLOCK), has(Items.MOSS_BLOCK))
+                        .unlockedBy(getHasName(Items.VINE), has(Items.VINE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_SLAB, 6)
+                        .define('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), has(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_SLAB, 6)
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_STAIRS, 4)
+                        .define('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), has(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_STAIRS, 4)
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
-                        .input('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
-                        .criterion(hasItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
+                        .define('#', PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE), has(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE)));
 
 
                 // Spacesuits
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_BOOTS, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_BOOTS, 1)
                         .pattern("   ")
                         .pattern("F F")
                         .pattern("FBF")
-                        .input('F', PlanetItems.FABRIC)
-                        .input('B', Items.IRON_BOOTS)
-                        .criterion(hasItem(PlanetItems.FABRIC), conditionsFromItem(PlanetItems.FABRIC))
-                        .criterion(hasItem(Items.IRON_BOOTS), conditionsFromItem(Items.IRON_BOOTS)));
+                        .define('F', PlanetItems.FABRIC)
+                        .define('B', Items.IRON_BOOTS)
+                        .unlockedBy(getHasName(PlanetItems.FABRIC), has(PlanetItems.FABRIC))
+                        .unlockedBy(getHasName(Items.IRON_BOOTS), has(Items.IRON_BOOTS)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_LEGGINGS, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_LEGGINGS, 1)
                         .pattern("FLF")
                         .pattern("F F")
                         .pattern("F F")
-                        .input('F', PlanetItems.FABRIC)
-                        .input('L', Items.IRON_LEGGINGS)
-                        .criterion(hasItem(PlanetItems.FABRIC), conditionsFromItem(PlanetItems.FABRIC))
-                        .criterion(hasItem(Items.IRON_LEGGINGS), conditionsFromItem(Items.IRON_LEGGINGS)));
+                        .define('F', PlanetItems.FABRIC)
+                        .define('L', Items.IRON_LEGGINGS)
+                        .unlockedBy(getHasName(PlanetItems.FABRIC), has(PlanetItems.FABRIC))
+                        .unlockedBy(getHasName(Items.IRON_LEGGINGS), has(Items.IRON_LEGGINGS)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_CHESTPLATE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_CHESTPLATE, 1)
                         .pattern("F F")
                         .pattern("FCF")
                         .pattern("FBF")
-                        .input('F', PlanetItems.FABRIC)
-                        .input('B', Items.BUCKET)
-                        .input('C', Items.IRON_CHESTPLATE)
-                        .criterion(hasItem(PlanetItems.FABRIC), conditionsFromItem(PlanetItems.FABRIC))
-                        .criterion(hasItem(Items.BUCKET), conditionsFromItem(Items.BUCKET))
-                        .criterion(hasItem(Items.IRON_CHESTPLATE), conditionsFromItem(Items.IRON_CHESTPLATE)));
+                        .define('F', PlanetItems.FABRIC)
+                        .define('B', Items.BUCKET)
+                        .define('C', Items.IRON_CHESTPLATE)
+                        .unlockedBy(getHasName(PlanetItems.FABRIC), has(PlanetItems.FABRIC))
+                        .unlockedBy(getHasName(Items.BUCKET), has(Items.BUCKET))
+                        .unlockedBy(getHasName(Items.IRON_CHESTPLATE), has(Items.IRON_CHESTPLATE)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_HELMET, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, PlanetItems.SPACESUIT_HELMET, 1)
                         .pattern("FHF")
                         .pattern("FGF")
                         .pattern("FFF")
-                        .input('F', PlanetItems.FABRIC)
-                        .input('H', Items.IRON_HELMET)
-                        .input('G', Items.YELLOW_STAINED_GLASS_PANE)
-                        .criterion(hasItem(PlanetItems.FABRIC), conditionsFromItem(PlanetItems.FABRIC))
-                        .criterion(hasItem(Items.IRON_HELMET), conditionsFromItem(Items.IRON_HELMET))
-                        .criterion(hasItem(Items.YELLOW_STAINED_GLASS_PANE), conditionsFromItem(Items.YELLOW_STAINED_GLASS_PANE)));
+                        .define('F', PlanetItems.FABRIC)
+                        .define('H', Items.IRON_HELMET)
+                        .define('G', Items.YELLOW_STAINED_GLASS_PANE)
+                        .unlockedBy(getHasName(PlanetItems.FABRIC), has(PlanetItems.FABRIC))
+                        .unlockedBy(getHasName(Items.IRON_HELMET), has(Items.IRON_HELMET))
+                        .unlockedBy(getHasName(Items.YELLOW_STAINED_GLASS_PANE), has(Items.YELLOW_STAINED_GLASS_PANE)));
 
                 // Martian Tools
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_PICKAXE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_PICKAXE, 1)
                         .pattern("MMM")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_SWORD, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_SWORD, 1)
                         .pattern(" M ")
                         .pattern(" M ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_SHOVEL, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_SHOVEL, 1)
                         .pattern(" M ")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_HOE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_HOE, 1)
                         .pattern(" MM")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_AXE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.MARTIAN_STONE_AXE, 1)
                         .pattern(" MM")
                         .pattern(" SM")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.MARTIAN_COBBLESTONE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_COBBLESTONE), conditionsFromItem(PlanetBlocks.MARTIAN_COBBLESTONE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.MARTIAN_COBBLESTONE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
                 // Anorthosite Tools
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_PICKAXE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_PICKAXE, 1)
                         .pattern("MMM")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.ANORTHOSITE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.ANORTHOSITE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_SWORD, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_SWORD, 1)
                         .pattern(" M ")
                         .pattern(" M ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.ANORTHOSITE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.ANORTHOSITE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_SHOVEL, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_SHOVEL, 1)
                         .pattern(" M ")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.ANORTHOSITE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.ANORTHOSITE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_HOE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_HOE, 1)
                         .pattern(" MM")
                         .pattern(" S ")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.ANORTHOSITE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.ANORTHOSITE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_AXE, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetItems.ANORTHOSITE_AXE, 1)
                         .pattern(" MM")
                         .pattern(" SM")
                         .pattern(" S ")
-                        .input('M', PlanetBlocks.ANORTHOSITE)
-                        .input('S', Items.STICK)
-                        .criterion(hasItem(PlanetBlocks.ANORTHOSITE), conditionsFromItem(PlanetBlocks.ANORTHOSITE))
-                        .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
+                        .define('M', PlanetBlocks.ANORTHOSITE)
+                        .define('S', Items.STICK)
+                        .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE))
+                        .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
                 // Martian Stone
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_WALL, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_WALL, 1)
                         .pattern("   ")
                         .pattern("SSS")
                         .pattern("SSS")
-                        .input('S', PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
+                        .define('S', PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_STAIRS, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_STAIRS, 1)
                         .pattern("S  ")
                         .pattern("SS ")
                         .pattern("SSS")
-                        .input('S', PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
+                        .define('S', PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
 
-                provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_SLAB, 1)
+                provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_SLAB, 1)
                         .pattern("   ")
                         .pattern("   ")
                         .pattern("SSS")
-                        .input('S', PlanetBlocks.MARTIAN_STONE)
-                        .criterion(hasItem(PlanetBlocks.MARTIAN_STONE), conditionsFromItem(PlanetBlocks.MARTIAN_STONE)));
+                        .define('S', PlanetBlocks.MARTIAN_STONE)
+                        .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)));
 
 
 
@@ -852,94 +850,94 @@ public class PlanetModule extends Module {
 
 
             @Override
-            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerator generator) {
-                generator.registerArmor((ArmorItem) PlanetItems.SPACESUIT_BOOTS);
-                generator.registerArmor((ArmorItem) PlanetItems.SPACESUIT_CHESTPLATE);
-                generator.registerArmor((ArmorItem) PlanetItems.SPACESUIT_LEGGINGS);
-                generator.registerArmor((ArmorItem) PlanetItems.SPACESUIT_HELMET);
+            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerators generator) {
+                generator.generateArmorTrims((ArmorItem) PlanetItems.SPACESUIT_BOOTS);
+                generator.generateArmorTrims((ArmorItem) PlanetItems.SPACESUIT_CHESTPLATE);
+                generator.generateArmorTrims((ArmorItem) PlanetItems.SPACESUIT_LEGGINGS);
+                generator.generateArmorTrims((ArmorItem) PlanetItems.SPACESUIT_HELMET);
 
-                generator.register(PlanetItems.MARTIAN_STONE_SWORD, Models.HANDHELD);
-                generator.register(PlanetItems.MARTIAN_STONE_SHOVEL, Models.HANDHELD);
-                generator.register(PlanetItems.MARTIAN_STONE_PICKAXE, Models.HANDHELD);
-                generator.register(PlanetItems.MARTIAN_STONE_HOE, Models.HANDHELD);
-                generator.register(PlanetItems.MARTIAN_STONE_AXE, Models.HANDHELD);
+                generator.generateFlatItem(PlanetItems.MARTIAN_STONE_SWORD, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.MARTIAN_STONE_SHOVEL, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.MARTIAN_STONE_PICKAXE, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.MARTIAN_STONE_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.MARTIAN_STONE_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 
-                generator.register(PlanetItems.ANORTHOSITE_SWORD, Models.HANDHELD);
-                generator.register(PlanetItems.ANORTHOSITE_SHOVEL, Models.HANDHELD);
-                generator.register(PlanetItems.ANORTHOSITE_PICKAXE, Models.HANDHELD);
-                generator.register(PlanetItems.ANORTHOSITE_HOE, Models.HANDHELD);
-                generator.register(PlanetItems.ANORTHOSITE_AXE, Models.HANDHELD);
+                generator.generateFlatItem(PlanetItems.ANORTHOSITE_SWORD, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.ANORTHOSITE_SHOVEL, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.ANORTHOSITE_PICKAXE, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.ANORTHOSITE_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
+                generator.generateFlatItem(PlanetItems.ANORTHOSITE_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
             }
 
             @Override
-            public void models(AmbleModelProvider provider, BlockStateModelGenerator generator) {
+            public void models(AmbleModelProvider provider, BlockModelGenerators generator) {
                 //Martian (Slabs, Walls, etc.)
-                BlockStateModelGenerator.BlockTexturePool martian_stone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MARTIAN_STONE);
+                BlockModelGenerators.BlockFamilyProvider martian_stone_pool = generator.family(PlanetBlocks.MARTIAN_STONE);
                 martian_stone_pool.stairs(PlanetBlocks.MARTIAN_STONE_STAIRS);
                 martian_stone_pool.wall(PlanetBlocks.MARTIAN_STONE_WALL);
                 martian_stone_pool.slab(PlanetBlocks.MARTIAN_STONE_SLAB);
                 martian_stone_pool.button(PlanetBlocks.MARTIAN_STONE_BUTTON);
                 martian_stone_pool.pressurePlate(PlanetBlocks.MARTIAN_STONE_PRESSURE_PLATE);
 
-                BlockStateModelGenerator.BlockTexturePool martian_bricks_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MARTIAN_BRICKS);
+                BlockModelGenerators.BlockFamilyProvider martian_bricks_pool = generator.family(PlanetBlocks.MARTIAN_BRICKS);
                 martian_bricks_pool.stairs(PlanetBlocks.MARTIAN_BRICK_STAIRS);
                 martian_bricks_pool.wall(PlanetBlocks.MARTIAN_BRICK_WALL);
                 martian_bricks_pool.slab(PlanetBlocks.MARTIAN_BRICK_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool martian_cobblestone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MARTIAN_COBBLESTONE);
+                BlockModelGenerators.BlockFamilyProvider martian_cobblestone_pool = generator.family(PlanetBlocks.MARTIAN_COBBLESTONE);
                 martian_cobblestone_pool.stairs(PlanetBlocks.MARTIAN_COBBLESTONE_STAIRS);
                 martian_cobblestone_pool.wall(PlanetBlocks.MARTIAN_COBBLESTONE_WALL);
                 martian_cobblestone_pool.slab(PlanetBlocks.MARTIAN_COBBLESTONE_SLAB);
 
 
-                BlockStateModelGenerator.BlockTexturePool mossy_martian_cobblestone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE);
+                BlockModelGenerators.BlockFamilyProvider mossy_martian_cobblestone_pool = generator.family(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE);
                 mossy_martian_cobblestone_pool.stairs(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_STAIRS);
                 mossy_martian_cobblestone_pool.wall(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_WALL);
                 mossy_martian_cobblestone_pool.slab(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool martian_sandstone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MARTIAN_SANDSTONE);
+                BlockModelGenerators.BlockFamilyProvider martian_sandstone_pool = generator.family(PlanetBlocks.MARTIAN_SANDSTONE);
                 martian_sandstone_pool.stairs(PlanetBlocks.MARTIAN_SANDSTONE_STAIRS);
                 martian_sandstone_pool.wall(PlanetBlocks.MARTIAN_SANDSTONE_WALL);
                 martian_sandstone_pool.slab(PlanetBlocks.MARTIAN_SANDSTONE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool martian_sandstone_bricks_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS);
+                BlockModelGenerators.BlockFamilyProvider martian_sandstone_bricks_pool = generator.family(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS);
                 martian_sandstone_bricks_pool.stairs(PlanetBlocks.MARTIAN_SANDSTONE_BRICK_STAIRS);
                 martian_sandstone_bricks_pool.wall(PlanetBlocks.MARTIAN_SANDSTONE_BRICK_WALL);
                 martian_sandstone_bricks_pool.slab(PlanetBlocks.MARTIAN_SANDSTONE_BRICK_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool smooth_martian_stone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.SMOOTH_MARTIAN_STONE);
+                BlockModelGenerators.BlockFamilyProvider smooth_martian_stone_pool = generator.family(PlanetBlocks.SMOOTH_MARTIAN_STONE);
                 smooth_martian_stone_pool.slab(PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool polished_martian_stone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.POLISHED_MARTIAN_STONE);
+                BlockModelGenerators.BlockFamilyProvider polished_martian_stone_pool = generator.family(PlanetBlocks.POLISHED_MARTIAN_STONE);
                 polished_martian_stone_pool.stairs(PlanetBlocks.POLISHED_MARTIAN_STONE_STAIRS);
                 polished_martian_stone_pool.slab(PlanetBlocks.POLISHED_MARTIAN_STONE_SLAB);
 
 
                 //Anorthosite (Slabs, Walls, etc.)
 
-                BlockStateModelGenerator.BlockTexturePool anorthosite_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.ANORTHOSITE);
+                BlockModelGenerators.BlockFamilyProvider anorthosite_pool = generator.family(PlanetBlocks.ANORTHOSITE);
                 anorthosite_pool.stairs(PlanetBlocks.ANORTHOSITE_STAIRS);
                 anorthosite_pool.wall(PlanetBlocks.ANORTHOSITE_WALL);
                 anorthosite_pool.slab(PlanetBlocks.ANORTHOSITE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool anorthosite_bricks_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.ANORTHOSITE_BRICKS);
+                BlockModelGenerators.BlockFamilyProvider anorthosite_bricks_pool = generator.family(PlanetBlocks.ANORTHOSITE_BRICKS);
                 anorthosite_bricks_pool.stairs(PlanetBlocks.ANORTHOSITE_BRICK_STAIRS);
                 anorthosite_bricks_pool.wall(PlanetBlocks.ANORTHOSITE_BRICK_WALL);
                 anorthosite_bricks_pool.slab(PlanetBlocks.ANORTHOSITE_BRICK_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool smooth_anorthosite_stone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.SMOOTH_ANORTHOSITE);
+                BlockModelGenerators.BlockFamilyProvider smooth_anorthosite_stone_pool = generator.family(PlanetBlocks.SMOOTH_ANORTHOSITE);
                 smooth_anorthosite_stone_pool.slab(PlanetBlocks.SMOOTH_ANORTHOSITE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool polished_anorthosite_stone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.POLISHED_ANORTHOSITE);
+                BlockModelGenerators.BlockFamilyProvider polished_anorthosite_stone_pool = generator.family(PlanetBlocks.POLISHED_ANORTHOSITE);
                 polished_anorthosite_stone_pool.stairs(PlanetBlocks.POLISHED_ANORTHOSITE_STAIRS);
                 polished_anorthosite_stone_pool.slab(PlanetBlocks.POLISHED_ANORTHOSITE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool moon_sandstone_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MOON_SANDSTONE);
+                BlockModelGenerators.BlockFamilyProvider moon_sandstone_pool = generator.family(PlanetBlocks.MOON_SANDSTONE);
                 moon_sandstone_pool.stairs(PlanetBlocks.MOON_SANDSTONE_STAIRS);
                 moon_sandstone_pool.wall(PlanetBlocks.MOON_SANDSTONE_WALL);
                 moon_sandstone_pool.slab(PlanetBlocks.MOON_SANDSTONE_SLAB);
 
-                BlockStateModelGenerator.BlockTexturePool moon_sandstone_bricks_pool = generator.registerCubeAllModelTexturePool(PlanetBlocks.MOON_SANDSTONE_BRICKS);
+                BlockModelGenerators.BlockFamilyProvider moon_sandstone_bricks_pool = generator.family(PlanetBlocks.MOON_SANDSTONE_BRICKS);
                 moon_sandstone_bricks_pool.stairs(PlanetBlocks.MOON_SANDSTONE_BRICK_STAIRS);
                 moon_sandstone_bricks_pool.wall(PlanetBlocks.MOON_SANDSTONE_BRICK_WALL);
                 moon_sandstone_bricks_pool.slab(PlanetBlocks.MOON_SANDSTONE_BRICK_SLAB);
@@ -947,63 +945,63 @@ public class PlanetModule extends Module {
 
             @Override
             public void advancements(Consumer<Advancement> consumer) {
-                Advancement root = Advancement.Builder.create()
+                Advancement root = Advancement.Builder.advancement()
                         .display(
                                 PlanetItems.SPACESUIT_HELMET,
-                                Text.translatable("achievements.ait.title.planet_root"),
-                                Text.translatable("achievements.ait.description.planet_root"),
+                                Component.translatable("achievements.ait.title.planet_root"),
+                                Component.translatable("achievements.ait.description.planet_root"),
                                 AITMod.id("textures/block/martian_stone.png"),
-                                AdvancementFrame.TASK,
+                                FrameType.TASK,
                                 false,
                                 false,
                                 false
                         )
-                        .criterion("enter_tardis", TardisCriterions.ENTER_TARDIS.conditions())
-                        .build(consumer, AITMod.MOD_ID + "/planet_root");
-                Advancement landOnMars = Advancement.Builder.create()
+                        .addCriterion("enter_tardis", TardisCriterions.ENTER_TARDIS.conditions())
+                        .save(consumer, AITMod.MOD_ID + "/planet_root");
+                Advancement landOnMars = Advancement.Builder.advancement()
                         .parent(root)
                         .display(
                                 PlanetBlocks.MARTIAN_STONE,
-                                Text.translatable("achievements.ait.title.enter_mars"),
-                                Text.translatable("achievements.ait.description.enter_mars"),
+                                Component.translatable("achievements.ait.title.enter_mars"),
+                                Component.translatable("achievements.ait.description.enter_mars"),
                                 null,
-                                AdvancementFrame.TASK,
+                                FrameType.TASK,
                                 true,
                                 true,
                                 true
                         )
-                        .criterion(
+                        .addCriterion(
                                 "enter_mars",
-                                ChangedDimensionCriterion.Conditions.to(
-                                        RegistryKey.of(
-                                                RegistryKeys.WORLD,
+                                ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(
+                                        ResourceKey.create(
+                                                Registries.DIMENSION,
                                                 AITMod.id("mars")
                                         )
                                 )
                         )
-                        .build(consumer, AITMod.MOD_ID + "/enter_mars");
-                Advancement landOnMoon = Advancement.Builder.create()
+                        .save(consumer, AITMod.MOD_ID + "/enter_mars");
+                Advancement landOnMoon = Advancement.Builder.advancement()
                         .parent(root)
                         .display(
                                 PlanetBlocks.ANORTHOSITE,
-                                Text.translatable("achievements.ait.title.enter_moon"),
-                                Text.translatable("achievements.ait.description.enter_moon"),
+                                Component.translatable("achievements.ait.title.enter_moon"),
+                                Component.translatable("achievements.ait.description.enter_moon"),
                                 null,
-                                AdvancementFrame.TASK,
+                                FrameType.TASK,
                                 true,
                                 true,
                                 true
                         )
-                        .criterion(
+                        .addCriterion(
                                 "enter_moon",
-                                ChangedDimensionCriterion.Conditions.to(
-                                        RegistryKey.of(
-                                                RegistryKeys.WORLD,
+                                ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(
+                                        ResourceKey.create(
+                                                Registries.DIMENSION,
                                                 AITMod.id("moon")
                                         )
                                 )
                         )
-                        .build(consumer, AITMod.MOD_ID + "/enter_moon");
+                        .save(consumer, AITMod.MOD_ID + "/enter_moon");
 
                 // todo - idk how to do this
                 // Advancement findStructure = Advancement.Builder.create().parent(root).display(Blocks.REDSTONE_BLOCK, Text.translatable("advancements.ait.find_planet_structure.title"), Text.translatable("advancements.ait.find_planet_structure.description"), null, AdvancementFrame.CHALLENGE, true, true, true).criterion("planet_structure", TickCriterion.Conditions.createLocation(LocationPredicate.feature(RegistryKey.of(RegistryKeys.STRUCTURE, AITMod.id("cult_structures_overworld"))))).build(consumer, AITMod.MOD_ID + "/find_planet_structure");

@@ -8,46 +8,44 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.monster.CrossbowAttackMob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.CrossbowUser;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.RangedWeaponItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.AITStatusEffects;
 
-public class BaseGunItem extends RangedWeaponItem {
-    public static final Identifier SHOOT = AITMod.id("shoot_gun");
-    public static final Predicate<ItemStack> GUN_PROJECTILES = itemStack -> itemStack.isOf(GunItems.STASER_BOLT_MAGAZINE);
+public class BaseGunItem extends ProjectileWeaponItem {
+    public static final ResourceLocation SHOOT = AITMod.id("shoot_gun");
+    public static final Predicate<ItemStack> GUN_PROJECTILES = itemStack -> itemStack.is(GunItems.STASER_BOLT_MAGAZINE);
     public static final double MAX_AMMO = 64;
     public static final String AMMO_KEY = "ammo";
 
-    public BaseGunItem(Settings settings) {
+    public BaseGunItem(Properties settings) {
         super(settings);
     }
 
@@ -57,17 +55,17 @@ public class BaseGunItem extends RangedWeaponItem {
         boolean isAds = buf.readBoolean();
 
         if (shoot) {
-            if (player.getMainHandStack().getItem() instanceof BaseGunItem gun) {
-                if (gun.getCurrentAmmo(player.getMainHandStack()) <= 0) {
-                    player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            if (player.getMainHandItem().getItem() instanceof BaseGunItem gun) {
+                if (gun.getCurrentAmmo(player.getMainHandItem()) <= 0) {
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.STONE_BUTTON_CLICK_OFF, SoundSource.PLAYERS, 1.0f, 1.0f);
                     return;
                 }
-                BaseGunItem.shoot(player.getWorld(), player, Hand.MAIN_HAND, player.getMainHandStack(), GunItems.STASER_BOLT_MAGAZINE.getDefaultStack(),
-                        1.0f, false, 4.0f, player.hasStatusEffect(AITStatusEffects.ZEITON_HIGH) ? 20f : gun.getAimDeviation(isAds), 0.0f);
-                NbtCompound compound = player.getMainHandStack().getOrCreateNbt();
+                BaseGunItem.shoot(player.level(), player, InteractionHand.MAIN_HAND, player.getMainHandItem(), GunItems.STASER_BOLT_MAGAZINE.getDefaultInstance(),
+                        1.0f, false, 4.0f, player.hasEffect(AITStatusEffects.ZEITON_HIGH) ? 20f : gun.getAimDeviation(isAds), 0.0f);
+                CompoundTag compound = player.getMainHandItem().getOrCreateTag();
                 double current = compound.getDouble(AMMO_KEY);
                 double removableAmmo = (isAds ? 2 : 1);
-                player.getItemCooldownManager().set(gun, gun.getCooldown());
+                player.getCooldowns().addCooldown(gun, gun.getCooldown());
                 if (current - removableAmmo <= 0) {
                     compound.putDouble(AMMO_KEY, 0);
                 } else {
@@ -79,49 +77,49 @@ public class BaseGunItem extends RangedWeaponItem {
     }
 
     @Override
-    public ItemStack getDefaultStack() {
+    public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putDouble(AMMO_KEY, 0);
         return stack;
     }
 
     @Environment(EnvType.CLIENT)
     public static void shootGun(boolean shoot, boolean isAds) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(shoot);
         buf.writeBoolean(isAds);
         ClientPlayNetworking.send(BaseGunItem.SHOOT, buf);
     }
 
     @Environment(EnvType.CLIENT)
-    public void tryShoot(World world, Entity entity, boolean selected) {
-        if (world.isClient() && entity instanceof PlayerEntity player) {
+    public void tryShoot(Level world, Entity entity, boolean selected) {
+        if (world.isClientSide() && entity instanceof Player player) {
             if (selected) {
-                BaseGunItem.shootGun(MinecraftClient.getInstance().options.attackKey.isPressed(), MinecraftClient.getInstance().options.useKey.isPressed());
-                MinecraftClient.getInstance().options.attackKey.setPressed(false);
+                BaseGunItem.shootGun(Minecraft.getInstance().options.keyAttack.isDown(), Minecraft.getInstance().options.keyUse.isDown());
+                Minecraft.getInstance().options.keyAttack.setDown(false);
             }
         }
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
-        if (world.isClient()) {
-            if (entity instanceof PlayerEntity player) {
-                if (!player.getItemCooldownManager().isCoolingDown(this))
+        if (world.isClientSide()) {
+            if (entity instanceof Player player) {
+                if (!player.getCooldowns().isOnCooldown(this))
                     this.tryShoot(world, entity, selected);
             }
         }
     }
 
     @Override
-    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player player, SlotAccess cursorStackReference) {
         if (otherStack.getItem() instanceof StaserBoltMagazine magazine) {
             double magazineAmmo = magazine.getCurrentFuel(otherStack);
             if (stack.getItem() instanceof BaseGunItem gun) {
                 double ammo = gun.getCurrentAmmo(stack);
-                if (clickType == ClickType.RIGHT && gun.getCurrentAmmo(stack) < gun.getMaxAmmo()) {
+                if (clickType == ClickAction.SECONDARY && gun.getCurrentAmmo(stack) < gun.getMaxAmmo()) {
                     double residual = (ammo + magazineAmmo) - gun.getMaxAmmo();
                     gun.setCurrentAmmo(ammo + magazineAmmo, stack);
                     magazine.setCurrentFuel(residual, otherStack);
@@ -129,23 +127,23 @@ public class BaseGunItem extends RangedWeaponItem {
                 }
             }
         }
-        return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
+        return super.overrideOtherStackedOnMe(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
 
     @Override
-    public Predicate<ItemStack> getProjectiles() {
+    public Predicate<ItemStack> getAllSupportedProjectiles() {
         return GUN_PROJECTILES;
     }
 
     public double getCurrentAmmo(ItemStack stack) {
         if (stack.getItem() == this)
-            return stack.getOrCreateNbt().getDouble(AMMO_KEY);
+            return stack.getOrCreateTag().getDouble(AMMO_KEY);
         return 0.0d;
     }
 
     public void setCurrentAmmo(double var, ItemStack stack) {
         if (stack.getItem() == this)
-            stack.getOrCreateNbt().putDouble(AMMO_KEY, Math.min(var, this.getMaxAmmo()));
+            stack.getOrCreateTag().putDouble(AMMO_KEY, Math.min(var, this.getMaxAmmo()));
     }
 
     public double getMaxAmmo() {
@@ -161,43 +159,43 @@ public class BaseGunItem extends RangedWeaponItem {
     }
 
     @Override
-    public int getRange() {
+    public int getDefaultProjectileRange() {
         return 24;
     }
 
-    private static void shoot(World world, LivingEntity shooter, Hand hand, ItemStack gun, ItemStack projectile, float soundPitch, boolean creative, float speed, float divergence, float simulated) {
-        PersistentProjectileEntity projectileEntity;
-        if (world.isClient) {
+    private static void shoot(Level world, LivingEntity shooter, InteractionHand hand, ItemStack gun, ItemStack projectile, float soundPitch, boolean creative, float speed, float divergence, float simulated) {
+        AbstractArrow projectileEntity;
+        if (world.isClientSide) {
             return;
         }
         projectileEntity = BaseGunItem.createBolt(world, shooter, gun, projectile);
         if (creative || simulated != 0.0f) {
-            projectileEntity.pickupType = PersistentProjectileEntity.PickupPermission.DISALLOWED;
+            projectileEntity.pickup = AbstractArrow.Pickup.DISALLOWED;
         }
-        if (shooter instanceof CrossbowUser crossbowUser) {
-            crossbowUser.shoot(crossbowUser.getTarget(), gun, projectileEntity, simulated);
+        if (shooter instanceof CrossbowAttackMob crossbowUser) {
+            crossbowUser.shootCrossbowProjectile(crossbowUser.getTarget(), gun, projectileEntity, simulated);
         } else {
-            Vec3d vec3d = shooter.getOppositeRotationVector(1.0f);
+            Vec3 vec3d = shooter.getUpVector(1.0f);
             Quaternionf quaternionf = new Quaternionf().setAngleAxis(simulated * ((float)Math.PI / 180), vec3d.x, vec3d.y, vec3d.z);
-            Vec3d vec3d2 = shooter.getRotationVec(1.0f);
+            Vec3 vec3d2 = shooter.getViewVector(1.0f);
             Vector3f vector3f = vec3d2.toVector3f().rotate(quaternionf);
-            projectileEntity.setVelocity(vector3f.x(), vector3f.y(), vector3f.z(), speed, divergence);
+            projectileEntity.shoot(vector3f.x(), vector3f.y(), vector3f.z(), speed, divergence);
         }
-        gun.damage(3, shooter, e -> e.sendToolBreakStatus(hand));
-        projectileEntity.setPos(shooter.getX(), shooter.getY() + 1.2f, shooter.getZ());
-        world.spawnEntity(projectileEntity);
-        world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), AITSounds.STASER, SoundCategory.PLAYERS, 0.25f, soundPitch);
+        gun.hurtAndBreak(3, shooter, e -> e.broadcastBreakEvent(hand));
+        projectileEntity.setPosRaw(shooter.getX(), shooter.getY() + 1.2f, shooter.getZ());
+        world.addFreshEntity(projectileEntity);
+        world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), AITSounds.STASER, SoundSource.PLAYERS, 0.25f, soundPitch);
     }
 
-    private static PersistentProjectileEntity createBolt(World world, LivingEntity entity, ItemStack gun, ItemStack bolt) {
+    private static AbstractArrow createBolt(Level world, LivingEntity entity, ItemStack gun, ItemStack bolt) {
         StaserBoltMagazine boltItem = (StaserBoltMagazine)(bolt.getItem() instanceof StaserBoltMagazine ? bolt.getItem() : GunItems.STASER_BOLT_MAGAZINE);
-        PersistentProjectileEntity persistentProjectileEntity = boltItem.createStaserbolt(world, bolt, entity);
-        if (entity instanceof PlayerEntity) {
-            persistentProjectileEntity.setCritical(true);
+        AbstractArrow persistentProjectileEntity = boltItem.createStaserbolt(world, bolt, entity);
+        if (entity instanceof Player) {
+            persistentProjectileEntity.setCritArrow(true);
         }
-        persistentProjectileEntity.setSound(AITSounds.STASER);
+        persistentProjectileEntity.setSoundEvent(AITSounds.STASER);
         persistentProjectileEntity.setShotFromCrossbow(true);
-        int i = EnchantmentHelper.getLevel(Enchantments.PIERCING, gun);
+        int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, gun);
         if (i > 0) {
             persistentProjectileEntity.setPierceLevel((byte)i);
         }
@@ -205,17 +203,17 @@ public class BaseGunItem extends RangedWeaponItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
         double currentAmmo = this.getCurrentAmmo(stack);
-        Formatting ammoColor = currentAmmo > (this.getMaxAmmo() / 4) ? Formatting.GREEN : Formatting.RED;
+        ChatFormatting ammoColor = currentAmmo > (this.getMaxAmmo() / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;
 
         tooltip.add(
-                Text.translatable("message.ait.ammo", currentAmmo)
-                        .formatted(ammoColor)
-                        .append(Text.literal(" / ").formatted(Formatting.GRAY))
-                        .append(Text.literal(String.valueOf(this.getMaxAmmo())).formatted(Formatting.GRAY))
+                Component.translatable("message.ait.ammo", currentAmmo)
+                        .withStyle(ammoColor)
+                        .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(this.getMaxAmmo())).withStyle(ChatFormatting.GRAY))
         );
     }
 }

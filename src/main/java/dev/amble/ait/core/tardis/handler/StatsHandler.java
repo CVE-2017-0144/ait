@@ -13,13 +13,11 @@ import com.google.gson.JsonParser;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.level.Level;
 import org.joml.Vector3f;
-
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.resource.Resource;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.core.sounds.flight.FlightSound;
@@ -45,11 +43,11 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class StatsHandler extends KeyedTardisComponent {
 
-    public static final Identifier SHOULD_RECEIVE_CALLS = AITMod.id("should_receive_calls");
-    public static final Identifier FLIGHT_SOUND_PACKET = AITMod.id("flight_sound_packet");
-    public static final Identifier VORTEX_PACKET = AITMod.id("vortex_packet");
+    public static final ResourceLocation SHOULD_RECEIVE_CALLS = AITMod.id("should_receive_calls");
+    public static final ResourceLocation FLIGHT_SOUND_PACKET = AITMod.id("flight_sound_packet");
+    public static final ResourceLocation VORTEX_PACKET = AITMod.id("vortex_packet");
 
-    private static final Identifier NAME_PATH = AITMod.id("tardis_names.json");
+    private static final ResourceLocation NAME_PATH = AITMod.id("tardis_names.json");
     private static List<String> NAME_CACHE;
 
     private static final Property<String> NAME = new Property<>(Property.STR, "name", "");
@@ -57,15 +55,15 @@ public class StatsHandler extends KeyedTardisComponent {
             "");
     private static final Property<Long> DATE = new Property<>(Property.LONG, "date", 0L);
     private static final Property<String> DATE_TIME_ZONE = new Property<>(Property.STR, "date_time_zone", "");
-    private static final Property<RegistryKey<World>> SKYBOX = new Property<>(Property.WORLD_KEY, "skybox",
-            World.END);
+    private static final Property<ResourceKey<Level>> SKYBOX = new Property<>(Property.WORLD_KEY, "skybox",
+            Level.END);
     private static final FloatProperty SKYBOX_YAW = new FloatProperty("skybox_yaw", 0f);
     private static final FloatProperty SKYBOX_PITCH = new FloatProperty("skybox_pitch", 0f);
     private static final Property<HashSet<String>> UNLOCKS = new Property<>(Property.STR_SET, "unlocks",
             new HashSet<>());
 
-    private static final Property<Identifier> FLIGHT_FX = new Property<>(Property.IDENTIFIER, "flight_fx", new Identifier(""));
-    private static final Property<Identifier> VORTEX_FX = new Property<>(Property.IDENTIFIER, "vortex_fx", new Identifier(""));
+    private static final Property<ResourceLocation> FLIGHT_FX = new Property<>(Property.IDENTIFIER, "flight_fx", new ResourceLocation(""));
+    private static final Property<ResourceLocation> VORTEX_FX = new Property<>(Property.IDENTIFIER, "vortex_fx", new ResourceLocation(""));
     private static final BoolProperty SECURITY = new BoolProperty("security", false);
     private static final BoolProperty HAIL_MARY = new BoolProperty("hail_mary", false);
     private static final BoolProperty RECEIVE_CALLS = new BoolProperty("receive_calls", true);
@@ -78,15 +76,15 @@ public class StatsHandler extends KeyedTardisComponent {
     private final Value<String> playerCreatorName = PLAYER_CREATOR_NAME.create(this);
     private final Value<Long> dateCreated = DATE.create(this);
     private final Value<String> dateTimeZone = DATE_TIME_ZONE.create(this);
-    private final Value<RegistryKey<World>> skybox = SKYBOX.create(this);
+    private final Value<ResourceKey<Level>> skybox = SKYBOX.create(this);
     private final FloatValue skyboxYaw = SKYBOX_YAW.create(this);
     private final FloatValue skyboxPitch = SKYBOX_PITCH.create(this);
     private final Value<HashSet<String>> unlocks = UNLOCKS.create(this);
     private final BoolValue security = SECURITY.create(this);
     private final BoolValue hailMary = HAIL_MARY.create(this);
     private final BoolValue receiveCalls = RECEIVE_CALLS.create(this);
-    private final Value<Identifier> flightId = FLIGHT_FX.create(this);
-    private final Value<Identifier> vortexId = VORTEX_FX.create(this);
+    private final Value<ResourceLocation> flightId = FLIGHT_FX.create(this);
+    private final Value<ResourceLocation> vortexId = VORTEX_FX.create(this);
     private final DoubleValue tardisXScale = TARDIS_X_SCALE.create(this);
     private final DoubleValue tardisYScale = TARDIS_Y_SCALE.create(this);
     private final DoubleValue tardisZScale = TARDIS_Z_SCALE.create(this);
@@ -99,7 +97,7 @@ public class StatsHandler extends KeyedTardisComponent {
 
     static {
         ServerPlayNetworking.registerGlobalReceiver(VORTEX_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
-            Identifier id = buf.readIdentifier();
+            ResourceLocation id = buf.readResourceLocation();
 
             if (tardis == null || id == null)
                 return;
@@ -108,7 +106,7 @@ public class StatsHandler extends KeyedTardisComponent {
         })));
 
         ServerPlayNetworking.registerGlobalReceiver(FLIGHT_SOUND_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
-            Identifier id = buf.readIdentifier();
+            ResourceLocation id = buf.readResourceLocation();
 
             if (tardis == null || id == null)
                 return;
@@ -191,7 +189,7 @@ public class StatsHandler extends KeyedTardisComponent {
         }, sync);
     }
 
-    public Value<RegistryKey<World>> skybox() {
+    public Value<ResourceKey<Level>> skybox() {
         return skybox;
     }
 
@@ -285,7 +283,7 @@ public class StatsHandler extends KeyedTardisComponent {
                 return;
             }
 
-            InputStream stream = resource.get().getInputStream();
+            InputStream stream = resource.get().open();
 
             JsonArray list = JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonArray();
 
@@ -395,14 +393,14 @@ public class StatsHandler extends KeyedTardisComponent {
         return VortexReferenceRegistry.getInstance().getOrFallback(this.vortexId.get());
     }
 
-    public void setVortexEffects(Identifier current) {
+    public void setVortexEffects(ResourceLocation current) {
         this.vortexId.set(current);
 
         if (this.vortexFxCache != null)
             this.vortexFxCache.invalidate();
     }
 
-    public void setFlightEffects(Identifier current) {
+    public void setFlightEffects(ResourceLocation current) {
         this.flightId.set(current);
 
         if (this.flightFxCache != null)

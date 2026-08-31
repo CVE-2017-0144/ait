@@ -1,36 +1,44 @@
 package dev.amble.ait.client.models.boti;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.Entity;
 
-public class BotiPortalModel extends SinglePartEntityModel {
+public class BotiPortalModel extends HierarchicalModel {
     private final ModelPart BOTI;
     public BotiPortalModel(ModelPart root) {
         this.BOTI = root.getChild("BOTI");
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData BOTI = modelPartData.addChild("BOTI", ModelPartBuilder.create().uv(0, 0).cuboid(-8.0F, -32.0F, 0.0F, 16.0F, 16.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
-        return TexturedModelData.of(modelData, 32, 32);
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition BOTI = modelPartData.addOrReplaceChild("BOTI", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -32.0F, 0.0F, 16.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+        return LayerDefinition.create(modelData, 32, 32);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        matrices.push();
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+        matrices.pushPose();
         BOTI.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return BOTI;
     }
 
     @Override
-    public void setAngles(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+    public void setupAnim(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
 
     }
 }

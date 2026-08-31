@@ -1,13 +1,12 @@
 package dev.amble.ait.client.sounds.flight;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-
 import dev.amble.ait.api.tardis.TardisClientEvents;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.client.sounds.SoundHandler;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 
 // FIXME: god this is so stupid
 //   why does the client have to go through the trouble of finding every tardis in some radius
@@ -25,13 +24,13 @@ public class ClientFlightHandler extends SoundHandler {
     }
 
     private static void refresh() {
-        if (MinecraftClient.getInstance().world == null)
+        if (Minecraft.getInstance().level == null)
             return;
 
         ClientFlightHandler handler = ClientSoundManager.getFlight();
         handler.stopSounds();
         if (FLIGHT != null)
-            MinecraftClient.getInstance().getSoundManager().stop(FLIGHT);
+            Minecraft.getInstance().getSoundManager().stop(FLIGHT);
         FLIGHT = null;
         handler.needsReinit = true;
     }
@@ -44,7 +43,7 @@ public class ClientFlightHandler extends SoundHandler {
     }
 
     private InteriorFlightSound createFlightSound(ClientTardis tardis) {
-        return new InteriorFlightSound(tardis.stats().getFlightEffects(), SoundCategory.BLOCKS);
+        return new InteriorFlightSound(tardis.stats().getFlightEffects(), SoundSource.BLOCKS);
     }
 
     public static ClientFlightHandler create() {
@@ -72,7 +71,7 @@ public class ClientFlightHandler extends SoundHandler {
             if (interior.getData().id().equals(tardis.stats().getFlightEffects().id())) return;
 
             this.stopSounds();
-            MinecraftClient.getInstance().getSoundManager().stop(FLIGHT);
+            Minecraft.getInstance().getSoundManager().stop(FLIGHT);
             FLIGHT = null;
             this.generate(tardis);
         }
@@ -87,7 +86,7 @@ public class ClientFlightHandler extends SoundHandler {
         return tardis != null && tardis.travel().isLanded() && tardis.travel().speed() > 0 && tardis.travel().handbrake();
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.needsReinit && tardis != null) {

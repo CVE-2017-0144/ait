@@ -4,15 +4,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.schema.desktop.TardisDesktopSchema;
@@ -20,11 +17,11 @@ import dev.amble.ait.data.schema.desktop.textures.DesktopPreviewTexture;
 
 public class DatapackDesktop extends TardisDesktopSchema {
     public static final Codec<TardisDesktopSchema> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(Identifier.CODEC.fieldOf("id").forGetter(TardisDesktopSchema::id),
+            .group(ResourceLocation.CODEC.fieldOf("id").forGetter(TardisDesktopSchema::id),
                     Loyalty.CODEC.optionalFieldOf("loyalty").forGetter(TardisDesktopSchema::requirement))
             .apply(instance, DatapackDesktop::new));
 
-    public DatapackDesktop(Identifier id, Optional<Loyalty> loyalty) {
+    public DatapackDesktop(ResourceLocation id, Optional<Loyalty> loyalty) {
         super(id, new DesktopPreviewTexture(DesktopPreviewTexture.pathFromDesktopId(id)), loyalty);
     }
 

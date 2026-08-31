@@ -5,16 +5,14 @@ import java.util.function.Consumer;
 
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.datagen.datagen_providers.AITBlockTagProvider;
 import dev.amble.ait.datagen.datagen_providers.AITItemTagProvider;
@@ -33,7 +31,7 @@ import dev.amble.lib.itemgroup.AItemGroup;
 public class GunModule extends Module {
     private static final GunModule INSTANCE = new GunModule();
 
-    public static final Identifier ID = AITMod.id("gun");
+    public static final ResourceLocation ID = AITMod.id("gun");
 
 
     @Override
@@ -47,23 +45,23 @@ public class GunModule extends Module {
         HudRenderCallback.EVENT.register(new ScopeOverlay());
         EntityRendererRegistry.register(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, StaserBoltEntityRenderer::new);
 
-        ModelPredicateProviderRegistry.register(GunItems.CULT_STASER_RIFLE, new Identifier("ads"),
+        ItemProperties.register(GunItems.CULT_STASER_RIFLE, new ResourceLocation("ads"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null) return 0.0f;
-                    if (itemStack.getItem() == GunItems.CULT_STASER_RIFLE && livingEntity.getMainHandStack().getItem() == GunItems.CULT_STASER_RIFLE) {
-                        if (livingEntity instanceof PlayerEntity) {
-                            boolean bl = MinecraftClient.getInstance().options.useKey.isPressed();
+                    if (itemStack.getItem() == GunItems.CULT_STASER_RIFLE && livingEntity.getMainHandItem().getItem() == GunItems.CULT_STASER_RIFLE) {
+                        if (livingEntity instanceof Player) {
+                            boolean bl = Minecraft.getInstance().options.keyUse.isDown();
                             return bl ? 1.0f : 0.0f;
                         }
                     }
                     return 0.0F;
                 });
-        ModelPredicateProviderRegistry.register(GunItems.CULT_STASER, new Identifier("ads"),
+        ItemProperties.register(GunItems.CULT_STASER, new ResourceLocation("ads"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null) return 0.0f;
-                    if (itemStack.getItem() == GunItems.CULT_STASER && livingEntity.getMainHandStack().getItem() == GunItems.CULT_STASER) {
-                        if (livingEntity instanceof PlayerEntity) {
-                            boolean bl = MinecraftClient.getInstance().options.useKey.isPressed();
+                    if (itemStack.getItem() == GunItems.CULT_STASER && livingEntity.getMainHandItem().getItem() == GunItems.CULT_STASER) {
+                        if (livingEntity instanceof Player) {
+                            boolean bl = Minecraft.getInstance().options.keyUse.isDown();
                             return bl ? 1.0f : 0.0f;
                         }
                     }
@@ -82,7 +80,7 @@ public class GunModule extends Module {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return ID;
     }
 
@@ -110,12 +108,12 @@ public class GunModule extends Module {
             }
 
             @Override
-            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerator generator) {
+            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerators generator) {
 
             }
 
             @Override
-            public void models(AmbleModelProvider provider, BlockStateModelGenerator generator) {
+            public void models(AmbleModelProvider provider, BlockModelGenerators generator) {
 
             }
 

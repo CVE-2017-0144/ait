@@ -10,13 +10,12 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.border.WorldBorder;
-
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.border.WorldBorder;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.tardis.handler.TardisCrashHandler;
@@ -34,7 +33,7 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public abstract class TravelHandlerBase extends KeyedTardisComponent implements TardisTickable {
 
-    public static final Identifier TOGGLE_LEAVE_BEHIND = AITMod.id("toggle_leave_behind");
+    public static final ResourceLocation TOGGLE_LEAVE_BEHIND = AITMod.id("toggle_leave_behind");
 
     private static final Property<State> STATE = Property.forEnum("state", State.class, State.LANDED);
     private static final BoolProperty LEAVE_BEHIND = new BoolProperty("leave_behind", false);
@@ -130,7 +129,7 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
         if (crash.getState() != TardisCrashHandler.State.NORMAL && !tardis.travel().isLanded())
             crash.addRepairTicks(2 * this.speed());
 
-        if (server.getTicks() % 200 == 0 && this.hammerUses > 0)
+        if (server.getTickCount() % 200 == 0 && this.hammerUses > 0)
             this.hammerUses--;
     }
 
@@ -147,7 +146,7 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
     }
 
     protected int clampSpeed(int value) {
-        return MathHelper.clamp(value, 0, this.maxSpeed.get());
+        return Mth.clamp(value, 0, this.maxSpeed.get());
     }
 
     public IntValue maxSpeed() {
@@ -222,7 +221,7 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
         WorldBorder targetBorder = new WorldBorder();
         targetBorder.setSize(cached.getWorld().getWorldBorder().getSize() - 3);
 
-        cached = targetBorder.contains(pos) ? cached : cached.pos(targetBorder.clamp(pos.getX(), pos.getY(), pos.getZ()));
+        cached = targetBorder.isWithinBounds(pos) ? cached : cached.pos(targetBorder.clampToBounds(pos.getX(), pos.getY(), pos.getZ()));
 
         // TODO what is the point of this? the only time this should be done is on landing - unless it gets optimized enough to run here. - Loqor
         //cached = WorldUtil.locateSafe(cached, this.vGroundSearch.get(), this.hGroundSearch.get());
@@ -263,7 +262,7 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
     public enum State implements Ordered {
         LANDED(null), DEMAT(TravelHandler::finishDemat), FLIGHT(null, false), MAT(TravelHandler::finishRemat);
 
-        public static final Codec<State> CODEC = Codecs.NON_EMPTY_STRING.flatXmap(s -> {
+        public static final Codec<State> CODEC = ExtraCodecs.NON_EMPTY_STRING.flatXmap(s -> {
             try {
                 return DataResult.success(State.valueOf(s.toUpperCase()));
             } catch (Exception e) {

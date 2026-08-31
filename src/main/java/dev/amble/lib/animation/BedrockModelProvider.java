@@ -1,7 +1,7 @@
 package dev.amble.lib.animation;
 
 import dev.amble.lib.client.bedrock.BedrockModelReference;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 public interface BedrockModelProvider {
@@ -18,11 +18,11 @@ public interface BedrockModelProvider {
 	}
 
 	@Nullable
-	default Identifier getTexture() {
+	default ResourceLocation getTexture() {
 		if (getModel() == null) return null;
 
 		BedrockModelReference model = getModel();
-		Identifier id = model.id();
+		ResourceLocation id = model.id();
 
 		String prefix = getTexturePrefix();
 		if (!prefix.isEmpty() && !prefix.endsWith("/")) {
@@ -34,18 +34,18 @@ public interface BedrockModelProvider {
 			namespace = id.getNamespace();
 		}
 
-		return Identifier.of(namespace, "textures/" + prefix + model.id().getPath() + ".png");
+		return ResourceLocation.tryBuild(namespace, "textures/" + prefix + model.id().getPath() + ".png");
 	}
 
 	@Nullable
-	default Identifier getEmissionTexture() {
+	default ResourceLocation getEmissionTexture() {
 		if (!hasEmission()) return null;
 
-		Identifier texture = getTexture();
+		ResourceLocation texture = getTexture();
 		if (texture == null) return null;
 
 		// add _emission suffix
-		return Identifier.of(texture.getNamespace(), texture.getPath().replace(".png", "_emission.png"));
+		return ResourceLocation.tryBuild(texture.getNamespace(), texture.getPath().replace(".png", "_emission.png"));
 	}
 
 	default boolean hasEmission() {

@@ -4,26 +4,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
-
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Position;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Position;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 
 public class StackUtil {
 
-    public static final Identifier AIR_ID = Registries.ITEM.getId(Items.AIR);
+    public static final ResourceLocation AIR_ID = BuiltInRegistries.ITEM.getKey(Items.AIR);
     public static final String AIR_STR_ID = AIR_ID.toString();
 
     public static boolean equals(Collection<ItemStack> as, Collection<ItemStack> bs) {
@@ -34,7 +33,7 @@ public class StackUtil {
             boolean found = false;
 
             for (ItemStack b : bs) {
-                if (ItemStack.areItemsEqual(a, b)) {
+                if (ItemStack.isSameItem(a, b)) {
                     found = true;
                     break;
                 }
@@ -57,38 +56,38 @@ public class StackUtil {
         return copy;
     }
 
-    public static void spawn(World world, Position pos, ItemStack stack) {
-        world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), stack));
+    public static void spawn(Level world, Position pos, ItemStack stack) {
+        world.addFreshEntity(new ItemEntity(world, pos.x(), pos.y(), pos.z(), stack));
     }
 
-    public static void spawn(World world, BlockPos pos, ItemStack stack) {
-        spawn(world, pos.toCenterPos(), stack);
+    public static void spawn(Level world, BlockPos pos, ItemStack stack) {
+        spawn(world, pos.getCenter(), stack);
     }
 
-    public static void playBreak(PlayerEntity player) {
-        player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+    public static void playBreak(Player player) {
+        player.playSound(SoundEvents.ITEM_BREAK, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
     }
 
-    public static void scatter(World world, Position pos, Collection<ItemStack> stacks) {
+    public static void scatter(Level world, Position pos, Collection<ItemStack> stacks) {
         for (ItemStack stack : stacks) {
-            ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+            Containers.dropItemStack(world, pos.x(), pos.y(), pos.z(), stack);
         }
     }
 
-    public static void scatter(World world, BlockPos pos, Collection<ItemStack> stacks) {
-        scatter(world, pos.toCenterPos(), stacks);
+    public static void scatter(Level world, BlockPos pos, Collection<ItemStack> stacks) {
+        scatter(world, pos.getCenter(), stacks);
     }
 
-    public static NbtCompound writeUnordered(NbtCompound nbt, Collection<ItemStack> stacks) {
-        NbtList nbtList = new NbtList();
+    public static CompoundTag writeUnordered(CompoundTag nbt, Collection<ItemStack> stacks) {
+        ListTag nbtList = new ListTag();
 
         for (ItemStack stack : stacks) {
             if (stack == null || stack.isEmpty())
                 continue;
 
-            NbtCompound nbtCompound = new NbtCompound();
+            CompoundTag nbtCompound = new CompoundTag();
 
-            stack.writeNbt(nbtCompound);
+            stack.save(nbtCompound);
             nbtList.add(nbtCompound);
         }
 
@@ -98,8 +97,8 @@ public class StackUtil {
         return nbt;
     }
 
-    public static NbtCompound write(NbtCompound nbt, List<ItemStack> stacks) {
-        NbtList nbtList = new NbtList();
+    public static CompoundTag write(CompoundTag nbt, List<ItemStack> stacks) {
+        ListTag nbtList = new ListTag();
 
         for (int i = 0; i < stacks.size(); i++) {
             ItemStack stack = stacks.get(i);
@@ -110,10 +109,10 @@ public class StackUtil {
             if (stack.isEmpty())
                 continue;
 
-            NbtCompound nbtCompound = new NbtCompound();
+            CompoundTag nbtCompound = new CompoundTag();
             nbtCompound.putByte("Slot", (byte) i);
 
-            stack.writeNbt(nbtCompound);
+            stack.save(nbtCompound);
             nbtList.add(nbtCompound);
         }
 
@@ -123,8 +122,8 @@ public class StackUtil {
         return nbt;
     }
 
-    public static NbtCompound write(NbtCompound nbt, ItemStack... stacks) {
-        NbtList nbtList = new NbtList();
+    public static CompoundTag write(CompoundTag nbt, ItemStack... stacks) {
+        ListTag nbtList = new ListTag();
 
         for (int i = 0; i < stacks.length; i++) {
             ItemStack stack = stacks[i];
@@ -135,10 +134,10 @@ public class StackUtil {
             if (stack.isEmpty())
                 continue;
 
-            NbtCompound nbtCompound = new NbtCompound();
+            CompoundTag nbtCompound = new CompoundTag();
             nbtCompound.putByte("Slot", (byte) i);
 
-            stack.writeNbt(nbtCompound);
+            stack.save(nbtCompound);
             nbtList.add(nbtCompound);
         }
 
@@ -148,65 +147,65 @@ public class StackUtil {
         return nbt;
     }
 
-    public static void read(NbtCompound nbt, List<ItemStack> stacks) {
-        NbtList nbtList = nbt.getList("Items", 10);
+    public static void read(CompoundTag nbt, List<ItemStack> stacks) {
+        ListTag nbtList = nbt.getList("Items", 10);
 
         for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
+            CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
 
             if (j < stacks.size()) {
-                stacks.set(j, ItemStack.fromNbt(nbtCompound));
+                stacks.set(j, ItemStack.of(nbtCompound));
             }
         }
     }
 
-    public static ItemStack[] read(NbtCompound nbt) {
-        NbtList nbtList = nbt.getList("Items", 10);
+    public static ItemStack[] read(CompoundTag nbt) {
+        ListTag nbtList = nbt.getList("Items", 10);
         ItemStack[] stacks = new ItemStack[nbtList.size()];
 
         for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
+            CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
 
             if (j < stacks.length) {
-                stacks[j] = ItemStack.fromNbt(nbtCompound);
+                stacks[j] = ItemStack.of(nbtCompound);
             }
         }
 
         return stacks;
     }
 
-    public static void readUnordered(NbtCompound nbt, Collection<ItemStack> stacks) {
-        NbtList nbtList = nbt.getList("Items", 10);
+    public static void readUnordered(CompoundTag nbt, Collection<ItemStack> stacks) {
+        ListTag nbtList = nbt.getList("Items", 10);
 
         for (int i = 0; i < nbtList.size(); i++) {
-            stacks.add(ItemStack.fromNbt(nbtList.getCompound(i)));
+            stacks.add(ItemStack.of(nbtList.getCompound(i)));
         }
     }
 
-    public static void write(NbtCompound nbt, String key, Item item) {
-        Identifier identifier = item != null ? Registries.ITEM.getId(item) : null;
+    public static void write(CompoundTag nbt, String key, Item item) {
+        ResourceLocation identifier = item != null ? BuiltInRegistries.ITEM.getKey(item) : null;
         nbt.putString(key, identifier == null ? AIR_STR_ID : identifier.toString());
     }
 
-    public static Item readItem(NbtCompound nbt, String key) {
+    public static Item readItem(CompoundTag nbt, String key) {
         String raw = nbt.getString(key);
 
         if (raw.isEmpty())
             return null;
 
-        return Registries.ITEM.get(new Identifier(raw));
+        return BuiltInRegistries.ITEM.get(new ResourceLocation(raw));
     }
 
-    public static Item readItemNonNull(NbtCompound nbt, String key) {
+    public static Item readItemNonNull(CompoundTag nbt, String key) {
         Item result = readItem(nbt, key);
         return result != null ? result : Items.AIR;
     }
 
     public static ItemStack take(ItemStack other, int amount) {
         ItemStack result = other.copyWithCount(amount);
-        other.decrement(amount);
+        other.shrink(amount);
 
         return result;
     }
@@ -219,12 +218,12 @@ public class StackUtil {
         return new ItemStack(Items.AIR);
     }
 
-    public static void writeItem(PacketByteBuf buf, Item item) {
-        buf.writeRegistryValue(Registries.ITEM, item);
+    public static void writeItem(FriendlyByteBuf buf, Item item) {
+        buf.writeId(BuiltInRegistries.ITEM, item);
     }
 
-    public static Item readItem(PacketByteBuf buf) {
-        return buf.readRegistryValue(Registries.ITEM);
+    public static Item readItem(FriendlyByteBuf buf) {
+        return buf.readById(BuiltInRegistries.ITEM);
     }
 
     public static ItemStack orAir(ItemStack stack) {

@@ -4,12 +4,10 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITSounds;
@@ -44,11 +42,11 @@ public class TardisCriterions {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ROOT.trigger(handler.getPlayer()));
 
-        TardisEvents.CRASH.register(tardis -> tardis.asServer().world().getPlayers().forEach(
+        TardisEvents.CRASH.register(tardis -> tardis.asServer().world().players().forEach(
                 player -> TardisCriterions.CRASH.trigger(player)));
 
         TardisEvents.ENTER_FLIGHT.register(tardis -> {
-            tardis.asServer().world().getPlayers().forEach(player -> {
+            tardis.asServer().world().players().forEach(player -> {
                 TardisCriterions.TAKEOFF.trigger(player);
 
                 if (ZeitonHighEffect.isHigh(player))
@@ -57,16 +55,16 @@ public class TardisCriterions {
         });
 
         TardisEvents.ENTER_TARDIS.register((tardis, entity) -> {
-            if (!(entity instanceof ServerPlayerEntity player))
+            if (!(entity instanceof ServerPlayer player))
                 return TardisEvents.Interaction.PASS;
 
-            Advancement advancement = player.getServer().getAdvancementLoader().get(new Identifier("ait/enter_tardis"));
+            Advancement advancement = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("ait/enter_tardis"));
 
             Scheduler.get().runTaskLater(() -> {
                     if (advancement == null) {
                     AITMod.LOGGER.warn("Failed to get the enter_tardis advancement");
-                    } else if (TardisServerWorld.isTardisDimension(player.getServerWorld()) && !player.getAdvancementTracker().getProgress(advancement).isDone()) {
-                        player.playSound(AITSounds.ENTER_TARDIS, SoundCategory.PLAYERS, 1f,1.0f);
+                    } else if (TardisServerWorld.isTardisDimension(player.serverLevel()) && !player.getAdvancements().getOrStartProgress(advancement).isDone()) {
+                        player.playNotifySound(AITSounds.ENTER_TARDIS, SoundSource.PLAYERS, 1f,1.0f);
                     }
 
                 TardisCriterions.ENTER_TARDIS.trigger(player);
@@ -76,7 +74,7 @@ public class TardisCriterions {
         });
 
         TardisEvents.FORCED_ENTRY.register((tardis, entity) -> {
-            if (!(entity instanceof ServerPlayerEntity player))
+            if (!(entity instanceof ServerPlayer player))
                 return;
 
             TardisCriterions.FORCED_ENTRY.trigger(player);
@@ -86,14 +84,14 @@ public class TardisCriterions {
             if (system.isClient() || system instanceof EngineSystem)
                 return;
 
-            system.tardis().asServer().world().getPlayers().forEach(player ->
+            system.tardis().asServer().world().players().forEach(player ->
                     TardisCriterions.ENABLE_SUBSYSTEM.trigger(player));
         });
         TardisEvents.SUBSYSTEM_REPAIR.register(system -> {
             if (system.isClient())
                 return;
 
-            system.tardis().asServer().world().getPlayers().forEach(player ->
+            system.tardis().asServer().world().players().forEach(player ->
                     TardisCriterions.REPAIR_SUBSYSTEM.trigger(player));
         });
     }

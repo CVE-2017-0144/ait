@@ -2,35 +2,40 @@ package dev.amble.ait.core.blocks;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
@@ -40,21 +45,21 @@ import dev.amble.ait.core.util.ShapeUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 @SuppressWarnings("deprecation")
-public class DoorBlock extends HorizontalDirectionalBlock implements BlockEntityProvider, Waterloggable {
+public class DoorBlock extends HorizontalDirectionalBlock implements EntityBlock, SimpleWaterloggedBlock {
 
-    public static final VoxelShape NORTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 12.1, 16.0, 32.0, 16.0);
-    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-    public static final IntProperty LEVEL_4 = ExteriorBlock.LEVEL_4;
+    public static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 12.1, 16.0, 32.0, 16.0);
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final IntegerProperty LEVEL_4 = ExteriorBlock.LEVEL_4;
 
     static {
         TardisEvents.DOOR_OPEN.register(tardis -> {
             CachedDirectedGlobalPos globalPos = tardis.travel().position();
             BlockPos exteriorPos = globalPos.getPos();
-            World exteriorWorld = globalPos.getWorld();
+            Level exteriorWorld = globalPos.getWorld();
 
             BlockState exteriorState = exteriorWorld.getBlockState(exteriorPos);
             if (!tardis.travel().inFlight() && exteriorState.getBlock() instanceof ExteriorBlock)
-                setDoorLight(tardis.asServer(), exteriorState.get(ExteriorBlock.LEVEL_4));
+                setDoorLight(tardis.asServer(), exteriorState.getValue(ExteriorBlock.LEVEL_4));
         });
 
         TardisEvents.REAL_DOOR_CLOSE.register(tardis -> setDoorLight(tardis.asServer(), 0));
@@ -63,7 +68,7 @@ public class DoorBlock extends HorizontalDirectionalBlock implements BlockEntity
     private static void setDoorLight(ServerTardis tardis, int level) {
         if (!tardis.hasWorld() || !tardis.world().shouldTick()) return;
 
-        ServerWorld world = tardis.world();
+        ServerLevel world = tardis.world();
 
         // FIXME: ensure the DOOR_OPEN and DOOR_CLOSE events always get called on the main thread instead of doing this
         world.getServer().execute(() -> {
@@ -73,74 +78,74 @@ public class DoorBlock extends HorizontalDirectionalBlock implements BlockEntity
             if (!(state.getBlock() instanceof DoorBlock))
                 return;
 
-            world.setBlockState(pos, state.with(LEVEL_4, level));
+            world.setBlockAndUpdate(pos, state.setValue(LEVEL_4, level));
         });
     }
 
     @Override
-    public float getBlastResistance() {
+    public float getExplosionResistance() {
         return 10000f;
     }
 
-    public DoorBlock(Settings settings) {
+    public DoorBlock(Properties settings) {
         super(settings);
 
-        this.setDefaultState(this.getStateManager().getDefaultState()
-                .with(FACING, Direction.NORTH)
-                .with(WATERLOGGED, false)
-                .with(LEVEL_4, 0));
+        this.registerDefaultState(this.getStateDefinition().any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(WATERLOGGED, false)
+                .setValue(LEVEL_4, 0));
     }
 
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState,
-            WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if (state.get(WATERLOGGED))
-            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+            LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(WATERLOGGED))
+            world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+        return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         if (world.getBlockEntity(pos) instanceof DoorBlockEntity door && door.isLinked() &&
                 door.tardis().get().siege() != null && door.tardis().get().siege().isActive())
-            return VoxelShapes.empty();
+            return Shapes.empty();
 
-        return ShapeUtil.rotate(Direction.NORTH, state.get(FACING), NORTH_SHAPE);
+        return ShapeUtil.rotate(Direction.NORTH, state.getValue(FACING), NORTH_SHAPE);
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
             ItemStack itemStack) {
 
-        super.onPlaced(world, pos, state, placer, itemStack);
+        super.setPlacedBy(world, pos, state, placer, itemStack);
     }
 
     @Override
-    public boolean isShapeFullCube(BlockState state, BlockView world, BlockPos pos) {
+    public boolean isCollisionShapeFullBlock(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
             BlockHitResult hit) {
-        if (world.isClient())
-            return ActionResult.SUCCESS;
+        if (world.isClientSide())
+            return InteractionResult.SUCCESS;
 
         if (world.getBlockEntity(pos) instanceof DoorBlockEntity door)
-            door.useOn(world, player.isSneaking(), player);
+            door.useOn(world, player.isShiftKeyDown(), player);
 
-        return ActionResult.CONSUME;
+        return InteractionResult.CONSUME;
     }
 
     @Nullable @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state,
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state,
             BlockEntityType<T> type) {
         return type == AITBlockEntityTypes.DOOR_BLOCK_ENTITY_TYPE ? DoorBlockEntity::tick : null;
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        if (world.isClient())
+    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
+        if (world.isClientSide())
             return;
 
         if (!(world.getBlockEntity(pos) instanceof DoorBlockEntity door))
@@ -155,27 +160,27 @@ public class DoorBlock extends HorizontalDirectionalBlock implements BlockEntity
 //        if (door.tardis().get().stats().getYScale() == 0)
 //            return;
 
-        Vec3d expansionBehind = new Vec3d(entity.prevX, entity.prevY, entity.prevZ).subtract(entity.getPos());
-        Vec3d expansionForward = entity.getVelocity();
+        Vec3 expansionBehind = new Vec3(entity.xo, entity.yo, entity.zo).subtract(entity.position());
+        Vec3 expansionForward = entity.getDeltaMovement();
 
-        Box entityBox = entity.getBoundingBox().stretch(expansionForward.multiply(1.2)).stretch(expansionBehind);
+        AABB entityBox = entity.getBoundingBox().expandTowards(expansionForward.scale(1.2)).expandTowards(expansionBehind);
 
-        Box doorShape = this.getOutlineShape(state, world, pos, ShapeContext.of(entity)).getBoundingBox().offset(pos);
+        AABB doorShape = this.getShape(state, world, pos, CollisionContext.of(entity)).bounds().move(pos);
 
         double insideBlockExpanded = 1.0E-7D;
 
-        Box biggerEntityBox = entityBox.expand(insideBlockExpanded);
-        Box biggerDoorShape = doorShape.expand(insideBlockExpanded);
+        AABB biggerEntityBox = entityBox.inflate(insideBlockExpanded);
+        AABB biggerDoorShape = doorShape.inflate(insideBlockExpanded);
 
         if (biggerEntityBox.intersects(biggerDoorShape))
             door.onEntityCollision(entity);
     }
 
     @Override
-    public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        super.onBreak(world, pos, state, player);
+    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+        super.playerWillDestroy(world, pos, state, player);
 
-        if (world.isClient())
+        if (world.isClientSide())
             return;
 
         if (!(world.getBlockEntity(pos) instanceof DoorBlockEntity door))
@@ -185,27 +190,27 @@ public class DoorBlock extends HorizontalDirectionalBlock implements BlockEntity
     }
 
     @Nullable @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
-        return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(WATERLOGGED,
-                fluidState.getFluid() == Fluids.WATER);
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        FluidState fluidState = ctx.getLevel().getFluidState(ctx.getClickedPos());
+        return this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite()).setValue(WATERLOGGED,
+                fluidState.getType() == Fluids.WATER);
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new DoorBlockEntity(pos, state);
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED, LEVEL_4);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
-    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
-        return !(Boolean) state.get(WATERLOGGED);
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter world, BlockPos pos) {
+        return !(Boolean) state.getValue(WATERLOGGED);
     }
 }

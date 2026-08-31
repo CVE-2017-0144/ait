@@ -11,6 +11,6 @@ public class ClientPoliceBoxRenaissanceDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new PoliceBoxCoralDoorModel(PoliceBoxCoralDoorModel.getTexturedModelData().createModel());
+        return new PoliceBoxCoralDoorModel(PoliceBoxCoralDoorModel.getTexturedModelData().bakeRoot());
     }
 }

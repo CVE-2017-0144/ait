@@ -1,15 +1,14 @@
 package dev.amble.ait.data.schema.door.impl.exclusive;
 
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.schema.door.DoorSchema;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 
 public class DoomDoorVariant extends DoorSchema {
 
-    public static final Identifier REFERENCE = AITMod.id("door/doom");
+    public static final ResourceLocation REFERENCE = AITMod.id("door/doom");
 
     public DoomDoorVariant() {
         super(REFERENCE);

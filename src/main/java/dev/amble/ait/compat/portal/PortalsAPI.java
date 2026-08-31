@@ -1,10 +1,9 @@
 package dev.amble.ait.compat.portal;
 
 import java.util.Optional;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class PortalsAPI {
 
@@ -12,6 +11,6 @@ public class PortalsAPI {
 
     @FunctionalInterface
     public interface VisualizerImpl {
-        void open(ServerPlayerEntity player, ServerWorld world, BlockPos pos);
+        void open(ServerPlayer player, ServerLevel world, BlockPos pos);
     }
 }

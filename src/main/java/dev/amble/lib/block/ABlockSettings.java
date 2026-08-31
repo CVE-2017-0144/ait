@@ -4,33 +4,32 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.MapColor;
-import net.minecraft.block.enums.Instrument;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.resource.featuretoggle.FeatureFlag;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import org.jetbrains.annotations.ApiStatus;
 
 @SuppressWarnings("deprecation")
 public class ABlockSettings extends FabricBlockSettings {
 
-    public static ABlockSettings create() {
+    public static ABlockSettings of() {
         return new ABlockSettings();
     }
 
-    private Item.Settings settings;
+    private Item.Properties settings;
     private Property<?>[] properties;
 
-    public ABlockSettings itemSettings(Item.Settings settings) {
+    public ABlockSettings itemSettings(Item.Properties settings) {
         this.settings = settings;
         return this;
     }
@@ -42,33 +41,33 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings noCollision() {
-        return (ABlockSettings) super.noCollision();
+    public ABlockSettings noCollission() {
+        return (ABlockSettings) super.noCollission();
     }
 
     @Override
-    public ABlockSettings nonOpaque() {
-        return (ABlockSettings) super.nonOpaque();
+    public ABlockSettings noOcclusion() {
+        return (ABlockSettings) super.noOcclusion();
     }
 
     @Override
-    public ABlockSettings slipperiness(float value) {
-        return (ABlockSettings) super.slipperiness(value);
+    public ABlockSettings friction(float value) {
+        return (ABlockSettings) super.friction(value);
     }
 
     @Override
-    public ABlockSettings velocityMultiplier(float velocityMultiplier) {
-        return (ABlockSettings) super.velocityMultiplier(velocityMultiplier);
+    public ABlockSettings speedFactor(float velocityMultiplier) {
+        return (ABlockSettings) super.speedFactor(velocityMultiplier);
     }
 
     @Override
-    public ABlockSettings jumpVelocityMultiplier(float jumpVelocityMultiplier) {
-        return (ABlockSettings) super.jumpVelocityMultiplier(jumpVelocityMultiplier);
+    public ABlockSettings jumpFactor(float jumpVelocityMultiplier) {
+        return (ABlockSettings) super.jumpFactor(jumpVelocityMultiplier);
     }
 
     @Override
-    public ABlockSettings sounds(BlockSoundGroup group) {
-        return (ABlockSettings) super.sounds(group);
+    public ABlockSettings sound(SoundType group) {
+        return (ABlockSettings) super.sound(group);
     }
 
     @Override
@@ -77,18 +76,13 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings luminance(ToIntFunction<BlockState> luminanceFunction) {
-        return (ABlockSettings) super.luminance(luminanceFunction);
-    }
-
-    @Override
     public ABlockSettings strength(float hardness, float resistance) {
         return (ABlockSettings) super.strength(hardness, resistance);
     }
 
     @Override
-    public ABlockSettings breakInstantly() {
-        return (ABlockSettings) super.breakInstantly();
+    public ABlockSettings instabreak() {
+        return (ABlockSettings) super.instabreak();
     }
 
     @Override
@@ -97,18 +91,18 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings ticksRandomly() {
-        return (ABlockSettings) super.ticksRandomly();
+    public ABlockSettings randomTicks() {
+        return (ABlockSettings) super.randomTicks();
     }
 
     @Override
-    public ABlockSettings dynamicBounds() {
-        return (ABlockSettings) super.dynamicBounds();
+    public ABlockSettings dynamicShape() {
+        return (ABlockSettings) super.dynamicShape();
     }
 
     @Override
-    public ABlockSettings dropsNothing() {
-        return (ABlockSettings) super.dropsNothing();
+    public ABlockSettings noLootTable() {
+        return (ABlockSettings) super.noLootTable();
     }
 
     @Override
@@ -122,38 +116,38 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings allowsSpawning(AbstractBlock.TypedContextPredicate<EntityType<?>> predicate) {
-        return (ABlockSettings) super.allowsSpawning(predicate);
+    public ABlockSettings isValidSpawn(BlockBehaviour.StateArgumentPredicate<EntityType<?>> predicate) {
+        return (ABlockSettings) super.isValidSpawn(predicate);
     }
 
     @Override
-    public ABlockSettings solidBlock(AbstractBlock.ContextPredicate predicate) {
-        return (ABlockSettings) super.solidBlock(predicate);
+    public ABlockSettings isRedstoneConductor(BlockBehaviour.StatePredicate predicate) {
+        return (ABlockSettings) super.isRedstoneConductor(predicate);
     }
 
     @Override
-    public ABlockSettings suffocates(AbstractBlock.ContextPredicate predicate) {
-        return (ABlockSettings) super.suffocates(predicate);
+    public ABlockSettings isSuffocating(BlockBehaviour.StatePredicate predicate) {
+        return (ABlockSettings) super.isSuffocating(predicate);
     }
 
     @Override
-    public ABlockSettings blockVision(AbstractBlock.ContextPredicate predicate) {
-        return (ABlockSettings) super.blockVision(predicate);
+    public ABlockSettings isViewBlocking(BlockBehaviour.StatePredicate predicate) {
+        return (ABlockSettings) super.isViewBlocking(predicate);
     }
 
     @Override
-    public ABlockSettings postProcess(AbstractBlock.ContextPredicate predicate) {
-        return (ABlockSettings) super.postProcess(predicate);
+    public ABlockSettings hasPostProcess(BlockBehaviour.StatePredicate predicate) {
+        return (ABlockSettings) super.hasPostProcess(predicate);
     }
 
     @Override
-    public ABlockSettings emissiveLighting(AbstractBlock.ContextPredicate predicate) {
-        return (ABlockSettings) super.emissiveLighting(predicate);
+    public ABlockSettings emissiveRendering(BlockBehaviour.StatePredicate predicate) {
+        return (ABlockSettings) super.emissiveRendering(predicate);
     }
 
     @Override
-    public ABlockSettings requiresTool() {
-        return (ABlockSettings) super.requiresTool();
+    public ABlockSettings requiresCorrectToolForDrops() {
+        return (ABlockSettings) super.requiresCorrectToolForDrops();
     }
 
     @Override
@@ -162,28 +156,28 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings hardness(float hardness) {
-        return (ABlockSettings) super.hardness(hardness);
+    public ABlockSettings destroyTime(float hardness) {
+        return (ABlockSettings) super.destroyTime(hardness);
     }
 
     @Override
-    public ABlockSettings resistance(float resistance) {
-        return (ABlockSettings) super.resistance(resistance);
+    public ABlockSettings explosionResistance(float resistance) {
+        return (ABlockSettings) super.explosionResistance(resistance);
     }
 
     @Override
-    public ABlockSettings offset(AbstractBlock.OffsetType offsetType) {
-        return (ABlockSettings) super.offset(offsetType);
+    public ABlockSettings offsetType(BlockBehaviour.OffsetType offsetType) {
+        return (ABlockSettings) super.offsetType(offsetType);
     }
 
     @Override
-    public ABlockSettings noBlockBreakParticles() {
-        return (ABlockSettings) super.noBlockBreakParticles();
+    public ABlockSettings noParticlesOnBreak() {
+        return (ABlockSettings) super.noParticlesOnBreak();
     }
 
     @Override
-    public ABlockSettings requires(FeatureFlag... features) {
-        return (ABlockSettings) super.requires(features);
+    public ABlockSettings requiredFeatures(FeatureFlag... features) {
+        return (ABlockSettings) super.requiredFeatures(features);
     }
 
     @Override
@@ -192,8 +186,8 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings burnable() {
-        return (ABlockSettings) super.burnable();
+    public ABlockSettings ignitedByLava() {
+        return (ABlockSettings) super.ignitedByLava();
     }
 
     @Override
@@ -202,22 +196,22 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings solid() {
-        return (ABlockSettings) super.solid();
+    public ABlockSettings forceSolidOn() {
+        return (ABlockSettings) super.forceSolidOn();
     }
 
     @Override
-    public ABlockSettings notSolid() {
-        return (ABlockSettings) super.notSolid();
+    public ABlockSettings forceSolidOff() {
+        return (ABlockSettings) super.forceSolidOff();
     }
 
     @Override
-    public ABlockSettings pistonBehavior(PistonBehavior pistonBehavior) {
-        return (ABlockSettings) super.pistonBehavior(pistonBehavior);
+    public ABlockSettings pushReaction(PushReaction pistonBehavior) {
+        return (ABlockSettings) super.pushReaction(pistonBehavior);
     }
 
     @Override
-    public ABlockSettings instrument(Instrument instrument) {
+    public ABlockSettings instrument(NoteBlockInstrument instrument) {
         return (ABlockSettings) super.instrument(instrument);
     }
 
@@ -237,7 +231,7 @@ public class ABlockSettings extends FabricBlockSettings {
     }
 
     @Override
-    public ABlockSettings drops(Identifier dropTableId) {
+    public ABlockSettings drops(ResourceLocation dropTableId) {
         return (ABlockSettings) super.drops(dropTableId);
     }
 
@@ -261,7 +255,7 @@ public class ABlockSettings extends FabricBlockSettings {
         return (ABlockSettings) super.collidable(collidable);
     }
 
-    public Item.Settings itemSettings() {
+    public Item.Properties itemSettings() {
         return settings;
     }
 

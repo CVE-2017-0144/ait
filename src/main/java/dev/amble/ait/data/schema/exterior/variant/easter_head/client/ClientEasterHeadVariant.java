@@ -1,22 +1,20 @@
 package dev.amble.ait.data.schema.exterior.variant.easter_head.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.EasterHeadModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 // a useful class for creating easter_head variants as they all have the same filepath you know
 public abstract class ClientEasterHeadVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/easter_head";
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/easter_head.png");
-    protected static final Identifier BIOME_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/easter_head.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/easter_head.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/easter_head.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/easter_head_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()
@@ -33,16 +31,16 @@ public abstract class ClientEasterHeadVariant extends ClientExteriorVariantSchem
 
     @Override
     public SimpleExteriorModel model() {
-        return new EasterHeadModel(EasterHeadModel.getTexturedModelData().createModel());
+        return new EasterHeadModel(EasterHeadModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return null;
     }
 

@@ -1,8 +1,7 @@
 package dev.amble.ait.data.schema.desktop.textures;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.data.schema.desktop.TardisDesktopSchema;
+import net.minecraft.resources.ResourceLocation;
 
 public class DesktopPreviewTexture {
     // public static final Codec<DesktopPreviewTexture> CODEC =
@@ -14,11 +13,11 @@ public class DesktopPreviewTexture {
     // )
     // )
 
-    private final Identifier path;
+    private final ResourceLocation path;
     public final int width;
     public final int height;
 
-    public DesktopPreviewTexture(Identifier path, int width, int height) {
+    public DesktopPreviewTexture(ResourceLocation path, int width, int height) {
         this.path = path;
         this.width = width;
         this.height = height;
@@ -28,7 +27,7 @@ public class DesktopPreviewTexture {
         this(pathFromDesktopId(schema.id()), width, height);
     }
 
-    public DesktopPreviewTexture(Identifier path) {
+    public DesktopPreviewTexture(ResourceLocation path) {
         this(path, 128, 128);
     }
 
@@ -36,11 +35,11 @@ public class DesktopPreviewTexture {
         this(schema.id());
     }
 
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return this.path;
     }
 
-    public static Identifier pathFromDesktopId(Identifier desktopId) {
-        return new Identifier(desktopId.getNamespace(), "textures/desktop/" + desktopId.getPath() + ".png");
+    public static ResourceLocation pathFromDesktopId(ResourceLocation desktopId) {
+        return new ResourceLocation(desktopId.getNamespace(), "textures/desktop/" + desktopId.getPath() + ".png");
     }
 }

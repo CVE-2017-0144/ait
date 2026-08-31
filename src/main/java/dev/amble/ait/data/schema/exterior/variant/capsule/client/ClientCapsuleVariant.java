@@ -1,22 +1,20 @@
 package dev.amble.ait.data.schema.exterior.variant.capsule.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.CapsuleExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 // a useful class for creating tardim variants as they all have the same filepath you know
 public abstract class ClientCapsuleVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/capsule";
-    protected static final Identifier CATEGORY_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/capsule.png");
-    protected static final Identifier BIOME_IDENTIFIER = new Identifier(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/capsule.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/capsule.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/capsule.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/capsule_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()
@@ -34,16 +32,16 @@ public abstract class ClientCapsuleVariant extends ClientExteriorVariantSchema {
 
     @Override
     public SimpleExteriorModel model() {
-        return new CapsuleExteriorModel(CapsuleExteriorModel.getTexturedModelData().createModel());
+        return new CapsuleExteriorModel(CapsuleExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(TEXTURE_PATH + name + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return null;
     }
 

@@ -1,22 +1,21 @@
 package dev.amble.ait.core.effects;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-
 import dev.amble.ait.core.AITStatusEffects;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.LivingEntity;
 
-public class ZeitonHighEffect extends StatusEffect {
+public class ZeitonHighEffect extends MobEffect {
     public ZeitonHighEffect() {
-        super(StatusEffectCategory.BENEFICIAL, 0x8fbaff);
+        super(MobEffectCategory.BENEFICIAL, 0x8fbaff);
     }
 
     @Override
-    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+    public boolean isDurationEffectTick(int duration, int amplifier) {
         return true;
     }
 
     public static boolean isHigh(LivingEntity entity) {
-        return entity.hasStatusEffect(AITStatusEffects.ZEITON_HIGH);
+        return entity.hasEffect(AITStatusEffects.ZEITON_HIGH);
     }
 }

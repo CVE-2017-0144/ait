@@ -1,61 +1,59 @@
 package dev.amble.ait.core.blockentities;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ContainerLock;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Nameable;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.LockCode;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEntity implements Inventory,
-        NamedScreenHandlerFactory,
+public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEntity implements Container,
+        MenuProvider,
         Nameable {
 
-    private ContainerLock lock = ContainerLock.EMPTY;
-    @Nullable private Text customName;
+    private LockCode lock = LockCode.NO_LOCK;
+    @Nullable private Component customName;
 
     public AbstractConsoleBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        this.lock = ContainerLock.fromNbt(nbt);
-        if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) {
-            this.customName = Text.Serializer.fromJson(nbt.getString("CustomName"));
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
+        this.lock = LockCode.fromTag(nbt);
+        if (nbt.contains("CustomName", Tag.TAG_STRING)) {
+            this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"));
         }
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        this.lock.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
+        this.lock.addToTag(nbt);
         if (this.customName != null) {
-            nbt.putString("CustomName", Text.Serializer.toJson(this.customName));
+            nbt.putString("CustomName", Component.Serializer.toJson(this.customName));
         }
     }
 
-    public void setCustomName(Text customName) {
+    public void setCustomName(Component customName) {
         this.customName = customName;
     }
 
     @Override
-    public Text getName() {
+    public Component getName() {
         if (this.customName != null) {
             return this.customName;
         }
@@ -63,37 +61,37 @@ public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEn
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return this.getName();
     }
 
     @Override
-    @Nullable public Text getCustomName() {
+    @Nullable public Component getCustomName() {
         return this.customName;
     }
 
-    protected abstract Text getContainerName();
+    protected abstract Component getContainerName();
 
-    public boolean checkUnlocked(PlayerEntity player) {
-        return LockableContainerBlockEntity.checkUnlocked(player, this.lock, this.getDisplayName());
+    public boolean checkUnlocked(Player player) {
+        return BaseContainerBlockEntity.canUnlock(player, this.lock, this.getDisplayName());
     }
 
-    public static boolean checkUnlocked(PlayerEntity player, ContainerLock lock, Text containerName) {
-        if (player.isSpectator() || lock.canOpen(player.getMainHandStack())) {
+    public static boolean checkUnlocked(Player player, LockCode lock, Component containerName) {
+        if (player.isSpectator() || lock.unlocksWith(player.getMainHandItem())) {
             return true;
         }
-        player.sendMessage(Text.translatable("container.isLocked", containerName), true);
-        player.playSound(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, 1.0f, 1.0f);
+        player.displayClientMessage(Component.translatable("container.isLocked", containerName), true);
+        player.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0f, 1.0f);
         return false;
     }
 
     @Override
-    @Nullable public ScreenHandler createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+    @Nullable public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
         if (this.checkUnlocked(playerEntity)) {
             return this.createScreenHandler(i, playerInventory);
         }
         return null;
     }
 
-    protected abstract ScreenHandler createScreenHandler(int var1, PlayerInventory var2);
+    protected abstract AbstractContainerMenu createScreenHandler(int var1, Inventory var2);
 }

@@ -3,29 +3,26 @@ package dev.amble.lib.animation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 import dev.amble.lib.client.bedrock.BedrockModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.entity.EntityLike;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityAccess;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public interface AnimatedEntity extends EntityLike, AnimatedInstance {
+public interface AnimatedEntity extends EntityAccess, AnimatedInstance {
 	@Override
 	default int getAge() {
 		if (this instanceof Entity entity) {
-			return entity.age;
+			return entity.tickCount;
 		}
 
 		throw new UnsupportedOperationException("getAge() is only supported for Entity instances. Override this method");
 	}
 
 	@Nullable
-	static AnimatedEntity getInstance(EntityLike entity) {
+	static AnimatedEntity getInstance(EntityAccess entity) {
 		if (entity instanceof AnimatedEntity animated) {
 			return animated;
 		}
@@ -33,12 +30,12 @@ public interface AnimatedEntity extends EntityLike, AnimatedInstance {
 	}
 
 	@Override
-	default World getWorld() {
+	default Level getWorld() {
 		if (!(this instanceof Entity be)) {
 			throw new UnsupportedOperationException("getWorld() is only supported for Entity instances. Override this method");
 		}
 
-		return be.getWorld();
+		return be.level();
 	}
 
 	@Override
@@ -51,21 +48,21 @@ public interface AnimatedEntity extends EntityLike, AnimatedInstance {
 	}
 
 	@Override
-	default SoundCategory getSoundCategory() {
+	default SoundSource getSoundCategory() {
 		if (!(this instanceof Entity be)) {
 			throw new UnsupportedOperationException("getSoundCategory() is only supported for Entity instances. Override this method");
 		}
 
-		return be.getSoundCategory();
+		return be.getSoundSource();
 	}
 
 	@Override
-	default Vec3d getEffectPosition(float tickDelta) {
+	default Vec3 getEffectPosition(float tickDelta) {
 		if (!(this instanceof Entity entity)) throw new UnsupportedOperationException("getEffectPosition() is only supported for Entity instances. Override this method");
 
-		return new Vec3d(
-				MathHelper.lerp(tickDelta, entity.prevX, entity.getX()),
-				MathHelper.lerp(tickDelta, entity.prevY, entity.getY()),
-				MathHelper.lerp(tickDelta, entity.prevZ, entity.getZ()));
+		return new Vec3(
+				Mth.lerp(tickDelta, entity.xo, entity.getX()),
+				Mth.lerp(tickDelta, entity.yo, entity.getY()),
+				Mth.lerp(tickDelta, entity.zo, entity.getZ()));
 	}
 }

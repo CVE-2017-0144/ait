@@ -1,16 +1,6 @@
 package dev.amble.ait.core.tardis.control.impl;
 
 import dev.amble.ait.core.engine.SubSystem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITSounds;
@@ -21,6 +11,15 @@ import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.control.sequences.SequenceHandler;
 import dev.amble.ait.core.tardis.handler.ButlerHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 public class SonicPortControl extends Control {
 
@@ -29,7 +28,7 @@ public class SonicPortControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         ButlerHandler butler = tardis.butler();
@@ -38,7 +37,7 @@ public class SonicPortControl extends Control {
         boolean hasSonicStored = !consoleBlockEntity.getSonicScrewdriver().isEmpty();
         boolean hasHandlesStored = butler.getHandles() != null;
 
-        if ((leftClick || player.isSneaking()) && (hasSonicStored || hasHandlesStored)) {
+        if ((leftClick || player.isShiftKeyDown()) && (hasSonicStored || hasHandlesStored)) {
             ItemStack item;
             if (hasSonicStored) {
                 item = consoleBlockEntity.getSonicScrewdriver();
@@ -50,20 +49,20 @@ public class SonicPortControl extends Control {
             if (item == null)
                 return Result.FAILURE;
 
-            player.getInventory().offerOrDrop(item);
+            player.getInventory().placeItemBackInInventory(item);
             return Result.SUCCESS;
         }
 
-        ItemStack stack = player.getMainHandStack();
+        ItemStack stack = player.getMainHandItem();
         if (!((stack.getItem() instanceof SonicItem) || (stack.getItem() instanceof HandlesItem)))
             return Result.FAILURE;
 
         LinkableItem linker = (LinkableItem) stack.getItem();
-        if (!linker.isLinked(stack) || player.isSneaking()) {
+        if (!linker.isLinked(stack) || player.isShiftKeyDown()) {
             linker.link(stack, tardis);
-            world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.BLOCKS,
+            world.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS,
                     1.0F, 1.0F);
-            SequenceHandler.spawnControlParticles(world, Vec3d.ofBottomCenter(console).add(0.0, 1.2f, 0.0));
+            SequenceHandler.spawnControlParticles(world, Vec3.atBottomCenterOf(console).add(0.0, 1.2f, 0.0));
         }
 
         if (stack.getItem() instanceof HandlesItem) {
@@ -71,13 +70,13 @@ public class SonicPortControl extends Control {
                 return Result.FAILURE;
 
             butler.insertHandles(stack, console);
-            player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else if (stack.getItem() instanceof SonicItem) {
             if (hasSonicStored || hasHandlesStored)
                 return Result.FAILURE;
 
             consoleBlockEntity.setSonicScrewdriver(stack);
-            player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
 
         boolean hasSonic = !consoleBlockEntity.getSonicScrewdriver().isEmpty() || butler.getHandles() != null;

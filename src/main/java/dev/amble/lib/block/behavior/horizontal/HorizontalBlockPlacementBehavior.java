@@ -1,9 +1,9 @@
 package dev.amble.lib.block.behavior.horizontal;
 
 import dev.amble.lib.block.behavior.base.BlockPlacementBehavior;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class HorizontalBlockPlacementBehavior extends BlockPlacementBehavior {
 
@@ -21,8 +21,8 @@ public class HorizontalBlockPlacementBehavior extends BlockPlacementBehavior {
     }
 
     @Override
-    public BlockState getPlacementState(BlockState state, ItemPlacementContext ctx) {
-        Direction direction = ctx.getHorizontalPlayerFacing();
-        return state.with(HorizontalBlockBehavior.FACING, facePlayer ? direction.getOpposite() : direction);
+    public BlockState getPlacementState(BlockState state, BlockPlaceContext ctx) {
+        Direction direction = ctx.getHorizontalDirection();
+        return state.setValue(HorizontalBlockBehavior.FACING, facePlayer ? direction.getOpposite() : direction);
     }
 }

@@ -1,8 +1,7 @@
 package dev.amble.lib.duck;
 
-import net.minecraft.client.model.ModelPart;
-
 import java.util.Map;
+import net.minecraft.client.model.geom.ModelPart;
 
 /**
  * Duck interface for accessing ModelPart's private children map.

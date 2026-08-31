@@ -1,11 +1,11 @@
 package dev.amble.lib.client.model;
 
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.world.entity.Entity;
 
 @SuppressWarnings("rawtypes")
-public abstract class BlockEntityModel extends SinglePartEntityModel {
+public abstract class BlockEntityModel extends HierarchicalModel {
 
     @Override
-    public void setAngles(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) { }
+    public void setupAnim(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) { }
 }

@@ -2,51 +2,49 @@ package dev.amble.ait.module.planet.client.renderers.wearables;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLoader;
-import net.minecraft.client.render.entity.model.ModelWithArms;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.ItemStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.module.planet.client.models.wearables.SpacesuitModel;
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 
 @Environment(value = EnvType.CLIENT)
-public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityModel<T> & ModelWithArms>
+public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityModel<T> & ArmedModel>
         extends
-            FeatureRenderer<T, M> {
+            RenderLayer<T, M> {
 
-    public static final Identifier BLANK_SPACESUIT = AITMod.id(
+    public static final ResourceLocation BLANK_SPACESUIT = AITMod.id(
             "textures/entity/wearables/spacesuit/nasa/blank_spacesuit.png");
     private final SpacesuitModel model;
 
-    public SpacesuitFeatureRenderer(FeatureRendererContext<T, M> context, EntityModelLoader loader) {
+    public SpacesuitFeatureRenderer(RenderLayerParent<T, M> context, EntityModelSet loader) {
         super(context);
-        this.model = new SpacesuitModel(SpacesuitModel.getTexturedModelData().createModel());
+        this.model = new SpacesuitModel(SpacesuitModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, T livingEntity,
+    public void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T livingEntity,
                        float f, float g, float h, float j, float k, float l) {
 
-        if (!(livingEntity instanceof AbstractClientPlayerEntity || livingEntity instanceof ArmorStandEntity))
+        if (!(livingEntity instanceof AbstractClientPlayer || livingEntity instanceof ArmorStand))
             return;
 
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(0, -1.5f, 0);
 
         // god bless america
@@ -59,18 +57,18 @@ public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityMo
             }
         }
 
-        this.model.Head.copyTransform(((BipedEntityModel) getContextModel()).head);
-        this.model.Body.copyTransform(((BipedEntityModel) getContextModel()).body);
-        this.model.LeftArm.copyTransform(((BipedEntityModel) getContextModel()).leftArm);
-        this.model.RightArm.copyTransform(((BipedEntityModel) getContextModel()).rightArm);
-        this.model.LeftLeg.copyTransform(((BipedEntityModel) getContextModel()).leftLeg);
-        this.model.RightLeg.copyTransform(((BipedEntityModel) getContextModel()).rightLeg);
-        this.model.setAngles(livingEntity, f, g, j, k, l);
+        this.model.Head.copyFrom(((HumanoidModel) getParentModel()).head);
+        this.model.Body.copyFrom(((HumanoidModel) getParentModel()).body);
+        this.model.LeftArm.copyFrom(((HumanoidModel) getParentModel()).leftArm);
+        this.model.RightArm.copyFrom(((HumanoidModel) getParentModel()).rightArm);
+        this.model.LeftLeg.copyFrom(((HumanoidModel) getParentModel()).leftLeg);
+        this.model.RightLeg.copyFrom(((HumanoidModel) getParentModel()).rightLeg);
+        this.model.setupAnim(livingEntity, f, g, j, k, l);
 
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(BLANK_SPACESUIT));
-        this.model.render(matrixStack, vertexConsumer, i, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1f);
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderType.entityCutoutNoCullZOffset(BLANK_SPACESUIT));
+        this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
     public static void enablePart(SpacesuitModel model, BodyParts part) {
@@ -118,10 +116,10 @@ public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityMo
 
     public static ItemStack getModelForSlot(LivingEntity entity, BodyParts parts) {
         return switch(parts) {
-            default -> entity.getEquippedStack(EquipmentSlot.HEAD);
-            case CHEST -> entity.getEquippedStack(EquipmentSlot.CHEST);
-            case LEGS -> entity.getEquippedStack(EquipmentSlot.LEGS);
-            case FEET -> entity.getEquippedStack(EquipmentSlot.FEET);
+            default -> entity.getItemBySlot(EquipmentSlot.HEAD);
+            case CHEST -> entity.getItemBySlot(EquipmentSlot.CHEST);
+            case LEGS -> entity.getItemBySlot(EquipmentSlot.LEGS);
+            case FEET -> entity.getItemBySlot(EquipmentSlot.FEET);
         };
     }
 

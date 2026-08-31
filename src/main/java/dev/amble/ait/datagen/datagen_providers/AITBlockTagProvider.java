@@ -4,15 +4,13 @@ import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.module.ModuleRegistry;
@@ -22,19 +20,19 @@ import dev.amble.lib.datagen.tag.AmbleBlockTagProvider;
 
 public class AITBlockTagProvider extends AmbleBlockTagProvider {
     public AITBlockTagProvider(FabricDataOutput output,
-            CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup arg) {
+    protected void addTags(HolderLookup.Provider arg) {
 //TODO: Make the glass tag work on this and the leafs, for now theres just glass and glass pane and the birch leafs as a temporarly thing.
         getOrCreateTagBuilder(AITTags.Blocks.SONIC_INTERACTABLE).add(Blocks.IRON_DOOR).add(Blocks.IRON_TRAPDOOR)
                 .add(Blocks.TNT)
                 .forceAddTag(BlockTags.CANDLES).forceAddTag(BlockTags.CANDLE_CAKES)
                 .add(Blocks.REDSTONE_LAMP).add(AITBlocks.EXTERIOR_BLOCK).add(AITBlocks.CONSOLE_GENERATOR)
-                .forceAddTag(TagKey.of(RegistryKeys.BLOCK, new Identifier("c", "glass_panes")))
-                .forceAddTag(TagKey.of(RegistryKeys.BLOCK, new Identifier("c", "glass_blocks")))
+                .forceAddTag(TagKey.create(Registries.BLOCK, new ResourceLocation("c", "glass_panes")))
+                .forceAddTag(TagKey.create(Registries.BLOCK, new ResourceLocation("c", "glass_blocks")))
                 .add(AITBlocks.MACHINE_CASING, AITBlocks.CONSOLE)
                 .add(Blocks.BRICKS)
                 .add(Blocks.REDSTONE_WIRE, Blocks.COMPARATOR, Blocks.REPEATER, Blocks.LEVER)
@@ -89,7 +87,7 @@ public class AITBlockTagProvider extends AmbleBlockTagProvider {
         });
 
         this.withBlocks(AITBlocks.class);
-        super.configure(arg);
+        super.addTags(arg);
     }
 
     @Override

@@ -3,35 +3,32 @@ package dev.amble.ait.core.item.blueprint;
 import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITItems;
 
 public class BlueprintItem extends Item {
 
-    public BlueprintItem(Settings settings) {
-        super(settings.maxCount(1));
+    public BlueprintItem(Properties settings) {
+        super(settings.stacksTo(1));
     }
 
     @Override
-    public ItemStack getDefaultStack() {
-        ItemStack stack = super.getDefaultStack();
+    public ItemStack getDefaultInstance() {
+        ItemStack stack = super.getDefaultInstance();
         BlueprintSchema blueprint = BlueprintRegistry.getInstance().getRandom();
 
         if (blueprint != null) {
-            NbtCompound nbt = stack.getOrCreateNbt();
+            CompoundTag nbt = stack.getOrCreateTag();
             nbt.putString("Blueprint", blueprint.id().toString());
         }
 
@@ -39,26 +36,26 @@ public class BlueprintItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
             BlueprintSchema blueprint = getSchema(stack);
             if (blueprint == null) return;
 
-            tooltip.add(Text.translatable("ait.blueprint.tooltip").formatted(Formatting.BLUE)
-                    .append(blueprint.text().copy().formatted(Formatting.GRAY)));
+            tooltip.add(Component.translatable("ait.blueprint.tooltip").withStyle(ChatFormatting.BLUE)
+                    .append(blueprint.text().copy().withStyle(ChatFormatting.GRAY)));
 
             for (int i = blueprint.inputs().size() - 1; i >= 0; i--) {
-                tooltip.add(blueprint.inputs().get(i).text().copy().formatted(Formatting.DARK_GRAY));
+                tooltip.add(blueprint.inputs().get(i).text().copy().withStyle(ChatFormatting.DARK_GRAY));
             }
         });
 
     }
 
     public static BlueprintSchema getSchema(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        NbtElement element = nbt.get("Blueprint");
+        CompoundTag nbt = stack.getOrCreateTag();
+        Tag element = nbt.get("Blueprint");
 
         if (element == null) {
             AITMod.LOGGER.warn("Blueprint item has no blueprint data!");
@@ -68,10 +65,10 @@ public class BlueprintItem extends Item {
             return schema;
         }
 
-        Identifier id = Identifier.tryParse(element.asString());
+        ResourceLocation id = ResourceLocation.tryParse(element.getAsString());
 
         if (id == null) {
-            AITMod.LOGGER.warn("Couldn't parse blueprint id: '{}'", element.asString());
+            AITMod.LOGGER.warn("Couldn't parse blueprint id: '{}'", element.getAsString());
             return null;
         }
 
@@ -93,7 +90,7 @@ public class BlueprintItem extends Item {
         return stack;
     }
     public static ItemStack setSchema(ItemStack stack, BlueprintSchema schema) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putString("Blueprint", schema.id().toString());
         return stack;
     }

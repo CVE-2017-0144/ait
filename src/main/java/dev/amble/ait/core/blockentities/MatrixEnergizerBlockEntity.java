@@ -4,58 +4,56 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.event.BlockPositionSource;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.event.PositionSource;
-import net.minecraft.world.event.Vibrations;
-import net.minecraft.world.event.listener.GameEventListener;
-
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.blocks.MatrixEnergizerBlock;
 
 public class MatrixEnergizerBlockEntity
         extends BlockEntity
-        implements GameEventListener.Holder<Vibrations.VibrationListener>,
-        Vibrations {
+        implements GameEventListener.Holder<VibrationSystem.Listener>,
+        VibrationSystem {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private Vibrations.ListenerData listenerData;
-    private final Vibrations.VibrationListener listener;
-    private final Vibrations.Callback callback = this.createCallback();
+    private VibrationSystem.Data listenerData;
+    private final VibrationSystem.Listener listener;
+    private final VibrationSystem.User callback = this.createCallback();
     private int lastVibrationFrequency;
 
     protected MatrixEnergizerBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
-        this.listenerData = new Vibrations.ListenerData();
-        this.listener = new Vibrations.VibrationListener(this);
+        this.listenerData = new VibrationSystem.Data();
+        this.listener = new VibrationSystem.Listener(this);
     }
 
     public MatrixEnergizerBlockEntity(BlockPos pos, BlockState state) {
         this(AITBlockEntityTypes.MATRIX_ENERGIZER_BLOCK_ENTITY_TYPE, pos, state);
     }
 
-    public Vibrations.Callback createCallback() {
-        return new VibrationCallback(this.getPos());
+    public VibrationSystem.User createCallback() {
+        return new VibrationCallback(this.getBlockPos());
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
         this.lastVibrationFrequency = nbt.getInt("last_vibration_frequency");
-        if (nbt.contains("listener", NbtElement.COMPOUND_TYPE)) {
-            Vibrations.ListenerData.CODEC.parse(new Dynamic<>(
+        if (nbt.contains("listener", Tag.TAG_COMPOUND)) {
+            VibrationSystem.Data.CODEC.parse(new Dynamic<>(
                     NbtOps.INSTANCE, nbt.getCompound("listener")))
                     .resultOrPartial(LOGGER::error).ifPresent(listener -> {
                 this.listenerData = listener;
@@ -64,20 +62,20 @@ public class MatrixEnergizerBlockEntity
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
         nbt.putInt("last_vibration_frequency", this.lastVibrationFrequency);
-        Vibrations.ListenerData.CODEC.encodeStart(NbtOps.INSTANCE, this.listenerData)
+        VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.listenerData)
                 .resultOrPartial(LOGGER::error).ifPresent(listenerNbt -> nbt.put("listener", listenerNbt));
     }
 
     @Override
-    public Vibrations.ListenerData getVibrationListenerData() {
+    public VibrationSystem.Data getVibrationData() {
         return this.listenerData;
     }
 
     @Override
-    public Vibrations.Callback getVibrationCallback() {
+    public VibrationSystem.User getVibrationUser() {
         return this.callback;
     }
 
@@ -90,12 +88,12 @@ public class MatrixEnergizerBlockEntity
     }
 
     @Override
-    public Vibrations.VibrationListener getEventListener() {
+    public VibrationSystem.Listener getListener() {
         return this.listener;
     }
 
     protected class VibrationCallback
-            implements Vibrations.Callback {
+            implements VibrationSystem.User {
         protected final BlockPos pos;
         private final PositionSource positionSource;
 
@@ -105,7 +103,7 @@ public class MatrixEnergizerBlockEntity
         }
 
         @Override
-        public int getRange() {
+        public int getListenerRadius() {
             return 1;
         }
 
@@ -115,28 +113,28 @@ public class MatrixEnergizerBlockEntity
         }
 
         @Override
-        public boolean triggersAvoidCriterion() {
+        public boolean canTriggerAvoidVibration() {
             return true;
         }
 
         @Override
-        public boolean accepts(ServerWorld world, BlockPos pos, GameEvent event, @Nullable GameEvent.Emitter emitter) {
+        public boolean canReceiveVibration(ServerLevel world, BlockPos pos, GameEvent event, @Nullable GameEvent.Context emitter) {
             if (pos.equals(this.pos) && (event == GameEvent.BLOCK_DESTROY || event == GameEvent.BLOCK_PLACE)) {
                 return false;
             }
-            return MatrixEnergizerBlock.isInactive(MatrixEnergizerBlockEntity.this.getCachedState());
+            return MatrixEnergizerBlock.isInactive(MatrixEnergizerBlockEntity.this.getBlockState());
         }
 
         @Override
-        public TagKey<GameEvent> getTag() {
+        public TagKey<GameEvent> getListenableEvents() {
             return AITTags.GameEvents.MATRIX_CAN_LISTEN;
         }
 
         @Override
-        public void accept(ServerWorld world, BlockPos pos, GameEvent event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
-            BlockState blockState = MatrixEnergizerBlockEntity.this.getCachedState();
+        public void onReceiveVibration(ServerLevel world, BlockPos pos, GameEvent event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
+            BlockState blockState = MatrixEnergizerBlockEntity.this.getBlockState();
             if (MatrixEnergizerBlock.isInactive(blockState)) {
-                MatrixEnergizerBlockEntity.this.setLastVibrationFrequency(Vibrations.getFrequency(event));
+                MatrixEnergizerBlockEntity.this.setLastVibrationFrequency(VibrationSystem.getGameEventFrequency(event));
                 Block block = blockState.getBlock();
                 if (event.equals(GameEvent.SHRIEK) && block instanceof MatrixEnergizerBlock matrixEnergizerBlock) {
                     matrixEnergizerBlock.setActive(world, this.pos, blockState,
@@ -146,12 +144,12 @@ public class MatrixEnergizerBlockEntity
         }
 
         @Override
-        public void onListen() {
-            MatrixEnergizerBlockEntity.this.markDirty();
+        public void onDataChanged() {
+            MatrixEnergizerBlockEntity.this.setChanged();
         }
 
         @Override
-        public boolean requiresTickingChunksAround() {
+        public boolean requiresAdjacentChunksToBeTicking() {
             return true;
         }
     }

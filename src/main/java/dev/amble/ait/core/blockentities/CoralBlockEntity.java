@@ -1,12 +1,10 @@
 package dev.amble.ait.core.blockentities;
 
 import java.util.UUID;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.core.AITBlockEntityTypes;
 
 public class CoralBlockEntity extends BlockEntity {
@@ -18,15 +16,15 @@ public class CoralBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        this.creator = nbt.getUuid("creator");
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
+        this.creator = nbt.getUUID("creator");
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
         if (this.creator == null) return;
-        nbt.putUuid("creator", this.creator);
+        nbt.putUUID("creator", this.creator);
     }
 }

@@ -1,12 +1,9 @@
 package dev.amble.ait.data.schema.exterior;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.*;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
 import dev.amble.ait.data.schema.BasicSchema;
 import dev.amble.ait.data.schema.exterior.category.CapsuleCategory;
 import dev.amble.ait.registry.impl.CategoryRegistry;
@@ -16,9 +13,9 @@ import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
  * @author duzo
  */
 public abstract class ExteriorCategorySchema extends BasicSchema {
-    private final Identifier id;
+    private final ResourceLocation id;
 
-    protected ExteriorCategorySchema(Identifier id, String name) {
+    protected ExteriorCategorySchema(ResourceLocation id, String name) {
         super("exterior");
         this.id = id;
     }
@@ -32,7 +29,7 @@ public abstract class ExteriorCategorySchema extends BasicSchema {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -65,11 +62,11 @@ public abstract class ExteriorCategorySchema extends BasicSchema {
         @Override
         public ExteriorCategorySchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = CapsuleCategory.REFERENCE;
             }
 

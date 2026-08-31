@@ -9,11 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
@@ -27,9 +26,12 @@ public interface AnimatedEntityModel {
 		if (name.equals("root") || name.equalsIgnoreCase("player")) {
 			return Optional.of(this.getPart());
 		}
-		return this.getPart().traverse().filter(part -> part.hasChild(name)).findFirst().map(part -> part.getChild(name));
+		return this.getPart().getAllParts().filter(part -> part.hasChild(name)).findFirst().map(part -> part.getChild(name));
 	}
 
+	/**
+	 * Call this in {@link EntityModel#setupAnim(Entity, float, float, float, float, float)} where progress is usually named 'h'
+	 */
 	default void applyAnimation(AnimatedInstance entity, float progress) {
 		BedrockAnimationReference reference = entity.getCurrentAnimation();
 
@@ -46,7 +48,7 @@ public interface AnimatedEntityModel {
 
 		if (entity.isAnimationDirty()) {
 			state.stop();
-			state.startIfNotRunning(entity.getAge());
+			state.startIfStopped(entity.getAge());
 		}
 
 		if (animation.isFinished(state)) {
@@ -54,7 +56,7 @@ public interface AnimatedEntityModel {
 			return;
 		}
 
-		state.startIfNotRunning(entity.getAge());
+		state.startIfStopped(entity.getAge());
 
 		animation.apply(this.getPart(), state, progress, 1.0F, entity);
 	}
@@ -63,24 +65,24 @@ public interface AnimatedEntityModel {
 		BedrockAnimationReference reference = entity.getCurrentAnimation();
 
 		if (reference == null) {
-			this.getPart().traverse().forEach(ModelPart::resetTransform);
+			this.getPart().getAllParts().forEach(ModelPart::resetPose);
 			return;
 		}
 
 		BedrockAnimation animation = reference.get().orElse(null);
 		if (animation == null) {
-			this.getPart().traverse().forEach(ModelPart::resetTransform);
+			this.getPart().getAllParts().forEach(ModelPart::resetPose);
 			return;
 		}
 
 		AnimationState state = entity.getAnimationState();
 		if (state == null || animation.isFinished(state)) {
-			this.getPart().traverse().forEach(ModelPart::resetTransform);
+			this.getPart().getAllParts().forEach(ModelPart::resetPose);
 			return;
 		}
 
 		if (animation.metadata != null && !animation.metadata.movement()) {
-			this.getPart().traverse().forEach(ModelPart::resetTransform);
+			this.getPart().getAllParts().forEach(ModelPart::resetPose);
 		}
 	}
 }

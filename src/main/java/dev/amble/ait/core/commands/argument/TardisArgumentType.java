@@ -6,7 +6,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -14,14 +19,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-
 import dev.amble.ait.api.tardis.link.v2.block.AbstractLinkableBlockEntity;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.TardisManager;
@@ -31,12 +28,12 @@ import dev.amble.ait.core.world.TardisServerWorld;
 public class TardisArgumentType implements ArgumentType<TardisArgumentType.ServerTardisAccessor> {
 
     public static final SimpleCommandExceptionType INVALID_UUID = new SimpleCommandExceptionType(
-            Text.translatable("argument.uuid.invalid"));
+            Component.translatable("argument.uuid.invalid"));
 
     private static final Collection<String> EXAMPLES = List.of("~", "^", "dd12be42-52a9-4a91-a8a1-11c01849e498");
     private static final Pattern VALID_CHARACTERS = Pattern.compile("^([-A-Fa-f0-9]+)");
 
-    public static ServerTardis getTardis(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    public static ServerTardis getTardis(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
         return context.getArgument(name, ServerTardisAccessor.class).get(context);
     }
 
@@ -50,7 +47,7 @@ public class TardisArgumentType implements ArgumentType<TardisArgumentType.Serve
             reader.skip();
 
             return context -> {
-                if (!(context.getSource().getWorld() instanceof TardisServerWorld tardisWorld))
+                if (!(context.getSource().getLevel() instanceof TardisServerWorld tardisWorld))
                     throw INVALID_UUID.create();
 
                 return tardisWorld.getTardis();
@@ -61,12 +58,12 @@ public class TardisArgumentType implements ArgumentType<TardisArgumentType.Serve
             reader.skip();
 
             return context -> {
-                HitResult hit = context.getSource().getEntity().raycast(16, 0, false);
+                HitResult hit = context.getSource().getEntity().pick(16, 0, false);
 
                 if (!(hit instanceof BlockHitResult blockHit))
                     throw INVALID_UUID.create();
 
-                BlockEntity blockEntity = context.getSource().getWorld().getBlockEntity(blockHit.getBlockPos());
+                BlockEntity blockEntity = context.getSource().getLevel().getBlockEntity(blockHit.getBlockPos());
 
                 if (!(blockEntity instanceof AbstractLinkableBlockEntity linkable))
                     throw INVALID_UUID.create();
@@ -92,10 +89,10 @@ public class TardisArgumentType implements ArgumentType<TardisArgumentType.Serve
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        boolean isServer = context.getSource() instanceof ServerCommandSource;
+        boolean isServer = context.getSource() instanceof CommandSourceStack;
         TardisManager<?, ?> manager = TardisManager.getInstance(isServer);
 
-        return CommandSource.suggestMatching(manager.ids().stream().map(UUID::toString),
+        return SharedSuggestionProvider.suggest(manager.ids().stream().map(UUID::toString),
                 builder.suggest("~").suggest("^"));
     }
 
@@ -106,6 +103,6 @@ public class TardisArgumentType implements ArgumentType<TardisArgumentType.Serve
 
     @FunctionalInterface
     public interface ServerTardisAccessor {
-        ServerTardis get(CommandContext<ServerCommandSource> context) throws CommandSyntaxException;
+        ServerTardis get(CommandContext<CommandSourceStack> context) throws CommandSyntaxException;
     }
 }

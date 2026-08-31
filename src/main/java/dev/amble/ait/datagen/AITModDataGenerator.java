@@ -1,7 +1,7 @@
 package dev.amble.ait.datagen;
 
 import static dev.amble.ait.core.AITItems.isUnlockedOnThisDay;
-import static net.minecraft.data.server.recipe.RecipeProvider.*;
+import static net.minecraft.data.recipes.RecipeProvider.*;
 
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
@@ -26,19 +26,18 @@ import dev.amble.lib.datagen.sound.AmbleSoundProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-
-import net.minecraft.block.Blocks;
-import net.minecraft.data.server.recipe.CookingRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.SmithingTransformRecipeJsonBuilder;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryBuilder;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Blocks;
 
 public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
@@ -77,9 +76,9 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
     }
 
     @Override
-    public void buildRegistry(RegistryBuilder registryBuilder) {
-        registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, PlanetConfiguredFeatures::bootstrap);
-        registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlanetPlacedFeatures::boostrap);
+    public void buildRegistry(RegistrySetBuilder registryBuilder) {
+        registryBuilder.add(Registries.CONFIGURED_FEATURE, PlanetConfiguredFeatures::bootstrap);
+        registryBuilder.add(Registries.PLACED_FEATURE, PlanetPlacedFeatures::boostrap);
     }
 
     public void generateRecipes(FabricDataGenerator.Pack pack) {
@@ -90,191 +89,191 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
                 dataGenerator.recipes(provider);
             }));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.IRON_KEY, 1)
-                    .pattern(" N ").pattern("IEI").pattern("IRI").input('N', Items.IRON_NUGGET)
-                    .input('I', Items.IRON_INGOT).input('E', Items.ENDER_PEARL).input('R', Items.REDSTONE)
-                    .criterion(hasItem(Items.IRON_NUGGET), conditionsFromItem(Items.IRON_NUGGET))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.ENDER_PEARL), conditionsFromItem(Items.ENDER_PEARL))
-                    .criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.IRON_KEY, 1)
+                    .pattern(" N ").pattern("IEI").pattern("IRI").define('N', Items.IRON_NUGGET)
+                    .define('I', Items.IRON_INGOT).define('E', Items.ENDER_PEARL).define('R', Items.REDSTONE)
+                    .unlockedBy(getHasName(Items.IRON_NUGGET), has(Items.IRON_NUGGET))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.ENDER_PEARL), has(Items.ENDER_PEARL))
+                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITItems.PLASMIC_MATERIAL, 4)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITItems.PLASMIC_MATERIAL, 4)
                     .pattern("CCC")
                     .pattern("SBS")
                     .pattern("CCC")
-                    .input('B', Items.SLIME_BALL)
-                    .input('S', AITItems.SUPERHEATED_ZEITON)
-                    .input('C', Items.LIGHT_GRAY_CONCRETE_POWDER)
-                    .criterion(hasItem(Items.SLIME_BALL), conditionsFromItem(Items.SLIME_BALL))
-                    .criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON))
-                    .criterion(hasItem(Items.LIGHT_GRAY_CONCRETE_POWDER), conditionsFromItem(Items.LIGHT_GRAY_CONCRETE_POWDER)));
+                    .define('B', Items.SLIME_BALL)
+                    .define('S', AITItems.SUPERHEATED_ZEITON)
+                    .define('C', Items.LIGHT_GRAY_CONCRETE_POWDER)
+                    .unlockedBy(getHasName(Items.SLIME_BALL), has(Items.SLIME_BALL))
+                    .unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON))
+                    .unlockedBy(getHasName(Items.LIGHT_GRAY_CONCRETE_POWDER), has(Items.LIGHT_GRAY_CONCRETE_POWDER)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.CORAL_PLANT, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.CORAL_PLANT, 1)
                     .pattern("CCC")
                     .pattern("CCC")
                     .pattern("CCC")
-                    .input('C', AITItems.CORAL_FRAGMENT)
-                    .criterion(hasItem(AITItems.CORAL_FRAGMENT), conditionsFromItem(AITItems.CORAL_FRAGMENT)));
+                    .define('C', AITItems.CORAL_FRAGMENT)
+                    .unlockedBy(getHasName(AITItems.CORAL_FRAGMENT), has(AITItems.CORAL_FRAGMENT)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_BLOCK, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_BLOCK, 1)
                     .pattern("##")
                     .pattern("##")
-                    .input('#', AITItems.CORAL_FRAGMENT)
-                    .criterion(hasItem(AITItems.CORAL_FRAGMENT), conditionsFromItem(AITItems.CORAL_FRAGMENT)));
+                    .define('#', AITItems.CORAL_FRAGMENT)
+                    .unlockedBy(getHasName(AITItems.CORAL_FRAGMENT), has(AITItems.CORAL_FRAGMENT)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_SLAB, 6)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_SLAB, 6)
                     .pattern("###")
-                    .input('#', AITBlocks.TARDIS_CORAL_BLOCK)
-                    .criterion(hasItem(AITBlocks.TARDIS_CORAL_BLOCK), conditionsFromItem(AITBlocks.TARDIS_CORAL_BLOCK)));
+                    .define('#', AITBlocks.TARDIS_CORAL_BLOCK)
+                    .unlockedBy(getHasName(AITBlocks.TARDIS_CORAL_BLOCK), has(AITBlocks.TARDIS_CORAL_BLOCK)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_STAIRS, 4)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_STAIRS, 4)
                     .pattern("#  ")
                     .pattern("## ")
                     .pattern("###")
-                    .input('#', AITBlocks.TARDIS_CORAL_BLOCK)
-                    .criterion(hasItem(AITBlocks.TARDIS_CORAL_BLOCK), conditionsFromItem(AITBlocks.TARDIS_CORAL_BLOCK)));
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_FAN, 3)
+                    .define('#', AITBlocks.TARDIS_CORAL_BLOCK)
+                    .unlockedBy(getHasName(AITBlocks.TARDIS_CORAL_BLOCK), has(AITBlocks.TARDIS_CORAL_BLOCK)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.TARDIS_CORAL_FAN, 3)
                     .pattern(" # ")
                     .pattern("###")
                     .pattern(" # ")
-                    .input('#', AITItems.CORAL_FRAGMENT)
-                    .criterion(hasItem(AITItems.CORAL_FRAGMENT), conditionsFromItem(AITItems.CORAL_FRAGMENT)));
+                    .define('#', AITItems.CORAL_FRAGMENT)
+                    .unlockedBy(getHasName(AITItems.CORAL_FRAGMENT), has(AITItems.CORAL_FRAGMENT)));
 
-            provider.addBlastFurnaceRecipe(CookingRecipeJsonBuilder.createBlasting(Ingredient.ofItems(AITItems.ZEITON_SHARD),
+            provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(AITItems.ZEITON_SHARD),
                             RecipeCategory.MISC, AITItems.SUPERHEATED_ZEITON, 0.2f, 500)
-                    .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)),
-            new Identifier("ait", "superheated_zeiton_from_zeiton_shard_blasting"));
+                    .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)),
+            new ResourceLocation("ait", "superheated_zeiton_from_zeiton_shard_blasting"));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, AITBlocks.ZEITON_BLOCK, 1)
-                            .pattern("ZZ ").pattern("ZZ ").pattern("   ").input('Z', AITItems.ZEITON_SHARD)
-                            .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+                    ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, AITBlocks.ZEITON_BLOCK, 1)
+                            .pattern("ZZ ").pattern("ZZ ").pattern("   ").define('Z', AITItems.ZEITON_SHARD)
+                            .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE, 1)
+                    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE, 1)
                             .pattern("GGG").pattern("GNG").pattern("GGG")
-                            .input('N', Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).input('G', Items.GOLD_NUGGET)
-                            .criterion(hasItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
-                                    conditionsFromItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE))
-                            .criterion(hasItem(Items.GOLD_NUGGET), conditionsFromItem(Items.GOLD_NUGGET)));
+                            .define('N', Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).define('G', Items.GOLD_NUGGET)
+                            .unlockedBy(getHasName(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                                    has(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE))
+                            .unlockedBy(getHasName(Items.GOLD_NUGGET), has(Items.GOLD_NUGGET)));
 
-            provider.addShapelessRecipe(ShapelessRecipeJsonBuilder
-                    .create(RecipeCategory.BREWING, AITItems.ZEITON_DUST, 4).input(AITItems.ZEITON_SHARD)
-                    .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+            provider.addShapelessRecipe(ShapelessRecipeBuilder
+                    .shapeless(RecipeCategory.BREWING, AITItems.ZEITON_DUST, 4).requires(AITItems.ZEITON_SHARD)
+                    .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.MISC, AITItems.CHARGED_ZEITON_CRYSTAL, 1).pattern("ZZZ").pattern("CAC")
-                    .pattern("ZZZ").input('Z', AITItems.ZEITON_SHARD).input('C', AITBlocks.ZEITON_CLUSTER)
-                    .input('A', AITItems.ARTRON_COLLECTOR)
-                    .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                    .criterion(hasItem(AITBlocks.ZEITON_CLUSTER), conditionsFromItem(AITBlocks.ZEITON_CLUSTER))
-                    .criterion(hasItem(AITItems.ARTRON_COLLECTOR), conditionsFromItem(AITItems.ARTRON_COLLECTOR)));
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.MISC, AITItems.CHARGED_ZEITON_CRYSTAL, 1).pattern("ZZZ").pattern("CAC")
+                    .pattern("ZZZ").define('Z', AITItems.ZEITON_SHARD).define('C', AITBlocks.ZEITON_CLUSTER)
+                    .define('A', AITItems.ARTRON_COLLECTOR)
+                    .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                    .unlockedBy(getHasName(AITBlocks.ZEITON_CLUSTER), has(AITBlocks.ZEITON_CLUSTER))
+                    .unlockedBy(getHasName(AITItems.ARTRON_COLLECTOR), has(AITItems.ARTRON_COLLECTOR)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.MISC, AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE, 1).pattern("SSS")
-                    .pattern("SGS").pattern("SSS").input('G', AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE)
-                    .input('S', Items.NETHERITE_SCRAP)
-                    .criterion(hasItem(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
-                            conditionsFromItem(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE))
-                    .criterion(hasItem(Items.NETHERITE_SCRAP), conditionsFromItem(Items.NETHERITE_SCRAP)));
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.MISC, AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE, 1).pattern("SSS")
+                    .pattern("SGS").pattern("SSS").define('G', AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE)
+                    .define('S', Items.NETHERITE_SCRAP)
+                    .unlockedBy(getHasName(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
+                            has(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE))
+                    .unlockedBy(getHasName(Items.NETHERITE_SCRAP), has(Items.NETHERITE_SCRAP)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.MISC, AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE, 1).pattern("SAS")
-                    .pattern("INI").pattern("SAS").input('I', Items.NETHERITE_INGOT)
-                    .input('N', AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE).input('S', Items.NETHERITE_SCRAP)
-                    .input('A', Items.AMETHYST_SHARD)
-                    .criterion(hasItem(Items.NETHERITE_INGOT), conditionsFromItem(Items.NETHERITE_INGOT))
-                    .criterion(hasItem(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
-                            conditionsFromItem(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE))
-                    .criterion(hasItem(Items.NETHERITE_SCRAP), conditionsFromItem(Items.NETHERITE_SCRAP))
-                    .criterion(hasItem(Items.AMETHYST_SHARD), conditionsFromItem(Items.AMETHYST_SHARD)));
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.MISC, AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE, 1).pattern("SAS")
+                    .pattern("INI").pattern("SAS").define('I', Items.NETHERITE_INGOT)
+                    .define('N', AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE).define('S', Items.NETHERITE_SCRAP)
+                    .define('A', Items.AMETHYST_SHARD)
+                    .unlockedBy(getHasName(Items.NETHERITE_INGOT), has(Items.NETHERITE_INGOT))
+                    .unlockedBy(getHasName(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
+                            has(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE))
+                    .unlockedBy(getHasName(Items.NETHERITE_SCRAP), has(Items.NETHERITE_SCRAP))
+                    .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.TOOLS, AITBlocks.ARTRON_COLLECTOR_BLOCK, 1).pattern(" L ").pattern(" R ")
-                    .pattern("SBS").input('L', Items.LIGHTNING_ROD).input('R', Items.IRON_INGOT)
-                    .input('S', Items.SMOOTH_STONE_SLAB).input('B', Items.REDSTONE_BLOCK)
-                    .criterion(hasItem(Items.LIGHTNING_ROD), conditionsFromItem(Items.LIGHTNING_ROD))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.SMOOTH_STONE_SLAB), conditionsFromItem(Items.SMOOTH_STONE_SLAB))
-                    .criterion(hasItem(Items.REDSTONE_BLOCK), conditionsFromItem(Items.REDSTONE_BLOCK)));
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.TOOLS, AITBlocks.ARTRON_COLLECTOR_BLOCK, 1).pattern(" L ").pattern(" R ")
+                    .pattern("SBS").define('L', Items.LIGHTNING_ROD).define('R', Items.IRON_INGOT)
+                    .define('S', Items.SMOOTH_STONE_SLAB).define('B', Items.REDSTONE_BLOCK)
+                    .unlockedBy(getHasName(Items.LIGHTNING_ROD), has(Items.LIGHTNING_ROD))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.SMOOTH_STONE_SLAB), has(Items.SMOOTH_STONE_SLAB))
+                    .unlockedBy(getHasName(Items.REDSTONE_BLOCK), has(Items.REDSTONE_BLOCK)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.ARTRON_COLLECTOR, 1)
-                    .pattern("CCC").pattern("IRI").pattern("CCC").input('C', Items.COPPER_INGOT)
-                    .input('I', Items.IRON_INGOT).input('R', Items.REDSTONE_BLOCK)
-                    .criterion(hasItem(Items.COPPER_INGOT), conditionsFromItem(Items.COPPER_INGOT))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.REDSTONE_BLOCK), conditionsFromItem(Items.REDSTONE_BLOCK)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.ARTRON_COLLECTOR, 1)
+                    .pattern("CCC").pattern("IRI").pattern("CCC").define('C', Items.COPPER_INGOT)
+                    .define('I', Items.IRON_INGOT).define('R', Items.REDSTONE_BLOCK)
+                    .unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.REDSTONE_BLOCK), has(Items.REDSTONE_BLOCK)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.RIFT_SCANNER, 1).pattern(" A ")
-                            .pattern("IDI").pattern("QRQ").input('A', Items.AMETHYST_SHARD).input('I', Items.IRON_INGOT)
-                            .input('D', Items.DIAMOND).input('R', Items.REDSTONE_BLOCK).input('Q', Items.QUARTZ)
-                            .criterion(hasItem(Items.AMETHYST_SHARD), conditionsFromItem(Items.AMETHYST_SHARD))
-                            .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                            .criterion(hasItem(Items.DIAMOND), conditionsFromItem(Items.DIAMOND))
-                            .criterion(hasItem(Items.REDSTONE_BLOCK), conditionsFromItem(Items.REDSTONE_BLOCK))
-                            .criterion(hasItem(Items.QUARTZ), conditionsFromItem(Items.QUARTZ)));
+                    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.RIFT_SCANNER, 1).pattern(" A ")
+                            .pattern("IDI").pattern("QRQ").define('A', Items.AMETHYST_SHARD).define('I', Items.IRON_INGOT)
+                            .define('D', Items.DIAMOND).define('R', Items.REDSTONE_BLOCK).define('Q', Items.QUARTZ)
+                            .unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
+                            .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                            .unlockedBy(getHasName(Items.DIAMOND), has(Items.DIAMOND))
+                            .unlockedBy(getHasName(Items.REDSTONE_BLOCK), has(Items.REDSTONE_BLOCK))
+                            .unlockedBy(getHasName(Items.QUARTZ), has(Items.QUARTZ)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.WAYPOINT_BANK, 1)
-                    .pattern("RTR").pattern("BWB").pattern("IEI").input('R', Items.REDSTONE)
-                    .input('T', Blocks.TINTED_GLASS).input('B', Items.IRON_BARS).input('W', AITItems.WAYPOINT_CARTRIDGE)
-                    .input('I', Blocks.IRON_BLOCK).input('E', Blocks.ENDER_CHEST)
-                    .criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE))
-                    .criterion(hasItem(Items.TINTED_GLASS), conditionsFromItem(Items.TINTED_GLASS))
-                    .criterion(hasItem(Items.IRON_BARS), conditionsFromItem(Items.IRON_BARS))
-                    .criterion(hasItem(AITItems.WAYPOINT_CARTRIDGE), conditionsFromItem(AITItems.WAYPOINT_CARTRIDGE))
-                    .criterion(hasItem(Items.IRON_BLOCK), conditionsFromItem(Items.IRON_BLOCK))
-                    .criterion(hasItem(Blocks.ENDER_CHEST), conditionsFromItem(Blocks.ENDER_CHEST)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.WAYPOINT_BANK, 1)
+                    .pattern("RTR").pattern("BWB").pattern("IEI").define('R', Items.REDSTONE)
+                    .define('T', Blocks.TINTED_GLASS).define('B', Items.IRON_BARS).define('W', AITItems.WAYPOINT_CARTRIDGE)
+                    .define('I', Blocks.IRON_BLOCK).define('E', Blocks.ENDER_CHEST)
+                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .unlockedBy(getHasName(Items.TINTED_GLASS), has(Items.TINTED_GLASS))
+                    .unlockedBy(getHasName(Items.IRON_BARS), has(Items.IRON_BARS))
+                    .unlockedBy(getHasName(AITItems.WAYPOINT_CARTRIDGE), has(AITItems.WAYPOINT_CARTRIDGE))
+                    .unlockedBy(getHasName(Items.IRON_BLOCK), has(Items.IRON_BLOCK))
+                    .unlockedBy(getHasName(Blocks.ENDER_CHEST), has(Blocks.ENDER_CHEST)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.POWER_CONVERTER, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.POWER_CONVERTER, 1)
                     .pattern("RFR")
                     .pattern("BGB")
                     .pattern("IFI")
-                    .input('R', Items.REDSTONE)
-                    .input('B', Items.IRON_BARS)
-                    .input('F', AITBlocks.CABLE_BLOCK)
-                    .input('I', Blocks.IRON_BLOCK)
-                    .input('G', AITBlocks.GENERIC_SUBSYSTEM)
-                    .criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE))
-                    .criterion(hasItem(Items.IRON_BARS), conditionsFromItem(Items.IRON_BARS))
-                    .criterion(hasItem(AITBlocks.CABLE_BLOCK), conditionsFromItem(AITBlocks.CABLE_BLOCK))
-                    .criterion(hasItem(Items.IRON_BLOCK), conditionsFromItem(Items.IRON_BLOCK))
-                    .criterion(hasItem(AITBlocks.GENERIC_SUBSYSTEM), conditionsFromItem(AITBlocks.GENERIC_SUBSYSTEM)));
+                    .define('R', Items.REDSTONE)
+                    .define('B', Items.IRON_BARS)
+                    .define('F', AITBlocks.CABLE_BLOCK)
+                    .define('I', Blocks.IRON_BLOCK)
+                    .define('G', AITBlocks.GENERIC_SUBSYSTEM)
+                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .unlockedBy(getHasName(Items.IRON_BARS), has(Items.IRON_BARS))
+                    .unlockedBy(getHasName(AITBlocks.CABLE_BLOCK), has(AITBlocks.CABLE_BLOCK))
+                    .unlockedBy(getHasName(Items.IRON_BLOCK), has(Items.IRON_BLOCK))
+                    .unlockedBy(getHasName(AITBlocks.GENERIC_SUBSYSTEM), has(AITBlocks.GENERIC_SUBSYSTEM)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.MATRIX_ENERGIZER, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.MATRIX_ENERGIZER, 1)
                     .pattern("IRI")
                     .pattern("SCS")
                     .pattern("IZI")
-                    .input('I', Items.IRON_INGOT)
-                    .input('R', Items.REDSTONE)
-                    .input('S', Items.SCULK)
-                    .input('C', AITBlocks.ARTRON_COLLECTOR_BLOCK)
-                    .input('Z', AITItems.SUPERHEATED_ZEITON)
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE))
-                    .criterion(hasItem(Items.SCULK), conditionsFromItem(Items.SCULK))
-                    .criterion(hasItem(AITBlocks.ARTRON_COLLECTOR_BLOCK), conditionsFromItem(AITBlocks.ARTRON_COLLECTOR_BLOCK))
-                    .criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON)));
+                    .define('I', Items.IRON_INGOT)
+                    .define('R', Items.REDSTONE)
+                    .define('S', Items.SCULK)
+                    .define('C', AITBlocks.ARTRON_COLLECTOR_BLOCK)
+                    .define('Z', AITItems.SUPERHEATED_ZEITON)
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .unlockedBy(getHasName(Items.SCULK), has(Items.SCULK))
+                    .unlockedBy(getHasName(AITBlocks.ARTRON_COLLECTOR_BLOCK), has(AITBlocks.ARTRON_COLLECTOR_BLOCK))
+                    .unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.PHOTON_ACCELERATOR, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.PHOTON_ACCELERATOR, 1)
                     .pattern(" I ")
                     .pattern("IXI")
                     .pattern(" I ")
-                    .input('I', Items.IRON_INGOT)
-                    .input('X', Items.BLAZE_POWDER)
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.BLAZE_POWDER), conditionsFromItem(Items.BLAZE_POWDER)));
+                    .define('I', Items.IRON_INGOT)
+                    .define('X', Items.BLAZE_POWDER)
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.BLAZE_POWDER), has(Items.BLAZE_POWDER)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.ORTHOGONAL_ENGINE_FILTER, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.ORTHOGONAL_ENGINE_FILTER, 1)
                     .pattern("III")
                     .pattern("IBI")
                     .pattern("IXI")
-                    .input('I', Items.IRON_INGOT)
-                    .input('X', AITItems.SUPERHEATED_ZEITON)
-                    .input('B', AITItems.ARTRON_COLLECTOR)
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON))
-                    .criterion(hasItem(AITItems.ARTRON_COLLECTOR), conditionsFromItem(AITItems.ARTRON_COLLECTOR)));
+                    .define('I', Items.IRON_INGOT)
+                    .define('X', AITItems.SUPERHEATED_ZEITON)
+                    .define('B', AITItems.ARTRON_COLLECTOR)
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON))
+                    .unlockedBy(getHasName(AITItems.ARTRON_COLLECTOR), has(AITItems.ARTRON_COLLECTOR)));
 
 
             /*provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.IRON_GOAT_HORN, 1)
@@ -286,160 +285,160 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
                     .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
                     .criterion(hasItem(Items.GOAT_HORN), conditionsFromItem(Items.GOAT_HORN)));*/
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, PlanetItems.FABRIC, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, PlanetItems.FABRIC, 1)
                     .pattern("SSS")
                     .pattern("SPS")
                     .pattern("SSS")
-                    .input('S', Items.STRING)
-                    .input('P', Items.PAPER)
-                    .criterion(hasItem(Items.STRING), conditionsFromItem(Items.STRING))
-                    .criterion(hasItem(Items.PAPER), conditionsFromItem(Items.PAPER)));
+                    .define('S', Items.STRING)
+                    .define('P', Items.PAPER)
+                    .unlockedBy(getHasName(Items.STRING), has(Items.STRING))
+                    .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER)));
 
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, PlanetBlocks.OXYGENATOR_BLOCK, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, PlanetBlocks.OXYGENATOR_BLOCK, 1)
                     .pattern("IWI")
                     .pattern("BTB")
                     .pattern("IWI")
-                    .input('I', Items.BLACKSTONE)
-                    .input('B', Items.IRON_BARS)
-                    .input('T', AITItems.SUPERHEATED_ZEITON)
-                    .input('W', Items.WATER_BUCKET)
-                    .criterion(hasItem(Items.BLACKSTONE), conditionsFromItem(Items.BLACKSTONE))
-                    .criterion(hasItem(Items.IRON_BARS), conditionsFromItem(Items.IRON_BARS))
-                    .criterion(hasItem(Items.WATER_BUCKET), conditionsFromItem(Items.WATER_BUCKET))
-                    .criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON)));
+                    .define('I', Items.BLACKSTONE)
+                    .define('B', Items.IRON_BARS)
+                    .define('T', AITItems.SUPERHEATED_ZEITON)
+                    .define('W', Items.WATER_BUCKET)
+                    .unlockedBy(getHasName(Items.BLACKSTONE), has(Items.BLACKSTONE))
+                    .unlockedBy(getHasName(Items.IRON_BARS), has(Items.IRON_BARS))
+                    .unlockedBy(getHasName(Items.WATER_BUCKET), has(Items.WATER_BUCKET))
+                    .unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.GENERIC_SUBSYSTEM, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.GENERIC_SUBSYSTEM, 1)
                     .pattern("IBI")
                     .pattern("BSB")
                     .pattern("IBI")
-                    .input('I', Items.IRON_INGOT)
-                    .input('B', AITItems.SUPERHEATED_ZEITON)
-                    .input('S', AITItems.ORTHOGONAL_ENGINE_FILTER)
-                    .criterion(hasItem(Items.IRON_BLOCK), conditionsFromItem(Items.IRON_BLOCK))
-                    .criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON))
-                    .criterion(hasItem(AITItems.ORTHOGONAL_ENGINE_FILTER), conditionsFromItem(AITItems.ORTHOGONAL_ENGINE_FILTER)));
+                    .define('I', Items.IRON_INGOT)
+                    .define('B', AITItems.SUPERHEATED_ZEITON)
+                    .define('S', AITItems.ORTHOGONAL_ENGINE_FILTER)
+                    .unlockedBy(getHasName(Items.IRON_BLOCK), has(Items.IRON_BLOCK))
+                    .unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON))
+                    .unlockedBy(getHasName(AITItems.ORTHOGONAL_ENGINE_FILTER), has(AITItems.ORTHOGONAL_ENGINE_FILTER)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, AITBlocks.PLAQUE_BLOCK, 1).pattern("GSG")
-                            .pattern("SBS").pattern("GSG").input('G', Items.GOLD_NUGGET).input('S', Items.SPRUCE_SLAB)
-                            .input('B', Items.BLACK_CONCRETE)
-                            .criterion(hasItem(Items.GOLD_NUGGET), conditionsFromItem(Items.GOLD_NUGGET))
-                            .criterion(hasItem(Items.SPRUCE_SLAB), conditionsFromItem(Items.SPRUCE_SLAB))
-                            .criterion(hasItem(Items.BLACK_CONCRETE), conditionsFromItem(Items.BLACK_CONCRETE)));
+                    ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, AITBlocks.PLAQUE_BLOCK, 1).pattern("GSG")
+                            .pattern("SBS").pattern("GSG").define('G', Items.GOLD_NUGGET).define('S', Items.SPRUCE_SLAB)
+                            .define('B', Items.BLACK_CONCRETE)
+                            .unlockedBy(getHasName(Items.GOLD_NUGGET), has(Items.GOLD_NUGGET))
+                            .unlockedBy(getHasName(Items.SPRUCE_SLAB), has(Items.SPRUCE_SLAB))
+                            .unlockedBy(getHasName(Items.BLACK_CONCRETE), has(Items.BLACK_CONCRETE)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITBlocks.CONSOLE_GENERATOR, 1)
-                    .pattern(" G ").pattern("CEC").pattern(" I ").input('G', Items.GLASS).input('C', Items.COMPARATOR)
-                    .input('E', Items.END_CRYSTAL).input('I', Items.IRON_INGOT)
-                    .criterion(hasItem(Items.GLASS), conditionsFromItem(Items.GLASS))
-                    .criterion(hasItem(Items.COMPARATOR), conditionsFromItem(Items.COMPARATOR))
-                    .criterion(hasItem(Items.END_CRYSTAL), conditionsFromItem(Items.END_CRYSTAL))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITBlocks.CONSOLE_GENERATOR, 1)
+                    .pattern(" G ").pattern("CEC").pattern(" I ").define('G', Items.GLASS).define('C', Items.COMPARATOR)
+                    .define('E', Items.END_CRYSTAL).define('I', Items.IRON_INGOT)
+                    .unlockedBy(getHasName(Items.GLASS), has(Items.GLASS))
+                    .unlockedBy(getHasName(Items.COMPARATOR), has(Items.COMPARATOR))
+                    .unlockedBy(getHasName(Items.END_CRYSTAL), has(Items.END_CRYSTAL))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITBlocks.DETECTOR_BLOCK, 4)
-                    .pattern(" D ").pattern("ICI").pattern(" R ").input('D', Items.DAYLIGHT_DETECTOR)
-                    .input('I', Items.IRON_INGOT).input('C', Items.COMPARATOR).input('R', Items.REDSTONE)
-                    .criterion(hasItem(Items.DAYLIGHT_DETECTOR), conditionsFromItem(Items.DAYLIGHT_DETECTOR))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.COMPARATOR), conditionsFromItem(Items.COMPARATOR))
-                    .criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITBlocks.DETECTOR_BLOCK, 4)
+                    .pattern(" D ").pattern("ICI").pattern(" R ").define('D', Items.DAYLIGHT_DETECTOR)
+                    .define('I', Items.IRON_INGOT).define('C', Items.COMPARATOR).define('R', Items.REDSTONE)
+                    .unlockedBy(getHasName(Items.DAYLIGHT_DETECTOR), has(Items.DAYLIGHT_DETECTOR))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.COMPARATOR), has(Items.COMPARATOR))
+                    .unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITBlocks.DOOR_BLOCK, 1)
-                    .pattern("GCG").pattern("CDC").pattern("CCC").input('D', Items.IRON_DOOR)
-                    .input('G', Items.GLASS_PANE).input('C', Items.LIGHT_GRAY_CONCRETE)
-                    .criterion(hasItem(Items.IRON_DOOR), conditionsFromItem(Items.IRON_DOOR))
-                    .criterion(hasItem(Items.GLASS_PANE), conditionsFromItem(Items.GLASS_PANE))
-                    .criterion(hasItem(Items.LIGHT_GRAY_CONCRETE), conditionsFromItem(Items.LIGHT_GRAY_CONCRETE)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITBlocks.DOOR_BLOCK, 1)
+                    .pattern("GCG").pattern("CDC").pattern("CCC").define('D', Items.IRON_DOOR)
+                    .define('G', Items.GLASS_PANE).define('C', Items.LIGHT_GRAY_CONCRETE)
+                    .unlockedBy(getHasName(Items.IRON_DOOR), has(Items.IRON_DOOR))
+                    .unlockedBy(getHasName(Items.GLASS_PANE), has(Items.GLASS_PANE))
+                    .unlockedBy(getHasName(Items.LIGHT_GRAY_CONCRETE), has(Items.LIGHT_GRAY_CONCRETE)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, AITItems.CORAL_CAGE, 1)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.MISC, AITItems.CORAL_CAGE, 1)
                     .pattern("BPB")
                     .pattern("ICI")
                     .pattern("BPB")
-                    .input('B', Items.IRON_BARS)
-                    .input('P', AITItems.PLASMIC_MATERIAL)
-                    .input('I', Items.IRON_INGOT)
-                    .input('C', AITItems.CORAL_FRAGMENT)
-                    .criterion(hasItem(Items.IRON_BARS), conditionsFromItem(Items.IRON_BARS))
-                    .criterion(hasItem(AITItems.PLASMIC_MATERIAL), conditionsFromItem(AITItems.PLASMIC_MATERIAL))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(AITItems.CORAL_FRAGMENT), conditionsFromItem(AITItems.CORAL_FRAGMENT)));
+                    .define('B', Items.IRON_BARS)
+                    .define('P', AITItems.PLASMIC_MATERIAL)
+                    .define('I', Items.IRON_INGOT)
+                    .define('C', AITItems.CORAL_FRAGMENT)
+                    .unlockedBy(getHasName(Items.IRON_BARS), has(Items.IRON_BARS))
+                    .unlockedBy(getHasName(AITItems.PLASMIC_MATERIAL), has(AITItems.PLASMIC_MATERIAL))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(AITItems.CORAL_FRAGMENT), has(AITItems.CORAL_FRAGMENT)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.WAYPOINT_CARTRIDGE, 1).pattern("III")
-                            .pattern("IBI").pattern("CGC").input('I', Items.IRON_INGOT).input('B', Items.REDSTONE_BLOCK)
-                            .input('C', Items.GREEN_DYE).input('G', Items.GOLD_NUGGET)
-                            .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                            .criterion(hasItem(Items.REDSTONE_BLOCK), conditionsFromItem(Items.REDSTONE_BLOCK))
-                            .criterion(hasItem(Items.GREEN_DYE), conditionsFromItem(Items.GREEN_DYE))
-                            .criterion(hasItem(Items.GOLD_NUGGET), conditionsFromItem(Items.GOLD_NUGGET)));
+                    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.WAYPOINT_CARTRIDGE, 1).pattern("III")
+                            .pattern("IBI").pattern("CGC").define('I', Items.IRON_INGOT).define('B', Items.REDSTONE_BLOCK)
+                            .define('C', Items.GREEN_DYE).define('G', Items.GOLD_NUGGET)
+                            .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                            .unlockedBy(getHasName(Items.REDSTONE_BLOCK), has(Items.REDSTONE_BLOCK))
+                            .unlockedBy(getHasName(Items.GREEN_DYE), has(Items.GREEN_DYE))
+                            .unlockedBy(getHasName(Items.GOLD_NUGGET), has(Items.GOLD_NUGGET)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.CONTROL_DISC, 1)
+                    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.CONTROL_DISC, 1)
                             .pattern(" I ")
                             .pattern("IZI")
                             .pattern(" I ")
-                            .input('I', Items.IRON_INGOT)
-                            .input('Z', AITItems.CHARGED_ZEITON_CRYSTAL)
-                            .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                            .criterion(hasItem(AITItems.CHARGED_ZEITON_CRYSTAL), conditionsFromItem(AITItems.CHARGED_ZEITON_CRYSTAL)));
+                            .define('I', Items.IRON_INGOT)
+                            .define('Z', AITItems.CHARGED_ZEITON_CRYSTAL)
+                            .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                            .unlockedBy(getHasName(AITItems.CHARGED_ZEITON_CRYSTAL), has(AITItems.CHARGED_ZEITON_CRYSTAL)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.HAMMER, 1)
-                    .pattern("DSD").pattern(" A ").pattern(" T ").input('D', Items.DRIED_KELP).input('S', Items.STRING)
-                    .input('A', Items.IRON_AXE).input('T', Items.STICK)
-                    .criterion(hasItem(Items.DRIED_KELP), conditionsFromItem(Items.DRIED_KELP))
-                    .criterion(hasItem(Items.STRING), conditionsFromItem(Items.STRING))
-                    .criterion(hasItem(Items.IRON_AXE), conditionsFromItem(Items.IRON_AXE))
-                    .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK)));
-
-            provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITBlocks.MONITOR_BLOCK, 1).pattern("III")
-                            .pattern("IBI").pattern("III").input('I', Items.IRON_INGOT).input('B', Items.ENDER_EYE)
-                            .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                            .criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE)));
-
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.REDSTONE, AITBlocks.WALL_MONITOR_BLOCK, 1).pattern("QIQ").pattern("IBI")
-                    .pattern("QIQ").input('Q', Items.QUARTZ).input('I', Items.IRON_INGOT).input('B', Items.ENDER_EYE)
-                    .criterion(hasItem(Items.QUARTZ), conditionsFromItem(Items.QUARTZ))
-                    .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE)));
-
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.RESPIRATOR, 1)
-                    .pattern("NNN").pattern("SPS").pattern("WNW").input('N', Items.IRON_NUGGET).input('S', Items.STRING)
-                    .input('P', Items.GLASS_PANE).input('W', Items.PINK_WOOL)
-                    .criterion(hasItem(Items.IRON_NUGGET), conditionsFromItem(Items.IRON_NUGGET))
-                    .criterion(hasItem(Items.STRING), conditionsFromItem(Items.STRING))
-                    .criterion(hasItem(Items.GLASS_PANE), conditionsFromItem(Items.GLASS_PANE))
-                    .criterion(hasItem(Items.PINK_WOOL), conditionsFromItem(Items.PINK_WOOL)));
-
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder
-                    .create(RecipeCategory.TOOLS, AITItems.FACELESS_RESPIRATOR, 1).pattern("   ").pattern(" R ")
-                    .pattern("NWN").input('R', Items.REDSTONE).input('N', Items.IRON_NUGGET)
-                    .input('W', Items.BLACK_WOOL).criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE))
-                    .criterion(hasItem(Items.IRON_NUGGET), conditionsFromItem(Items.IRON_NUGGET))
-                    .criterion(hasItem(Items.BLACK_WOOL), conditionsFromItem(Items.BLACK_WOOL)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.HAMMER, 1)
+                    .pattern("DSD").pattern(" A ").pattern(" T ").define('D', Items.DRIED_KELP).define('S', Items.STRING)
+                    .define('A', Items.IRON_AXE).define('T', Items.STICK)
+                    .unlockedBy(getHasName(Items.DRIED_KELP), has(Items.DRIED_KELP))
+                    .unlockedBy(getHasName(Items.STRING), has(Items.STRING))
+                    .unlockedBy(getHasName(Items.IRON_AXE), has(Items.IRON_AXE))
+                    .unlockedBy(getHasName(Items.STICK), has(Items.STICK)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITBlocks.ENVIRONMENT_PROJECTOR, 1)
-                            .pattern("IGI").pattern("GPG").pattern("ISI").input('I', Items.IRON_INGOT)
-                            .criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_NUGGET))
-                            .input('G', Blocks.GLASS_PANE)
-                            .criterion(hasItem(Blocks.GLASS_PANE), conditionsFromItem(Blocks.GLASS_PANE))
-                            .input('P', Items.ENDER_PEARL)
-                            .criterion(hasItem(Items.ENDER_PEARL), conditionsFromItem(Items.ENDER_PEARL))
-                            .input('S', Blocks.SEA_LANTERN)
-                            .criterion(hasItem(Blocks.SEA_LANTERN), conditionsFromItem(Blocks.SEA_LANTERN)));
+                    ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITBlocks.MONITOR_BLOCK, 1).pattern("III")
+                            .pattern("IBI").pattern("III").define('I', Items.IRON_INGOT).define('B', Items.ENDER_EYE)
+                            .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                            .unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE)));
+
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.REDSTONE, AITBlocks.WALL_MONITOR_BLOCK, 1).pattern("QIQ").pattern("IBI")
+                    .pattern("QIQ").define('Q', Items.QUARTZ).define('I', Items.IRON_INGOT).define('B', Items.ENDER_EYE)
+                    .unlockedBy(getHasName(Items.QUARTZ), has(Items.QUARTZ))
+                    .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE)));
+
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.RESPIRATOR, 1)
+                    .pattern("NNN").pattern("SPS").pattern("WNW").define('N', Items.IRON_NUGGET).define('S', Items.STRING)
+                    .define('P', Items.GLASS_PANE).define('W', Items.PINK_WOOL)
+                    .unlockedBy(getHasName(Items.IRON_NUGGET), has(Items.IRON_NUGGET))
+                    .unlockedBy(getHasName(Items.STRING), has(Items.STRING))
+                    .unlockedBy(getHasName(Items.GLASS_PANE), has(Items.GLASS_PANE))
+                    .unlockedBy(getHasName(Items.PINK_WOOL), has(Items.PINK_WOOL)));
+
+            provider.addShapedRecipe(ShapedRecipeBuilder
+                    .shaped(RecipeCategory.TOOLS, AITItems.FACELESS_RESPIRATOR, 1).pattern("   ").pattern(" R ")
+                    .pattern("NWN").define('R', Items.REDSTONE).define('N', Items.IRON_NUGGET)
+                    .define('W', Items.BLACK_WOOL).unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE))
+                    .unlockedBy(getHasName(Items.IRON_NUGGET), has(Items.IRON_NUGGET))
+                    .unlockedBy(getHasName(Items.BLACK_WOOL), has(Items.BLACK_WOOL)));
 
             provider.addShapedRecipe(
-                    ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITBlocks.LANDING_PAD, 1)
+                    ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITBlocks.ENVIRONMENT_PROJECTOR, 1)
+                            .pattern("IGI").pattern("GPG").pattern("ISI").define('I', Items.IRON_INGOT)
+                            .unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_NUGGET))
+                            .define('G', Blocks.GLASS_PANE)
+                            .unlockedBy(getHasName(Blocks.GLASS_PANE), has(Blocks.GLASS_PANE))
+                            .define('P', Items.ENDER_PEARL)
+                            .unlockedBy(getHasName(Items.ENDER_PEARL), has(Items.ENDER_PEARL))
+                            .define('S', Blocks.SEA_LANTERN)
+                            .unlockedBy(getHasName(Blocks.SEA_LANTERN), has(Blocks.SEA_LANTERN)));
+
+            provider.addShapedRecipe(
+                    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITBlocks.LANDING_PAD, 1)
                             .pattern(" E ")
                             .pattern("ZCZ")
                             .pattern("ZDZ")
-                            .input('E', Items.ENDER_EYE).input('Z', AITItems.ZEITON_SHARD).input('D', Items.DIAMOND).input('C', Items.COMPASS)
-                            .criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE))
-                            .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                            .criterion(hasItem(Items.DIAMOND), conditionsFromItem(Items.DIAMOND))
-                            .criterion(hasItem(Items.COMPASS), conditionsFromItem(Items.COMPASS)));
+                            .define('E', Items.ENDER_EYE).define('Z', AITItems.ZEITON_SHARD).define('D', Items.DIAMOND).define('C', Items.COMPASS)
+                            .unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE))
+                            .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                            .unlockedBy(getHasName(Items.DIAMOND), has(Items.DIAMOND))
+                            .unlockedBy(getHasName(Items.COMPASS), has(Items.COMPASS)));
 
             /*if (isUnlockedOnThisDay(Calendar.DECEMBER, 29)) {
                 provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.COMBAT, AITItems.COBBLED_SNOWBALL)
@@ -449,14 +448,14 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
             if (isUnlockedOnThisDay(Calendar.JANUARY, 2)) {
                 provider.addShapedRecipe(
-                        ShapedRecipeJsonBuilder.create(RecipeCategory.FOOD, AITItems.MUG, 1)
+                        ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, AITItems.MUG, 1)
                                 .pattern(" CC")
                                 .pattern("P C")
                                 .pattern(" CC")
-                                .input('P', Items.FLOWER_POT)
-                                .input('C', Items.CLAY_BALL)
-                                .criterion(hasItem(Items.FLOWER_POT), conditionsFromItem(Items.FLOWER_POT))
-                                .criterion(hasItem(Items.CLAY_BALL), conditionsFromItem(Items.CLAY_BALL)));
+                                .define('P', Items.FLOWER_POT)
+                                .define('C', Items.CLAY_BALL)
+                                .unlockedBy(getHasName(Items.FLOWER_POT), has(Items.FLOWER_POT))
+                                .unlockedBy(getHasName(Items.CLAY_BALL), has(Items.CLAY_BALL)));
                 /*provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.FOOD, AITItems.HOT_CHOCOLATE_POWDER)
                         .input(Items.COCOA_BEANS).criterion(hasItem(Items.COCOA_BEANS), conditionsFromItem(Items.COCOA_BEANS))
                         .input(Blocks.COBBLESTONE).criterion(hasItem(Blocks.COBBLESTONE), conditionsFromItem(Blocks.COBBLESTONE))
@@ -469,143 +468,143 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
             if (isUnlockedOnThisDay(Calendar.DECEMBER, 30)) {
                 provider.addShapedRecipe(
-                        ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, AITBlocks.SNOW_GLOBE, 1)
+                        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, AITBlocks.SNOW_GLOBE, 1)
                                 .pattern("GGG")
                                 .pattern("GSG")
                                 .pattern("CCC")
-                                .input('G', Items.GLASS_PANE)
-                                .input('C', Items.BLUE_CONCRETE)
-                                .input('S', Items.SNOWBALL)
-                                .criterion(hasItem(Items.GLASS_PANE), conditionsFromItem(Items.GLASS_PANE))
-                                .criterion(hasItem(Items.BLUE_CONCRETE), conditionsFromItem(Items.BLUE_CONCRETE))
-                                .criterion(hasItem(Items.SNOWBALL), conditionsFromItem(Items.SNOWBALL)));
+                                .define('G', Items.GLASS_PANE)
+                                .define('C', Items.BLUE_CONCRETE)
+                                .define('S', Items.SNOWBALL)
+                                .unlockedBy(getHasName(Items.GLASS_PANE), has(Items.GLASS_PANE))
+                                .unlockedBy(getHasName(Items.BLUE_CONCRETE), has(Items.BLUE_CONCRETE))
+                                .unlockedBy(getHasName(Items.SNOWBALL), has(Items.SNOWBALL)));
             }
 
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.HYPERCUBE)
-                    .pattern("BBB").pattern("BEB").pattern("BBB").input('B', AITItems.ZEITON_SHARD)
-                    .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                    .input('E', Items.END_CRYSTAL)
-                    .criterion(hasItem(Items.END_CRYSTAL), conditionsFromItem(Items.END_CRYSTAL)));
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.HYPERCUBE)
+                    .pattern("BBB").pattern("BEB").pattern("BBB").define('B', AITItems.ZEITON_SHARD)
+                    .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                    .define('E', Items.END_CRYSTAL)
+                    .unlockedBy(getHasName(Items.END_CRYSTAL), has(Items.END_CRYSTAL)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITItems.REDSTONE_CONTROL)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITItems.REDSTONE_CONTROL)
                     .pattern("OEO").pattern("ZRZ").pattern("OOO")
-                    .input('O', Blocks.OBSIDIAN).criterion(hasItem(Blocks.OBSIDIAN), conditionsFromItem(Blocks.OBSIDIAN))
-                    .input('E', Items.ENDER_EYE).criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE))
-                    .input('Z', AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                    .input('R', Items.REDSTONE).criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE)));
+                    .define('O', Blocks.OBSIDIAN).unlockedBy(getHasName(Blocks.OBSIDIAN), has(Blocks.OBSIDIAN))
+                    .define('E', Items.ENDER_EYE).unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE))
+                    .define('Z', AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                    .define('R', Items.REDSTONE).unlockedBy(getHasName(Items.REDSTONE), has(Items.REDSTONE)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITItems.HAZANDRA)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITItems.HAZANDRA)
                     .pattern("CEC").pattern("ZRZ").pattern("CAC")
-                    .input('A', Items.AMETHYST_SHARD).criterion(hasItem(Items.AMETHYST_SHARD), conditionsFromItem(Items.AMETHYST_SHARD))
-                    .input('C', Items.COPPER_INGOT).criterion(hasItem(Items.COPPER_INGOT), conditionsFromItem(Items.COPPER_INGOT))
-                    .input('E', Items.ENDER_EYE).criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE))
-                    .input('Z', AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                    .input('R', Items.END_CRYSTAL).criterion(hasItem(Items.END_CRYSTAL), conditionsFromItem(Items.END_CRYSTAL)));
+                    .define('A', Items.AMETHYST_SHARD).unlockedBy(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
+                    .define('C', Items.COPPER_INGOT).unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
+                    .define('E', Items.ENDER_EYE).unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE))
+                    .define('Z', AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                    .define('R', Items.END_CRYSTAL).unlockedBy(getHasName(Items.END_CRYSTAL), has(Items.END_CRYSTAL)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITBlocks.CABLE_BLOCK, 8)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITBlocks.CABLE_BLOCK, 8)
                     .pattern("DDD").pattern("CZC").pattern("DDD")
-                    .input('D', Blocks.POLISHED_DEEPSLATE).criterion(hasItem(Blocks.POLISHED_DEEPSLATE), conditionsFromItem(Blocks.POLISHED_DEEPSLATE))
-                    .input('C', Items.COPPER_INGOT).criterion(hasItem(Items.COPPER_INGOT), conditionsFromItem(Items.COPPER_INGOT))
-                    .input('Z', AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+                    .define('D', Blocks.POLISHED_DEEPSLATE).unlockedBy(getHasName(Blocks.POLISHED_DEEPSLATE), has(Blocks.POLISHED_DEEPSLATE))
+                    .define('C', Items.COPPER_INGOT).unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
+                    .define('Z', AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
-            provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITBlocks.CABLE_CONNECTOR_BLOCK , 2)
-                    .input(AITBlocks.CABLE_BLOCK, 4).criterion(hasItem(AITBlocks.CABLE_BLOCK), conditionsFromItem(AITBlocks.CABLE_BLOCK)));
+            provider.addShapelessRecipe(ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, AITBlocks.CABLE_CONNECTOR_BLOCK , 2)
+                    .requires(AITBlocks.CABLE_BLOCK, 4).unlockedBy(getHasName(AITBlocks.CABLE_BLOCK), has(AITBlocks.CABLE_BLOCK)));
 
             //provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITBlocks.CABLE_BLOCK, 2)
             //        .input(AITBlocks.CABLE_CONNECTOR_BLOCK ).criterion(hasItem(AITBlocks.CABLE_CONNECTOR_BLOCK ), conditionsFromItem(AITBlocks.CABLE_CONNECTOR_BLOCK )));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITItems.HYPERION_CORE_SHAFT)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITItems.HYPERION_CORE_SHAFT)
                     .pattern("ACB")
-                    .input('B', AITItems.SUPERHEATED_ZEITON).criterion(hasItem(AITItems.SUPERHEATED_ZEITON), conditionsFromItem(AITItems.SUPERHEATED_ZEITON))
-                    .input('A', AITItems.PHOTON_ACCELERATOR).criterion(hasItem(AITItems.PHOTON_ACCELERATOR), conditionsFromItem(AITItems.PHOTON_ACCELERATOR))
-                    .input('C', Items.IRON_INGOT).criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT)));
+                    .define('B', AITItems.SUPERHEATED_ZEITON).unlockedBy(getHasName(AITItems.SUPERHEATED_ZEITON), has(AITItems.SUPERHEATED_ZEITON))
+                    .define('A', AITItems.PHOTON_ACCELERATOR).unlockedBy(getHasName(AITItems.PHOTON_ACCELERATOR), has(AITItems.PHOTON_ACCELERATOR))
+                    .define('C', Items.IRON_INGOT).unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE, AITItems.TRANSWARP_RESONATOR)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, AITItems.TRANSWARP_RESONATOR)
                     .pattern("III").pattern("IZI").pattern("III")
-                    .input('I', Items.IRON_INGOT).criterion(hasItem(Items.IRON_INGOT), conditionsFromItem(Items.IRON_INGOT))
-                    .input('Z', AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+                    .define('I', Items.IRON_INGOT).unlockedBy(getHasName(Items.IRON_INGOT), has(Items.IRON_INGOT))
+                    .define('Z', AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.REDSTONE,AITBlocks.FABRICATOR)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE,AITBlocks.FABRICATOR)
                     .pattern(" O ").pattern("OZO").pattern("OZO")
-                    .input('O', Blocks.OBSIDIAN).criterion(hasItem(Blocks.OBSIDIAN), conditionsFromItem(Blocks.OBSIDIAN))
-                    .input('Z', AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+                    .define('O', Blocks.OBSIDIAN).unlockedBy(getHasName(Blocks.OBSIDIAN), has(Blocks.OBSIDIAN))
+                    .define('Z', AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, AITItems.GALLIFREY_FALLS_PAINTING)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, AITItems.GALLIFREY_FALLS_PAINTING)
                     .pattern("OBO")
                     .pattern("BSB")
                     .pattern("OPO")
-                    .input('O', Blocks.ORANGE_WOOL)
-                    .criterion(hasItem(Blocks.ORANGE_WOOL), conditionsFromItem(Blocks.ORANGE_WOOL))
-                    .input('S', AITItems.CHARGED_ZEITON_CRYSTAL)
-                    .criterion(hasItem(AITItems.CHARGED_ZEITON_CRYSTAL), conditionsFromItem(AITItems.CHARGED_ZEITON_CRYSTAL))
-                    .input('P', Items.PAINTING)
-                    .criterion(hasItem(Items.PAINTING), conditionsFromItem(Items.PAINTING))
-                    .input('B', Blocks.BLACK_WOOL)
-                    .criterion(hasItem(Blocks.BLACK_WOOL), conditionsFromItem(Blocks.BLACK_WOOL)));
+                    .define('O', Blocks.ORANGE_WOOL)
+                    .unlockedBy(getHasName(Blocks.ORANGE_WOOL), has(Blocks.ORANGE_WOOL))
+                    .define('S', AITItems.CHARGED_ZEITON_CRYSTAL)
+                    .unlockedBy(getHasName(AITItems.CHARGED_ZEITON_CRYSTAL), has(AITItems.CHARGED_ZEITON_CRYSTAL))
+                    .define('P', Items.PAINTING)
+                    .unlockedBy(getHasName(Items.PAINTING), has(Items.PAINTING))
+                    .define('B', Blocks.BLACK_WOOL)
+                    .unlockedBy(getHasName(Blocks.BLACK_WOOL), has(Blocks.BLACK_WOOL)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.DECORATIONS, AITItems.TRENZALORE_PAINTING)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, AITItems.TRENZALORE_PAINTING)
                     .pattern("OBO")
                     .pattern("BSB")
                     .pattern("OPO")
-                    .input('O', Blocks.PURPLE_WOOL)
-                    .criterion(hasItem(Blocks.PURPLE_WOOL), conditionsFromItem(Blocks.PURPLE_WOOL))
-                    .input('S', AITItems.CHARGED_ZEITON_CRYSTAL)
-                    .criterion(hasItem(AITItems.CHARGED_ZEITON_CRYSTAL), conditionsFromItem(AITItems.CHARGED_ZEITON_CRYSTAL))
-                    .input('P', Items.PAINTING)
-                    .criterion(hasItem(Items.PAINTING), conditionsFromItem(Items.PAINTING))
-                    .input('B', Blocks.BLACK_WOOL)
-                    .criterion(hasItem(Blocks.BLACK_WOOL), conditionsFromItem(Blocks.BLACK_WOOL)));
+                    .define('O', Blocks.PURPLE_WOOL)
+                    .unlockedBy(getHasName(Blocks.PURPLE_WOOL), has(Blocks.PURPLE_WOOL))
+                    .define('S', AITItems.CHARGED_ZEITON_CRYSTAL)
+                    .unlockedBy(getHasName(AITItems.CHARGED_ZEITON_CRYSTAL), has(AITItems.CHARGED_ZEITON_CRYSTAL))
+                    .define('P', Items.PAINTING)
+                    .unlockedBy(getHasName(Items.PAINTING), has(Items.PAINTING))
+                    .define('B', Blocks.BLACK_WOOL)
+                    .unlockedBy(getHasName(Blocks.BLACK_WOOL), has(Blocks.BLACK_WOOL)));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.PSYCHPAPER)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.PSYCHPAPER)
                     .pattern("SOS")
                     .pattern("BPB")
                     .pattern("SOS")
-                    .input('O', Items.BLACK_DYE)
-                    .criterion(hasItem(Items.BLACK_DYE), conditionsFromItem(Items.BLACK_DYE))
-                    .input('S', Items.LEATHER)
-                    .criterion(hasItem(Items.LEATHER), conditionsFromItem(Items.LEATHER))
-                    .input('P', Items.PAPER)
-                    .criterion(hasItem(Items.PAPER), conditionsFromItem(Items.PAPER))
-                    .input('B', Items.ENDER_EYE)
-                    .criterion(hasItem(Items.ENDER_EYE), conditionsFromItem(Items.ENDER_EYE)));
+                    .define('O', Items.BLACK_DYE)
+                    .unlockedBy(getHasName(Items.BLACK_DYE), has(Items.BLACK_DYE))
+                    .define('S', Items.LEATHER)
+                    .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
+                    .define('P', Items.PAPER)
+                    .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+                    .define('B', Items.ENDER_EYE)
+                    .unlockedBy(getHasName(Items.ENDER_EYE), has(Items.ENDER_EYE)));
 
 
-            provider.addShapelessRecipe(ShapelessRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, AITBlocks.ZEITON_COBBLE)
-                    .input(Blocks.COBBLESTONE).criterion(hasItem(Blocks.COBBLESTONE), conditionsFromItem(Blocks.COBBLESTONE))
-                    .input(AITItems.ZEITON_SHARD).criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD)));
+            provider.addShapelessRecipe(ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, AITBlocks.ZEITON_COBBLE)
+                    .requires(Blocks.COBBLESTONE).unlockedBy(getHasName(Blocks.COBBLESTONE), has(Blocks.COBBLESTONE))
+                    .requires(AITItems.ZEITON_SHARD).unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)));
 
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.BUILDING_BLOCKS, AITBlocks.COMPACT_ZEITON)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, AITBlocks.COMPACT_ZEITON)
                     .pattern("OBO")
                     .pattern("BSB")
                     .pattern("OPO")
-                    .input('O', AITItems.ZEITON_SHARD)
-                    .criterion(hasItem(AITItems.ZEITON_SHARD), conditionsFromItem(AITItems.ZEITON_SHARD))
-                    .input('S', Blocks.COBBLESTONE)
-                    .criterion(hasItem(Blocks.COBBLESTONE), conditionsFromItem(Blocks.COBBLESTONE))
-                    .input('P', AITBlocks.ZEITON_COBBLE)
-                    .criterion(hasItem(AITBlocks.ZEITON_COBBLE), conditionsFromItem(AITBlocks.ZEITON_COBBLE))
-                    .input('B', AITBlocks.ZEITON_BLOCK)
-                    .criterion(hasItem(AITBlocks.ZEITON_BLOCK), conditionsFromItem(AITBlocks.ZEITON_BLOCK)));
+                    .define('O', AITItems.ZEITON_SHARD)
+                    .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD))
+                    .define('S', Blocks.COBBLESTONE)
+                    .unlockedBy(getHasName(Blocks.COBBLESTONE), has(Blocks.COBBLESTONE))
+                    .define('P', AITBlocks.ZEITON_COBBLE)
+                    .unlockedBy(getHasName(AITBlocks.ZEITON_COBBLE), has(AITBlocks.ZEITON_COBBLE))
+                    .define('B', AITBlocks.ZEITON_BLOCK)
+                    .unlockedBy(getHasName(AITBlocks.ZEITON_BLOCK), has(AITBlocks.ZEITON_BLOCK)));
 
-            createStairsRecipe(PlanetBlocks.MARTIAN_STONE_STAIRS, Ingredient.ofItems(PlanetBlocks.MARTIAN_STONE));
-            createSlabRecipe(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_SLAB, Ingredient.ofItems(PlanetBlocks.MARTIAN_STONE));
+            stairBuilder(PlanetBlocks.MARTIAN_STONE_STAIRS, Ingredient.of(PlanetBlocks.MARTIAN_STONE));
+            slabBuilder(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE_SLAB, Ingredient.of(PlanetBlocks.MARTIAN_STONE));
 
-            provider.addShapedRecipe(ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, AITItems.REMOTE_ITEM)
+            provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, AITItems.REMOTE_ITEM)
                     .pattern("OPO")
                     .pattern("BSB")
                     .pattern("OKO")
-                    .input('O', Items.NETHERITE_SCRAP)
-                    .criterion(hasItem(Items.NETHERITE_SCRAP), conditionsFromItem(Items.NETHERITE_SCRAP))
-                    .input('S', Blocks.STONE_BUTTON)
-                    .criterion(hasItem(Blocks.STONE_BUTTON), conditionsFromItem(Blocks.STONE_BUTTON))
-                    .input('P', Items.NETHER_STAR)
-                    .criterion(hasItem(Items.NETHER_STAR), conditionsFromItem(Items.NETHER_STAR))
-                    .input('K', Blocks.REDSTONE_BLOCK)
-                    .criterion(hasItem(Blocks.REDSTONE_BLOCK), conditionsFromItem(Blocks.REDSTONE_BLOCK))
-                    .input('B', Items.NETHERITE_INGOT)
-                    .criterion(hasItem(Items.NETHERITE_INGOT), conditionsFromItem(Items.NETHERITE_INGOT)));
+                    .define('O', Items.NETHERITE_SCRAP)
+                    .unlockedBy(getHasName(Items.NETHERITE_SCRAP), has(Items.NETHERITE_SCRAP))
+                    .define('S', Blocks.STONE_BUTTON)
+                    .unlockedBy(getHasName(Blocks.STONE_BUTTON), has(Blocks.STONE_BUTTON))
+                    .define('P', Items.NETHER_STAR)
+                    .unlockedBy(getHasName(Items.NETHER_STAR), has(Items.NETHER_STAR))
+                    .define('K', Blocks.REDSTONE_BLOCK)
+                    .unlockedBy(getHasName(Blocks.REDSTONE_BLOCK), has(Blocks.REDSTONE_BLOCK))
+                    .define('B', Items.NETHERITE_INGOT)
+                    .unlockedBy(getHasName(Items.NETHERITE_INGOT), has(Items.NETHERITE_INGOT)));
 
 
             generateSmithingRecipes(provider);
@@ -616,37 +615,37 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
     public void generateSmithingRecipes(AITRecipeProvider provider) {
         // Key Crafting
         provider.addSmithingTransformRecipe(
-                SmithingTransformRecipeJsonBuilder
-                        .create(Ingredient.ofItems(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                Ingredient.ofItems(AITItems.IRON_KEY), Ingredient.ofItems(Items.GOLD_NUGGET),
+                SmithingTransformRecipeBuilder
+                        .smithing(Ingredient.of(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                Ingredient.of(AITItems.IRON_KEY), Ingredient.of(Items.GOLD_NUGGET),
                                 RecipeCategory.TOOLS, AITItems.GOLD_KEY)
-                        .criterion(hasItem(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                conditionsFromItem(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE))
-                        .criterion(hasItem(AITItems.IRON_KEY), conditionsFromItem(AITItems.IRON_KEY))
-                        .criterion(hasItem(Items.GOLD_NUGGET), conditionsFromItem(Items.GOLD_NUGGET))
-                        .criterion(hasItem(AITItems.GOLD_KEY), conditionsFromItem(AITItems.GOLD_KEY)),
+                        .unlocks(getHasName(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                has(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE))
+                        .unlocks(getHasName(AITItems.IRON_KEY), has(AITItems.IRON_KEY))
+                        .unlocks(getHasName(Items.GOLD_NUGGET), has(Items.GOLD_NUGGET))
+                        .unlocks(getHasName(AITItems.GOLD_KEY), has(AITItems.GOLD_KEY)),
                 AITMod.id("gold_key_smithing"));
         provider.addSmithingTransformRecipe(
-                SmithingTransformRecipeJsonBuilder
-                        .create(Ingredient.ofItems(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                Ingredient.ofItems(AITItems.GOLD_KEY), Ingredient.ofItems(Items.NETHERITE_SCRAP),
+                SmithingTransformRecipeBuilder
+                        .smithing(Ingredient.of(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                Ingredient.of(AITItems.GOLD_KEY), Ingredient.of(Items.NETHERITE_SCRAP),
                                 RecipeCategory.TOOLS, AITItems.NETHERITE_KEY)
-                        .criterion(hasItem(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                conditionsFromItem(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE))
-                        .criterion(hasItem(AITItems.GOLD_KEY), conditionsFromItem(AITItems.GOLD_KEY))
-                        .criterion(hasItem(Items.NETHERITE_SCRAP), conditionsFromItem(Items.NETHERITE_SCRAP))
-                        .criterion(hasItem(AITItems.NETHERITE_KEY), conditionsFromItem(AITItems.NETHERITE_KEY)),
+                        .unlocks(getHasName(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                has(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE))
+                        .unlocks(getHasName(AITItems.GOLD_KEY), has(AITItems.GOLD_KEY))
+                        .unlocks(getHasName(Items.NETHERITE_SCRAP), has(Items.NETHERITE_SCRAP))
+                        .unlocks(getHasName(AITItems.NETHERITE_KEY), has(AITItems.NETHERITE_KEY)),
                 AITMod.id("netherite_key_smithing"));
         provider.addSmithingTransformRecipe(
-                SmithingTransformRecipeJsonBuilder
-                        .create(Ingredient.ofItems(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                Ingredient.ofItems(AITItems.NETHERITE_KEY), Ingredient.ofItems(Items.AMETHYST_SHARD),
+                SmithingTransformRecipeBuilder
+                        .smithing(Ingredient.of(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                Ingredient.of(AITItems.NETHERITE_KEY), Ingredient.of(Items.AMETHYST_SHARD),
                                 RecipeCategory.TOOLS, AITItems.CLASSIC_KEY)
-                        .criterion(hasItem(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE),
-                                conditionsFromItem(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE))
-                        .criterion(hasItem(AITItems.NETHERITE_KEY), conditionsFromItem(AITItems.NETHERITE_KEY))
-                        .criterion(hasItem(Items.AMETHYST_SHARD), conditionsFromItem(Items.AMETHYST_SHARD))
-                        .criterion(hasItem(AITItems.CLASSIC_KEY), conditionsFromItem(AITItems.CLASSIC_KEY)),
+                        .unlocks(getHasName(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE),
+                                has(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE))
+                        .unlocks(getHasName(AITItems.NETHERITE_KEY), has(AITItems.NETHERITE_KEY))
+                        .unlocks(getHasName(Items.AMETHYST_SHARD), has(Items.AMETHYST_SHARD))
+                        .unlocks(getHasName(AITItems.CLASSIC_KEY), has(AITItems.CLASSIC_KEY)),
                 AITMod.id("classic_key_smithing"));
 
         // Horn Crafting
@@ -755,7 +754,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      */
 
     public AmbleLanguageProvider addEnglishTranslations(FabricDataOutput output,
-                                                          CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, LanguageType languageType) {
+                                                          CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
 
         provider.translateBlocks(AITBlocks.class);
@@ -993,18 +992,18 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         provider.addTranslation("yacl3.config.ait:server.travelBlacklist", "TARDIS Travel Blacklist");
         provider.addTranslation("yacl3.config.ait:server.travelWhitelist", "TARDIS Travel Whitelist");
 
-        provider.addTranslation(AITMod.TARDIS_GRIEFING.getTranslationKey(), "TARDIS Griefing");
-        provider.addTranslation(AITMod.TARDIS_FIRE_GRIEFING.getTranslationKey(), "TARDIS Fire Griefing");
+        provider.addTranslation(AITMod.TARDIS_GRIEFING.getDescriptionId(), "TARDIS Griefing");
+        provider.addTranslation(AITMod.TARDIS_FIRE_GRIEFING.getDescriptionId(), "TARDIS Fire Griefing");
         provider.addTranslation("entity.minecraft.villager.fabricator_engineer", "Fabricator Engineer");
 
         // Entitys
-        provider.addTranslation(AITEntityTypes.RIFT_ENTITY.getTranslationKey(), "Space-Time Rift");
-        provider.addTranslation(AITEntityTypes.CONTROL_ENTITY_TYPE.getTranslationKey(), "Control Entity");
-        provider.addTranslation(AITEntityTypes.FALLING_TARDIS_TYPE.getTranslationKey(), "Falling TARDIS");
-        provider.addTranslation(AITEntityTypes.FLIGHT_TARDIS_TYPE.getTranslationKey(), "RWF TARDIS");
-        provider.addTranslation(AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE.getTranslationKey(), "Gallifrey Falls Painting");
-        provider.addTranslation(AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE.getTranslationKey(), "Trenzalore Painting");
-        provider.addTranslation(GunEntityTypes.STASER_BOLT_ENTITY_TYPE.getTranslationKey(), "Stazer Bolt Projectile");
+        provider.addTranslation(AITEntityTypes.RIFT_ENTITY.getDescriptionId(), "Space-Time Rift");
+        provider.addTranslation(AITEntityTypes.CONTROL_ENTITY_TYPE.getDescriptionId(), "Control Entity");
+        provider.addTranslation(AITEntityTypes.FALLING_TARDIS_TYPE.getDescriptionId(), "Falling TARDIS");
+        provider.addTranslation(AITEntityTypes.FLIGHT_TARDIS_TYPE.getDescriptionId(), "RWF TARDIS");
+        provider.addTranslation(AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE.getDescriptionId(), "Gallifrey Falls Painting");
+        provider.addTranslation(AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE.getDescriptionId(), "Trenzalore Painting");
+        provider.addTranslation(GunEntityTypes.STASER_BOLT_ENTITY_TYPE.getDescriptionId(), "Stazer Bolt Projectile");
 
         // Items
         provider.addTranslation(AITItems.TARDIS_ITEM, "TARDIS");
@@ -1013,20 +1012,20 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         provider.addTranslation(AITItems.SIEGE_ITEM, "TARDIS");
         provider.addTranslation(AITItems.TWO_THOUSAND_MUSIC_DISC, "Music Disc");
         provider.addTranslation(AITItems.WONDERFUL_TIME_IN_SPACE_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.TWO_THOUSAND_MUSIC_DISC.getTranslationKey() + ".desc", "lucien - Two Thousand");
-        provider.addTranslation(AITItems.WONDERFUL_TIME_IN_SPACE_MUSIC_DISC.getTranslationKey() + ".desc", "Dian - Wonderful Time in Space");
+        provider.addTranslation(AITItems.TWO_THOUSAND_MUSIC_DISC.getDescriptionId() + ".desc", "lucien - Two Thousand");
+        provider.addTranslation(AITItems.WONDERFUL_TIME_IN_SPACE_MUSIC_DISC.getDescriptionId() + ".desc", "Dian - Wonderful Time in Space");
         provider.addTranslation(AITItems.EARTH_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.EARTH_MUSIC_DISC.getTranslationKey() + ".desc", "Nitrogenez - Earth");
+        provider.addTranslation(AITItems.EARTH_MUSIC_DISC.getDescriptionId() + ".desc", "Nitrogenez - Earth");
         provider.addTranslation(AITItems.VENUS_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.VENUS_MUSIC_DISC.getTranslationKey() + ".desc", "Nitrogenez - Venus");
+        provider.addTranslation(AITItems.VENUS_MUSIC_DISC.getDescriptionId() + ".desc", "Nitrogenez - Venus");
         provider.addTranslation(AITItems.STAGE_4_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.STAGE_4_MUSIC_DISC.getTranslationKey() + ".desc", "??? - [stage 4]");
+        provider.addTranslation(AITItems.STAGE_4_MUSIC_DISC.getDescriptionId() + ".desc", "??? - [stage 4]");
         provider.addTranslation(AITItems.GOOD_MAN_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.GOOD_MAN_MUSIC_DISC.getTranslationKey() + ".desc", "Dian - Good Man? [CUT EDITION]");
+        provider.addTranslation(AITItems.GOOD_MAN_MUSIC_DISC.getDescriptionId() + ".desc", "Dian - Good Man? [CUT EDITION]");
         provider.addTranslation(AITItems.AIT_THEME_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.AIT_THEME_MUSIC_DISC.getTranslationKey() + ".desc", "RatZoomie - Adventures In Time [MAIN THEME]");
+        provider.addTranslation(AITItems.AIT_THEME_MUSIC_DISC.getDescriptionId() + ".desc", "RatZoomie - Adventures In Time [MAIN THEME]");
         provider.addTranslation(AITItems.CRASH_MUSIC_DISC, "Music Disc");
-        provider.addTranslation(AITItems.CRASH_MUSIC_DISC.getTranslationKey() + ".desc", "lucien - Crashing TARDIS");
+        provider.addTranslation(AITItems.CRASH_MUSIC_DISC.getDescriptionId() + ".desc", "lucien - Crashing TARDIS");
         provider.addTranslation(AITItems.GOLD_KEY_UPGRADE_SMITHING_TEMPLATE, "Smithing Template");
         provider.addTranslation(AITItems.NETHERITE_KEY_UPGRADE_SMITHING_TEMPLATE, "Smithing Template");
         provider.addTranslation(AITItems.CLASSIC_KEY_UPGRADE_SMITHING_TEMPLATE, "Smithing Template");
@@ -1795,7 +1794,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      * @return The AmbleLanguageProvider.
      */
     public AmbleLanguageProvider addFrenchTranslations(FabricDataOutput output,
-                                                     CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, LanguageType languageType) {
+                                                     CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
 
         provider.addTranslation(AITItemGroups.MAIN, "Adventures In Time");
@@ -1913,7 +1912,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      * @return The AmbleLanguageProvider.
      */
     public AmbleLanguageProvider addSpanishTranslations(FabricDataOutput output,
-                                                      CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, LanguageType languageType) {
+                                                      CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
 
         provider.addTranslation("achievement.ait.description.attack_eyebrows", "¡Es un ascensor!");
@@ -2978,7 +2977,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
     }
 
     public AmbleLanguageProvider addGermanTranslations(FabricDataOutput output,
-                                                     CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, LanguageType languageType) {
+                                                     CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
 
         provider.addTranslation(AITItemGroups.MAIN, "Abenteuer in der Zeit");
@@ -3094,7 +3093,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
     }
 
     public AmbleLanguageProvider addPortugueseTranslations(FabricDataOutput output,
-                                                         CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, LanguageType languageType) {
+                                                         CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
         provider.addTranslation("tardis.message.control.telepathic.home_updated", "Local de origem da TARDIS alterado.");
         provider.addTranslation("tardis.message.control.telepathic.home_denied", "A TARDIS recusa-se a mudar sua casa para você. Nível de lealdade PILOT necessário.");

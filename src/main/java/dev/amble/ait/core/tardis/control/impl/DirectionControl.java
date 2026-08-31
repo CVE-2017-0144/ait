@@ -1,11 +1,5 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blocks.ExteriorBlock;
@@ -14,6 +8,11 @@ import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class DirectionControl extends Control {
 
@@ -22,7 +21,7 @@ public class DirectionControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
             boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
@@ -43,9 +42,9 @@ public class DirectionControl extends Control {
     // ← · →
     // ↙ ↓ ↘
 
-    private void messagePlayer(ServerPlayerEntity player, int rotation) {
+    private void messagePlayer(ServerPlayer player, int rotation) {
         String arrow = rotationForArrow(rotation);
-        player.sendMessage(Text.translatable("message.ait.control.direction.rotation", WorldUtil.rot2Text(rotation),
+        player.displayClientMessage(Component.translatable("message.ait.control.direction.rotation", WorldUtil.rot2Text(rotation),
                 arrow), true);
     }
 

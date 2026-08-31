@@ -2,11 +2,9 @@ package dev.amble.lib.register.datapack;
 
 import java.util.*;
 import java.util.function.Supplier;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.register.Registry;
@@ -18,7 +16,7 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 public abstract class DatapackRegistry<T extends Identifiable> implements Registry {
 
     protected static final Random RANDOM = new Random();
-    protected final HashMap<Identifier, T> REGISTRY = new HashMap<>();
+    protected final HashMap<ResourceLocation, T> REGISTRY = new HashMap<>();
 
     public abstract T fallback();
 
@@ -26,7 +24,7 @@ public abstract class DatapackRegistry<T extends Identifiable> implements Regist
         return register(schema, schema.id());
     }
 
-    public T register(T schema, Identifier id) {
+    public T register(T schema, ResourceLocation id) {
         REGISTRY.put(id, schema);
         return schema;
     }
@@ -58,16 +56,16 @@ public abstract class DatapackRegistry<T extends Identifiable> implements Regist
         return list;
     }
 
-    public T get(Identifier id) {
+    public T get(ResourceLocation id) {
         return REGISTRY.get(id);
     }
-    public T getOrElse(Identifier id, T fallback) {
+    public T getOrElse(ResourceLocation id, T fallback) {
         return REGISTRY.getOrDefault(id, fallback);
     }
-    public T getOrFallback(Identifier id) {
+    public T getOrFallback(ResourceLocation id) {
         return this.getOrElse(id, this.fallback());
     }
-    public Optional<T> getOptional(Identifier id) {
+    public Optional<T> getOptional(ResourceLocation id) {
         return Optional.ofNullable(this.get(id));
     }
 
@@ -89,14 +87,14 @@ public abstract class DatapackRegistry<T extends Identifiable> implements Regist
             return;
         }
 
-        for (ServerPlayerEntity player : ServerLifecycleHooks.get().getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : ServerLifecycleHooks.get().getPlayerList().getPlayers()) {
             this.syncToClient(player);
         }
     }
 
-    public abstract void syncToClient(ServerPlayerEntity player);
+    public abstract void syncToClient(ServerPlayer player);
 
-    public abstract void readFromServer(PacketByteBuf buf);
+    public abstract void readFromServer(FriendlyByteBuf buf);
 
     @Override
     public void onCommonInit() {

@@ -4,7 +4,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
@@ -12,10 +13,6 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
 import dev.amble.ait.core.tardis.animation.v2.blockbench.BlockbenchParser;
@@ -25,34 +22,34 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 public class DatapackAnimation extends TardisAnimation {
     public static final Codec<TardisAnimation> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
-                    Identifier.CODEC.fieldOf("id").forGetter(TardisAnimation::id),
-                    Identifier.CODEC.optionalFieldOf("blockbench_file").forGetter(TardisAnimation::getBlockbenchId),
+                    ResourceLocation.CODEC.fieldOf("id").forGetter(TardisAnimation::id),
+                    ResourceLocation.CODEC.optionalFieldOf("blockbench_file").forGetter(TardisAnimation::getBlockbenchId),
                     TravelHandlerBase.State.CODEC.fieldOf("expected_state").forGetter(TardisAnimation::getExpectedState),
-                    Identifier.CODEC.optionalFieldOf("sound").forGetter(TardisAnimation::getSoundId)
+                    ResourceLocation.CODEC.optionalFieldOf("sound").forGetter(TardisAnimation::getSoundId)
     ).apply(instance, DatapackAnimation::new));
 
     private final TravelHandlerBase.State expectedState;
     private final String nameKey;
-    @Nullable private final Identifier blockbenchId;
+    @Nullable private final ResourceLocation blockbenchId;
 
-    protected DatapackAnimation(Identifier id, Optional<Identifier> blockbench, TravelHandlerBase.State expectedState, Optional<Identifier> sound) {
+    protected DatapackAnimation(ResourceLocation id, Optional<ResourceLocation> blockbench, TravelHandlerBase.State expectedState, Optional<ResourceLocation> sound) {
         super(id, sound.orElse(null), BlockbenchParser.getOrFallback(blockbench.orElse(id)));
 
         this.blockbenchId = blockbench.orElse(null);
         this.expectedState = expectedState;
-        this.nameKey = id.toTranslationKey("animation");
+        this.nameKey = id.toLanguageKey("animation");
     }
 
-    protected DatapackAnimation(Identifier id, KeyframeTracker<Float> alpha, KeyframeTracker<Vector3f> scale, KeyframeTracker<Vector3f> position, KeyframeTracker<Vector3f> rotation, Identifier blockbench, TravelHandlerBase.State expectedState, String optName, @Nullable Identifier soundId) {
+    protected DatapackAnimation(ResourceLocation id, KeyframeTracker<Float> alpha, KeyframeTracker<Vector3f> scale, KeyframeTracker<Vector3f> position, KeyframeTracker<Vector3f> rotation, ResourceLocation blockbench, TravelHandlerBase.State expectedState, String optName, @Nullable ResourceLocation soundId) {
         super(id, soundId, alpha, scale, position, rotation);
 
         this.blockbenchId = blockbench;
         this.expectedState = expectedState;
-        this.nameKey = id.toTranslationKey("animation");
+        this.nameKey = id.toLanguageKey("animation");
     }
 
     @Override
-    public Optional<Identifier> getBlockbenchId() {
+    public Optional<ResourceLocation> getBlockbenchId() {
         return Optional.ofNullable(this.blockbenchId);
     }
 
@@ -89,7 +86,7 @@ public class DatapackAnimation extends TardisAnimation {
     }
 
     @Override
-    public Text text() {
-        return Text.translatableWithFallback(this.nameKey, this.id().getPath());
+    public Component text() {
+        return Component.translatableWithFallback(this.nameKey, this.id().getPath());
     }
 }

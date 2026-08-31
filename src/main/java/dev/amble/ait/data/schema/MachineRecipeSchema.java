@@ -3,23 +3,20 @@ package dev.amble.ait.data.schema;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import com.google.gson.*;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.core.util.StackUtil;
 import dev.amble.ait.registry.impl.MachineRecipeRegistry;
 import dev.amble.lib.api.Identifiable;
 
 public class MachineRecipeSchema implements Identifiable {
 
-    private final Identifier id;
+    private final ResourceLocation id;
     private final ItemStack output;
     private final List<ItemStack> input;
 
-    public MachineRecipeSchema(Identifier id, ItemStack output, List<ItemStack> input) {
+    public MachineRecipeSchema(ResourceLocation id, ItemStack output, List<ItemStack> input) {
         this.id = id;
         this.output = output;
         this.input = input;
@@ -36,7 +33,7 @@ public class MachineRecipeSchema implements Identifiable {
         return false;
     }
 
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -64,7 +61,7 @@ public class MachineRecipeSchema implements Identifiable {
         @Override
         public MachineRecipeSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            return MachineRecipeRegistry.getInstance().get(new Identifier(json.getAsJsonPrimitive().getAsString()));
+            return MachineRecipeRegistry.getInstance().get(new ResourceLocation(json.getAsJsonPrimitive().getAsString()));
         }
 
         @Override

@@ -7,15 +7,22 @@ import java.util.List;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Rarity;
-
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.*;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.RecordItem;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.drinks.DrinkRegistry;
@@ -38,47 +45,47 @@ import dev.amble.lib.item.AItemSettings;
 public class AITItems extends ItemContainer {
 
     @NoEnglish
-    public static final Item MUG = new DrinkItem(new AItemSettings().maxCount(1));
-    public static final FoodComponent ZEITON_DUST_FOOD = new FoodComponent.Builder().hunger(4).saturationModifier(0.3f)
-            .statusEffect(new StatusEffectInstance(StatusEffects.SPEED, 1000, 3), 1.0F)
-            .statusEffect(new StatusEffectInstance(AITStatusEffects.ZEITON_HIGH, 500, 1), 1.0F)
-            .statusEffect(new StatusEffectInstance(StatusEffects.WITHER, 500, 1), 0.5F)
-            .statusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 25, 1), 0.1F)
-            .statusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 45, 1), 0.7F)
-            .statusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 65, 1), 0.3F)
+    public static final Item MUG = new DrinkItem(new AItemSettings().stacksTo(1));
+    public static final FoodProperties ZEITON_DUST_FOOD = new FoodProperties.Builder().nutrition(4).saturationMod(0.3f)
+            .effect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 1000, 3), 1.0F)
+            .effect(new MobEffectInstance(AITStatusEffects.ZEITON_HIGH, 500, 1), 1.0F)
+            .effect(new MobEffectInstance(MobEffects.WITHER, 500, 1), 0.5F)
+            .effect(new MobEffectInstance(MobEffects.CONFUSION, 25, 1), 0.1F)
+            .effect(new MobEffectInstance(MobEffects.HUNGER, 45, 1), 0.7F)
+            .effect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 65, 1), 0.3F)
             .build();
 
     // TARDIS
     @NoEnglish
     public static final Item TARDIS_ITEM = new TardisItemBuilder(
-            new AItemSettings().group(AITItemGroups.MAIN).fireproof().maxCount(1));
+            new AItemSettings().group(AITItemGroups.MAIN).fireResistant().stacksTo(1));
 
     @NoEnglish
-    public static final LinkableItem SIEGE_ITEM = new SiegeTardisItem(new FabricItemSettings().fireproof());
+    public static final LinkableItem SIEGE_ITEM = new SiegeTardisItem(new FabricItemSettings().fireResistant());
 
     // Functional Items
     @NoEnglish
     public static final Item REMOTE_ITEM = new RemoteItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1).fireproof().maxDamageIfAbsent(300));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).fireResistant().defaultDurability(300));
     @NoEnglish
     public static final Item ARTRON_COLLECTOR = new ArtronCollectorItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));
     public static final Item RIFT_SCANNER = new RiftScannerItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1));
-    public static final Item REPAIR_TOOL = new RepairToolItem(new AItemSettings().group(AITItemGroups.MAIN).maxCount(1).maxDamage(16));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));
+    public static final Item REPAIR_TOOL = new RepairToolItem(new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).durability(16));
     @NoEnglish
     public static final Item HAMMER = new HammerItem(3, -2.4F,
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1).maxDamage(600));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).durability(600));
     public static final Item RESPIRATOR = new RenderableArmorItem(ArmorMaterials.IRON, ArmorItem.Type.HELMET,
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1).maxDamage(80), true);
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).durability(80), true);
     public static final Item FACELESS_RESPIRATOR = new RenderableArmorItem(ArmorMaterials.IRON,
-            ArmorItem.Type.HELMET, new AItemSettings().group(AITItemGroups.MAIN).maxCount(1).maxDamage(80),
+            ArmorItem.Type.HELMET, new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).durability(80),
             true);
 
-    public static final Item SONIC_SCREWDRIVER = new SonicItem(new AItemSettings().maxCount(1).group(AITItemGroups.MAIN));
+    public static final Item SONIC_SCREWDRIVER = new SonicItem(new AItemSettings().stacksTo(1).group(AITItemGroups.MAIN));
 
-    public static final Item HYPERCUBE = new HypercubeItem(new AItemSettings().maxCount(1).group(AITItemGroups.MAIN));
-    public static final Item PSYCHPAPER = new PsychpaperItem(new AItemSettings().maxCount(1).group(AITItemGroups.MAIN));
+    public static final Item HYPERCUBE = new HypercubeItem(new AItemSettings().stacksTo(1).group(AITItemGroups.MAIN));
+    public static final Item PSYCHPAPER = new PsychpaperItem(new AItemSettings().stacksTo(1).group(AITItemGroups.MAIN));
     public static final Item HAZANDRA = new InteriorTeleporterItem(new AItemSettings().group(AITItemGroups.MAIN));
 
     // Keys/Horns - Templates
@@ -86,7 +93,7 @@ public class AITItems extends ItemContainer {
     public static final Item GOLD_KEY = new KeyItem(
             new AItemSettings().rarity(Rarity.UNCOMMON).group(AITItemGroups.MAIN), KeyItem.Protocols.SNAP);
     public static final Item NETHERITE_KEY = new KeyItem(
-            new AItemSettings().rarity(Rarity.RARE).group(AITItemGroups.MAIN).fireproof(), KeyItem.Protocols.SNAP,
+            new AItemSettings().rarity(Rarity.RARE).group(AITItemGroups.MAIN).fireResistant(), KeyItem.Protocols.SNAP,
             KeyItem.Protocols.HAIL);
     public static final Item CLASSIC_KEY = new KeyItem(
             new AItemSettings().rarity(Rarity.EPIC).group(AITItemGroups.MAIN), KeyItem.Protocols.SNAP,
@@ -119,7 +126,7 @@ public class AITItems extends ItemContainer {
     // Crafting items
     public static final Item ZEITON_SHARD = new ZeitonShardItem(new AItemSettings());
     public static final Item CHARGED_ZEITON_CRYSTAL = new ChargedZeitonCrystalItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));
     public static final Item ZEITON_DUST = new Item(
             new AItemSettings().food(ZEITON_DUST_FOOD));
     public static final Item FOOD_CUBE = new Item(new AItemSettings().food(AITFoodComponents.FOOD_CUBE));
@@ -186,43 +193,43 @@ public class AITItems extends ItemContainer {
 
     // Waypoint-related
     public static final Item WAYPOINT_CARTRIDGE = new WaypointItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));
 
     public static final Item CONTROL_DISC = new ControlDiscItem(
-            new AItemSettings().group(AITItemGroups.MAIN).maxCount(1));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));
 
     // Music discs
     @NoEnglish
-    public static final Item TWO_THOUSAND_MUSIC_DISC = new MusicDiscItem(1, AITSounds.TWO_THOUSAND,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 169);
+    public static final Item TWO_THOUSAND_MUSIC_DISC = new RecordItem(1, AITSounds.TWO_THOUSAND,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 169);
 
     @NoEnglish
-    public static final Item STAGE_4_MUSIC_DISC = new MusicDiscItem(15, AITSounds.STAGE_4,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 239);
+    public static final Item STAGE_4_MUSIC_DISC = new RecordItem(15, AITSounds.STAGE_4,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 239);
 
     @NoEnglish
-    public static final Item WONDERFUL_TIME_IN_SPACE_MUSIC_DISC = new MusicDiscItem(1, AITSounds.WONDERFUL_TIME_IN_SPACE,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 73);
+    public static final Item WONDERFUL_TIME_IN_SPACE_MUSIC_DISC = new RecordItem(1, AITSounds.WONDERFUL_TIME_IN_SPACE,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 73);
 
     @NoEnglish
-    public static final Item VENUS_MUSIC_DISC = new MusicDiscItem(1, AITSounds.VENUS_MUSIC,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 342);
+    public static final Item VENUS_MUSIC_DISC = new RecordItem(1, AITSounds.VENUS_MUSIC,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 342);
 
     @NoEnglish
-    public static final Item GOOD_MAN_MUSIC_DISC = new MusicDiscItem(1, AITSounds.GOOD_MAN_MUSIC,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 342);
+    public static final Item GOOD_MAN_MUSIC_DISC = new RecordItem(1, AITSounds.GOOD_MAN_MUSIC,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 342);
 
     @NoEnglish
-    public static final Item AIT_THEME_MUSIC_DISC = new MusicDiscItem(1, AITSounds.AIT_THEME_MONO,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 180);
+    public static final Item AIT_THEME_MUSIC_DISC = new RecordItem(1, AITSounds.AIT_THEME_MONO,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 180);
 
     @NoEnglish
-    public static final Item EARTH_MUSIC_DISC = new MusicDiscItem(1, AITSounds.EARTH_MUSIC,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 315);
+    public static final Item EARTH_MUSIC_DISC = new RecordItem(1, AITSounds.EARTH_MUSIC,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 315);
 
     @NoEnglish
-    public static final Item CRASH_MUSIC_DISC = new MusicDiscItem(1, AITSounds.ARPALARM_MONO,
-            new AItemSettings().maxCount(1).rarity(Rarity.RARE), 69);
+    public static final Item CRASH_MUSIC_DISC = new RecordItem(1, AITSounds.ARPALARM_MONO,
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 69);
 
 
     // Block controls
@@ -237,7 +244,7 @@ public class AITItems extends ItemContainer {
     private static void addDrinks(FabricItemGroupEntries entries) {
         DrinkRegistry.getInstance().toList().stream()/*.filter(entry -> entry != DrinkRegistry.EMPTY_MUG)*/
                 .map(entry -> DrinkUtil.setDrink(new ItemStack(AITItems.MUG),
-                        entry)).forEach(stack -> entries.add(stack, ItemGroup.StackVisibility.PARENT_AND_SEARCH_TABS));
+                        entry)).forEach(stack -> entries.accept(stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
     }
 
     public static boolean getAdventDates(int monthBegin, int monthEnd, int dayBegin, int dayEnd) {
@@ -260,8 +267,8 @@ public class AITItems extends ItemContainer {
     public static List<Item> get() {
         List<Item> list = new ArrayList<>();
 
-        for (Item item : Registries.ITEM) {
-            if (Registries.ITEM.getId(item).getNamespace().equalsIgnoreCase(AITMod.MOD_ID)) {
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equalsIgnoreCase(AITMod.MOD_ID)) {
                 list.add(item);
             }
         }
@@ -270,7 +277,7 @@ public class AITItems extends ItemContainer {
     }
 
     static {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
             entries.addAfter(Items.MUSIC_DISC_RELIC, TWO_THOUSAND_MUSIC_DISC);
             entries.addAfter(TWO_THOUSAND_MUSIC_DISC, WONDERFUL_TIME_IN_SPACE_MUSIC_DISC);
             entries.addAfter(WONDERFUL_TIME_IN_SPACE_MUSIC_DISC, EARTH_MUSIC_DISC);
@@ -280,7 +287,7 @@ public class AITItems extends ItemContainer {
 
 
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(entries -> {
             addDrinks(entries);
             entries.addAfter(Items.SPIDER_EYE, FOOD_CUBE);
         });
@@ -289,9 +296,9 @@ public class AITItems extends ItemContainer {
             entries.addAfter(Items.BUCKET);
         });*/
 
-        ItemGroupEvents.modifyEntriesEvent(RegistryKey.of(RegistryKeys.ITEM_GROUP, AITItemGroups.FABRICATOR.id())).register(entries -> {
+        ItemGroupEvents.modifyEntriesEvent(ResourceKey.create(Registries.CREATIVE_MODE_TAB, AITItemGroups.FABRICATOR.id())).register(entries -> {
             for (BlueprintSchema schema : BlueprintRegistry.getInstance().toList()) {
-                entries.add(BlueprintItem.createStack(schema));
+                entries.accept(BlueprintItem.createStack(schema));
             }
         });
     }

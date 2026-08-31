@@ -115,7 +115,7 @@ public class ServerTardis extends Tardis {
     public boolean shouldTickExterior() {
         CachedDirectedGlobalPos pos = this.travel().position();
         return pos.getWorld() != null && pos.getWorld()
-                .shouldTickEntity(pos.getPos());
+                .isPositionEntityTicking(pos.getPos());
     }
 
     public static Object creator() {

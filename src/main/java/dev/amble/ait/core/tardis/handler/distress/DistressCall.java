@@ -5,23 +5,21 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.item.HypercubeItem;
@@ -38,7 +36,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
     private static final int DEFAULT_LIFETIME = 120 * 20; // 2 minute default lifetime
 
     private static DistressCall createTardis(UUID tardis, String message, MinecraftServer server, int lifetime, boolean isSourceCall) {
-        return new DistressCall(new TardisSender(tardis), message, lifetime, server.getTicks(), isSourceCall);
+        return new DistressCall(new TardisSender(tardis), message, lifetime, server.getTickCount(), isSourceCall);
     }
     private static DistressCall createTardis(UUID tardis, String message, boolean isSourceCall) {
         return createTardis(tardis, message, ServerLifecycleHooks.get(), DEFAULT_LIFETIME, isSourceCall);
@@ -48,10 +46,10 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
     }
 
     private static DistressCall createPlayer(UUID player, String message, MinecraftServer server, int lifetime, boolean isSourceCall) {
-        return new DistressCall(new PlayerSender(player), message, lifetime, server.getTicks(), isSourceCall);
+        return new DistressCall(new PlayerSender(player), message, lifetime, server.getTickCount(), isSourceCall);
     }
-    public static DistressCall create(PlayerEntity player, String message, boolean isSourceCall) {
-        return createPlayer(player.getUuid(), message, ServerLifecycleHooks.get(), DEFAULT_LIFETIME, isSourceCall);
+    public static DistressCall create(Player player, String message, boolean isSourceCall) {
+        return createPlayer(player.getUUID(), message, ServerLifecycleHooks.get(), DEFAULT_LIFETIME, isSourceCall);
     }
     public static DistressCall copyForSend(DistressCall call, int ticks) {
         return new DistressCall(
@@ -80,7 +78,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         return (this.creationTime + this.lifetime) > ticks;
     }
     private boolean isValid(MinecraftServer server) {
-        return this.isValid(server.getTicks());
+        return this.isValid(server.getTickCount());
     }
     public boolean isValid() {
         return this.isValid(ServerLifecycleHooks.get());
@@ -95,7 +93,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         return Math.max(time, 0);
     }
     private int getTimeLeft(MinecraftServer server) {
-        return this.getTimeLeft(server.getTicks());
+        return this.getTimeLeft(server.getTickCount());
     }
     public int getTimeLeft() {
         return this.getTimeLeft(ServerLifecycleHooks.get());
@@ -135,23 +133,23 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         if (!target.stats().receiveCalls().get()) return; // ignore if doesnt want to receive
 
         // spawn distress item at door
-        ServerWorld world = target.world();
+        ServerLevel world = target.world();
 
-        Vec3d pos = TardisUtil.offsetInteriorDoorPosition(target);
+        Vec3 pos = TardisUtil.offsetInteriorDoorPosition(target);
 
-        ItemStack created = HypercubeItem.create(copyForSend(this, world.getServer().getTicks()));
-        ItemEntity entity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), created);
+        ItemStack created = HypercubeItem.create(copyForSend(this, world.getServer().getTickCount()));
+        ItemEntity entity = new ItemEntity(world, pos.x(), pos.y(), pos.z(), created);
 
-        world.spawnEntity(entity);
+        world.addFreshEntity(entity);
 
-        world.playSound(null, BlockPos.ofFloored(pos), AITSounds.DING, SoundCategory.PLAYERS, 1.0F, 1F);
+        world.playSound(null, BlockPos.containing(pos), AITSounds.DING, SoundSource.PLAYERS, 1.0F, 1F);
     }
     public boolean isSource(UUID uuid) {
         return uuid.equals(this.sender().getUuid());
     }
 
-    public NbtCompound toNbt() {
-        NbtCompound data = new NbtCompound();
+    public CompoundTag toNbt() {
+        CompoundTag data = new CompoundTag();
 
         data.put("Sender", this.sender.toNbt());
         data.putString("Message", this.message);
@@ -161,7 +159,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
 
         return data;
     }
-    private static DistressCall fromNbt(Sender send, NbtCompound data, int ticks) {
+    private static DistressCall fromNbt(Sender send, CompoundTag data, int ticks) {
         return new DistressCall(
                 send,
                 data.getString("Message"),
@@ -170,26 +168,26 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
                 data.getBoolean("IsSourceCall")
         );
     }
-    public static DistressCall fromNbt(NbtCompound data, int ticks) {
-        NbtCompound sender = data.getCompound("Sender");
+    public static DistressCall fromNbt(CompoundTag data, int ticks) {
+        CompoundTag sender = data.getCompound("Sender");
 
         if (sender.contains("Tardis")) return fromTardisNbt(data, ticks);
         if (sender.contains("Player")) return fromPlayerNbt(data, ticks);
 
         throw new IllegalStateException();
     }
-    public static DistressCall fromTardisNbt(NbtCompound data, int ticks) {
-        return fromNbt(new TardisSender(data.getCompound("Sender").getUuid("Tardis")), data, ticks);
+    public static DistressCall fromTardisNbt(CompoundTag data, int ticks) {
+        return fromNbt(new TardisSender(data.getCompound("Sender").getUUID("Tardis")), data, ticks);
     }
-    public static DistressCall fromPlayerNbt(NbtCompound data, int ticks) {
-        return fromNbt(new PlayerSender(data.getCompound("Sender").getUuid("Player")), data, ticks);
+    public static DistressCall fromPlayerNbt(CompoundTag data, int ticks) {
+        return fromNbt(new PlayerSender(data.getCompound("Sender").getUUID("Player")), data, ticks);
     }
 
     public interface Sender {
-        NbtCompound toNbt();
+        CompoundTag toNbt();
         UUID getUuid();
         CachedDirectedGlobalPos position();
-        Text getTooltip();
+        Component getTooltip();
         void playSoundAt(SoundEvent event, float pitch);
         default void playSoundAt(SoundEvent event) {
             this.playSoundAt(event, 1f);
@@ -202,7 +200,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
 
         public TardisSender(UUID id) {
             this.id = id;
-            this.ref = TardisRef.createAs(ServerLifecycleHooks.get().getOverworld(), this.getUuid());
+            this.ref = TardisRef.createAs(ServerLifecycleHooks.get().overworld(), this.getUuid());
         }
         public TardisSender(Tardis tardis) {
             this(tardis.getUuid());
@@ -213,10 +211,10 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         }
 
         @Override
-        public NbtCompound toNbt() {
-            NbtCompound data = new NbtCompound();
+        public CompoundTag toNbt() {
+            CompoundTag data = new CompoundTag();
 
-            data.putUuid("Tardis", this.id);
+            data.putUUID("Tardis", this.id);
 
             return data;
         }
@@ -234,7 +232,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         }
 
         @Override
-        public Text getTooltip() {
+        public Component getTooltip() {
             return TextUtil.forTardis(this.tardis().getId());
         }
 
@@ -242,7 +240,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         public void playSoundAt(SoundEvent event, float pitch) {
             if (this.tardis().isEmpty()) return;
 
-            this.tardis().get().getDesktop().playSoundAtEveryConsole(event, SoundCategory.BLOCKS, 1f, pitch);
+            this.tardis().get().getDesktop().playSoundAtEveryConsole(event, SoundSource.BLOCKS, 1f, pitch);
         }
 
         @Override
@@ -252,20 +250,20 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
     }
     public static class PlayerSender implements Sender {
         private final UUID id;
-        private PlayerEntity playerCache;
+        private Player playerCache;
 
         public PlayerSender(UUID id) {
             this.id = id;
         }
-        public PlayerSender(PlayerEntity player) {
-            this(player.getUuid());
+        public PlayerSender(Player player) {
+            this(player.getUUID());
         }
 
         @Override
-        public NbtCompound toNbt() {
-            NbtCompound data = new NbtCompound();
+        public CompoundTag toNbt() {
+            CompoundTag data = new CompoundTag();
 
-            data.putUuid("Player", this.id);
+            data.putUUID("Player", this.id);
 
             return data;
         }
@@ -278,31 +276,31 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
         @Override
         public CachedDirectedGlobalPos position() {
             if (this.player() == null) return CachedDirectedGlobalPos.create(
-                    ServerLifecycleHooks.get().getOverworld(),
-                    BlockPos.ORIGIN,
+                    ServerLifecycleHooks.get().overworld(),
+                    BlockPos.ZERO,
                     (byte)0
             );
 
-            if (this.player().getWorld() instanceof TardisServerWorld tardisWorld)
+            if (this.player().level() instanceof TardisServerWorld tardisWorld)
                 return tardisWorld.getTardis().travel().position();
 
             return CachedDirectedGlobalPos.create(
-                    (ServerWorld) this.player().getWorld(),
-                    this.player().getBlockPos(),
-                    (byte) RotationPropertyHelper.fromYaw(this.player().getYaw())
+                    (ServerLevel) this.player().level(),
+                    this.player().blockPosition(),
+                    (byte) RotationSegment.convertToSegment(this.player().getYRot())
             );
         }
 
         @Override
-        public Text getTooltip() {
-            MutableText text = (this.player() == null) ? Text.literal("???") : this.player().getDisplayName().copy();
+        public Component getTooltip() {
+            MutableComponent text = (this.player() == null) ? Component.literal("???") : this.player().getDisplayName().copy();
 
-            return text.formatted(Formatting.BOLD, Formatting.GREEN);
+            return text.withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN);
         }
 
         @Override
         public void playSoundAt(SoundEvent event, float pitch) {
-            this.position().getWorld().playSound(null, this.position().getPos(), event, SoundCategory.PLAYERS, 1.0F, pitch);
+            this.position().getWorld().playSound(null, this.position().getPos(), event, SoundSource.PLAYERS, 1.0F, pitch);
         }
 
         @Override
@@ -310,23 +308,23 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
             return true;
         }
 
-        public PlayerEntity player() {
+        public Player player() {
             if (this.playerCache == null) {
                 this.playerCache = this.findPlayer();
             }
 
             return this.playerCache;
         }
-        private PlayerEntity findPlayer() {
+        private Player findPlayer() {
             if (ServerLifecycleHooks.isServer())
-                return ServerLifecycleHooks.get().getPlayerManager().getPlayer(this.getUuid());
+                return ServerLifecycleHooks.get().getPlayerList().getPlayer(this.getUuid());
 
             return this.findClientPlayer();
         }
 
         @Environment(EnvType.CLIENT)
-        private PlayerEntity findClientPlayer() {
-            return MinecraftClient.getInstance().world.getPlayerByUuid(this.getUuid());
+        private Player findClientPlayer() {
+            return Minecraft.getInstance().level.getPlayerByUUID(this.getUuid());
         }
     }
 }

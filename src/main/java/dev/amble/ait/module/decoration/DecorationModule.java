@@ -5,14 +5,12 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.block.Blocks;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.datagen.datagen_providers.AITBlockTagProvider;
 import dev.amble.ait.datagen.datagen_providers.AITItemTagProvider;
@@ -32,7 +30,7 @@ import dev.amble.lib.itemgroup.AItemGroup;
 public class DecorationModule extends Module {
     private static final DecorationModule INSTANCE = new DecorationModule();
 
-    public static final Identifier ID = AITMod.id("decoration");
+    public static final ResourceLocation ID = AITMod.id("decoration");
 
     @Override
     public void init() {
@@ -53,7 +51,7 @@ public class DecorationModule extends Module {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return ID;
     }
 
@@ -94,12 +92,12 @@ public class DecorationModule extends Module {
             }
 
             @Override
-            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerator generator) {
+            public void generateItemModels(AmbleModelProvider provider, ItemModelGenerators generator) {
 
             }
 
             @Override
-            public void models(AmbleModelProvider provider, BlockStateModelGenerator generator) {
+            public void models(AmbleModelProvider provider, BlockModelGenerators generator) {
 
             }
 

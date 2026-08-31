@@ -2,10 +2,8 @@ package dev.amble.ait.core.util;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import dev.amble.ait.data.Exclude;
 
 /**
@@ -14,30 +12,30 @@ import dev.amble.ait.data.Exclude;
 public class EntityRef<T extends Entity> {
 
     @Exclude
-    private ServerWorld world;
+    private ServerLevel world;
 
     @Exclude
     private WeakReference<T> ref;
 
     private final UUID id;
 
-    public EntityRef(ServerWorld world, T entity) {
-        this.id = entity.getUuid();
+    public EntityRef(ServerLevel world, T entity) {
+        this.id = entity.getUUID();
 
         this.world = world;
         this.ref = new WeakReference<>(entity);
     }
 
-    public EntityRef(ServerWorld world, UUID id) {
+    public EntityRef(ServerLevel world, UUID id) {
         this.id = id;
         this.world = world;
     }
 
-    public ServerWorld getWorld() {
+    public ServerLevel getWorld() {
         return this.world;
     }
 
-    public void setWorld(ServerWorld world) {
+    public void setWorld(ServerLevel world) {
         this.world = world;
     }
 

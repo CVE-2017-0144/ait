@@ -1,83 +1,81 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.amble.ait.core.world.RiftChunkManager;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 
 public class RiftChunkCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(AITMod.MOD_ID).then(literal("rift_chunk")
                 .requires(source -> PermissionAPICompat.hasPermission(source, "ait.command.rift_chunk", 2))
                 .then(literal("check")
-                        .then(argument("position", BlockPosArgumentType.blockPos()).executes(RiftChunkCommand::check)))
+                        .then(argument("position", BlockPosArgument.blockPos()).executes(RiftChunkCommand::check)))
                 .then(literal("get")
-                        .then(argument("position", BlockPosArgumentType.blockPos()).executes(RiftChunkCommand::get)))
-                .then(literal("set").then(argument("position", BlockPosArgumentType.blockPos())
+                        .then(argument("position", BlockPosArgument.blockPos()).executes(RiftChunkCommand::get)))
+                .then(literal("set").then(argument("position", BlockPosArgument.blockPos())
                         .then(argument("artron", DoubleArgumentType.doubleArg()).executes(RiftChunkCommand::set))))));
     }
 
-    private static int check(CommandContext<ServerCommandSource> context) {
-        BlockPos targetBlockPos = BlockPosArgumentType.getBlockPos(context, "position");
-        ServerCommandSource source = context.getSource();
+    private static int check(CommandContext<CommandSourceStack> context) {
+        BlockPos targetBlockPos = BlockPosArgument.getBlockPos(context, "position");
+        CommandSourceStack source = context.getSource();
 
-        boolean isARiftChunk = RiftChunkManager.isRiftChunk(source.getWorld(), targetBlockPos);
-        Text isriftchunk = Text.translatable("message.ait.sonic.riftfound");
-        Text notriftchunk = Text.translatable("message.ait.sonic.riftnotfound");
+        boolean isARiftChunk = RiftChunkManager.isRiftChunk(source.getLevel(), targetBlockPos);
+        Component isriftchunk = Component.translatable("message.ait.sonic.riftfound");
+        Component notriftchunk = Component.translatable("message.ait.sonic.riftnotfound");
 
-        source.sendMessage((isARiftChunk ? isriftchunk : notriftchunk));
+        source.sendSystemMessage((isARiftChunk ? isriftchunk : notriftchunk));
         return 1;
     }
 
-    private static int get(CommandContext<ServerCommandSource> context) {
-        BlockPos targetBlockPos = BlockPosArgumentType.getBlockPos(context, "position");
-        ServerCommandSource source = context.getSource();
+    private static int get(CommandContext<CommandSourceStack> context) {
+        BlockPos targetBlockPos = BlockPosArgument.getBlockPos(context, "position");
+        CommandSourceStack source = context.getSource();
 
-        boolean isARiftChunk = RiftChunkManager.isRiftChunk(source.getWorld(), targetBlockPos);
+        boolean isARiftChunk = RiftChunkManager.isRiftChunk(source.getLevel(), targetBlockPos);
 
-        ServerWorld world = source.getWorld();
+        ServerLevel world = source.getLevel();
 
-        Text message = !isARiftChunk
-                ? Text.translatable("command.ait.riftchunk.cannotgetlevel")
-                : Text.translatable("command.ait.riftchunk.getlevel",
+        Component message = !isARiftChunk
+                ? Component.translatable("command.ait.riftchunk.cannotgetlevel")
+                : Component.translatable("command.ait.riftchunk.getlevel",
                     RiftChunkManager.getInstance(world).getArtron(new ChunkPos(targetBlockPos)));
 
-        source.sendMessage(message);
+        source.sendSystemMessage(message);
         return 1;
     }
 
-    private static int set(CommandContext<ServerCommandSource> context) {
-        BlockPos targetBlockPos = BlockPosArgumentType.getBlockPos(context, "position");
-        ServerCommandSource source = context.getSource();
+    private static int set(CommandContext<CommandSourceStack> context) {
+        BlockPos targetBlockPos = BlockPosArgument.getBlockPos(context, "position");
+        CommandSourceStack source = context.getSource();
 
-        Text message;
+        Component message;
 
-        if (!RiftChunkManager.isRiftChunk(source.getWorld(), targetBlockPos)) {
-            message = Text.translatable("command.ait.riftchunk.cannotsetlevel");
+        if (!RiftChunkManager.isRiftChunk(source.getLevel(), targetBlockPos)) {
+            message = Component.translatable("command.ait.riftchunk.cannotsetlevel");
         } else {
             double artron = DoubleArgumentType.getDouble(context, "artron");
 
-            ServerWorld world = source.getWorld();
+            ServerLevel world = source.getLevel();
             RiftChunkManager.getInstance(world).setCurrentFuel(new ChunkPos(targetBlockPos), artron);
 
-            message = Text.translatable("command.ait.riftchunk.setlevel", artron);
+            message = Component.translatable("command.ait.riftchunk.setlevel", artron);
         }
 
-        source.sendMessage(message);
+        source.sendSystemMessage(message);
         return 1;
     }
 }

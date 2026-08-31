@@ -1,21 +1,20 @@
 package dev.amble.ait.client.sounds.engine;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.EngineBlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 
 public class EngineLoopSound extends PositionedLoopingSound {
     private int ticks = 0;
 
     public EngineLoopSound() {
-        super(AITSounds.ENGINE_LOOP, SoundCategory.BLOCKS, new BlockPos(0, 0, 0), AITModClient.CONFIG.engineLoopVolume);
+        super(AITSounds.ENGINE_LOOP, SoundSource.BLOCKS, new BlockPos(0, 0, 0), AITModClient.CONFIG.engineLoopVolume);
     }
 
     @Override
@@ -32,7 +31,7 @@ public class EngineLoopSound extends PositionedLoopingSound {
         BlockPos nearestEngine = ClientTardisUtil.getNearestEngine();
         if (nearestEngine == null) return;
 
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
         boolean isEngineBlockEntity = world != null && world.getBlockEntity(nearestEngine) instanceof EngineBlockEntity;
 
         this.setPosition(nearestEngine);

@@ -11,6 +11,6 @@ public class ClientEasterHeadDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new EasterHeadDoorModel(EasterHeadDoorModel.getTexturedModelData().createModel());
+        return new EasterHeadDoorModel(EasterHeadDoorModel.getTexturedModelData().bakeRoot());
     }
 }

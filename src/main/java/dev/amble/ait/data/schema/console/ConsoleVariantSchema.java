@@ -6,11 +6,9 @@ import java.util.Optional;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.schema.BasicSchema;
@@ -45,14 +43,14 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
     public static final float[] DEFAULT_HANDLES_ROTATION = new float[]{120f, 135f};
     public static final Vector3f DEFAULT_HANDLES_POS = new Vector3f(0.65f, 1.6f, 0.6f);
 
-    private final Identifier parent;
-    private final Identifier id;
+    private final ResourceLocation parent;
+    private final ResourceLocation id;
     private final Loyalty loyalty;
 
     @Environment(EnvType.CLIENT)
     private ClientConsoleVariantSchema cachedSchema;
 
-    protected ConsoleVariantSchema(Identifier parent, Identifier id, Optional<Loyalty> loyalty) {
+    protected ConsoleVariantSchema(ResourceLocation parent, ResourceLocation id, Optional<Loyalty> loyalty) {
         super("console");
 
         this.parent = parent;
@@ -60,16 +58,16 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
         this.loyalty = loyalty.orElse(null);
     }
 
-    protected ConsoleVariantSchema(Identifier parent, Identifier id, Loyalty loyalty) {
+    protected ConsoleVariantSchema(ResourceLocation parent, ResourceLocation id, Loyalty loyalty) {
         this(parent, id, Optional.of(loyalty));
     }
 
-    protected ConsoleVariantSchema(Identifier parent, Identifier id) {
+    protected ConsoleVariantSchema(ResourceLocation parent, ResourceLocation id) {
         this(parent, id, Optional.empty());
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -83,7 +81,7 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
         return UnlockType.CONSOLE;
     }
 
-    public Identifier parentId() {
+    public ResourceLocation parentId() {
         return this.parent;
     }
 
@@ -123,11 +121,11 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
         @Override
         public ConsoleVariantSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = AITMod.id("console/borealis");
             }
 

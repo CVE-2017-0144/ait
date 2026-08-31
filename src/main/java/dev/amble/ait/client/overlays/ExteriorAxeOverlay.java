@@ -1,16 +1,14 @@
 package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-
-import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.AxeItem;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.blocks.ExteriorBlock;
@@ -18,24 +16,24 @@ import dev.amble.ait.core.tardis.Tardis;
 
 public class ExteriorAxeOverlay implements HudRenderCallback {
     @Override
-    public void onHudRender(DrawContext drawContext, float delta) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        MatrixStack stack = drawContext.getMatrices();
+    public void onHudRender(GuiGraphics drawContext, float delta) {
+        Minecraft mc = Minecraft.getInstance();
+        PoseStack stack = drawContext.pose();
 
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.level == null)
             return;
 
-        if (!mc.options.getPerspective().isFirstPerson())
+        if (!mc.options.getCameraType().isFirstPerson())
             return;
 
-        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.BLOCK)
+        if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK)
             return;
 
-        Block block = mc.player.getWorld()
-                .getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos())
+        Block block = mc.player.level()
+                .getBlockState(((BlockHitResult) mc.hitResult).getBlockPos())
                 .getBlock();
         if (!(block instanceof ExteriorBlock)) return;
-        ExteriorBlockEntity exterior = (ExteriorBlockEntity) mc.player.getWorld().getBlockEntity(((BlockHitResult) mc.crosshairTarget).getBlockPos());
+        ExteriorBlockEntity exterior = (ExteriorBlockEntity) mc.player.level().getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
 
         if (exterior == null || !exterior.isLinked())
             return;
@@ -47,16 +45,16 @@ public class ExteriorAxeOverlay implements HudRenderCallback {
 
         if (!tardis.siege().isActive() && !tardis.isGrowth()
                 && !tardis.fuel().hasPower() && tardis.door().locked()
-                && !(mc.player.getMainHandStack().getItem() instanceof AxeItem)) {
-            stack.push();
-            stack.translate((float) drawContext.getScaledWindowWidth() / 2 - 8f,
-                    (float) drawContext.getScaledWindowHeight() / 2 - 8f,
+                && !(mc.player.getMainHandItem().getItem() instanceof AxeItem)) {
+            stack.pushPose();
+            stack.translate((float) drawContext.guiWidth() / 2 - 8f,
+                    (float) drawContext.guiHeight() / 2 - 8f,
                     -10);
-            drawContext.drawTexture(AITMod.id("textures/gui/overlay/axe_door.png"), 2, -4, 0, 0, 16, 16, 16, 16);
+            drawContext.blit(AITMod.id("textures/gui/overlay/axe_door.png"), 2, -4, 0, 0, 16, 16, 16, 16);
             RenderSystem.defaultBlendFunc();
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
-            stack.pop();
+            stack.popPose();
         }
     }
 }

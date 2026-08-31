@@ -11,6 +11,6 @@ public class ClientPoliceBoxDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new PoliceBoxDoorModel(PoliceBoxDoorModel.getTexturedModelData().createModel());
+        return new PoliceBoxDoorModel(PoliceBoxDoorModel.getTexturedModelData().bakeRoot());
     }
 }

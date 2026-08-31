@@ -4,18 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITSounds;
@@ -24,7 +21,7 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 
 public class HandlesItem extends LinkableItem {
     private static final Map<String, HandlesResponses> RESPONSE_MAP = new HashMap<>();
-    public HandlesItem(Settings settings) {
+    public HandlesItem(Properties settings) {
         super(settings, true);
     }
 
@@ -129,67 +126,67 @@ public class HandlesItem extends LinkableItem {
      * @see dev.amble.ait.core.handles.HandlesResponse
      */
     @Deprecated(forRemoval = true)
-    public enum HandlesResponses implements StringIdentifiable {
+    public enum HandlesResponses implements StringRepresentable {
         DEFAULT {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
-                return Text.translatable("message.ait.handles.default", player.getName());
+            public Component getResponseText(Tardis tardis, Player player) {
+                return Component.translatable("message.ait.handles.default", player.getName());
             }
 
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
                 failed(tardis, player, world);
             }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITMod.RANDOM.nextBoolean() ? AITSounds.HANDLES_PARDON : AITSounds.HANDLES_PLEASE_ASK_AGAIN, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITMod.RANDOM.nextBoolean() ? AITSounds.HANDLES_PARDON : AITSounds.HANDLES_PLEASE_ASK_AGAIN, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
             }
         },
         HELP {
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 success(tardis, player, world);
             }
 
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
-                return Text.literal("<Handles> ").append(Text.translatable("message.ait.handles.available_commands",
+            public Component getResponseText(Tardis tardis, Player player) {
+                return Component.literal("<Handles> ").append(Component.translatable("message.ait.handles.available_commands",
                         new ArrayList<>(RESPONSE_MAP.keySet())));
             }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         JOKE {
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 success(tardis, player, world);
             }
 
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 List<String> jokes = List.of(
                         "message.ait.handles.joke.dalek",
                         "message.ait.handles.joke.time_lords",
@@ -198,74 +195,74 @@ public class HandlesItem extends LinkableItem {
                         "message.ait.handles.joke.calm"
                 );
                 String randomJoke = jokes.get((int) (Math.random() * jokes.size()));
-                return Text.literal("<Handles> ").append(Text.translatable(randomJoke));
+                return Component.literal("<Handles> ").append(Component.translatable(randomJoke));
             }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(getResponseText(tardis, player), false);
+                    player.displayClientMessage(getResponseText(tardis, player), false);
                 });
             }
         },
         FUN_FACT {
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 success(tardis, player, world);
             }
 
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 List<String> funFacts = List.of(
                         "message.ait.handles.fun_fact.green_tardis",
                         "message.ait.handles.fun_fact.gallifrey",
                         "message.ait.handles.fun_fact.handles"
                 );
                 String randomFact = funFacts.get((int) (Math.random() * funFacts.size()));
-                return Text.literal("<Handles> ").append(Text.translatable(randomFact));
+                return Component.literal("<Handles> ").append(Component.translatable(randomFact));
             }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(getResponseText(tardis, player), false);
+                    player.displayClientMessage(getResponseText(tardis, player), false);
                 });
             }
         },
         TAKE_OFF {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
 
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (!tardis.travel().isLanded()) {
@@ -282,36 +279,36 @@ public class HandlesItem extends LinkableItem {
                 if (speed) tardis.travel().increaseSpeed();
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.take_off", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.take_off", player.getName()));
                 });
                 success(tardis, player, world);
                 }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
 
             }
         },
         DISPLACE {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
 
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (!tardis.travel().isLanded() || !tardis.waypoint().hasWaypoint() || !tardis.travel().autopilot()) {
@@ -328,34 +325,34 @@ public class HandlesItem extends LinkableItem {
                 if (speed) tardis.travel().increaseSpeed();
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.displace", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.displace", player.getName()));
                 });
                 success(tardis, player, world);
                 }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         LAND {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (tardis.travel().getState() == TravelHandlerBase.State.DEMAT) {
@@ -376,34 +373,34 @@ public class HandlesItem extends LinkableItem {
                 if (speed) tardis.travel().speed(0);
                 tardis.travel().handbrake(true);
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.land", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.land", player.getName()));
                 });
                 success(tardis, player, world);
             }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         ACTIVATE_REFUEL {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (tardis.travel().inFlight() || tardis.flight().isFlying()) {
@@ -415,7 +412,7 @@ public class HandlesItem extends LinkableItem {
                     tardis.travel().handbrake(true);
                     tardis.setRefueling(true);
                     world.getServer().execute(() -> {
-                        player.sendMessage(Text.translatable("message.ait.handles.activate_refuel", player.getName()));
+                        player.sendSystemMessage(Component.translatable("message.ait.handles.activate_refuel", player.getName()));
                     });
                     success(tardis, player, world);
                 }
@@ -423,34 +420,34 @@ public class HandlesItem extends LinkableItem {
                 }
 
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         DISABLE_REFUEL {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (tardis.travel().getState() == TravelHandlerBase.State.LANDED) {
                     tardis.setRefueling(false);
                     world.getServer().execute(() -> {
-                        player.sendMessage(Text.translatable("message.ait.handles.disable_refuel", player.getName()));
+                        player.sendSystemMessage(Component.translatable("message.ait.handles.disable_refuel", player.getName()));
                     });
                     success(tardis, player, world);
                     return;
@@ -458,61 +455,61 @@ public class HandlesItem extends LinkableItem {
 
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         TOGGLE_SHIELDS {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.shields().visuallyShielded().toggle();
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.toggle_shields", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.toggle_shields", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         OPEN_DOOR {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
 
 
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
 
@@ -523,95 +520,95 @@ public class HandlesItem extends LinkableItem {
 
                 tardis.door().openDoors();
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.open_doors", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.open_doors", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         CLOSE_DOOR {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.door().closeDoors();
                  world.getServer().execute(() -> {
-                     player.sendMessage(Text.translatable("message.ait.handles.close_doors", player.getName()));
+                     player.sendSystemMessage(Component.translatable("message.ait.handles.close_doors", player.getName()));
                  });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         TOGGLE_LOCK {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.door().interactToggleLock(null, true);
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.toggle_lock", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.toggle_lock", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         ACTIVATE_HANDBRAKE {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 if (tardis.travel().inFlight() || tardis.flight().isFlying()) {
@@ -622,162 +619,162 @@ public class HandlesItem extends LinkableItem {
                 tardis.travel().handbrake(true);
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.activate_handbrake", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.activate_handbrake", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         DISABLE_HANDBRAKE {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.travel().handbrake(false);
 
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.disable_handbrake", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.disable_handbrake", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         TOGGLE_ANTIGRAVS {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.travel().antigravs().toggle();
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.toggle_antigravs", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.toggle_antigravs", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         TOGGLE_CLOAK {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.cloak().cloaked().set(!tardis.cloak().cloaked().get());
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.toggle_cloaked", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.toggle_cloaked", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         },
         TOGGLE_ALARMS {
             @Override
-            public Text getResponseText(Tardis tardis, PlayerEntity player) {
+            public Component getResponseText(Tardis tardis, Player player) {
                 return null;
             }
             @Override
-            public void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player, ItemStack stack) {
+            public void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player, ItemStack stack) {
                 if (tardis == null) return;
 
                 tardis.alarm().toggle();
                 world.getServer().execute(() -> {
-                    player.sendMessage(Text.translatable("message.ait.handles.toggle_alarms", player.getName()));
+                    player.sendSystemMessage(Component.translatable("message.ait.handles.toggle_alarms", player.getName()));
                 });
                 success(tardis, player, world);
             }
             @Override
-            public void failed(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void failed(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_DENIED, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_DENIED, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
 
             @Override
-            public void success(Tardis tardis, PlayerEntity player, ServerWorld world) {
+            public void success(Tardis tardis, Player player, ServerLevel world) {
                 tardis.getDesktop().getConsolePos().forEach(pos -> {
-                    player.getWorld().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            AITSounds.HANDLES_AFFIRMATIVE, SoundCategory.PLAYERS, 1f, 1f);
+                    player.level().playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            AITSounds.HANDLES_AFFIRMATIVE, SoundSource.PLAYERS, 1f, 1f);
                 });
             }
         };
 
-        public abstract void run(@Nullable Tardis tardis, ServerWorld world, BlockPos pos, PlayerEntity player,
+        public abstract void run(@Nullable Tardis tardis, ServerLevel world, BlockPos pos, Player player,
                                  ItemStack stack);
 
-        public abstract Text getResponseText(Tardis tardis, PlayerEntity player);
-        public abstract void failed(Tardis tardis, PlayerEntity player, ServerWorld world);
+        public abstract Component getResponseText(Tardis tardis, Player player);
+        public abstract void failed(Tardis tardis, Player player, ServerLevel world);
 
-        public abstract void success(Tardis tardis, PlayerEntity player, ServerWorld world);
+        public abstract void success(Tardis tardis, Player player, ServerLevel world);
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return StringUtils.capitalize(this.toString().replace("_", " "));
         }
     }

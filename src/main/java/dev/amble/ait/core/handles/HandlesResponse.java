@@ -1,12 +1,10 @@
 package dev.amble.ait.core.handles;
 
 import java.util.List;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.lib.api.Identifiable;
@@ -23,9 +21,9 @@ public interface HandlesResponse extends Identifiable {
      * @param target The player to send the message to.
      * @param message The message to send.
      */
-    default void sendChat(ServerPlayerEntity target, Text message) {
-        message = Text.literal("<Handles> ").append(message);
-        target.sendMessage(message, false);
+    default void sendChat(ServerPlayer target, Component message) {
+        message = Component.literal("<Handles> ").append(message);
+        target.displayClientMessage(message, false);
     }
 
     /**
@@ -43,12 +41,12 @@ public interface HandlesResponse extends Identifiable {
     }
 
     default boolean success(HandlesSound source) {
-        source.playSound(successSound(), SoundCategory.PLAYERS, 1.0f, 1.0f);
+        source.playSound(successSound(), SoundSource.PLAYERS, 1.0f, 1.0f);
         return true;
     }
 
     default boolean failure(HandlesSound source) {
-        source.playSound(failureSound(), SoundCategory.PLAYERS, 1.0f, 1.0f);
+        source.playSound(failureSound(), SoundSource.PLAYERS, 1.0f, 1.0f);
         return false;
     }
 
@@ -59,7 +57,7 @@ public interface HandlesResponse extends Identifiable {
      * @param tardis handles linked tardis
      * @return Whether the responses was successful.
      */
-    boolean run(ServerPlayerEntity player, HandlesSound source, ServerTardis tardis);
+    boolean run(ServerPlayer player, HandlesSound source, ServerTardis tardis);
 
     /**
      * @param command keyword to search for

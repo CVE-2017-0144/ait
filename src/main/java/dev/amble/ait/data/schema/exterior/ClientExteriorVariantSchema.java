@@ -5,11 +5,9 @@ import java.lang.reflect.Type;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
@@ -22,18 +20,18 @@ import dev.amble.lib.api.Identifiable;
 @Environment(EnvType.CLIENT)
 public abstract class ClientExteriorVariantSchema implements Identifiable {
 
-    private final Identifier parent;
-    private final Identifier id;
+    private final ResourceLocation parent;
+    private final ResourceLocation id;
 
     private ClientDoorSchema door;
     private ExteriorModel model;
 
-    protected ClientExteriorVariantSchema(Identifier parent, Identifier id) {
+    protected ClientExteriorVariantSchema(ResourceLocation parent, ResourceLocation id) {
         this.parent = parent;
         this.id = id;
     }
 
-    protected ClientExteriorVariantSchema(Identifier parent) {
+    protected ClientExteriorVariantSchema(ResourceLocation parent) {
         this.id = parent;
         this.parent = parent;
     }
@@ -50,13 +48,13 @@ public abstract class ClientExteriorVariantSchema implements Identifiable {
         return ExteriorVariantRegistry.getInstance().get(this.parent);
     }
 
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
-    public abstract Identifier texture();
+    public abstract ResourceLocation texture();
 
-    public abstract Identifier emission();
+    public abstract ResourceLocation emission();
 
     public abstract ExteriorModel model();
 
@@ -102,11 +100,11 @@ public abstract class ClientExteriorVariantSchema implements Identifiable {
         @Override
         public ClientExteriorVariantSchema deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = AITMod.id("capsule_default");
             }
 

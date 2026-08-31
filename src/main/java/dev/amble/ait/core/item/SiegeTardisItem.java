@@ -1,24 +1,21 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
@@ -29,27 +26,27 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 public class SiegeTardisItem extends LinkableItem {
     static {
         TardisEvents.ENTER_TARDIS.register((tardis, entity) -> {
-            if (!(entity instanceof ServerPlayerEntity player))
+            if (!(entity instanceof ServerPlayer player))
                 return TardisEvents.Interaction.PASS;
-            boolean hasSiege = player.getInventory().containsAny(stack -> stack.isOf(AITItems.SIEGE_ITEM));
+            boolean hasSiege = player.getInventory().hasAnyMatching(stack -> stack.is(AITItems.SIEGE_ITEM));
             if (!hasSiege) return TardisEvents.Interaction.PASS;
 
-            player.sendMessage(Text.translatable("ait.tooltip.siege_item.enter").formatted(Formatting.RED), true);
+            player.displayClientMessage(Component.translatable("ait.tooltip.siege_item.enter").withStyle(ChatFormatting.RED), true);
             return TardisEvents.Interaction.FAIL;
         });
     }
 
     public static final String CURRENT_TEXTURE_KEY = "siege_current_texture";
 
-    public SiegeTardisItem(Settings settings) {
-        super(settings.maxCount(1), "tardis-uuid", true);
+    public SiegeTardisItem(Properties settings) {
+        super(settings.stacksTo(1), "tardis-uuid", true);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
 
-        if (world.isClient())
+        if (world.isClientSide())
             return;
 
         Tardis tardis = this.getTardis(world, stack);
@@ -64,71 +61,71 @@ public class SiegeTardisItem extends LinkableItem {
             return;
         }
 
-        if (entity instanceof ServerPlayerEntity player)
-            tardis.siege().setSiegeBeingHeld(player.getUuid());
+        if (entity instanceof ServerPlayer player)
+            tardis.siege().setSiegeBeingHeld(player.getUUID());
 
         tardis.travel().forcePosition(fromEntity(entity));
 
         if (!tardis.isSiegeBeingHeld()) {
-            tardis.setSiegeBeingHeld(entity.getUuid());
+            tardis.setSiegeBeingHeld(entity.getUUID());
         }
     }
 
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getHand() != Hand.MAIN_HAND || context.getPlayer() == null)
-            return ActionResult.PASS;
+    public InteractionResult useOn(UseOnContext context) {
+        if (context.getHand() != InteractionHand.MAIN_HAND || context.getPlayer() == null)
+            return InteractionResult.PASS;
 
-        context.getPlayer().getInventory().setStack(context.getPlayer().getInventory().selectedSlot, Items.AIR.getDefaultStack());
+        context.getPlayer().getInventory().setItem(context.getPlayer().getInventory().selected, Items.AIR.getDefaultInstance());
 
-        context.getStack().decrement(1);
+        context.getItemInHand().shrink(1);
 
-        if (context.getWorld().isClient())
-            return ActionResult.SUCCESS;
+        if (context.getLevel().isClientSide())
+            return InteractionResult.SUCCESS;
 
-        Tardis tardis = this.getTardis(context.getWorld(), context.getStack());
+        Tardis tardis = this.getTardis(context.getLevel(), context.getItemInHand());
 
         if (tardis == null)
-            return ActionResult.CONSUME;
+            return InteractionResult.CONSUME;
 
         if (!tardis.siege().isActive()) {
             tardis.setSiegeBeingHeld(null);
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         placeTardis(tardis, fromItemContext(context));
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        NbtCompound tag = stack.getOrCreateNbt();
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        CompoundTag tag = stack.getOrCreateTag();
         String text = tag.contains("tardis-uuid")
-                ? tag.getUuid("tardis-uuid").toString().substring(0, 8)
-                : Text.translatable("tooltip.ait.remoteitem.notardis").getString();
+                ? tag.getUUID("tardis-uuid").toString().substring(0, 8)
+                : Component.translatable("tooltip.ait.remoteitem.notardis").getString();
 
-        tooltip.add(Text.literal("→ " + text).formatted(Formatting.BLUE));
+        tooltip.add(Component.literal("→ " + text).withStyle(ChatFormatting.BLUE));
     }
 
-    public static CachedDirectedGlobalPos fromItemContext(ItemUsageContext context) {
-        return CachedDirectedGlobalPos.create((ServerWorld) context.getWorld(),
-                context.getBlockPos().offset(context.getSide()), (byte) 0);
+    public static CachedDirectedGlobalPos fromItemContext(UseOnContext context) {
+        return CachedDirectedGlobalPos.create((ServerLevel) context.getLevel(),
+                context.getClickedPos().relative(context.getClickedFace()), (byte) 0);
     }
 
     public static CachedDirectedGlobalPos fromEntity(Entity entity) {
-        return CachedDirectedGlobalPos.create((ServerWorld) entity.getWorld(), BlockPos.ofFloored(entity.getPos()),
+        return CachedDirectedGlobalPos.create((ServerLevel) entity.level(), BlockPos.containing(entity.position()),
                 (byte) 0);
     }
 
-    public static void pickupTardis(Tardis tardis, ServerPlayerEntity player) {
+    public static void pickupTardis(Tardis tardis, ServerPlayer player) {
         if (tardis.travel().handbrake())
             return;
 
         tardis.travel().deleteExterior();
-        tardis.siege().setSiegeBeingHeld(player.getUuid());
-        player.getInventory().insertStack(create(tardis));
-        player.getInventory().markDirty();
+        tardis.siege().setSiegeBeingHeld(player.getUUID());
+        player.getInventory().add(create(tardis));
+        player.getInventory().setChanged();
     }
 
     public static void placeTardis(Tardis tardis, CachedDirectedGlobalPos pos) {

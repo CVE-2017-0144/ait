@@ -9,28 +9,34 @@ import dev.drtheo.gaslighter.Gaslighter3000;
 import dev.drtheo.gaslighter.api.FakeBlockEvents;
 import dev.drtheo.gaslighter.impl.FakeStructureWorldAccess;
 import org.jetbrains.annotations.NotNull;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.*;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.levelgen.feature.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature;
+import net.minecraft.world.level.levelgen.feature.ChorusPlantFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.DesertWellFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.HugeFungusFeature;
+import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -70,7 +76,7 @@ public class ChameleonHandler extends KeyedTardisComponent {
         });
 
         TardisEvents.SEND_TARDIS.register((tardis, player) -> {
-            if (player.isInTeleportationState())
+            if (player.isChangingDimension())
                 return;
 
             if (shouldNotBeDisguised(tardis))
@@ -78,7 +84,7 @@ public class ChameleonHandler extends KeyedTardisComponent {
 
             CachedDirectedGlobalPos pos = tardis.travel().position();
 
-            if (pos == null || pos.getWorld() != player.getServerWorld())
+            if (pos == null || pos.getWorld() != player.serverLevel())
                 return;
 
             tardis.chameleon().applyDisguise(player);
@@ -107,30 +113,30 @@ public class ChameleonHandler extends KeyedTardisComponent {
             if (blockEntity.isEmpty())
                 return DoorHandler.InteractionResult.CONTINUE;
 
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(cached.getWorld(), cached.getPos()));
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(cached.getWorld(), cached.getPos().up()));
-            player.networkHandler.sendPacket(BlockEntityUpdateS2CPacket.create(blockEntity.get()));
+            player.connection.send(new ClientboundBlockUpdatePacket(cached.getWorld(), cached.getPos()));
+            player.connection.send(new ClientboundBlockUpdatePacket(cached.getWorld(), cached.getPos().above()));
+            player.connection.send(ClientboundBlockEntityDataPacket.create(blockEntity.get()));
 
             return DoorHandler.InteractionResult.CONTINUE;
         });
 
         FakeBlockEvents.INTERACT.register((player, hand, pos) -> {
             // allow only main hand clicks!
-            if (hand != Hand.MAIN_HAND)
+            if (hand != InteractionHand.MAIN_HAND)
                 return FakeBlockEvents.Action.REMOVE;
 
             return FakeBlockEvents.Action.CONTINUE;
         });
 
         FakeBlockEvents.CHECK.register((player, hand, state, pos) -> {
-            if (state.isOf(AITBlocks.EXTERIOR_BLOCK))
+            if (state.is(AITBlocks.EXTERIOR_BLOCK))
                 return FakeBlockEvents.Action.CONTINUE;
 
-            ServerWorld world = player.getServerWorld();
+            ServerLevel world = player.serverLevel();
 
             // should be cheap enough
-            if (hand == Hand.MAIN_HAND && world.getBlockEntity(pos.down()) instanceof ExteriorBlockEntity ebe) {
-                ebe.useOn(world, player.isSneaking(), player);
+            if (hand == InteractionHand.MAIN_HAND && world.getBlockEntity(pos.below()) instanceof ExteriorBlockEntity ebe) {
+                ebe.useOn(world, player.isShiftKeyDown(), player);
                 return FakeBlockEvents.Action.CONTINUE;
             }
 
@@ -142,7 +148,7 @@ public class ChameleonHandler extends KeyedTardisComponent {
         FakeBlockEvents.REMOVED.register(ChameleonHandler::shitParticles);
     }
 
-    private Identifier lastFeature = null;
+    private ResourceLocation lastFeature = null;
 
     public ChameleonHandler() {
         super(Id.CHAMELEON);
@@ -158,10 +164,10 @@ public class ChameleonHandler extends KeyedTardisComponent {
         CachedDirectedGlobalPos cached = tardis.travel().position();
 
         BlockPos pos = cached.getPos();
-        ServerWorld world = cached.getWorld();
+        ServerLevel world = cached.getWorld();
 
-        Optional<RegistryEntry.Reference<ConfiguredFeature<?, ?>>> feature =
-                getRegistry(world).getEntry(asFeature(lastFeature));
+        Optional<Holder.Reference<ConfiguredFeature<?, ?>>> feature =
+                getRegistry(world).getHolder(asFeature(lastFeature));
 
         if (feature.isEmpty())
             return;
@@ -207,7 +213,7 @@ public class ChameleonHandler extends KeyedTardisComponent {
 
         long start = System.currentTimeMillis();
         CachedDirectedGlobalPos cached = tardis.travel().position();
-        ServerWorld world = cached.getWorld();
+        ServerLevel world = cached.getWorld();
         BlockPos pos = cached.getPos();
 
         this.gaslighter = new Gaslighter3000(world);
@@ -222,9 +228,9 @@ public class ChameleonHandler extends KeyedTardisComponent {
         return result;
     }
 
-    private boolean tryFixDisguise(ServerWorld world, BlockPos pos) {
+    private boolean tryFixDisguise(ServerLevel world, BlockPos pos) {
         // check if the exterior's position is still an exterior
-        if (!this.gaslighter.getAgenda(pos).isOf(AITBlocks.EXTERIOR_BLOCK))
+        if (!this.gaslighter.getAgenda(pos).is(AITBlocks.EXTERIOR_BLOCK))
             return true;
 
         // if it is, then try applying fallback
@@ -236,11 +242,11 @@ public class ChameleonHandler extends KeyedTardisComponent {
         return true;
     }
 
-    private boolean applyFallback(ServerWorld world, BlockPos pos) {
-        BlockState below = world.getBlockState(pos.down());
+    private boolean applyFallback(ServerLevel world, BlockPos pos) {
+        BlockState below = world.getBlockState(pos.below());
 
         if (!isSafe(below)) {
-            below = world.getBlockState(pos.down(2));
+            below = world.getBlockState(pos.below(2));
 
             if (!isSafe(below)) {
                 this.notifyFailure();
@@ -253,14 +259,14 @@ public class ChameleonHandler extends KeyedTardisComponent {
     }
 
     private void notifyFailure() {
-        Text text = Text.translatable("tardis.message.chameleon.failed")
-                .formatted(Formatting.RED);
+        Component text = Component.translatable("tardis.message.chameleon.failed")
+                .withStyle(ChatFormatting.RED);
 
         NetworkUtil.getSubscribedPlayers(tardis.asServer()).forEach(player ->
-                player.sendMessage(text, true));
+                player.displayClientMessage(text, true));
     }
 
-    private void applyDisguise(ServerPlayerEntity player) {
+    private void applyDisguise(ServerPlayer player) {
         if (!this.recalcDisguise())
             return;
 
@@ -274,14 +280,14 @@ public class ChameleonHandler extends KeyedTardisComponent {
         this.gaslighter.tweet();
     }
 
-    private boolean testBiome(ServerWorld world, BlockPos pos) {
-        RegistryEntry<Biome> biome = world.getBiome(pos);
-        List<RegistryEntry<ConfiguredFeature<?, ?>>> trees = this.findTrees(world, biome);
+    private boolean testBiome(ServerLevel world, BlockPos pos) {
+        Holder<Biome> biome = world.getBiome(pos);
+        List<Holder<ConfiguredFeature<?, ?>>> trees = this.findTrees(world, biome);
 
         if (trees.isEmpty())
             return false;
 
-        RegistryEntry<ConfiguredFeature<?, ?>> tree = trees.get(world.random.nextInt(trees.size()));
+        Holder<ConfiguredFeature<?, ?>> tree = trees.get(world.random.nextInt(trees.size()));
 
         if (tree == null)
             return false;
@@ -289,36 +295,36 @@ public class ChameleonHandler extends KeyedTardisComponent {
         return this.generate(world, pos, tree);
     }
 
-    private boolean generate(ServerWorld world, BlockPos pos, RegistryEntry<ConfiguredFeature<?, ?>> feature) {
-        feature.getKey().ifPresent(k -> this.lastFeature = k.getValue());
+    private boolean generate(ServerLevel world, BlockPos pos, Holder<ConfiguredFeature<?, ?>> feature) {
+        feature.unwrapKey().ifPresent(k -> this.lastFeature = k.location());
 
         FakeStructureWorldAccess access = new FakeStructureWorldAccess(world, gaslighter);
-        return feature.value().generate(access, world.getChunkManager().getChunkGenerator(), world.random, pos);
+        return feature.value().place(access, world.getChunkSource().getGenerator(), world.random, pos);
     }
 
     private static boolean isSafe(BlockState state) {
-        return state.isSolid() && !state.isReplaceable();
+        return state.isSolid() && !state.canBeReplaced();
     }
 
     private static final Set<Class<? extends Feature<?>>> TREES = Set.of(
-            TreeFeature.class, HugeMushroomFeature.class, HugeFungusFeature.class,
+            TreeFeature.class, AbstractHugeMushroomFeature.class, HugeFungusFeature.class,
             DesertWellFeature.class, ChorusPlantFeature.class
     );
 
-    private static final RegistryKey<ConfiguredFeature<?, ?>> CACTUS = asFeature(AITMod.id("cactus"));
+    private static final ResourceKey<ConfiguredFeature<?, ?>> CACTUS = asFeature(AITMod.id("cactus"));
 
-    private List<RegistryEntry<ConfiguredFeature<?, ?>>> findTrees(ServerWorld world, RegistryEntry<Biome> biome) {
+    private List<Holder<ConfiguredFeature<?, ?>>> findTrees(ServerLevel world, Holder<Biome> biome) {
         BiomeHandler biomeHandler = this.tardis.handler(Id.BIOME);
-        List<RegistryEntry<ConfiguredFeature<?, ?>>> trees = new ArrayList<>();
+        List<Holder<ConfiguredFeature<?, ?>>> trees = new ArrayList<>();
 
         if (biomeHandler.getBiomeKey() == BiomeHandler.BiomeType.SANDY && world.random.nextInt(5) != 0) {
-            trees.add(getRegistry(world).getEntry(CACTUS).orElse(null));
+            trees.add(getRegistry(world).getHolder(CACTUS).orElse(null));
             return trees;
         }
 
-        for (RegistryEntryList<PlacedFeature> feature : biome.value().getGenerationSettings().getFeatures()) {
-            for (RegistryEntry<PlacedFeature> entry : feature) {
-                RegistryEntry<ConfiguredFeature<?, ?>> configured = entry.value().feature();
+        for (HolderSet<PlacedFeature> feature : biome.value().getGenerationSettings().features()) {
+            for (Holder<PlacedFeature> entry : feature) {
+                Holder<ConfiguredFeature<?, ?>> configured = entry.value().feature();
 
                 if (isTree(configured.value(), biome)) {
                     trees.add(configured);
@@ -327,7 +333,7 @@ public class ChameleonHandler extends KeyedTardisComponent {
                     boolean shouldBreak = false;
 
                     for (ConfiguredFeature<?, ?> configuredFeature : configured.value()
-                            .config().getDecoratedFeatures().toList()) {
+                            .config().getFeatures().toList()) {
                         if (!isTree(configuredFeature, biome))
                             continue;
 
@@ -349,13 +355,13 @@ public class ChameleonHandler extends KeyedTardisComponent {
         return isDisguised(tardis) && gaslighter != null;
     }
 
-    private static void shitParticles(ServerWorld world, BlockPos pos) {
-        Vec3d center = pos.toCenterPos();
-        world.spawnParticles(ParticleTypes.END_ROD, center.getX(), center.getY(), center.getZ(),
+    private static void shitParticles(ServerLevel world, BlockPos pos) {
+        Vec3 center = pos.getCenter();
+        world.sendParticles(ParticleTypes.END_ROD, center.x(), center.y(), center.z(),
                 12, 0.3, 0.3, 0.3, 0);
     }
 
-    private static boolean isTree(ConfiguredFeature<?, ?> configured, RegistryEntry<Biome> biome) {
+    private static boolean isTree(ConfiguredFeature<?, ?> configured, Holder<Biome> biome) {
         Feature<?> feature = configured.feature();
 
         for (Class<?> clazz : TREES) {
@@ -366,11 +372,11 @@ public class ChameleonHandler extends KeyedTardisComponent {
         return false;
     }
 
-    @NotNull private static Registry<ConfiguredFeature<?, ?>> getRegistry(World world) {
-        return world.getRegistryManager().get(RegistryKeys.CONFIGURED_FEATURE);
+    @NotNull private static Registry<ConfiguredFeature<?, ?>> getRegistry(Level world) {
+        return world.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
     }
 
-    @NotNull private static RegistryKey<ConfiguredFeature<?, ?>> asFeature(Identifier id) {
-        return RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, id);
+    @NotNull private static ResourceKey<ConfiguredFeature<?, ?>> asFeature(ResourceLocation id) {
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, id);
     }
 }

@@ -9,24 +9,22 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -36,39 +34,39 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class NetworkUtil {
 
-    public static <T> void send(ServerPlayerEntity player, PacketByteBuf buf, Identifier id, Codec<T> codec, T t) {
-        DataResult<NbtElement> result = codec.encodeStart(NbtOps.INSTANCE, t);
-        NbtElement nbt = result.resultOrPartial(AITMod.LOGGER::error).orElseThrow();
+    public static <T> void send(ServerPlayer player, FriendlyByteBuf buf, ResourceLocation id, Codec<T> codec, T t) {
+        DataResult<Tag> result = codec.encodeStart(NbtOps.INSTANCE, t);
+        Tag nbt = result.resultOrPartial(AITMod.LOGGER::error).orElseThrow();
 
-        buf.writeNbt((NbtCompound) nbt);
+        buf.writeNbt((CompoundTag) nbt);
         send(player, id, buf);
     }
 
-    public static void send(ServerPlayerEntity player, Identifier id, PacketByteBuf buf) {
+    public static void send(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
         if (player == null)
             return;
 
         ServerPlayNetworking.send(player, id, buf);
     }
 
-    public static <T> T receive(Codec<T> codec, PacketByteBuf buf) {
+    public static <T> T receive(Codec<T> codec, FriendlyByteBuf buf) {
         return codec.decode(NbtOps.INSTANCE, buf.readNbt())
                 .resultOrPartial(AITMod.LOGGER::error)
                 .orElseThrow().getFirst();
     }
 
-    public static void sendToInterior(ServerTardis tardis, Identifier id, PacketByteBuf buf) {
+    public static void sendToInterior(ServerTardis tardis, ResourceLocation id, FriendlyByteBuf buf) {
         if (!tardis.hasWorld()) return;
 
-        for (ServerPlayerEntity player : tardis.world().getPlayers()) {
+        for (ServerPlayer player : tardis.world().players()) {
             send(player, id, buf);
         }
     }
 
-    public static Collection<ServerPlayerEntity> getLinkedPlayers(ServerTardis tardis) {
-        List<ServerPlayerEntity> players = new ArrayList<>();
+    public static Collection<ServerPlayer> getLinkedPlayers(ServerTardis tardis) {
+        List<ServerPlayer> players = new ArrayList<>();
 
-        for (ServerPlayerEntity player : ServerLifecycleHooks.get().getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : ServerLifecycleHooks.get().getPlayerList().getPlayers()) {
             if (hasLinkedItem(tardis, player)) {
                 players.add(player);
             }
@@ -77,8 +75,8 @@ public class NetworkUtil {
         return players;
     }
 
-    public static boolean hasLinkedItem(Tardis tardis, ServerPlayerEntity player) {
-        for (ItemStack stack : player.getInventory().main) {
+    public static boolean hasLinkedItem(Tardis tardis, ServerPlayer player) {
+        for (ItemStack stack : player.getInventory().items) {
             if (stack.isEmpty())
                 continue;
 
@@ -94,17 +92,17 @@ public class NetworkUtil {
         return false;
     }
 
-    public static Set<ServerTardis> findLinkedItems(ServerPlayerEntity player) {
+    public static Set<ServerTardis> findLinkedItems(ServerPlayer player) {
         Set<ServerTardis> ids = new HashSet<>();
 
-        for (ItemStack stack : player.getInventory().main) {
+        for (ItemStack stack : player.getInventory().items) {
             if (stack.isEmpty())
                 continue;
 
             if (!(stack.getItem() instanceof LinkableItem item))
                 continue;
 
-            Tardis tardis = item.getTardis(player.getWorld(), stack);
+            Tardis tardis = item.getTardis(player.level(), stack);
 
             if (tardis == null)
                 continue;
@@ -115,8 +113,8 @@ public class NetworkUtil {
         return ids;
     }
 
-    public static Stream<ServerPlayerEntity> getSubscribedPlayers(ServerTardis tardis) {
-        Stream<ServerPlayerEntity> result = tardis.hasWorld() ? tardis.world().getPlayers().stream() : Stream.empty();
+    public static Stream<ServerPlayer> getSubscribedPlayers(ServerTardis tardis) {
+        Stream<ServerPlayer> result = tardis.hasWorld() ? tardis.world().players().stream() : Stream.empty();
         CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
 
         if (exteriorPos == null || exteriorPos.getWorld() == null)
@@ -129,27 +127,27 @@ public class NetworkUtil {
     /**
      * plays a sound, ignoring whether it exists or not.
      */
-    public static void playSound(RegistryKey<World> worldKey, BlockPos pos, Identifier soundId, SoundCategory category, float volume) {
+    public static void playSound(ResourceKey<Level> worldKey, BlockPos pos, ResourceLocation soundId, SoundSource category, float volume) {
         if (!ServerLifecycleHooks.isServer()) return;
 
-        RegistryEntry<SoundEvent> soundEntry = RegistryEntry.of(SoundEvent.of(soundId));
-        long seed = ServerLifecycleHooks.get().getOverworld().getRandom().nextLong();
+        Holder<SoundEvent> soundEntry = Holder.direct(SoundEvent.createVariableRangeEvent(soundId));
+        long seed = ServerLifecycleHooks.get().overworld().getRandom().nextLong();
 
         ServerLifecycleHooks.get()
-                .getPlayerManager()
-                .sendToAround(
+                .getPlayerList()
+                .broadcast(
                         null,
                         pos.getX(),
                         pos.getY(),
                         pos.getZ(),
                         volume > 1.0F ? 16.0F * volume : 16.0F,
                         worldKey,
-                        new PlaySoundS2CPacket(soundEntry, category, pos.getX(), pos.getY(), pos.getZ(), volume, 1f, seed)
+                        new ClientboundSoundPacket(soundEntry, category, pos.getX(), pos.getY(), pos.getZ(), volume, 1f, seed)
                 );
     }
 
     @Environment(EnvType.CLIENT)
     public static boolean canClientSendPackets() {
-        return MinecraftClient.getInstance().getNetworkHandler() != null;
+        return Minecraft.getInstance().getConnection() != null;
     }
 }

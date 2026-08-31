@@ -8,23 +8,21 @@ import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.queue.api.util.block.ChunkEraser;
 import dev.drtheo.queue.api.util.structure.QueuedStructureTemplate;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.AbstractDecorationEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.structure.StructurePlacementData;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.World;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -44,8 +42,8 @@ import dev.amble.lib.data.DirectedBlockPos;
 
 public class TardisDesktop extends TardisComponent {
 
-    private static final StructurePlacementData SETTINGS = new StructurePlacementData().setUpdateNeighbors(false);
-    public static final Identifier CACHE_CONSOLE = AITMod.id("cache_console");
+    private static final StructurePlaceSettings SETTINGS = new StructurePlaceSettings().setKnownShape(false);
+    public static final ResourceLocation CACHE_CONSOLE = AITMod.id("cache_console");
     private TardisDesktopSchema schema;
     private DirectedBlockPos doorPos;
     private BlockPos enginePos;
@@ -63,15 +61,15 @@ public class TardisDesktop extends TardisComponent {
                     BlockPos console = buf.readBlockPos();
 
                     server.execute(() -> {
-                        if (!(player.getWorld().getBlockEntity(console) instanceof ConsoleBlockEntity consoleBlockEntity)) return;
+                        if (!(player.level().getBlockEntity(console) instanceof ConsoleBlockEntity consoleBlockEntity)) return;
 
                         if (tardis == null)
                             return;
 
                         if (consoleBlockEntity.isLinked() && consoleBlockEntity.getSonicScrewdriver() != null && !consoleBlockEntity.getSonicScrewdriver().isEmpty()) {
-                            player.getWorld().playSound(null, player.getBlockPos(), AITSounds.BWEEP,
-                                    SoundCategory.PLAYERS, 1f, 1f);
-                            player.sendMessage(Text.translatable("tardis.message.console.has_sonic_in_port"), true);
+                            player.level().playSound(null, player.blockPosition(), AITSounds.BWEEP,
+                                    SoundSource.PLAYERS, 1f, 1f);
+                            player.displayClientMessage(Component.translatable("tardis.message.console.has_sonic_in_port"), true);
                             return;
                         }
 
@@ -104,7 +102,7 @@ public class TardisDesktop extends TardisComponent {
     }
 
     public void setDoorPos(DoorBlockEntity door) {
-        if (door == null || door.getWorld() == null || door.getWorld().isClient())
+        if (door == null || door.getLevel() == null || door.getLevel().isClientSide())
             return;
 
         DirectedBlockPos pos = door.getDirectedPos();
@@ -117,10 +115,10 @@ public class TardisDesktop extends TardisComponent {
     }
 
     public void setEnginePos(EngineBlockEntity engine) {
-        if (engine == null || engine.getWorld() == null || engine.getWorld().isClient())
+        if (engine == null || engine.getLevel() == null || engine.getLevel().isClientSide())
             return;
 
-        BlockPos pos = engine.getPos();
+        BlockPos pos = engine.getBlockPos();
 
         if (pos.equals(this.enginePos))
             return;
@@ -148,7 +146,7 @@ public class TardisDesktop extends TardisComponent {
             }
 
             // oh no this this cant be
-            return DirectedBlockPos.create(BlockPos.ORIGIN, (byte) 0);
+            return DirectedBlockPos.create(BlockPos.ZERO, (byte) 0);
         }
 
         return doorPos;
@@ -172,7 +170,7 @@ public class TardisDesktop extends TardisComponent {
             TardisEvents.RECONFIGURE_DESKTOP.invoker().reconfigure(this.tardis);
 
         ServerTardis tardis = this.tardis.asServer();
-        ServerWorld world = tardis.world();
+        ServerLevel world = tardis.world();
 
         Optional<StructureTemplate> optional = this.schema.findTemplate();
 
@@ -183,8 +181,8 @@ public class TardisDesktop extends TardisComponent {
 
         QueuedStructureTemplate template = new QueuedTardisStructureTemplate(optional.get(), tardis);
 
-        Optional<ActionQueue> optionalQueue = template.place(world, BlockPos.ofFloored(corners.getBox().getCenter()),
-                BlockPos.ofFloored(corners.getBox().getCenter()), SETTINGS, world.getRandom(), Block.FORCE_STATE);
+        Optional<ActionQueue> optionalQueue = template.place(world, BlockPos.containing(corners.getBox().getCenter()),
+                BlockPos.containing(corners.getBox().getCenter()), SETTINGS, world.getRandom(), Block.UPDATE_KNOWN_SHAPE);
 
         optionalQueue.ifPresentOrElse(queue -> queue.thenRun(
                         () -> AITMod.LOGGER.warn("Time taken to generate interior: {}ms",
@@ -198,13 +196,13 @@ public class TardisDesktop extends TardisComponent {
 
     public ActionQueue createDesktopClearQueue() {
         ServerTardis tardis = this.tardis.asServer();
-        ServerWorld world = tardis.world();
-        int chunkRadius = ChunkSectionPos.getSectionCoord(RADIUS);
+        ServerLevel world = tardis.world();
+        int chunkRadius = SectionPos.blockToSectionCoord(RADIUS);
 
-        TardisUtil.getEntitiesInBox(AbstractDecorationEntity.class, world, corners.getBox(), frame -> true)
+        TardisUtil.getEntitiesInBox(HangingEntity.class, world, corners.getBox(), frame -> true)
                 .forEach(frame -> frame.remove(Entity.RemovalReason.DISCARDED));
 
-        return new ChunkEraser.Builder().withFlags(Block.FORCE_STATE).build(
+        return new ChunkEraser.Builder().withFlags(Block.UPDATE_KNOWN_SHAPE).build(
                 world, -chunkRadius, -chunkRadius, chunkRadius, chunkRadius
         ).thenRun(() -> {
             this.consolePos.clear();
@@ -241,53 +239,53 @@ public class TardisDesktop extends TardisComponent {
     }
 
     public void cacheConsole(BlockPos consolePos) {
-        World dim = this.tardis.asServer().world();
-        dim.playSound(null, consolePos, SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 0.5f, 1.0f);
+        Level dim = this.tardis.asServer().world();
+        dim.playSound(null, consolePos, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 0.5f, 1.0f);
 
         if (dim.getBlockEntity(consolePos) instanceof ConsoleBlockEntity entity) {
             ConsoleGeneratorBlockEntity generator = new ConsoleGeneratorBlockEntity(consolePos,
-                    AITBlocks.CONSOLE_GENERATOR.getDefaultState(), entity.getTypeSchema().id(), entity.getVariant().id());
+                    AITBlocks.CONSOLE_GENERATOR.defaultBlockState(), entity.getTypeSchema().id(), entity.getVariant().id());
 
             entity.onBroken();
 
             dim.removeBlock(consolePos, false);
             dim.removeBlockEntity(consolePos);
 
-            dim.setBlockState(consolePos, AITBlocks.CONSOLE_GENERATOR.getDefaultState(), Block.NOTIFY_ALL);
+            dim.setBlock(consolePos, AITBlocks.CONSOLE_GENERATOR.defaultBlockState(), Block.UPDATE_ALL);
 
-            dim.addBlockEntity(generator);
+            dim.setBlockEntity(generator);
         }
     }
 
-    public static void playSoundAtConsole(World dim, BlockPos console, SoundEvent sound, SoundCategory category, float volume,
+    public static void playSoundAtConsole(Level dim, BlockPos console, SoundEvent sound, SoundSource category, float volume,
                                           float pitch) {
         dim.playSound(null, console, sound, category, volume, pitch);
     }
 
-    public void playSoundAtEveryConsole(SoundEvent sound, SoundCategory category, float volume, float pitch) {
+    public void playSoundAtEveryConsole(SoundEvent sound, SoundSource category, float volume, float pitch) {
         if (!this.isServer()) return;
 
-        ServerWorld world = this.tardis.asServer().world();
+        ServerLevel world = this.tardis.asServer().world();
 
         this.getConsolePos().forEach(consolePos ->
                 playSoundAtConsole(world, consolePos, sound, category, volume, pitch));
     }
 
-    public void forcePlaySoundAtEveryConsole(Identifier soundId, SoundCategory category) {
+    public void forcePlaySoundAtEveryConsole(ResourceLocation soundId, SoundSource category) {
         if (!this.isServer()) return;
 
-        RegistryKey<World> worldKey = this.tardis.asServer().world().getRegistryKey();
+        ResourceKey<Level> worldKey = this.tardis.asServer().world().dimension();
         this.getConsolePos().forEach(consolePos -> {
             NetworkUtil.playSound(worldKey, consolePos, soundId, category, 1);
         });
     }
 
-    public void playSoundAtEveryConsole(SoundEvent sound, SoundCategory category) {
+    public void playSoundAtEveryConsole(SoundEvent sound, SoundSource category) {
         this.playSoundAtEveryConsole(sound, category, 1f, 1f);
     }
 
     public void playSoundAtEveryConsole(SoundEvent sound) {
-        this.playSoundAtEveryConsole(sound, SoundCategory.BLOCKS);
+        this.playSoundAtEveryConsole(sound, SoundSource.BLOCKS);
     }
 
     public Set<BlockPos> getConsolePos() {

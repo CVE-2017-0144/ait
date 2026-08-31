@@ -1,59 +1,56 @@
 package dev.amble.ait.client.renderers.machines;
 
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.RotationAxis;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.ait.client.models.machines.GenericSubSystemModel;
 import dev.amble.ait.core.engine.block.generic.GenericStructureSystemBlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 
 public class GenericSubSystemRenderer<T extends GenericStructureSystemBlockEntity> implements BlockEntityRenderer<T> {
     private final GenericSubSystemModel model;
-    private static final MinecraftClient client = MinecraftClient.getInstance();
+    private static final Minecraft client = Minecraft.getInstance();
 
-    public GenericSubSystemRenderer(BlockEntityRendererFactory.Context ctx) {
+    public GenericSubSystemRenderer(BlockEntityRendererProvider.Context ctx) {
         this.model = new GenericSubSystemModel();
     }
 
     @Override
-    public void render(GenericStructureSystemBlockEntity entity, float tickDelta, MatrixStack matrices,
-                       VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        matrices.push();
+    public void render(GenericStructureSystemBlockEntity entity, float tickDelta, PoseStack matrices,
+                       MultiBufferSource vertexConsumers, int light, int overlay) {
+        matrices.pushPose();
 
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
         matrices.translate(0.5f, -1.5f, -0.5f);
 
         ItemStack stack = entity.getSourceStack().orElse(null);
         boolean hasStack = stack != null && !stack.isEmpty();
 
-        ModelPart wires = this.model.getPart().getChild("wires");
+        ModelPart wires = this.model.root().getChild("wires");
         wires.visible = hasStack;
 
         if (hasStack) {
-            matrices.push();
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            double offset = Math.sin((entity.getWorld().getTime() + tickDelta) / 8.0) / 18.0;
+            matrices.pushPose();
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            double offset = Math.sin((entity.getLevel().getGameTime() + tickDelta) / 8.0) / 18.0;
 
             matrices.translate(0, -0.95f + (offset / 2), 0);
 
-            Vector3f scale = client.getItemRenderer().getModel(stack, entity.getWorld(), null, 0).getTransformation().firstPersonRightHand.scale;
+            Vector3f scale = client.getItemRenderer().getModel(stack, entity.getLevel(), null, 0).getTransforms().firstPersonRightHand.scale;
             matrices.scale(0.9f, 0.9f, 0.9f);
             matrices.scale(scale.x, scale.y, scale.z);
 
-            client.getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND, 0xf000f0,
-                    overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-            matrices.pop();
+            client.getItemRenderer().renderStatic(stack, ItemDisplayContext.GROUND, 0xf000f0,
+                    overlay, matrices, vertexConsumers, entity.getLevel(), 0);
+            matrices.popPose();
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 }

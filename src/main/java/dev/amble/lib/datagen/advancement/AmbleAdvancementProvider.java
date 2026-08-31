@@ -2,14 +2,13 @@ package dev.amble.lib.datagen.advancement;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.advancement.criterion.CriterionConditions;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.FrameType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,11 +40,11 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
     }
 
     public Builder challenge(Advancement parent, String name) {
-        return create(parent, name).frame(AdvancementFrame.CHALLENGE);
+        return create(parent, name).frame(FrameType.CHALLENGE);
     }
 
     public Builder goal(Advancement parent, String name) {
-        return create(parent, name).frame(AdvancementFrame.GOAL);
+        return create(parent, name).frame(FrameType.GOAL);
     }
 
     @Override
@@ -59,26 +58,26 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
 
         private final Advancement.Builder builder;
 
-        private ItemConvertible item = Items.BARRIER;
+        private ItemLike item = Items.BARRIER;
         private boolean hidden = false;
-        private AdvancementFrame frame = AdvancementFrame.TASK;
-        private Identifier background;
+        private FrameType frame = FrameType.TASK;
+        private ResourceLocation background;
         private boolean announce = true;
         private boolean showToast = true;
 
         private final String name;
 
         public Builder(Advancement parent, String name) {
-            this.builder = Advancement.Builder.create().parent(parent);
+            this.builder = Advancement.Builder.advancement().parent(parent);
             this.name = name;
         }
 
-        public Builder condition(String name, CriterionConditions conditions) {
-            this.builder.criterion(name, conditions);
+        public Builder condition(String name, CriterionTriggerInstance conditions) {
+            this.builder.addCriterion(name, conditions);
             return this;
         }
 
-        public Builder icon(ItemConvertible item) {
+        public Builder icon(ItemLike item) {
             this.item = item;
             return this;
         }
@@ -88,18 +87,18 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
             return this;
         }
 
-        public Builder frame(AdvancementFrame frame) {
+        public Builder frame(FrameType frame) {
             this.frame = frame;
             return this;
         }
 
-        public Builder background(Identifier background) {
+        public Builder background(ResourceLocation background) {
             this.background = background;
             return this;
         }
 
         public Builder background(String background) {
-            return background(new Identifier(AmbleAdvancementProvider.this.output.getModId(), background));
+            return background(new ResourceLocation(AmbleAdvancementProvider.this.output.getModId(), background));
         }
 
         public Builder silent() {
@@ -117,10 +116,10 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
 
             return builder
                     .display(item,
-                            Text.translatable("achievement." + modId + ".title." + name),
-                            Text.translatable("achievement." + modId + ".description." + name),
+                            Component.translatable("achievement." + modId + ".title." + name),
+                            Component.translatable("achievement." + modId + ".description." + name),
                             background, frame, showToast, announce, hidden)
-                    .build(advancement -> {}, modId + ":" + name);
+                    .save(advancement -> {}, modId + ":" + name);
         }
     }
 }

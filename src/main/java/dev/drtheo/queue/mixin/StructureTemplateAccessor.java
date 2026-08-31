@@ -1,22 +1,20 @@
 package dev.drtheo.queue.mixin;
 
 import java.util.List;
-
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.util.math.Vec3i;
 
 @Mixin(StructureTemplate.class)
 public interface StructureTemplateAccessor {
 
-    @Accessor("entities")
+    @Accessor("entityInfoList")
     List<StructureTemplate.StructureEntityInfo> getEntities();
 
     @Accessor("size")
     Vec3i getSize();
 
-    @Accessor("blockInfoLists")
-    List<StructureTemplate.PalettedBlockInfoList> getBlockInfo();
+    @Accessor("palettes")
+    List<StructureTemplate.Palette> getBlockInfo();
 }

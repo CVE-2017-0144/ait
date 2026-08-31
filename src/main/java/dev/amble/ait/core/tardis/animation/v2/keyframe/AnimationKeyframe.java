@@ -3,12 +3,10 @@ package dev.amble.ait.core.tardis.animation.v2.keyframe;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import org.joml.Vector3f;
-
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.math.MathHelper;
-
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.TardisTickable;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 
 /**
  * Represents a keyframe in an animation.
@@ -56,7 +54,7 @@ public class AnimationKeyframe<T> implements TardisTickable, Disposable {
 
     @Override
     public void age() {
-        this.ticks = MathHelper.ceil(this.duration);
+        this.ticks = Mth.ceil(this.duration);
     }
 
     public int ticks() {
@@ -202,19 +200,19 @@ public class AnimationKeyframe<T> implements TardisTickable, Disposable {
         LINEAR {
             @Override
             public float interpolate(float progress, float previous, float start, float end, float next) {
-                return MathHelper.lerp(Math.min(progress, 1), start, end);
+                return Mth.lerp(Math.min(progress, 1), start, end);
             }
         },
         CUBIC {;
             @Override
             public float interpolate(float progress, float previous, float start, float end, float next) {
-                return MathHelper.catmullRom(Math.min(progress, 1), previous, start, end, next);
+                return Mth.catmullrom(Math.min(progress, 1), previous, start, end, next);
             }
         };
 
         public abstract float interpolate(float progress, float previous, float start, float end, float next);
 
-        public static final Codec<Interpolation> CODEC = Codecs.NON_EMPTY_STRING.flatXmap(s -> {
+        public static final Codec<Interpolation> CODEC = ExtraCodecs.NON_EMPTY_STRING.flatXmap(s -> {
             try {
                 return DataResult.success(Interpolation.valueOf(s.toUpperCase()));
             } catch (Exception e) {

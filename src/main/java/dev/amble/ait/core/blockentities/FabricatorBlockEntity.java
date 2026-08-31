@@ -3,22 +3,19 @@ package dev.amble.ait.core.blockentities;
 
 import java.util.List;
 import java.util.Optional;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITItems;
@@ -35,14 +32,14 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
         super(AITBlockEntityTypes.FABRICATOR_BLOCK_ENTITY_TYPE, pos, state);
     }
 
-    public void useOn(BlockState state, World world, boolean sneaking, PlayerEntity player) {
-        if (world.isClient())
+    public void useOn(BlockState state, Level world, boolean sneaking, Player player) {
+        if (world.isClientSide())
             return;
 
         if (!this.isValid())
             return;
 
-        ItemStack hand = player.getMainHandStack();
+        ItemStack hand = player.getMainHandItem();
 
         // accept new blueprint
         if (!this.hasBlueprint() && hand.getItem() instanceof BlueprintItem) {
@@ -52,7 +49,7 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
                 return;
 
             this.setBlueprint(schema.create());
-            world.playSound(null, this.getPos(), AITSounds.FABRICATOR_START, SoundCategory.BLOCKS, 1, 1);
+            world.playSound(null, this.getBlockPos(), AITSounds.FABRICATOR_START, SoundSource.BLOCKS, 1, 1);
             return;
         }
 
@@ -63,12 +60,12 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
             if (hand.isEmpty() && sneaking) {
                 List<ItemStack> inputs = blueprint.getInsertedItems();
                 for (ItemStack stack : inputs) {
-                    player.getInventory().offerOrDrop(stack);
+                    player.getInventory().placeItemBackInInventory(stack);
                 }
 
                 this.setBlueprint(null, true);
                 this.sync();
-                this.markDirty();
+                this.setChanged();
 
                 return;
             }
@@ -77,7 +74,7 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
                 this.syncChanges();
 
                 if (blueprint.isComplete())
-                    world.playSound(null, this.getPos(), AITSounds.FABRICATOR_END, SoundCategory.BLOCKS, 1, 1);
+                    world.playSound(null, this.getBlockPos(), AITSounds.FABRICATOR_END, SoundSource.BLOCKS, 1, 1);
 
                 return;
             }
@@ -86,20 +83,20 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
             Optional<ItemStack> output = blueprint.tryCraft();
             if (output.isPresent()) {
                 ItemStack stack = output.get();
-                player.getInventory().offerOrDrop(stack);
+                player.getInventory().placeItemBackInInventory(stack);
 
                 this.setBlueprint(null, true);
                 this.sync();
-                this.markDirty();
+                this.setChanged();
             }
         }
     }
 
     public boolean isValid() {
-        if (!this.hasWorld())
+        if (!this.hasLevel())
             return false;
 
-        return this.getWorld().getBlockState(this.getPos().down()).isOf(Blocks.SMITHING_TABLE);
+        return this.getLevel().getBlockState(this.getBlockPos().below()).is(Blocks.SMITHING_TABLE);
     }
 
     public Optional<Blueprint> getBlueprint() {
@@ -136,7 +133,7 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
             if (this.blueprint.isComplete()) return this.blueprint.getOutput();
 
             // cycle through the requirements based off world ticks
-            int index = (int) (world.getTime() / 20 % this.blueprint.getRequirements().size());
+            int index = (int) (level.getGameTime() / 20 % this.blueprint.getRequirements().size());
             return this.blueprint.getRequirements().get(index);
         }
 
@@ -144,8 +141,8 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
         this.blueprint = null;
 
@@ -154,8 +151,8 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         if (blueprint != null)
             nbt.put("Blueprint", blueprint.toNbt());
@@ -164,29 +161,29 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Nullable @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     protected void syncChanges() {
-        if (this.getWorld().isClient())
+        if (this.getLevel().isClientSide())
             return;
 
-        ServerWorld world = (ServerWorld) this.getWorld();
-        world.getChunkManager().markForUpdate(this.getPos());
-        this.markDirty();
+        ServerLevel world = (ServerLevel) this.getLevel();
+        world.getChunkSource().blockChanged(this.getBlockPos());
+        this.setChanged();
     }
 
     public void onBroken() {
         if (this.hasBlueprint()) {
             this.getBlueprint().ifPresent(blueprint -> {
-                ItemStack stack = AITItems.BLUEPRINT.getDefaultStack();
+                ItemStack stack = AITItems.BLUEPRINT.getDefaultInstance();
                 BlueprintItem.setSchema(stack, blueprint.getSource());
 
-                StackUtil.spawn(this.getWorld(), this.getPos(), stack);
+                StackUtil.spawn(this.getLevel(), this.getBlockPos(), stack);
 
                 List<ItemStack> inputs = blueprint.getInsertedItems();
-                StackUtil.scatter(this.getWorld(), this.getPos(), inputs);
+                StackUtil.scatter(this.getLevel(), this.getBlockPos(), inputs);
             });
         }
     }

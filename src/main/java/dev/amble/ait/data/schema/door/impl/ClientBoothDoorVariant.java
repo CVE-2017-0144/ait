@@ -11,6 +11,6 @@ public class ClientBoothDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new BoothDoorModel(BoothDoorModel.getTexturedModelData().createModel());
+        return new BoothDoorModel(BoothDoorModel.getTexturedModelData().bakeRoot());
     }
 }

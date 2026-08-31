@@ -7,8 +7,7 @@ import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
-
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
 import dev.amble.ait.AITMod;
@@ -77,7 +76,7 @@ public class TardisHandlersManager extends TardisComponent implements TardisTick
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         this.forEach(component -> {
             if (!(component instanceof TardisTickable tickable))
                 return;

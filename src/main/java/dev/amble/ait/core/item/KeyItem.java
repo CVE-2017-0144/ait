@@ -3,27 +3,24 @@ package dev.amble.ait.core.item;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
@@ -42,8 +39,8 @@ public class KeyItem extends LinkableItem {
 
     private final EnumSet<Protocols> protocols;
 
-    public KeyItem(Settings settings, Protocols... abs) {
-        super(settings.maxCount(1), true);
+    public KeyItem(Properties settings, Protocols... abs) {
+        super(settings.stacksTo(1), true);
 
         this.protocols = new EnumSet<>(Protocols::values);
         this.protocols.addAll(abs);
@@ -62,14 +59,14 @@ public class KeyItem extends LinkableItem {
         return this.protocols.contains(var);
     }
 
-    public static boolean isKeyInInventory(PlayerEntity player) {
+    public static boolean isKeyInInventory(Player player) {
         return player.getInventory().contains(AITTags.Items.KEY);
     }
 
-    public static Collection<ItemStack> getKeysInInventory(PlayerEntity player) {
+    public static Collection<ItemStack> getKeysInInventory(Player player) {
         List<ItemStack> items = new ArrayList<>();
 
-        for (ItemStack stack : player.getInventory().main) {
+        for (ItemStack stack : player.getInventory().items) {
             if (stack != null && stack.getItem() instanceof KeyItem)
                 items.add(stack);
         }
@@ -77,7 +74,7 @@ public class KeyItem extends LinkableItem {
         return items;
     }
 
-    public static boolean hasMatchingKeyInInventory(PlayerEntity player, Tardis tardis) {
+    public static boolean hasMatchingKeyInInventory(Player player, Tardis tardis) {
         Collection<ItemStack> keys = getKeysInInventory(player);
 
         for (ItemStack stack : keys) {
@@ -86,7 +83,7 @@ public class KeyItem extends LinkableItem {
             if (key.hasProtocol(Protocols.SKELETON))
                 return true;
 
-            Tardis found = key.getTardis(player.getWorld(), stack);
+            Tardis found = key.getTardis(player.level(), stack);
 
             if (found == tardis)
                 return true;
@@ -96,8 +93,8 @@ public class KeyItem extends LinkableItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!(entity instanceof ServerPlayerEntity player))
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
+        if (!(entity instanceof ServerPlayer player))
             return;
 
         Tardis tardis = KeyItem.getTardisStatic(world, stack);
@@ -109,13 +106,13 @@ public class KeyItem extends LinkableItem {
     }
 
     @Override
-    public void onItemEntityDestroyed(ItemEntity entity) {
+    public void onDestroyed(ItemEntity entity) {
         Entity owner = entity.getOwner();
 
-        if (!(owner instanceof ServerPlayerEntity player))
+        if (!(owner instanceof ServerPlayer player))
             return;
 
-        Tardis tardis = KeyItem.getTardisStatic(entity.getWorld(), entity.getStack());
+        Tardis tardis = KeyItem.getTardisStatic(entity.level(), entity.getItem());
 
         if (tardis == null)
             return;
@@ -124,8 +121,8 @@ public class KeyItem extends LinkableItem {
         tardis.getDesktop().playSoundAtEveryConsole(AITSounds.CLOISTER);
     }
 
-    private static void hailMary(Tardis tardis, ItemStack stack, PlayerEntity player) {
-        if (player.getItemCooldownManager().isCoolingDown(stack.getItem()))
+    private static void hailMary(Tardis tardis, ItemStack stack, Player player) {
+        if (player.getCooldowns().isOnCooldown(stack.getItem()))
             return;
 
         if (tardis == null) return;
@@ -148,15 +145,15 @@ public class KeyItem extends LinkableItem {
         if (player.getHealth() > 4)
             return;
 
-        World world = player.getWorld();
+        Level world = player.level();
         // fail silently if destination world is blacklisted
-        if (!WorldUtil.getTravelWorlds().contains((ServerWorld) world))
+        if (!WorldUtil.getTravelWorlds().contains((ServerLevel) world))
             return;
 
-        BlockPos pos = player.getBlockPos();
+        BlockPos pos = player.blockPosition();
 
-        CachedDirectedGlobalPos globalPos = CachedDirectedGlobalPos.create((ServerWorld) world, pos,
-                (byte) RotationPropertyHelper.fromYaw(player.getBodyYaw()));
+        CachedDirectedGlobalPos globalPos = CachedDirectedGlobalPos.create((ServerLevel) world, pos,
+                (byte) RotationSegment.convertToSegment(player.getVisualRotationYInDegrees()));
 
         tardis.alarm().enable(ServerAlarmHandler.AlarmType.HAIL_MARY);
         tardis.travel().dematerialize();
@@ -171,18 +168,18 @@ public class KeyItem extends LinkableItem {
         tardis.shields().enableVisuals();
         tardis.removeFuel(4250 + 50 * tardis.travel().instability());
 
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 80, 3));
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 6 * 20, 3));
-        ((ServerWorld) world).spawnParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 3));
+        player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 6 * 20, 3));
+        ((ServerLevel) world).sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
 
-        player.getItemCooldownManager().set(stack.getItem(), 60 * 20);
+        player.getCooldowns().addCooldown(stack.getItem(), 60 * 20);
 
         tardis.stats().hailMary().set(false);
         tardis.door().previouslyLocked().set(false);
 
         // like a sound to show it's been called
-        world.playSound(null, pos, AITSounds.CLOISTER, SoundCategory.BLOCKS, 5f, 0.1f);
-        world.playSound(null, pos, SoundEvents.BLOCK_BELL_RESONATE, SoundCategory.BLOCKS, 5f, 0.1f);
+        world.playSound(null, pos, AITSounds.CLOISTER, SoundSource.BLOCKS, 5f, 0.1f);
+        world.playSound(null, pos, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 5f, 0.1f);
     }
 
     /*
@@ -210,9 +207,9 @@ public class KeyItem extends LinkableItem {
      */
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         if (stack.getItem() == AITItems.SKELETON_KEY)
-            tooltip.add(Text.translatable("tooltip.ait.skeleton_key").formatted(Formatting.DARK_PURPLE));
-        super.appendTooltip(stack, world, tooltip, context);
+            tooltip.add(Component.translatable("tooltip.ait.skeleton_key").withStyle(ChatFormatting.DARK_PURPLE));
+        super.appendHoverText(stack, world, tooltip, context);
     }
 }

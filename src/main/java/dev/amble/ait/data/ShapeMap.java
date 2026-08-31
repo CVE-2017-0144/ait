@@ -2,12 +2,10 @@ package dev.amble.ait.data;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import com.google.common.collect.Maps;
-
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 
 public class ShapeMap {
 
@@ -43,7 +41,7 @@ public class ShapeMap {
                 VoxelShape own = this.map.get(direction);
                 VoxelShape another = other.get(direction);
 
-                this.add(direction, VoxelShapes.union(own, another));
+                this.add(direction, Shapes.or(own, another));
             }
 
             return this;

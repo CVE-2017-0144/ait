@@ -1,30 +1,29 @@
 package dev.amble.ait.client.sounds.sonic;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.world.World;
-
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 
 public class SonicSound extends PositionedLoopingSound {
-    private final AbstractClientPlayerEntity player;
+    private final AbstractClientPlayer player;
     private boolean hasPlayedOnSound = false;
     private boolean hasPlayedOffSound = false;
     private float lastYaw;
     private float lastPitch;
 
-    public SonicSound(AbstractClientPlayerEntity player) {
-        super(AITSounds.SONIC_USE, SoundCategory.PLAYERS, player.getBlockPos(), 1f, 1f);
+    public SonicSound(AbstractClientPlayer player) {
+        super(AITSounds.SONIC_USE, SoundSource.PLAYERS, player.blockPosition(), 1f, 1f);
         this.player = player;
-        this.lastYaw = player.getYaw();
-        this.lastPitch = player.getPitch();
+        this.lastYaw = player.getYRot();
+        this.lastPitch = player.getXRot();
     }
 
     @Override
@@ -32,7 +31,7 @@ public class SonicSound extends PositionedLoopingSound {
         super.tick();
 
         if (!shouldPlay(this.player)) {
-            this.stop();
+            this.stopSonic();
             return;
         }
 
@@ -46,13 +45,13 @@ public class SonicSound extends PositionedLoopingSound {
 
     private boolean checkAndPlayDuelSound() {
 
-        HitResult hitResult = this.player.raycast(16, 0.0f, false);
+        HitResult hitResult = this.player.pick(16, 0.0f, false);
 
         if (hitResult.getType() != HitResult.Type.ENTITY) return false;
 
         EntityHitResult entityHitResult = (EntityHitResult) hitResult;
 
-        if (!(entityHitResult.getEntity() instanceof AbstractClientPlayerEntity otherPlayer)) return false;
+        if (!(entityHitResult.getEntity() instanceof AbstractClientPlayer otherPlayer)) return false;
 
         if (!shouldPlay(otherPlayer)) return false;
 
@@ -66,8 +65,8 @@ public class SonicSound extends PositionedLoopingSound {
         return false;
     }
 
-    public static boolean shouldPlay(PlayerEntity player) {
-        return player.isUsingItem() && player.getActiveItem().isOf(AITItems.SONIC_SCREWDRIVER);
+    public static boolean shouldPlay(Player player) {
+        return player.isUsingItem() && player.getUseItem().is(AITItems.SONIC_SCREWDRIVER);
     }
 
     public void play() {
@@ -77,15 +76,15 @@ public class SonicSound extends PositionedLoopingSound {
             hasPlayedOffSound = false;
         }
 
-        MinecraftClient.getInstance().getSoundManager().play(this);
+        Minecraft.getInstance().getSoundManager().play(this);
     }
 
     public boolean isPlaying() {
-        return MinecraftClient.getInstance().getSoundManager().isPlaying(this);
+        return Minecraft.getInstance().getSoundManager().isActive(this);
     }
 
-    public void stop() {
-        MinecraftClient.getInstance().getSoundManager().stop(this);
+    public void stopSonic() {
+        Minecraft.getInstance().getSoundManager().stop(this);
 
         if (!hasPlayedOffSound) {
             playSoundAtPlayer(AITSounds.SONIC_OFF);
@@ -95,12 +94,12 @@ public class SonicSound extends PositionedLoopingSound {
     }
 
     private void updatePosition() {
-        this.setPosition(this.player.getBlockPos());
+        this.setPosition(this.player.blockPosition());
     }
 
     private void updatePitchBasedOnCameraMovement() {
-        float currentYaw = this.player.getYaw();
-        float currentPitch = this.player.getPitch();
+        float currentYaw = this.player.getYRot();
+        float currentPitch = this.player.getXRot();
 
         float yawChange = Math.abs(currentYaw - lastYaw);
         float pitchChange = Math.abs(currentPitch - lastPitch);
@@ -123,15 +122,15 @@ public class SonicSound extends PositionedLoopingSound {
     }
 
     public void onFinishUse() {
-        this.stop();
+        this.stopSonic();
     }
 
     private void playSoundAtPlayer(SoundEvent sound) {
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
         if (world != null) {
-            world.playSound(
+            world.playLocalSound(
                     this.player.getX(), this.player.getY(), this.player.getZ(),
-                    sound, SoundCategory.PLAYERS, 1.0f, 1.0f, false
+                    sound, SoundSource.PLAYERS, 1.0f, 1.0f, false
             );
         }
     }
@@ -140,6 +139,6 @@ public class SonicSound extends PositionedLoopingSound {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof SonicSound other)) return false;
-        return this.player != null && other.player != null && this.player.getUuid().equals(other.player.getUuid());
+        return this.player != null && other.player != null && this.player.getUUID().equals(other.player.getUUID());
     }
 }

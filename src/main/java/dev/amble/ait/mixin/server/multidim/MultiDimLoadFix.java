@@ -8,12 +8,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
@@ -23,8 +21,8 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 @Mixin(MinecraftServer.class)
 public class MultiDimLoadFix {
 
-    @Inject(method = "getWorld", at = @At("RETURN"), cancellable = true)
-    public void getWorld(RegistryKey<World> key, CallbackInfoReturnable<ServerWorld> cir) {
+    @Inject(method = "getLevel", at = @At("RETURN"), cancellable = true)
+    public void getWorld(ResourceKey<Level> key, CallbackInfoReturnable<ServerLevel> cir) {
         // we only override the default behaviour if we couldn't find an already loaded world
         //  and the world we're trying to load is indeed a tardis dim
         if (cir.getReturnValue() != null || !TardisServerWorld.isTardisDimension(key))
@@ -33,7 +31,7 @@ public class MultiDimLoadFix {
         cir.setReturnValue(ait$loadTardisFromWorld((MinecraftServer) (Object) this, key));
     }
 
-    @Unique public ServerWorld ait$loadTardisFromWorld(MinecraftServer server, RegistryKey<World> key) {
+    @Unique public ServerLevel ait$loadTardisFromWorld(MinecraftServer server, ResourceKey<Level> key) {
         ServerTardisManager manager = ServerTardisManager.getInstance();
         UUID id = TardisServerWorld.getTardisId(key);
 
@@ -51,11 +49,11 @@ public class MultiDimLoadFix {
         CachedDirectedGlobalPos pos = travel.position();
 
         // reads & loads the world, lv is used in handling recursion later on
-        ServerWorld loadedWorld = TardisServerWorld.load(server, tardis);
+        ServerLevel loadedWorld = TardisServerWorld.load(server, tardis);
 
         // handles situations where a tardis is inside a tardis
         if (TardisServerWorld.isTardisDimension(pos.getDimension())) {
-            ServerWorld targetWorld;
+            ServerLevel targetWorld;
             if (pos.getDimension().equals(key)) {
                 targetWorld = loadedWorld;
             } else {

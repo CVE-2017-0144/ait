@@ -2,9 +2,8 @@ package dev.amble.ait.core.events;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class ServerChunkEvents {
 
@@ -17,6 +16,6 @@ public class ServerChunkEvents {
 
     @FunctionalInterface
     public interface Tick {
-        void onChunkTick(ServerWorld world, WorldChunk chunk);
+        void onChunkTick(ServerLevel world, LevelChunk chunk);
     }
 }

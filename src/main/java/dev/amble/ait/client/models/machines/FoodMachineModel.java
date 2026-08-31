@@ -1,12 +1,20 @@
 package dev.amble.ait.client.models.machines;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.Entity;
 
-public class FoodMachineModel extends SinglePartEntityModel {
+public class FoodMachineModel extends HierarchicalModel {
     private final ModelPart root;
     private final ModelPart pannel;
     private final ModelPart bone;
@@ -52,83 +60,83 @@ public class FoodMachineModel extends SinglePartEntityModel {
         bb_main = bbMain;
     }
 
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData pannel = modelPartData.addChild("pannel", ModelPartBuilder.create().uv(62, 2).cuboid(-0.5F, 3.5F, -43.0F, 1.0F, 1.0F, 0.0F, new Dilation(0.0F))
-                .uv(0, 0).cuboid(-6.0F, -2.7F, -42.9F, 12.0F, 13.0F, 12.0F, new Dilation(0.0F))
-                .uv(0, 26).cuboid(-6.0F, -14.7F, -41.9F, 0.0F, 12.0F, 11.0F, new Dilation(0.0F))
-                .uv(0, 26).mirrored().cuboid(6.0F, -14.7F, -41.9F, 0.0F, 12.0F, 11.0F, new Dilation(0.0F)).mirrored(false)
-                .uv(0, 77).cuboid(-5.997F, -4.7F, -41.9F, 0.0F, 2.0F, 11.0F, new Dilation(0.0F))
-                .uv(78, 49).cuboid(-4.0F, -1.7F, -42.9F, 4.0F, 3.0F, 3.0F, new Dilation(0.0F))
-                .uv(36, 49).cuboid(-6.0F, -14.7F, -30.9F, 12.0F, 12.0F, 0.0F, new Dilation(0.0F))
-                .uv(1, 50).cuboid(-6.0F, -14.7F, -35.9F, 12.0F, 0.0F, 5.0F, new Dilation(0.0F))
-                .uv(0, 77).cuboid(5.998F, -4.7F, -41.9F, 0.0F, 2.0F, 11.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 13.7F, 36.9F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition pannel = modelPartData.addOrReplaceChild("pannel", CubeListBuilder.create().texOffs(62, 2).addBox(-0.5F, 3.5F, -43.0F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 0).addBox(-6.0F, -2.7F, -42.9F, 12.0F, 13.0F, 12.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 26).addBox(-6.0F, -14.7F, -41.9F, 0.0F, 12.0F, 11.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 26).mirror().addBox(6.0F, -14.7F, -41.9F, 0.0F, 12.0F, 11.0F, new CubeDeformation(0.0F)).mirror(false)
+                .texOffs(0, 77).addBox(-5.997F, -4.7F, -41.9F, 0.0F, 2.0F, 11.0F, new CubeDeformation(0.0F))
+                .texOffs(78, 49).addBox(-4.0F, -1.7F, -42.9F, 4.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(36, 49).addBox(-6.0F, -14.7F, -30.9F, 12.0F, 12.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(1, 50).addBox(-6.0F, -14.7F, -35.9F, 12.0F, 0.0F, 5.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 77).addBox(5.998F, -4.7F, -41.9F, 0.0F, 2.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 13.7F, 36.9F));
 
-        ModelPartData cube_r1 = pannel.addChild("cube_r1", ModelPartBuilder.create().uv(0, 55).cuboid(-6.0F, 0.0F, 0.0F, 12.0F, 14.0F, 3.0F, new Dilation(-0.001F)), ModelTransform.of(0.0F, -14.701F, -35.9F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r1 = pannel.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 55).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 14.0F, 3.0F, new CubeDeformation(-0.001F)), PartPose.offsetAndRotation(0.0F, -14.701F, -35.9F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData bone = pannel.addChild("bone", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, -14.7067F, -35.8873F));
+        PartDefinition bone = pannel.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, -14.7067F, -35.8873F));
 
-        ModelPartData cube_r2 = bone.addChild("cube_r2", ModelPartBuilder.create().uv(64, 26).cuboid(-5.0F, -14.0F, 0.0F, 10.0F, 14.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 12.0567F, -7.0127F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r2 = bone.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(64, 26).addBox(-5.0F, -14.0F, 0.0F, 10.0F, 14.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 12.0567F, -7.0127F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData cube_r3 = bone.addChild("cube_r3", ModelPartBuilder.create().uv(16, 25).cuboid(-4.0F, -11.2F, -0.6F, 8.0F, 4.0F, 0.0F, new Dilation(0.0F))
-                .uv(0, 25).cuboid(-4.0F, -11.2F, -0.4F, 8.0F, 4.0F, 0.0F, new Dilation(0.0F))
-                .uv(64, 17).cuboid(-4.0F, -11.2F, -0.3F, 8.0F, 4.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 12.0567F, -6.7627F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r3 = bone.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(16, 25).addBox(-4.0F, -11.2F, -0.6F, 8.0F, 4.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 25).addBox(-4.0F, -11.2F, -0.4F, 8.0F, 4.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(64, 17).addBox(-4.0F, -11.2F, -0.3F, 8.0F, 4.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 12.0567F, -6.7627F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData dial2 = bone.addChild("dial2", ModelPartBuilder.create(), ModelTransform.pivot(2.5F, 11.7567F, -4.0127F));
+        PartDefinition dial2 = bone.addOrReplaceChild("dial2", CubeListBuilder.create(), PartPose.offset(2.5F, 11.7567F, -4.0127F));
 
-        ModelPartData cube_r4 = dial2.addChild("cube_r4", ModelPartBuilder.create().uv(0, 0).mirrored().cuboid(2.0F, -7.0F, -0.5F, 1.0F, 1.0F, 0.0F, new Dilation(0.0F)).mirrored(false)
-                .uv(48, 44).mirrored().cuboid(2.0F, -6.0F, -1.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(-2.5F, 2.7F, -4.1F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r4 = dial2.addOrReplaceChild("cube_r4", CubeListBuilder.create().texOffs(0, 0).mirror().addBox(2.0F, -7.0F, -0.5F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false)
+                .texOffs(48, 44).mirror().addBox(2.0F, -6.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-2.5F, 2.7F, -4.1F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData dial = bone.addChild("dial", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition dial = bone.addOrReplaceChild("dial", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r5 = dial.addChild("cube_r5", ModelPartBuilder.create().uv(48, 44).cuboid(-3.0F, -6.0F, -1.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r5 = dial.addOrReplaceChild("cube_r5", CubeListBuilder.create().texOffs(48, 44).addBox(-3.0F, -6.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData cube_r6 = dial.addChild("cube_r6", ModelPartBuilder.create().uv(0, 0).cuboid(-0.5F, -0.5F, -1.0F, 1.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-2.5F, -7.4461F, 3.567F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r6 = dial.addOrReplaceChild("cube_r6", CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -0.5F, -1.0F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.5F, -7.4461F, 3.567F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData water = bone.addChild("water", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition water = bone.addOrReplaceChild("water", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r7 = water.addChild("cube_r7", ModelPartBuilder.create().uv(54, 44).cuboid(-0.5F, -7.5F, -0.7F, 1.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r7 = water.addOrReplaceChild("cube_r7", CubeListBuilder.create().texOffs(54, 44).addBox(-0.5F, -7.5F, -0.7F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData milk = bone.addChild("milk", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition milk = bone.addOrReplaceChild("milk", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r8 = milk.addChild("cube_r8", ModelPartBuilder.create().uv(0, 3).cuboid(-0.5F, -4.3F, -0.7F, 1.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r8 = milk.addOrReplaceChild("cube_r8", CubeListBuilder.create().texOffs(0, 3).addBox(-0.5F, -4.3F, -0.7F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData select_dial = bone.addChild("select_dial", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 8.9321F, -4.3457F));
+        PartDefinition select_dial = bone.addOrReplaceChild("select_dial", CubeListBuilder.create(), PartPose.offset(0.0F, 8.9321F, -4.3457F));
 
-        ModelPartData cube_r9 = select_dial.addChild("cube_r9", ModelPartBuilder.create().uv(3, 0).cuboid(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.2F))
-                .uv(48, 44).cuboid(-0.5F, -0.5F, -1.0F, 1.0F, 1.0F, 1.0F, new Dilation(-0.1F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r9 = select_dial.addOrReplaceChild("cube_r9", CubeListBuilder.create().texOffs(3, 0).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.2F))
+                .texOffs(48, 44).addBox(-0.5F, -0.5F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.1F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData spiny_thing2 = bone.addChild("spiny_thing2", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition spiny_thing2 = bone.addOrReplaceChild("spiny_thing2", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r10 = spiny_thing2.addChild("cube_r10", ModelPartBuilder.create().uv(48, 40).cuboid(-4.5F, -7.5F, -0.4F, 4.0F, 4.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r10 = spiny_thing2.addOrReplaceChild("cube_r10", CubeListBuilder.create().texOffs(48, 40).addBox(-4.5F, -7.5F, -0.4F, 4.0F, 4.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData water2 = bone.addChild("water2", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition water2 = bone.addOrReplaceChild("water2", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r11 = water2.addChild("cube_r11", ModelPartBuilder.create().uv(0, 1).cuboid(-4.2F, -8.8F, -0.4F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r11 = water2.addOrReplaceChild("cube_r11", CubeListBuilder.create().texOffs(0, 1).addBox(-4.2F, -8.8F, -0.4F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData spiny_thing = bone.addChild("spiny_thing", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 16.4567F, -8.1127F));
+        PartDefinition spiny_thing = bone.addOrReplaceChild("spiny_thing", CubeListBuilder.create(), PartPose.offset(0.0F, 16.4567F, -8.1127F));
 
-        ModelPartData cube_r12 = spiny_thing.addChild("cube_r12", ModelPartBuilder.create().uv(48, 34).mirrored().cuboid(0.5F, -7.5F, -0.4F, 4.0F, 4.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
+        PartDefinition cube_r12 = spiny_thing.addOrReplaceChild("cube_r12", CubeListBuilder.create().texOffs(48, 34).mirror().addBox(0.5F, -7.5F, -0.4F, 4.0F, 4.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -0.5236F, 0.0F, 0.0F));
 
-        ModelPartData door_slider = pannel.addChild("door_slider", ModelPartBuilder.create().uv(63, 2).cuboid(-4.7F, -11.1F, -50.1F, 4.0F, 2.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 10.3F, 7.0F));
+        PartDefinition door_slider = pannel.addOrReplaceChild("door_slider", CubeListBuilder.create().texOffs(63, 2).addBox(-4.7F, -11.1F, -50.1F, 4.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 10.3F, 7.0F));
 
-        ModelPartData bb_main = modelPartData.addChild("bb_main", ModelPartBuilder.create().uv(71, 0).cuboid(-6.0F, -13.1F, -6.1F, 12.0F, 13.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
-        return TexturedModelData.of(modelData, 128, 128);
+        PartDefinition bb_main = modelPartData.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(71, 0).addBox(-6.0F, -13.1F, -6.1F, 12.0F, 13.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+        return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         pannel.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
         bb_main.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return this.root;
     }
 
     @Override
-    public void setAngles(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+    public void setupAnim(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
 
     }
 }

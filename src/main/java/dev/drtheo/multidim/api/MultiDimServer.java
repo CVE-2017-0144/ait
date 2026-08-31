@@ -1,14 +1,14 @@
 package dev.drtheo.multidim.api;
 
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelStorageSource;
 
 public interface MultiDimServer {
-    void multidim$addWorld(ServerWorld world);
-    boolean multidim$hasWorld(RegistryKey<World> key);
-    ServerWorld multidim$removeWorld(RegistryKey<World> key);
+    void multidim$addWorld(ServerLevel world);
+    boolean multidim$hasWorld(ResourceKey<Level> key);
+    ServerLevel multidim$removeWorld(ResourceKey<Level> key);
 
-    LevelStorage.Session multidim$getSession();
+    LevelStorageSource.LevelStorageAccess multidim$getSession();
 }

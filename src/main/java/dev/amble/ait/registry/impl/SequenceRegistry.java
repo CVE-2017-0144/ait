@@ -5,26 +5,24 @@ import java.util.List;
 
 import dev.amble.plushies.PlushieBlocks;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.mob.DrownedEntity;
-import net.minecraft.entity.mob.PhantomEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Drowned;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.control.impl.*;
@@ -38,10 +36,10 @@ import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.data.DirectedBlockPos;
 
 public class SequenceRegistry {
-    public static final SimpleRegistry<Sequence> REGISTRY = FabricRegistryBuilder
-            .createSimple(RegistryKey.<Sequence>ofRegistry(AITMod.id("sequence")))
+    public static final MappedRegistry<Sequence> REGISTRY = FabricRegistryBuilder
+            .createSimple(ResourceKey.<Sequence>createRegistryKey(AITMod.id("sequence")))
             .buildAndRegister();
-    private static final Random random = Random.create();
+    private static final RandomSource random = RandomSource.create();
 
     public static Sequence register(Sequence schema) {
         return Registry.register(REGISTRY, schema.id(), schema);
@@ -71,35 +69,35 @@ public class SequenceRegistry {
     public static void init() {
         AVOID_DEBRIS = register(Sequence.Builder.create(AITMod.id("avoid_debris"),
                 finishedTardis -> finishedTardis.travel().decreaseFlightTime(100), missedTardis -> {
-                    missedTardis.removeFuel(-random.nextBetween(45, 125));
+                    missedTardis.removeFuel(-random.nextIntBetweenInclusive(45, 125));
                     missedTardis.door().openDoors();
 
                     missedTardis.travel().increaseFlightTime(700);
 
                     List<Explosion> explosions = new ArrayList<>();
-                    ServerWorld world = missedTardis.asServer().world();
+                    ServerLevel world = missedTardis.asServer().world();
 
                     missedTardis.getDesktop().getConsolePos().forEach(console -> {
-                        Explosion explosion = world.createExplosion(null, null, null,
-                                console.toCenterPos(), 3f * 2, false, World.ExplosionSourceType.BLOCK);
+                        Explosion explosion = world.explode(null, null, null,
+                                console.getCenter(), 3f * 2, false, Level.ExplosionInteraction.BLOCK);
 
                         explosions.add(explosion);
                     });
 
-                    for (ServerPlayerEntity player : world.getPlayers()) {
+                    for (ServerPlayer player : world.players()) {
                         float xVel = AITMod.RANDOM.nextFloat(-2f, 3f);
                         float yVel = AITMod.RANDOM.nextFloat(-1f, 2f);
                         float zVel = AITMod.RANDOM.nextFloat(-2f, 3f);
 
-                        player.setVelocity(xVel * 2, yVel * 2, zVel * 2);
+                        player.setDeltaMovement(xVel * 2, yVel * 2, zVel * 2);
 
                         if (!explosions.isEmpty()) {
-                            player.damage(world.getDamageSources().explosion(explosions.get(0)), 0);
+                            player.hurt(world.damageSources().explosion(explosions.get(0)), 0);
                         } else {
-                            player.damage(WorldUtil.getOverworld().getDamageSources().generic(), 0);
+                            player.hurt(WorldUtil.getOverworld().damageSources().generic(), 0);
                         }
                     }
-                }, 100L, Text.translatable("sequence.ait.avoid_debris").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }, 100L, Component.translatable("sequence.ait.avoid_debris").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                 new DirectionControl(), new RandomiserControl()));
 
         DIMENSIONAL_BREACH = register(
@@ -107,44 +105,44 @@ public class SequenceRegistry {
                     finishedTardis.travel().decreaseFlightTime(50);
                 }), (missedTardis -> {
                     missedTardis.door().openDoors();
-                }), 80L, Text.translatable("sequence.ait.dimensional_breach").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 80L, Component.translatable("sequence.ait.dimensional_breach").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new DimensionControl(), new DoorControl()));
 
         ENERGY_DRAIN = register(
                 Sequence.Builder.create(AITMod.id("energy_drain"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(25);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
-                }), (missedTardis -> missedTardis.removeFuel(random.nextBetween(45, 125))), 80L,
-                        Text.translatable("sequence.ait.energy_drain").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
+                }), (missedTardis -> missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125))), 80L,
+                        Component.translatable("sequence.ait.energy_drain").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new RefuelerControl()));
 
         POWER_DRAIN_IMMINENT = register(
                 Sequence.Builder.create(AITMod.id("power_drain_imminent"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(75);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.fuel().disablePower();
-                }), 110L, Text.translatable("sequence.ait.power_drain_imminent").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 110L, Component.translatable("sequence.ait.power_drain_imminent").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new PowerControl(), new RefuelerControl(), new RandomiserControl()));
 
         SHIP_COMPUTER_OFFLINE = register(
                 Sequence.Builder.create(AITMod.id("ship_computer_offline"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(50);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.fuel().disablePower();
-                }), 110L, Text.translatable("sequence.ait.ship_computer_offline").formatted(Formatting.ITALIC,
-                        Formatting.YELLOW), new AutoPilotControl()));
+                }), 110L, Component.translatable("sequence.ait.ship_computer_offline").withStyle(ChatFormatting.ITALIC,
+                        ChatFormatting.YELLOW), new AutoPilotControl()));
 
         ANTI_GRAVITY_ERROR = register(
                 Sequence.Builder.create(AITMod.id("anti_gravity_error"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(25);
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.travel().antigravs().set(false);
-                }), 80L, Text.translatable("sequence.ait.anti_gravity_error").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 80L, Component.translatable("sequence.ait.anti_gravity_error").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new AntiGravsControl()));
 
         DIMENSIONAL_DRIFT_X = register(
@@ -154,9 +152,9 @@ public class SequenceRegistry {
                     BlockPos pos = cached.getPos();
 
                     missedTardis.travel().increaseFlightTime(400);
-                    return cached.pos(random.nextBetween(pos.getX() - 8, pos.getX() + 8), pos.getY(),
-                            random.nextBetween(pos.getZ() - 8, pos.getZ() + 8));
-                })), 100L, Text.translatable("sequence.ait.dimensional_drift_x").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                    return cached.pos(random.nextIntBetweenInclusive(pos.getX() - 8, pos.getX() + 8), pos.getY(),
+                            random.nextIntBetweenInclusive(pos.getZ() - 8, pos.getZ() + 8));
+                })), 100L, Component.translatable("sequence.ait.dimensional_drift_x").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new DimensionControl(), new XControl()));
 
         DIMENSIONAL_DRIFT_Y = register(
@@ -166,9 +164,9 @@ public class SequenceRegistry {
                     BlockPos pos = cached.getPos();
 
                     missedTardis.travel().increaseFlightTime(400);
-                    return cached.pos(random.nextBetween(pos.getX() - 8, pos.getX() + 8), pos.getY(),
-                            random.nextBetween(pos.getZ() - 8, pos.getZ() + 8));
-                })), 100L, Text.translatable("sequence.ait.dimensional_drift_y").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                    return cached.pos(random.nextIntBetweenInclusive(pos.getX() - 8, pos.getX() + 8), pos.getY(),
+                            random.nextIntBetweenInclusive(pos.getZ() - 8, pos.getZ() + 8));
+                })), 100L, Component.translatable("sequence.ait.dimensional_drift_y").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new DimensionControl(), new YControl()));
 
         DIMENSIONAL_DRIFT_Z = register(
@@ -178,9 +176,9 @@ public class SequenceRegistry {
                     BlockPos pos = cached.getPos();
 
                     missedTardis.travel().increaseFlightTime(400);
-                    return cached.pos(random.nextBetween(pos.getX() - 8, pos.getX() + 8), pos.getY(),
-                            random.nextBetween(pos.getZ() - 8, pos.getZ() + 8));
-                })), 100L, Text.translatable("sequence.ait.dimensional_drift_z").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                    return cached.pos(random.nextIntBetweenInclusive(pos.getX() - 8, pos.getX() + 8), pos.getY(),
+                            random.nextIntBetweenInclusive(pos.getZ() - 8, pos.getZ() + 8));
+                })), 100L, Component.translatable("sequence.ait.dimensional_drift_z").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new DimensionControl(), new ZControl()));
 
         CLOAK_TO_AVOID_VORTEX_TRAPPED_MOBS = register(Sequence.Builder
@@ -196,17 +194,17 @@ public class SequenceRegistry {
                     if (finishedTardis.door().isOpen() || !(finishedTardis instanceof ServerTardis))
                         return;
 
-                    ServerWorld world = finishedTardis.asServer().world();
+                    ServerLevel world = finishedTardis.asServer().world();
 
                     ItemEntity rewardForCloaking = new ItemEntity(EntityType.ITEM, world);
-                    rewardForCloaking.setPosition(doorPos.toCenterPos());
+                    rewardForCloaking.setPos(doorPos.getCenter());
 
-                    rewardForCloaking.setStack(switch (random.nextInt(3)) {
-                        case 0 -> Items.COOKIE.getDefaultStack();
-                        case 1 -> Items.POPPY.getDefaultStack();
-                        default -> PlushieBlocks.GIFT_BOX.asItem().getDefaultStack();
+                    rewardForCloaking.setItem(switch (random.nextInt(3)) {
+                        case 0 -> Items.COOKIE.getDefaultInstance();
+                        case 1 -> Items.POPPY.getDefaultInstance();
+                        default -> PlushieBlocks.GIFT_BOX.asItem().getDefaultInstance();
                     });
-                    world.spawnEntity(rewardForCloaking);
+                    world.addFreshEntity(rewardForCloaking);
                 }), (missedTardis -> {
                     DirectedBlockPos directedDoorPos = missedTardis.getDesktop().getDoorPos();
 
@@ -219,22 +217,22 @@ public class SequenceRegistry {
                     if (missedTardis.door().isOpen() || !(missedTardis instanceof ServerTardis))
                         return;
 
-                    ServerWorld interior = missedTardis.asServer().world();
-                    Vec3d centered = doorPos.toCenterPos();
+                    ServerLevel interior = missedTardis.asServer().world();
+                    Vec3 centered = doorPos.getCenter();
 
-                    ZombieEntity zombieEntity = new ZombieEntity(EntityType.ZOMBIE, interior);
-                    zombieEntity.setPosition(centered);
+                    Zombie zombieEntity = new Zombie(EntityType.ZOMBIE, interior);
+                    zombieEntity.setPos(centered);
 
-                    DrownedEntity drownedEntity = new DrownedEntity(EntityType.DROWNED,
+                    Drowned drownedEntity = new Drowned(EntityType.DROWNED,
                             interior);
-                    drownedEntity.setPosition(centered);
+                    drownedEntity.setPos(centered);
 
-                    PhantomEntity phantomEntity = new PhantomEntity(EntityType.PHANTOM,
+                    Phantom phantomEntity = new Phantom(EntityType.PHANTOM,
                             interior);
-                    phantomEntity.setPosition(centered);
+                    phantomEntity.setPos(centered);
 
-                    interior.spawnEntity(random.nextBoolean() ? random.nextBoolean() ? drownedEntity : zombieEntity : phantomEntity);
-                }), 80L, Text.translatable("sequence.ait.cloak_to_avoid_vortex_trapped_mobs").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                    interior.addFreshEntity(random.nextBoolean() ? random.nextBoolean() ? drownedEntity : zombieEntity : phantomEntity);
+                }), 80L, Component.translatable("sequence.ait.cloak_to_avoid_vortex_trapped_mobs").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new CloakControl(), new RandomiserControl()));
 
         DIRECTIONAL_ERROR = register(
@@ -242,72 +240,72 @@ public class SequenceRegistry {
                     finishedTardis.travel().decreaseFlightTime(50);
                 }), (missedTardis -> {
                     missedTardis.travel().increaseFlightTime(200);
-                }), 80L, Text.translatable("sequence.ait.directional_error").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 80L, Component.translatable("sequence.ait.directional_error").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new DirectionControl()));
 
         SPEED_UP_TO_AVOID_DRIFTING_OUT_OF_VORTEX = register(Sequence.Builder
                 .create(AITMod.id("speed_up_to_avoid_drifting_out_of_vortex"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(100);
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.travel().increaseFlightTime(200);
-                }), 80L, Text.translatable("sequence.ait.speed_up_to_avoid_drifting_out_of_vortex").formatted(Formatting.ITALIC,
-                        Formatting.YELLOW), new IncrementControl(), new ThrottleControl()));
+                }), 80L, Component.translatable("sequence.ait.speed_up_to_avoid_drifting_out_of_vortex").withStyle(ChatFormatting.ITALIC,
+                        ChatFormatting.YELLOW), new IncrementControl(), new ThrottleControl()));
 
         SLOW_DOWN_TO_AVOID_FLYING_OUT_OF_VORTEX = register(Sequence.Builder
                 .create(AITMod.id("slow_down_to_avoid_flying_out_of_vortex"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(100);
                 }), (missedTardis -> {
                     missedTardis.travel().rematerialize();
-                }), 80L, Text.translatable("sequence.ait.slow_down_to_avoid_flying_out_of_vortex").formatted(Formatting.ITALIC,
-                        Formatting.YELLOW), new IncrementControl(), new HandBrakeControl(), new ThrottleControl()));
+                }), 80L, Component.translatable("sequence.ait.slow_down_to_avoid_flying_out_of_vortex").withStyle(ChatFormatting.ITALIC,
+                        ChatFormatting.YELLOW), new IncrementControl(), new HandBrakeControl(), new ThrottleControl()));
 
 
         COURSE_CORRECT = register(
                 Sequence.Builder.create(AITMod.id("course_correct"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(75);
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(65, 250));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(65, 250));
 
                     missedTardis.travel().forceDestination(cached -> {
                         BlockPos pos = cached.getPos();
 
                         missedTardis.travel().increaseFlightTime(400);
 
-                        return cached.pos(random.nextBetween(pos.getX() - 24, pos.getX() + 24), pos.getY(),
-                                random.nextBetween(pos.getZ() - 24, pos.getZ() + 24));
+                        return cached.pos(random.nextIntBetweenInclusive(pos.getX() - 24, pos.getX() + 24), pos.getY(),
+                                random.nextIntBetweenInclusive(pos.getZ() - 24, pos.getZ() + 24));
                     });
-                }), 110L, Text.translatable("sequence.ait.course_correct").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 110L, Component.translatable("sequence.ait.course_correct").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new HandBrakeControl(), new ThrottleControl(), new RandomiserControl()));
 
         GROUND_UNSTABLE = register(
                 Sequence.Builder.create(AITMod.id("ground_unstable"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(25);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.travel().increaseFlightTime(100);
-                }), 110L, Text.translatable("sequence.ait.ground_unstable").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 110L, Component.translatable("sequence.ait.ground_unstable").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new LandTypeControl(), new YControl(), new LoadWaypointControl()));
 
         INCREMENT_SCALE_RECALCULATION_NECESSARY = register(Sequence.Builder
                 .create(AITMod.id("increment_scale_recalculation_necessary"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(50);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.travel().increaseFlightTime(100);
-                }), 80L, Text.translatable("sequence.ait.increment_scale_recalculation_necessary").formatted(Formatting.ITALIC,
-                        Formatting.YELLOW), new IncrementControl()));
+                }), 80L, Component.translatable("sequence.ait.increment_scale_recalculation_necessary").withStyle(ChatFormatting.ITALIC,
+                        ChatFormatting.YELLOW), new IncrementControl()));
 
         SMALL_DEBRIS_FIELD = register(
                 Sequence.Builder.create(AITMod.id("small_debris_field"), (finishedTardis -> {
                     finishedTardis.travel().decreaseFlightTime(75);
-                    finishedTardis.addFuel(random.nextBetween(45, 125));
+                    finishedTardis.addFuel(random.nextIntBetweenInclusive(45, 125));
                 }), (missedTardis -> {
-                    missedTardis.removeFuel(random.nextBetween(45, 125));
+                    missedTardis.removeFuel(random.nextIntBetweenInclusive(45, 125));
                     missedTardis.travel().increaseFlightTime(150);
-                }), 80L, Text.translatable("sequence.ait.small_debris_field").formatted(Formatting.ITALIC, Formatting.YELLOW),
+                }), 80L, Component.translatable("sequence.ait.small_debris_field").withStyle(ChatFormatting.ITALIC, ChatFormatting.YELLOW),
                         new IncrementControl(), new ShieldsControl()));
     }
 }

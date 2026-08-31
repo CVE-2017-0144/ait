@@ -1,12 +1,11 @@
 package dev.amble.ait.core.engine.impl;
 
 
-import net.minecraft.item.Item;
-
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.engine.DurableSubSystem;
 import dev.amble.ait.core.engine.StructureHolder;
 import dev.amble.ait.core.engine.block.multi.MultiBlockStructure;
+import net.minecraft.world.item.Item;
 
 public class ShieldsCircuit extends DurableSubSystem implements StructureHolder {
 

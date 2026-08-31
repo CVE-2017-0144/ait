@@ -1,16 +1,14 @@
 package dev.amble.ait.datagen.datagen_providers.loot;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Items;
-import net.minecraft.loot.condition.MatchToolLootCondition;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.ApplyBonusLootFunction;
-import net.minecraft.loot.function.SetCountLootFunction;
-import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.predicate.item.ItemPredicate;
-
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.predicates.MatchTool;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITTags;
@@ -31,46 +29,46 @@ public class AITBlockLootTables extends AmbleBlockLootTable {
 
         super.generate();
 
-        this.addDrop(AITBlocks.ZEITON_CLUSTER,
-                (block) -> dropsWithSilkTouch(block, ItemEntry.builder(AITItems.ZEITON_SHARD)
-                        .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(4.0F)))
-                        .apply(ApplyBonusLootFunction.oreDrops(Enchantments.FORTUNE))
-                        .conditionally(MatchToolLootCondition
-                                .builder(ItemPredicate.Builder.create().tag(AITTags.Items.CLUSTER_MAX_HARVESTABLES)))
-                        .alternatively(this.applyExplosionDecay(block, ItemEntry.builder(AITItems.ZEITON_SHARD)
-                                .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(2.0F)))))));
+        this.add(AITBlocks.ZEITON_CLUSTER,
+                (block) -> createSilkTouchDispatchTable(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)
+                        .apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
+                        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+                        .when(MatchTool
+                                .toolMatches(ItemPredicate.Builder.item().of(AITTags.Items.CLUSTER_MAX_HARVESTABLES)))
+                        .otherwise(this.applyExplosionDecay(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)
+                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))))));
 
 
-        addDrop(AITBlocks.WAYPOINT_BANK, doorDrops(AITBlocks.WAYPOINT_BANK));
+        add(AITBlocks.WAYPOINT_BANK, createDoorTable(AITBlocks.WAYPOINT_BANK));
 
         // Martian
-        addDrop(PlanetBlocks.MARTIAN_STONE, drops(PlanetBlocks.MARTIAN_STONE, PlanetBlocks.MARTIAN_COBBLESTONE));
-        addDrop(PlanetBlocks.MARTIAN_BRICK_SLAB, slabDrops(PlanetBlocks.MARTIAN_BRICK_SLAB));
-        addDrop(PlanetBlocks.MARTIAN_COBBLESTONE_SLAB, slabDrops(PlanetBlocks.MARTIAN_COBBLESTONE_SLAB));
-        addDrop(PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB, slabDrops(PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB));
+        add(PlanetBlocks.MARTIAN_STONE, createSingleItemTableWithSilkTouch(PlanetBlocks.MARTIAN_STONE, PlanetBlocks.MARTIAN_COBBLESTONE));
+        add(PlanetBlocks.MARTIAN_BRICK_SLAB, createSlabItemTable(PlanetBlocks.MARTIAN_BRICK_SLAB));
+        add(PlanetBlocks.MARTIAN_COBBLESTONE_SLAB, createSlabItemTable(PlanetBlocks.MARTIAN_COBBLESTONE_SLAB));
+        add(PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB, createSlabItemTable(PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB));
 
         // Ore
-        addDrop(PlanetBlocks.ANORTHOSITE_COAL_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_COAL_ORE, Items.COAL));
-        addDrop(PlanetBlocks.ANORTHOSITE_COPPER_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_COPPER_ORE, Items.RAW_COPPER));
-        addDrop(PlanetBlocks.ANORTHOSITE_IRON_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_IRON_ORE, Items.RAW_IRON));
-        addDrop(PlanetBlocks.ANORTHOSITE_LAPIS_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_LAPIS_ORE, Items.LAPIS_LAZULI));
-        addDrop(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE, Items.REDSTONE));
-        addDrop(PlanetBlocks.ANORTHOSITE_GOLD_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_GOLD_ORE, Items.RAW_GOLD));
-        addDrop(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE, Items.DIAMOND));
-        addDrop(PlanetBlocks.ANORTHOSITE_EMERALD_ORE, oreDrops(PlanetBlocks.ANORTHOSITE_EMERALD_ORE, Items.EMERALD));
+        add(PlanetBlocks.ANORTHOSITE_COAL_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_COAL_ORE, Items.COAL));
+        add(PlanetBlocks.ANORTHOSITE_COPPER_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_COPPER_ORE, Items.RAW_COPPER));
+        add(PlanetBlocks.ANORTHOSITE_IRON_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_IRON_ORE, Items.RAW_IRON));
+        add(PlanetBlocks.ANORTHOSITE_LAPIS_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_LAPIS_ORE, Items.LAPIS_LAZULI));
+        add(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE, Items.REDSTONE));
+        add(PlanetBlocks.ANORTHOSITE_GOLD_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_GOLD_ORE, Items.RAW_GOLD));
+        add(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE, Items.DIAMOND));
+        add(PlanetBlocks.ANORTHOSITE_EMERALD_ORE, createOreDrop(PlanetBlocks.ANORTHOSITE_EMERALD_ORE, Items.EMERALD));
 
-        addDrop(PlanetBlocks.MARTIAN_COAL_ORE, oreDrops(PlanetBlocks.MARTIAN_COAL_ORE, Items.COAL));
-        addDrop(PlanetBlocks.MARTIAN_COPPER_ORE, oreDrops(PlanetBlocks.MARTIAN_COPPER_ORE, Items.RAW_COPPER));
-        addDrop(PlanetBlocks.MARTIAN_IRON_ORE, oreDrops(PlanetBlocks.MARTIAN_IRON_ORE, Items.RAW_IRON));
-        addDrop(PlanetBlocks.MARTIAN_LAPIS_ORE, oreDrops(PlanetBlocks.MARTIAN_LAPIS_ORE, Items.LAPIS_LAZULI));
-        addDrop(PlanetBlocks.MARTIAN_REDSTONE_ORE, oreDrops(PlanetBlocks.MARTIAN_REDSTONE_ORE, Items.REDSTONE));
-        addDrop(PlanetBlocks.MARTIAN_GOLD_ORE, oreDrops(PlanetBlocks.MARTIAN_GOLD_ORE, Items.RAW_GOLD));
-        addDrop(PlanetBlocks.MARTIAN_DIAMOND_ORE, oreDrops(PlanetBlocks.MARTIAN_DIAMOND_ORE, Items.DIAMOND));
-        addDrop(PlanetBlocks.MARTIAN_EMERALD_ORE, oreDrops(PlanetBlocks.MARTIAN_EMERALD_ORE, Items.EMERALD));
+        add(PlanetBlocks.MARTIAN_COAL_ORE, createOreDrop(PlanetBlocks.MARTIAN_COAL_ORE, Items.COAL));
+        add(PlanetBlocks.MARTIAN_COPPER_ORE, createOreDrop(PlanetBlocks.MARTIAN_COPPER_ORE, Items.RAW_COPPER));
+        add(PlanetBlocks.MARTIAN_IRON_ORE, createOreDrop(PlanetBlocks.MARTIAN_IRON_ORE, Items.RAW_IRON));
+        add(PlanetBlocks.MARTIAN_LAPIS_ORE, createOreDrop(PlanetBlocks.MARTIAN_LAPIS_ORE, Items.LAPIS_LAZULI));
+        add(PlanetBlocks.MARTIAN_REDSTONE_ORE, createOreDrop(PlanetBlocks.MARTIAN_REDSTONE_ORE, Items.REDSTONE));
+        add(PlanetBlocks.MARTIAN_GOLD_ORE, createOreDrop(PlanetBlocks.MARTIAN_GOLD_ORE, Items.RAW_GOLD));
+        add(PlanetBlocks.MARTIAN_DIAMOND_ORE, createOreDrop(PlanetBlocks.MARTIAN_DIAMOND_ORE, Items.DIAMOND));
+        add(PlanetBlocks.MARTIAN_EMERALD_ORE, createOreDrop(PlanetBlocks.MARTIAN_EMERALD_ORE, Items.EMERALD));
 
         // Anorthosite
-        addDrop(PlanetBlocks.ANORTHOSITE_BRICK_SLAB, slabDrops(PlanetBlocks.ANORTHOSITE_BRICK_SLAB));
-        addDrop(PlanetBlocks.ANORTHOSITE_SLAB, slabDrops(PlanetBlocks.ANORTHOSITE_SLAB));
-        addDrop(PlanetBlocks.POLISHED_ANORTHOSITE_SLAB, slabDrops(PlanetBlocks.POLISHED_ANORTHOSITE_SLAB));
+        add(PlanetBlocks.ANORTHOSITE_BRICK_SLAB, createSlabItemTable(PlanetBlocks.ANORTHOSITE_BRICK_SLAB));
+        add(PlanetBlocks.ANORTHOSITE_SLAB, createSlabItemTable(PlanetBlocks.ANORTHOSITE_SLAB));
+        add(PlanetBlocks.POLISHED_ANORTHOSITE_SLAB, createSlabItemTable(PlanetBlocks.POLISHED_ANORTHOSITE_SLAB));
     }
 }

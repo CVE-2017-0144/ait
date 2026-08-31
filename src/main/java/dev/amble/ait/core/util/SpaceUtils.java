@@ -6,17 +6,15 @@ import java.util.Optional;
 import java.util.Set;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.entities.FlightTardisEntity;
@@ -34,24 +32,24 @@ public class SpaceUtils {
 
     }
 
-    private static void onWorldTick(ServerWorld world) {
+    private static void onWorldTick(ServerLevel world) {
         checkPlayerTeleportation(world);
     }
 
-    public static void checkPlayerTeleportation(ServerWorld world) {
-        List<ServerPlayerEntity> playersToTeleport = new ArrayList<>();
-        List<ServerPlayerEntity> playersToSuck = new ArrayList<>();
+    public static void checkPlayerTeleportation(ServerLevel world) {
+        List<ServerPlayer> playersToTeleport = new ArrayList<>();
+        List<ServerPlayer> playersToSuck = new ArrayList<>();
 
-        for (ServerPlayerEntity player : world.getPlayers()) {
-            if (!(player.getWorld().getRegistryKey() == AITDimensions.SPACE)) {
+        for (ServerPlayer player : world.players()) {
+            if (!(player.level().dimension() == AITDimensions.SPACE)) {
                 continue;
             }
 
-            Vec3d playerPos = player.getPos();
+            Vec3 playerPos = player.position();
 
             for (Planet planet : Space.getInstance().getPlanets()) {
                 PlanetRenderInfo planetInfo = planet.render();
-                Vec3d planetPos = planetInfo.position();
+                Vec3 planetPos = planetInfo.position();
                 double planetRadius = planetInfo.radius();
                 double suctionRadius = planetInfo.suctionRadius();
 
@@ -69,7 +67,7 @@ public class SpaceUtils {
             }
         }
 
-        for (ServerPlayerEntity player : playersToTeleport) {
+        for (ServerPlayer player : playersToTeleport) {
             teleportPlayerToTouchingPlanet(player);
         }
 
@@ -89,37 +87,37 @@ public class SpaceUtils {
         }*/
     }
 
-    private static void applySuction(List<ServerPlayerEntity> player, Vec3d planetPos) {
+    private static void applySuction(List<ServerPlayer> player, Vec3 planetPos) {
         player.forEach(entity -> {
             if (entity.isSpectator())
                 return;
             if (entity.getVehicle() instanceof FlightTardisEntity tardis) {
                 if (tardis.tardis() != null && tardis.tardis().get().travel().antigravs().get()) return;
-                Vec3d motion = planetPos.subtract(tardis.getPos()).normalize().multiply(0.1f);
-                tardis.setVelocity(tardis.getVelocity().add(motion));
-                tardis.velocityDirty = true;
-                tardis.velocityModified = true;
+                Vec3 motion = planetPos.subtract(tardis.position()).normalize().scale(0.1f);
+                tardis.setDeltaMovement(tardis.getDeltaMovement().add(motion));
+                tardis.hasImpulse = true;
+                tardis.hurtMarked = true;
             } else {
-                Vec3d motion = planetPos.subtract(entity.getPos()).normalize().multiply(0.1f);
-                entity.setVelocity(entity.getVelocity().add(motion));
-                entity.velocityDirty = true;
-                entity.velocityModified = true;
+                Vec3 motion = planetPos.subtract(entity.position()).normalize().scale(0.1f);
+                entity.setDeltaMovement(entity.getDeltaMovement().add(motion));
+                entity.hasImpulse = true;
+                entity.hurtMarked = true;
             }
         });
     }
 
-    private static void teleportPlayerToTouchingPlanet(ServerPlayerEntity player) {
+    private static void teleportPlayerToTouchingPlanet(ServerPlayer player) {
         MinecraftServer server = player.getServer();
         if (server == null) return;
 
-        Identifier target = getTouchingPlanet(player).orElse(null);
+        ResourceLocation target = getTouchingPlanet(player).orElse(null);
         if (target == null) return;
 
-        RegistryKey<World> targetWorldKey = RegistryKey.of(RegistryKeys.WORLD, target);
-        ServerWorld targetWorld = server.getWorld(targetWorldKey);
+        ResourceKey<Level> targetWorldKey = ResourceKey.create(Registries.DIMENSION, target);
+        ServerLevel targetWorld = server.getLevel(targetWorldKey);
 
         if (targetWorld != null) {
-            player.teleport(targetWorld, player.getX(), targetWorld.getTopY(), player.getZ(), Set.of(), player.getYaw(), player.getPitch());
+            player.teleportTo(targetWorld, player.getX(), targetWorld.getMaxBuildHeight(), player.getZ(), Set.of(), player.getYRot(), player.getXRot());
         } else {
             AITMod.LOGGER.error("Teleporting to planets -> Dimension {} not found!", target);
         }
@@ -130,13 +128,13 @@ public class SpaceUtils {
      * @param entity The entity to check
      * @return The dimension of the planet the entity is touching
      */
-    private static Optional<Identifier> getTouchingPlanet(Entity entity) {
+    private static Optional<ResourceLocation> getTouchingPlanet(Entity entity) {
         for (Planet planet : Space.getInstance().getPlanets()) {
             PlanetRenderInfo planetInfo = planet.render();
-            Vec3d planetPos = planetInfo.position();
+            Vec3 planetPos = planetInfo.position();
             double planetRadius = planetInfo.radius();
 
-            double distance = planetPos.distanceTo(entity.getPos());
+            double distance = planetPos.distanceTo(entity.position());
 
             if (distance < planetRadius && planet.hasLandableSurface()) {
                 return Optional.of(planet.dimension());

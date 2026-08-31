@@ -1,29 +1,29 @@
 package dev.amble.ait.client.sounds;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 
 // fixme long permission
 
 public class PlayerFollowingLoopingSound extends LoopingSound {
-    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundCategory soundCategory, float volume, float pitch) {
+    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundSource soundCategory, float volume, float pitch) {
         super(soundEvent, soundCategory);
 
-        ClientPlayerEntity client = MinecraftClient.getInstance().player;
-        this.setPosition(client == null ? new BlockPos(0,0,0) : client.getBlockPos());
+        LocalPlayer client = Minecraft.getInstance().player;
+        this.setPosition(client == null ? new BlockPos(0,0,0) : client.blockPosition());
         this.setVolume(volume);
         this.setPitch(pitch);
-        this.repeat = true;
+        this.looping = true;
     }
 
-    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundCategory soundCategory, float volume) {
+    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundSource soundCategory, float volume) {
         this(soundEvent, soundCategory, volume, 1);
     }
 
-    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundCategory soundCategory) {
+    public PlayerFollowingLoopingSound(SoundEvent soundEvent, SoundSource soundCategory) {
         this(soundEvent, soundCategory, 1, 1);
     }
 
@@ -34,9 +34,9 @@ public class PlayerFollowingLoopingSound extends LoopingSound {
     }
 
     private void setCoordsToPlayerCoords() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null || player.getBlockPos() == null)
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null || player.blockPosition() == null)
             return;
-        this.setPosition(player.getBlockPos());
+        this.setPosition(player.blockPosition());
     }
 }

@@ -4,35 +4,34 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class PitchLadderWidget extends ClickableWidget {
+public class PitchLadderWidget extends AbstractWidget {
 
     private static final float MIN = -90f;
     private static final float MAX = 90f;
     private static final float STEP = 5f;
 
     private final Consumer<Float> onChange;
-    private final TextRenderer textRenderer;
+    private final Font textRenderer;
     private float value;
     private float lastClickValue;
     private boolean fresh = true;
 
     public PitchLadderWidget(int x, int y, int width, int height, float initial,
-                             TextRenderer textRenderer, Consumer<Float> onChange) {
-        super(x, y, width, height, Text.translatable("screen.ait.environment_projector.pitch"));
-        this.value = MathHelper.clamp(initial, MIN, MAX);
+                             Font textRenderer, Consumer<Float> onChange) {
+        super(x, y, width, height, Component.translatable("screen.ait.environment_projector.pitch"));
+        this.value = Mth.clamp(initial, MIN, MAX);
         this.lastClickValue = this.value;
         this.textRenderer = textRenderer;
         this.onChange = onChange;
@@ -43,7 +42,7 @@ public class PitchLadderWidget extends ClickableWidget {
     }
 
     public void setValue(float v) {
-        this.value = MathHelper.clamp(v, MIN, MAX);
+        this.value = Mth.clamp(v, MIN, MAX);
     }
 
     private int valueToY(float v) {
@@ -53,7 +52,7 @@ public class PitchLadderWidget extends ClickableWidget {
 
     private float yToValue(double y) {
         double t = (y - this.getY()) / (double) (this.getHeight() - 1);
-        return (float) MathHelper.clamp(MAX - t * (MAX - MIN), MIN, MAX);
+        return (float) Mth.clamp(MAX - t * (MAX - MIN), MIN, MAX);
     }
 
     private void updateFromMouse(double mouseY) {
@@ -72,8 +71,8 @@ public class PitchLadderWidget extends ClickableWidget {
     }
 
     private void playClick() {
-        MinecraftClient.getInstance().getSoundManager().play(
-                PositionedSoundInstance.master(SoundEvents.BLOCK_LEVER_CLICK, 1.6f));
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.LEVER_CLICK, 1.6f));
     }
 
     @Override
@@ -92,13 +91,13 @@ public class PitchLadderWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int barX = this.getX() + 10;
         int top = this.getY();
         int bottom = this.getY() + this.getHeight() - 1;
         int rangeColor = 0xFFAAAAAA;
         int labelColor = 0xFFCCCCCC;
-        int accent = this.isSelected() ? 0xFFFFFFFF : 0xFFFFCC55;
+        int accent = this.isHoveredOrFocused() ? 0xFFFFFFFF : 0xFFFFCC55;
         context.fill(barX, top, barX + 1, bottom + 1, rangeColor);
 
         for (int v = -90; v <= 90; v += 30) {
@@ -106,7 +105,7 @@ public class PitchLadderWidget extends ClickableWidget {
             int tickLen = (v == 0 || Math.abs(v) == 90) ? 5 : 3;
             context.fill(barX - tickLen, y, barX, y + 1, rangeColor);
             String label = (v > 0 ? "+" : "") + v;
-            context.drawText(textRenderer, label, barX + 4, y - 3, labelColor, false);
+            context.drawString(textRenderer, label, barX + 4, y - 3, labelColor, false);
         }
 
         int needleY = valueToY(this.value);
@@ -114,15 +113,15 @@ public class PitchLadderWidget extends ClickableWidget {
         int needleRight = barX + 3;
         context.fill(needleLeft, needleY - 1, needleRight + 1, needleY + 2, accent);
         String readout = String.format("%+.0f", this.value);
-        int readoutX = this.getX() + this.getWidth() - textRenderer.getWidth(readout);
-        context.drawText(textRenderer, readout, readoutX, needleY - 3, accent, true);
-        Text title = Text.translatable("screen.ait.environment_projector.pitch");
-        context.drawText(textRenderer, title,
-                this.getX() + (this.getWidth() - textRenderer.getWidth(title)) / 2,
+        int readoutX = this.getX() + this.getWidth() - textRenderer.width(readout);
+        context.drawString(textRenderer, readout, readoutX, needleY - 3, accent, true);
+        Component title = Component.translatable("screen.ait.environment_projector.pitch");
+        context.drawString(textRenderer, title,
+                this.getX() + (this.getWidth() - textRenderer.width(title)) / 2,
                 top - 11, 0xFFFFFFFF, false);
     }
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        this.appendDefaultNarrations(builder);
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+        this.defaultButtonNarrationText(builder);
     }
 }

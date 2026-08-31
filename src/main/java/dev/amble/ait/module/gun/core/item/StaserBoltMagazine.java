@@ -1,43 +1,40 @@
 package dev.amble.ait.module.gun.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.item.ZeitonShardItem;
 import dev.amble.ait.module.gun.core.entity.GunEntityTypes;
 import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
 
 public class StaserBoltMagazine extends Item implements ArtronHolderItem {
-    public StaserBoltMagazine(Settings settings) {
+    public StaserBoltMagazine(Properties settings) {
         super(settings);
     }
 
     public static final double MAX_FUEL = 64;
 
-    public PersistentProjectileEntity createStaserbolt(World world, ItemStack stack, LivingEntity shooter) {
+    public AbstractArrow createStaserbolt(Level world, ItemStack stack, LivingEntity shooter) {
         StaserBoltEntity staserBoltEntity = new StaserBoltEntity(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, world);
         return staserBoltEntity.createFromConstructor(world, shooter);
     }
     @Override
-    public ItemStack getDefaultStack() {
+    public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
 
         nbt.putDouble(FUEL_KEY, MAX_FUEL);
 
@@ -45,26 +42,26 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player player, SlotAccess cursorStackReference) {
         if (otherStack.getItem() instanceof ZeitonShardItem) {
             int shardCount = otherStack.getCount();
             if (stack.getItem() instanceof StaserBoltMagazine mag) {
                 double ammo = mag.getCurrentFuel(stack);
-                if (clickType == ClickType.RIGHT && mag.getCurrentFuel(stack) < mag.getMaxFuel(stack)) {
+                if (clickType == ClickAction.SECONDARY && mag.getCurrentFuel(stack) < mag.getMaxFuel(stack)) {
                     int residual = (int) ((ammo + shardCount) - mag.getCurrentFuel(stack));
                     mag.setCurrentFuel(Math.min(MAX_FUEL, ammo + shardCount), stack);
-                    otherStack.decrement(residual);
+                    otherStack.shrink(residual);
                     return true;
                 }
             }
         }
-        return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
+        return super.overrideOtherStackedOnMe(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
 
     @Override
-    public void onCraft(ItemStack stack, World world, PlayerEntity player) {
-        super.onCraft(stack, world, player);
-        NbtCompound nbt = stack.getOrCreateNbt();
+    public void onCraftedBy(ItemStack stack, Level world, Player player) {
+        super.onCraftedBy(stack, world, player);
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putDouble(FUEL_KEY, 0);
     }
 
@@ -74,17 +71,17 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         int currentFuel = (int) Math.round(this.getCurrentFuel(stack));
-        Formatting fuelColor = currentFuel > (MAX_FUEL / 4) ? Formatting.GREEN : Formatting.RED;
+        ChatFormatting fuelColor = currentFuel > (MAX_FUEL / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;
 
         tooltip.add(
-                Text.translatable("message.ait.artron_units", currentFuel)
-                        .formatted(fuelColor)
-                        .append(Text.literal(" / ").formatted(Formatting.GRAY))
-                        .append(Text.literal(String.valueOf(MAX_FUEL)).formatted(Formatting.GRAY))
+                Component.translatable("message.ait.artron_units", currentFuel)
+                        .withStyle(fuelColor)
+                        .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(MAX_FUEL)).withStyle(ChatFormatting.GRAY))
         );
 
-        super.appendTooltip(stack, world, tooltip, context);
+        super.appendHoverText(stack, world, tooltip, context);
     }
 }

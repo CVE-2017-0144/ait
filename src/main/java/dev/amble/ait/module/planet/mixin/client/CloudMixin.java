@@ -5,31 +5,29 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 
-@Mixin(value = WorldRenderer.class, priority = 1001)
+@Mixin(value = LevelRenderer.class, priority = 1001)
 public abstract class CloudMixin {
 
-    @Inject(method="renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
-    private void ait$renderClouds(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-        MinecraftClient mc = MinecraftClient.getInstance();
+    @Inject(method="renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
+    private void ait$renderClouds(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
+        Minecraft mc = Minecraft.getInstance();
 
         if (mc.player == null)
             return;
 
-        if (TardisServerWorld.isTardisDimension(mc.player.getWorld())) {
+        if (TardisServerWorld.isTardisDimension(mc.player.level())) {
             ci.cancel();
             return;
         }
 
-        Planet planet = PlanetRegistry.getInstance().get(mc.player.getWorld());
+        Planet planet = PlanetRegistry.getInstance().get(mc.player.level());
 
         if (planet == null)
             return;

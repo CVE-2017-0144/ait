@@ -3,9 +3,7 @@ package dev.amble.ait.registry.impl;
 import java.util.Random;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.resource.ResourceType;
-
+import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.datapack.DatapackCategory;
 import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
@@ -24,7 +22,7 @@ public class CategoryRegistry extends SimpleDatapackRegistry<ExteriorCategorySch
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override

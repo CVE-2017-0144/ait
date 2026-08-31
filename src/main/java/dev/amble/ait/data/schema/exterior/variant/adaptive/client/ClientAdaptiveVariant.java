@@ -1,14 +1,12 @@
 package dev.amble.ait.data.schema.exterior.variant.adaptive.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.CapsuleExteriorModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientAdaptiveVariant extends ClientExteriorVariantSchema {
 
@@ -22,16 +20,16 @@ public class ClientAdaptiveVariant extends ClientExteriorVariantSchema {
 
     @Override
     public ExteriorModel model() {
-        return new CapsuleExteriorModel(CapsuleExteriorModel.getTexturedModelData().createModel());
+        return new CapsuleExteriorModel(CapsuleExteriorModel.getTexturedModelData().bakeRoot());
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return AITMod.id(CATEGORY_PATH + ".png");
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return null;
     }
 

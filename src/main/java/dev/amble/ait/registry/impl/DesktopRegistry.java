@@ -3,9 +3,7 @@ package dev.amble.ait.registry.impl;
 import java.util.Random;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.resource.ResourceType;
-
+import net.minecraft.server.packs.PackType;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.data.datapack.DatapackDesktop;
 import dev.amble.ait.data.schema.desktop.DefaultCaveDesktop;
@@ -26,7 +24,7 @@ public class DesktopRegistry extends UnlockableRegistry<TardisDesktopSchema> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
 

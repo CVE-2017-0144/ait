@@ -1,10 +1,8 @@
 package dev.amble.ait.data.gson;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.core.BlockPos;
 import com.google.gson.*;
-
-import net.minecraft.util.math.BlockPos;
 
 public class BlockPosSerializer implements JsonDeserializer<BlockPos>, JsonSerializer<BlockPos> {
 

@@ -1,12 +1,7 @@
 package dev.amble.ait.client.models.exteriors;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -18,6 +13,10 @@ import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
 import dev.amble.lib.client.bedrock.BedrockModel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
 public class BedrockExteriorModel implements ExteriorModel, Identifiable {
     private final BedrockModel model;
@@ -28,22 +27,22 @@ public class BedrockExteriorModel implements ExteriorModel, Identifiable {
 
         if (this.model == null) throw new IllegalStateException("Bedrock Model is null. Ensure the resource pack is loaded correctly.");
 
-        this.root = this.model.create().createModel();
+        this.root = this.model.create().bakeRoot();
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.model.id();
     }
 
     @Override
-    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha, float tickDelta) {
-        matrices.push();
+    public void renderWithAnimations(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha, float tickDelta) {
+        matrices.pushPose();
 
         ExteriorVariantSchema schema = tardis.getExterior().getVariant();
 
         if (schema instanceof AnimatedDoor animDoor) {
-            this.getPart().traverse().forEach(ModelPart::resetTransform);
+            this.root().getAllParts().forEach(ModelPart::resetPose);
             animDoor.runAnimations(root, matrices, tickDelta, tardis);
         }
 
@@ -53,7 +52,7 @@ public class BedrockExteriorModel implements ExteriorModel, Identifiable {
 
         this.render(matrices, vertices, light, overlay, red, green, blue, alpha);
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     private void runTravelAnimations(TravelAnimationMap.Holder holder, ClientTardis tardis, float tickDelta) {
@@ -66,28 +65,28 @@ public class BedrockExteriorModel implements ExteriorModel, Identifiable {
         if (anim == null) return;
 
         if (anim.loopMode == BedrockAnimation.LoopMode.NONE) {
-            if (MinecraftClient.getInstance().player.age % 40 == 0) {
+            if (Minecraft.getInstance().player.tickCount % 40 == 0) {
                 AITMod.LOGGER.error("Non-looping animations are not supported in BedrockExteriorModel. Animation: {}", anim.name);
             }
             return;
         }
 
-        float ticks = MinecraftClient.getInstance().player.age;
+        float ticks = Minecraft.getInstance().player.tickCount;
         anim.apply(root, (int) ticks, tickDelta);
     }
 
     @Override
-    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         this.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
+    public void renderDoors(ClientTardis tardis, ExteriorBlockEntity exterior, ModelPart root, PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, boolean isBOTI) {
 
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return this.root;
     }
 }

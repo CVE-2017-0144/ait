@@ -3,19 +3,24 @@ package dev.amble.ait.core.item;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
-
+import net.minecraft.resources.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.AITUseActions;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.api.tardis.link.LinkableItem;
@@ -33,14 +38,14 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     public static final String MODE_KEY = "mode";
     public static final String SONIC_TYPE = "sonic_type";
 
-    public SonicItem(Settings settings) {
+    public SonicItem(Properties settings) {
         super(settings, true);
     }
 
     @Override
-    public ItemStack getDefaultStack() {
+    public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
 
         nbt.putInt(MODE_KEY, -1);
         nbt.putDouble(FUEL_KEY, getMaxFuel(stack));
@@ -52,58 +57,58 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAnim getUseAnimation(ItemStack stack) {
         return AITUseActions.SONIC;
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
+    public InteractionResult useOn(UseOnContext context) {
         // Charge the sonic with the artron collector block
-        if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof ArtronCollectorBlockEntity artronCollectorBlockEntity) {
-            double remainder = this.addFuel(artronCollectorBlockEntity.getCurrentFuel(), context.getStack());
+        if (context.getLevel().getBlockEntity(context.getClickedPos()) instanceof ArtronCollectorBlockEntity artronCollectorBlockEntity) {
+            double remainder = this.addFuel(artronCollectorBlockEntity.getCurrentFuel(), context.getItemInHand());
             artronCollectorBlockEntity.setCurrentFuel(remainder);
         }
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack stack = user.getStackInHand(hand);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        ItemStack stack = user.getItemInHand(hand);
         SonicMode mode = mode(stack);
 
         if (mode == null)
-            return TypedActionResult.fail(stack);
+            return InteractionResultHolder.fail(stack);
 
         if (!this.checkFuel(stack))
-            return TypedActionResult.fail(stack);
+            return InteractionResultHolder.fail(stack);
 
-        if (user.isSneaking()) {
+        if (user.isShiftKeyDown()) {
             mode = mode.next();
             setMode(stack, mode);
 
-            world.playSound(user, user.getBlockPos(), AITSounds.SONIC_SWITCH, SoundCategory.PLAYERS, 1F, 1F);
-            user.sendMessage(mode.text(), true);
+            world.playSound(user, user.blockPosition(), AITSounds.SONIC_SWITCH, SoundSource.PLAYERS, 1F, 1F);
+            user.displayClientMessage(mode.text(), true);
 
-            return TypedActionResult.consume(stack);
+            return InteractionResultHolder.consume(stack);
         }
 
         if (mode.startUsing(stack, world, user, hand)) {
-            user.setCurrentHand(hand);
-            return TypedActionResult.consume(stack);
+            user.startUsingItem(hand);
+            return InteractionResultHolder.consume(stack);
         }
 
-        return TypedActionResult.fail(stack);
+        return InteractionResultHolder.fail(stack);
     }
 
     @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         SonicMode mode = mode(stack);
 
         if (mode == SonicMode.Modes.INACTIVE)
             return;
 
-        if (world.isClient())
-            ClientSoundManager.getSonicSound().onUse((AbstractClientPlayerEntity) user);
+        if (world.isClientSide())
+            ClientSoundManager.getSonicSound().onUse((AbstractClientPlayer) user);
 
         int ticks = mode.maxTime() - remainingUseTicks;
 
@@ -118,34 +123,34 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+    public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
         SonicMode mode = mode(stack);
 
         if (mode == SonicMode.Modes.INACTIVE)
             return;
 
-        if (world.isClient())
-            ClientSoundManager.getSonicSound().onFinishUse((AbstractClientPlayerEntity) user);
+        if (world.isClientSide())
+            ClientSoundManager.getSonicSound().onFinishUse((AbstractClientPlayer) user);
 
         mode.stopUsing(stack, world, user, mode.maxTime() - remainingUseTicks, remainingUseTicks);
     }
 
     @Override
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         SonicMode mode = mode(stack);
 
         if (mode == SonicMode.Modes.INACTIVE)
             return stack;
 
-        if (world.isClient())
-            ClientSoundManager.getSonicSound().onFinishUse((AbstractClientPlayerEntity) user);
+        if (world.isClientSide())
+            ClientSoundManager.getSonicSound().onFinishUse((AbstractClientPlayer) user);
 
         mode.finishUsing(stack, world, user);
         return stack;
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
+    public int getUseDuration(ItemStack stack) {
         return mode(stack).maxTime();
     }
 
@@ -162,49 +167,49 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
         return true;
     }
 
-    private static final Text TEXT_MODE = Text.translatable("message.ait.sonic.mode");
-    private static final Text TEXT_ARTRON = Text.translatable("message.ait.tooltips.artron_units").formatted(Formatting.BLUE);
-    private static final Text TEXT_CASING = Text.translatable("message.ait.sonic.currenttype").formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
+    private static final Component TEXT_MODE = Component.translatable("message.ait.sonic.mode");
+    private static final Component TEXT_ARTRON = Component.translatable("message.ait.tooltips.artron_units").withStyle(ChatFormatting.BLUE);
+    private static final Component TEXT_CASING = Component.translatable("message.ait.sonic.currenttype").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         tooltip.add(TEXT_MODE.copy().append(mode(stack).text()));
 
         int fuel = (int) Math.round(this.getCurrentFuel(stack));
         boolean acceptableFuel = this.getCurrentFuel(stack) > this.getMaxFuel(stack) / 4;
 
-        tooltip.add(TEXT_ARTRON.copy().append(Text.literal(String.valueOf(fuel))
-                .formatted(acceptableFuel ? Formatting.GREEN : Formatting.RED)));
+        tooltip.add(TEXT_ARTRON.copy().append(Component.literal(String.valueOf(fuel))
+                .withStyle(acceptableFuel ? ChatFormatting.GREEN : ChatFormatting.RED)));
 
         tooltip.add(TEXT_CASING.copy().append(schema(stack).name()));
-        super.appendTooltip(stack, world, tooltip, context);
+        super.appendHoverText(stack, world, tooltip, context);
     }
 
     public static SonicMode mode(ItemStack stack) {
-        NbtCompound nbtCompound = stack.getOrCreateNbt();
+        CompoundTag nbtCompound = stack.getOrCreateTag();
         return SonicMode.Modes.getAndWrap(nbtCompound.getInt(MODE_KEY));
     }
 
     public static void setMode(ItemStack stack, SonicMode mode) {
-        NbtCompound nbtCompound = stack.getOrCreateNbt();
+        CompoundTag nbtCompound = stack.getOrCreateTag();
         nbtCompound.putInt(MODE_KEY, mode.index());
     }
 
     public static SonicSchema schema(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         String rawId = nbt.getString(SONIC_TYPE);
 
         if (rawId == null)
             return SonicRegistry.DEFAULT;
 
-        Identifier id = Identifier.tryParse(rawId);
+        ResourceLocation id = ResourceLocation.tryParse(rawId);
         SonicSchema schema = SonicRegistry.getInstance().get(id);
 
         return schema == null ? SonicRegistry.DEFAULT : schema;
     }
 
-    public static void setSchema(ItemStack stack, Identifier id) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+    public static void setSchema(ItemStack stack, ResourceLocation id) {
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putString(SONIC_TYPE, id.toString());
     }
 
@@ -217,7 +222,7 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
         return MAX_FUEL;
     }
 
-    public static boolean isBeingUsed(PlayerEntity player, ItemStack stack) {
-        return player.isUsingItem() && player.getActiveItem() == stack;
+    public static boolean isBeingUsed(Player player, ItemStack stack) {
+        return player.isUsingItem() && player.getUseItem() == stack;
     }
 }

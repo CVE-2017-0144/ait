@@ -4,14 +4,12 @@ package dev.amble.ait.core.tardis.handler;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -29,7 +27,7 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class LandingPadHandler extends KeyedTardisComponent {
 
-    public static final Identifier LANDING_CODE = AITMod.id("landing_code");
+    public static final ResourceLocation LANDING_CODE = AITMod.id("landing_code");
 
     public static final Property<String> CODE = new Property<>(Property.STR, "code", "");
     private final Value<String> code = LandingPadHandler.CODE.create(this);
@@ -57,7 +55,7 @@ public class LandingPadHandler extends KeyedTardisComponent {
             if (tardis == null)
                 return;
 
-            String input = buf.readString();
+            String input = buf.readUtf();
 
             tardis.landingPad().code().set(input);
         })));
@@ -107,7 +105,7 @@ public class LandingPadHandler extends KeyedTardisComponent {
     private CachedDirectedGlobalPos update(CachedDirectedGlobalPos pos) {
         TravelHandler travel = this.tardis.travel();
         CachedDirectedGlobalPos destination = travel.destination();
-        ServerWorld world = destination.getWorld();
+        ServerLevel world = destination.getWorld();
 
         LandingPadSpot spot = findFreeSpot(world, destination.getPos());
 
@@ -126,12 +124,12 @@ public class LandingPadHandler extends KeyedTardisComponent {
         this.claim(spot);
 
         TardisEvents.LANDING_PAD_ADJUST.invoker().onLandingPadAdjust(this.tardis, this.current);
-        TardisUtil.sendMessageToInterior(this.tardis.asServer(), Text.translatable("message.ait.landingpad.adjust"));
+        TardisUtil.sendMessageToInterior(this.tardis.asServer(), Component.translatable("message.ait.landingpad.adjust"));
 
         return destination;
     }
     private boolean checkCode() {
-        ServerWorld world = tardis.travel().destination().getWorld();
+        ServerLevel world = tardis.travel().destination().getWorld();
         BlockPos pos = tardis.travel().destination().getPos();
 
         LandingPadRegion region = LandingPadManager.getInstance(world)
@@ -149,7 +147,7 @@ public class LandingPadHandler extends KeyedTardisComponent {
         return tardisCode.equalsIgnoreCase(regionCode) || regionCode.isBlank();
     }
 
-    private static @Nullable LandingPadSpot findFreeSpot(ServerWorld world, BlockPos pos) {
+    private static @Nullable LandingPadSpot findFreeSpot(ServerLevel world, BlockPos pos) {
         LandingPadRegion region = LandingPadManager.getInstance(world).getRegionAt(pos);
 
         if (region == null)

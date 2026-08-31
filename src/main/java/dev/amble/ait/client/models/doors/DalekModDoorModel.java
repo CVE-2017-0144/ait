@@ -1,10 +1,18 @@
 package dev.amble.ait.client.models.doors;
 
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.api.tardis.link.v2.block.AbstractLinkableBlockEntity;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -16,53 +24,53 @@ public class DalekModDoorModel extends DoorModel {
         this.dalekmod = root.getChild("dalekmod");
 
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData dalekmod = modelPartData.addChild("dalekmod", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition dalekmod = modelPartData.addOrReplaceChild("dalekmod", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData Doors = dalekmod.addChild("Doors", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 2.0F, 2.0F));
+        PartDefinition Doors = dalekmod.addOrReplaceChild("Doors", CubeListBuilder.create(), PartPose.offset(0.0F, 2.0F, 2.0F));
 
-        ModelPartData right_door = Doors.addChild("right_door", ModelPartBuilder.create().uv(48, 141).cuboid(0.0F, -17.0F, 0.0F, 8.0F, 32.0F, 2.0F, new Dilation(0.0F))
-        .uv(144, 128).cuboid(0.0F, -18.0F, 0.0F, 8.0F, 32.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(-8.0F, -16.0F, -9.0F));
+        PartDefinition right_door = Doors.addOrReplaceChild("right_door", CubeListBuilder.create().texOffs(48, 141).addBox(0.0F, -17.0F, 0.0F, 8.0F, 32.0F, 2.0F, new CubeDeformation(0.0F))
+        .texOffs(144, 128).addBox(0.0F, -18.0F, 0.0F, 8.0F, 32.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-8.0F, -16.0F, -9.0F));
 
-        ModelPartData left_door = Doors.addChild("left_door", ModelPartBuilder.create().uv(68, 162).cuboid(-8.0F, -17.0F, 0.0F, 8.0F, 32.0F, 2.0F, new Dilation(0.0F))
-        .uv(88, 162).cuboid(-8.0F, -18.0F, 0.0F, 8.0F, 32.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(8.0F, -16.0F, -9.0F));
-        return TexturedModelData.of(modelData, 256, 256);
+        PartDefinition left_door = Doors.addOrReplaceChild("left_door", CubeListBuilder.create().texOffs(68, 162).addBox(-8.0F, -17.0F, 0.0F, 8.0F, 32.0F, 2.0F, new CubeDeformation(0.0F))
+        .texOffs(88, 162).addBox(-8.0F, -18.0F, 0.0F, 8.0F, 32.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(8.0F, -16.0F, -9.0F));
+        return LayerDefinition.create(modelData, 256, 256);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
                        float green, float blue, float alpha) {
         dalekmod.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public void renderWithAnimations(ClientTardis tardis, AbstractLinkableBlockEntity doorEntity, ModelPart root, MatrixStack matrices,
+    public void renderWithAnimations(ClientTardis tardis, AbstractLinkableBlockEntity doorEntity, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha, float tickDelta) {
         if (!AITModClient.CONFIG.animateDoors) {
             DoorHandler door = tardis.door();
 
-            this.dalekmod.getChild("Doors").getChild("left_door").yaw = (door.isLeftOpen() || door.isOpen()) ? -5.0f : 0.0F;
-            this.dalekmod.getChild("Doors").getChild("right_door").yaw = (door.isRightOpen() || door.areBothOpen())
+            this.dalekmod.getChild("Doors").getChild("left_door").yRot = (door.isLeftOpen() || door.isOpen()) ? -5.0f : 0.0F;
+            this.dalekmod.getChild("Doors").getChild("right_door").yRot = (door.isRightOpen() || door.areBothOpen())
                     ? 5.0f
                     : 0.0F;
         } else {
             float maxRot = 80f;
-        this.dalekmod.getChild("Doors").getChild("left_door").yaw = (float) Math.toRadians(maxRot*tardis.door().getLeftRot());
-        this.dalekmod.getChild("Doors").getChild("right_door").yaw = (float) -Math.toRadians(maxRot*tardis.door().getRightRot());
+        this.dalekmod.getChild("Doors").getChild("left_door").yRot = (float) Math.toRadians(maxRot*tardis.door().getLeftRot());
+        this.dalekmod.getChild("Doors").getChild("right_door").yRot = (float) -Math.toRadians(maxRot*tardis.door().getRightRot());
         }
 
-        matrices.push();
+        matrices.pushPose();
         matrices.scale(0.955F, 0.955F, 0.955F);
         matrices.translate(0, -1.56, 0);
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+        matrices.mulPose(Axis.YN.rotationDegrees(180));
 
         super.renderWithAnimations(tardis, doorEntity, root, matrices, vertices, light, overlay, red, green, blue, pAlpha, tickDelta);
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return dalekmod;
     }
 }

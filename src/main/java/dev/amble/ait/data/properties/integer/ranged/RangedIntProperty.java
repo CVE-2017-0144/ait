@@ -1,17 +1,15 @@
 package dev.amble.ait.data.properties.integer.ranged;
 
 import java.util.function.Function;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.PropertyType;
 
 public class RangedIntProperty extends Property<Integer> {
 
-    public static final PropertyType<Integer> TYPE = new PropertyType<>(Integer.class, PacketByteBuf::writeInt, PacketByteBuf::readInt);
+    public static final PropertyType<Integer> TYPE = new PropertyType<>(Integer.class, FriendlyByteBuf::writeInt, FriendlyByteBuf::readInt);
 
     private final int min;
     private final int max;
@@ -56,7 +54,7 @@ public class RangedIntProperty extends Property<Integer> {
     }
 
     public static int normalize(int min, int max, Integer value) {
-        return MathHelper.clamp(value == null ? 0 : value, min, max);
+        return Mth.clamp(value == null ? 0 : value, min, max);
     }
 
     public static int normalize(RangedIntProperty property, Integer value) {

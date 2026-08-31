@@ -2,39 +2,37 @@ package dev.amble.ait.api.tardis.link;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.World;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 
 public abstract class LinkableEntity extends Entity {
 
-    public static final TrackedData<Optional<UUID>> TARDIS_ID  = DataTracker.registerData(
-            LinkableEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    public static final EntityDataAccessor<Optional<UUID>> TARDIS_ID  = SynchedEntityData.defineId(
+            LinkableEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     private TardisRef cache;
 
-    protected LinkableEntity(EntityType<? extends LivingEntity> entityType, World world) {
+    protected LinkableEntity(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) { }
+    protected void readAdditionalSaveData(CompoundTag nbt) { }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) { }
+    protected void addAdditionalSaveData(CompoundTag nbt) { }
 
     public void link(ServerTardis tardis) {
-        this.dataTracker.set(TARDIS_ID, Optional.of(tardis.getUuid()));
+        this.entityData.set(TARDIS_ID, Optional.of(tardis.getUuid()));
         this.createCache(tardis.getUuid());
     }
 
@@ -52,13 +50,13 @@ public abstract class LinkableEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker() {
-        this.dataTracker.startTracking(TARDIS_ID, Optional.empty());
+    protected void defineSynchedData() {
+        this.entityData.define(TARDIS_ID, Optional.empty());
     }
 
     @Override
-    public void onTrackedDataSet(TrackedData<?> data) {
-        super.onTrackedDataSet(data);
+    public void onSyncedDataUpdated(EntityDataAccessor<?> data) {
+        super.onSyncedDataUpdated(data);
 
         if (TARDIS_ID.equals(data))
             this.reloadCache();
@@ -73,6 +71,6 @@ public abstract class LinkableEntity extends Entity {
     }
 
     private Optional<UUID> tardisId() {
-        return this.dataTracker.get(TARDIS_ID);
+        return this.entityData.get(TARDIS_ID);
     }
 }

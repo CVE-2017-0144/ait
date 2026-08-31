@@ -10,16 +10,16 @@ import dev.drtheo.multidim.util.MultiDimUtil;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionOptions;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -33,11 +33,11 @@ public class MultiDim {
     private static MultiDim instance;
     private static boolean initialized = false;
 
-    private final Map<Identifier, WorldBlueprint> blueprints = new HashMap<>();
+    private final Map<ResourceLocation, WorldBlueprint> blueprints = new HashMap<>();
     protected final MinecraftServer server;
 
-    private final Set<ServerWorld> toDelete = new ReferenceOpenHashSet<>();
-    private final Set<ServerWorld> toUnload = new ReferenceOpenHashSet<>();
+    private final Set<ServerLevel> toDelete = new ReferenceOpenHashSet<>();
+    private final Set<ServerLevel> toUnload = new ReferenceOpenHashSet<>();
 
     public static void init() {
         if (initialized)
@@ -54,22 +54,22 @@ public class MultiDim {
     }
 
     private void tick() {
-        Set<ServerWorld> deletionQueue = this.toDelete;
+        Set<ServerLevel> deletionQueue = this.toDelete;
 
         if (!deletionQueue.isEmpty())
             deletionQueue.removeIf(this::tickDeleteWorld);
 
-        Set<ServerWorld> unloadingQueue = this.toUnload;
+        Set<ServerLevel> unloadingQueue = this.toUnload;
 
         if (!unloadingQueue.isEmpty())
             unloadingQueue.removeIf(this::tickUnloadWorld);
     }
 
-    public boolean isWorldUnloaded(ServerWorld world) {
-        return world.getPlayers().isEmpty() && world.getChunkManager().getLoadedChunkCount() <= 0;
+    public boolean isWorldUnloaded(ServerLevel world) {
+        return world.players().isEmpty() && world.getChunkSource().getLoadedChunksCount() <= 0;
     }
 
-    private boolean prepareForUnload(ServerWorld world) {
+    private boolean prepareForUnload(ServerLevel world) {
         if (this.isWorldUnloaded(world))
             return true;
 
@@ -77,31 +77,31 @@ public class MultiDim {
         return false;
     }
 
-    public void kickPlayers(ServerWorld world) {
-        if (world.getPlayers().isEmpty())
+    public void kickPlayers(ServerLevel world) {
+        if (world.players().isEmpty())
             return;
 
-        ServerWorld overworld = this.server.getOverworld();
-        Vec3d spawnPos = overworld.getSpawnPos().toCenterPos();
+        ServerLevel overworld = this.server.overworld();
+        Vec3 spawnPos = overworld.getSharedSpawnPos().getCenter();
 
-        for (ServerPlayerEntity player : world.getPlayers()) {
-            player.teleport(overworld, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), player.getYaw(), player.getPitch());
+        for (ServerPlayer player : world.players()) {
+            player.teleportTo(overworld, spawnPos.x(), spawnPos.y(), spawnPos.z(), player.getYRot(), player.getXRot());
         }
     }
 
-    private boolean tickDeleteWorld(ServerWorld world) {
+    private boolean tickDeleteWorld(ServerLevel world) {
         if (!this.prepareForUnload(world))
             return false;
 
-        this.remove(world.getRegistryKey());
+        this.remove(world.dimension());
         return true;
     }
 
-    private boolean tickUnloadWorld(ServerWorld world) {
+    private boolean tickUnloadWorld(ServerLevel world) {
         if (!this.prepareForUnload(world))
             return false;
 
-        this.unload(world.getRegistryKey());
+        this.unload(world.dimension());
         return true;
     }
 
@@ -118,41 +118,41 @@ public class MultiDim {
         return instance;
     }
 
-    public MultiDimServerWorld add(WorldBlueprint blueprint, Identifier id) {
+    public MultiDimServerWorld add(WorldBlueprint blueprint, ResourceLocation id) {
         return addOrLoad(blueprint, id, true);
     }
 
-    public MultiDimServerWorld load(WorldBlueprint blueprint, Identifier id) {
+    public MultiDimServerWorld load(WorldBlueprint blueprint, ResourceLocation id) {
         return addOrLoad(blueprint, id, false);
     }
 
-    public MultiDimServerWorld addOrLoad(WorldBlueprint blueprint, Identifier id, boolean created) {
-        return this.addOrLoad(blueprint, RegistryKey.of(RegistryKeys.WORLD, id), created);
+    public MultiDimServerWorld addOrLoad(WorldBlueprint blueprint, ResourceLocation id, boolean created) {
+        return this.addOrLoad(blueprint, ResourceKey.create(Registries.DIMENSION, id), created);
     }
 
-    public MultiDimServerWorld add(WorldBlueprint blueprint, RegistryKey<World> id) {
+    public MultiDimServerWorld add(WorldBlueprint blueprint, ResourceKey<Level> id) {
         return addOrLoad(blueprint, id, true);
     }
 
-    public MultiDimServerWorld load(WorldBlueprint blueprint, RegistryKey<World> id) {
+    public MultiDimServerWorld load(WorldBlueprint blueprint, ResourceKey<Level> id) {
         return addOrLoad(blueprint, id, false);
     }
 
-    public MultiDimServerWorld addOrLoad(WorldBlueprint blueprint, RegistryKey<World> id, boolean created) {
-        ServerWorld existing = this.server.getWorld(id);
+    public MultiDimServerWorld addOrLoad(WorldBlueprint blueprint, ResourceKey<Level> id, boolean created) {
+        ServerLevel existing = this.server.getLevel(id);
 
         if (existing != null)
             return (MultiDimServerWorld) existing;
 
-        MutableRegistry<DimensionOptions> dimensionsRegistry = MultiDimUtil.getMutableDimensionsRegistry(this.server);
+        MutableRegistry<LevelStem> dimensionsRegistry = MultiDimUtil.getMutableDimensionsRegistry(this.server);
         boolean wasFrozen = dimensionsRegistry.multidim$isFrozen();
 
         if (wasFrozen)
             dimensionsRegistry.multidim$unfreeze();
 
-        DimensionOptions options = blueprint.createOptions(this.server);
-        RegistryKey<DimensionOptions> key = RegistryKey.of(RegistryKeys.DIMENSION, options.dimensionTypeEntry()
-                .getKey().map(RegistryKey::getValue).orElse(blueprint.id()));
+        LevelStem options = blueprint.createOptions(this.server);
+        ResourceKey<LevelStem> key = ResourceKey.create(Registries.LEVEL_STEM, options.type()
+                .unwrapKey().map(ResourceKey::location).orElse(blueprint.id()));
 
         if (!dimensionsRegistry.multidim$contains(key))
             dimensionsRegistry.multidim$add(key, options, Lifecycle.stable());
@@ -170,19 +170,19 @@ public class MultiDim {
         this.toUnload.add(world);
     }
 
-    public void queueUnload(RegistryKey<World> key) {
-        this.toUnload.add(this.server.getWorld(key));
+    public void queueUnload(ResourceKey<Level> key) {
+        this.toUnload.add(this.server.getLevel(key));
     }
 
-    private void unload(RegistryKey<World> key) {
-        ServerWorld world = ((MultiDimServer) this.server).multidim$removeWorld(key);
+    private void unload(ResourceKey<Level> key) {
+        ServerLevel world = ((MultiDimServer) this.server).multidim$removeWorld(key);
 
         if (world == null)
             return;
 
         world.save(new SimpleWorldProgressListener(() -> {
             ServerWorldEvents.UNLOAD.invoker().onWorldUnload(this.server, world);
-            MultiDimUtil.getMutableDimensionsRegistry(this.server).multidim$remove(key.getValue());
+            MultiDimUtil.getMutableDimensionsRegistry(this.server).multidim$remove(key.location());
         }), true, false);
     }
 
@@ -190,21 +190,21 @@ public class MultiDim {
         this.toDelete.add(world);
     }
 
-    public void queueRemove(RegistryKey<World> key) {
-        this.toDelete.add(this.server.getWorld(key));
+    public void queueRemove(ResourceKey<Level> key) {
+        this.toDelete.add(this.server.getLevel(key));
     }
 
-    private void remove(RegistryKey<World> key) {
-        ServerWorld world = ((MultiDimServer) this.server).multidim$removeWorld(key);
+    private void remove(ResourceKey<Level> key) {
+        ServerLevel world = ((MultiDimServer) this.server).multidim$removeWorld(key);
 
         if (world == null)
             return;
 
         ServerWorldEvents.UNLOAD.invoker().onWorldUnload(this.server, world);
-        MultiDimUtil.getMutableDimensionsRegistry(this.server).multidim$remove(key.getValue());
+        MultiDimUtil.getMutableDimensionsRegistry(this.server).multidim$remove(key.location());
 
-        LevelStorage.Session session = ((MultiDimServer) this.server).multidim$getSession();
-        File worldDirectory = session.getWorldDirectory(key).toFile();
+        LevelStorageSource.LevelStorageAccess session = ((MultiDimServer) this.server).multidim$getSession();
+        File worldDirectory = session.getDimensionPath(key).toFile();
 
         if (!worldDirectory.exists())
             return;
@@ -221,10 +221,10 @@ public class MultiDim {
     }
 
     private void load(MultiDimServerWorld world) {
-        MultiDimMod.LOGGER.info("Loading world {}", world.getRegistryKey().getValue());
+        MultiDimMod.LOGGER.info("Loading world {}", world.dimension().location());
 
-        if (((MultiDimServer) this.server).multidim$hasWorld(world.getRegistryKey())) {
-            MultiDimMod.LOGGER.warn("World {} is already loaded", world.getRegistryKey().getValue());
+        if (((MultiDimServer) this.server).multidim$hasWorld(world.dimension())) {
+            MultiDimMod.LOGGER.warn("World {} is already loaded", world.dimension().location());
             return;
         }
 
@@ -234,7 +234,7 @@ public class MultiDim {
         world.tick(() -> true);
     }
 
-    public WorldBlueprint getBlueprint(Identifier id) {
+    public WorldBlueprint getBlueprint(ResourceLocation id) {
         return blueprints.get(id);
     }
 }

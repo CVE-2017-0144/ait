@@ -1,7 +1,7 @@
 package dev.amble.lib.api;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public interface Identifiable {
-    Identifier id();
+    ResourceLocation id();
 }

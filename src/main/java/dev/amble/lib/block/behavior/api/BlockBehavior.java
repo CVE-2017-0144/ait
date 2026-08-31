@@ -1,11 +1,11 @@
 package dev.amble.lib.block.behavior.api;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 @ApiStatus.Experimental
 public interface BlockBehavior extends BlockBehaviorLike {

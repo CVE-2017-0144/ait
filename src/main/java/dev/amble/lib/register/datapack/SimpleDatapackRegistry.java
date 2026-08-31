@@ -11,13 +11,11 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.util.ServerLifecycleHooks;
@@ -28,12 +26,12 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
 
     private final Function<InputStream, T> deserializer;
     private final Codec<T> codec;
-    protected final Identifier packet;
-    private final Identifier name;
+    protected final ResourceLocation packet;
+    private final ResourceLocation name;
     private final boolean sync;
 
-    public SimpleDatapackRegistry(Function<InputStream, T> deserializer, Codec<T> codec, Identifier packet,
-            Identifier name, boolean sync) {
+    public SimpleDatapackRegistry(Function<InputStream, T> deserializer, Codec<T> codec, ResourceLocation packet,
+            ResourceLocation name, boolean sync) {
         this.deserializer = deserializer;
         this.codec = codec;
         this.packet = packet;
@@ -43,7 +41,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
 
     protected SimpleDatapackRegistry(Function<InputStream, T> deserializer, Codec<T> codec, String packet, String name,
             boolean sync, String modid) {
-        this(deserializer, codec, new Identifier(modid, "sync_" + packet), new Identifier(modid, name),
+        this(deserializer, codec, new ResourceLocation(modid, "sync_" + packet), new ResourceLocation(modid, name),
                 sync);
     }
 
@@ -64,12 +62,12 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
             return;
 
         ClientPlayNetworking.registerGlobalReceiver(this.packet, (client, handler, buf, responseSender) -> {
-            PacketByteBuf copy = new PacketByteBuf(buf.copy());
+            FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
             client.execute(() -> {
                 try {
                     // skip if we've since disconnected/reconnected so stale server data
                     // can't repopulate the registry after the fact
-                    if (client.getNetworkHandler() != handler)
+                    if (client.getConnection() != handler)
                         return;
                     this.readFromServer(copy);
                 } finally {
@@ -91,7 +89,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     public void onCommonInit() {
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
 
         if (!this.sync)
             return;
@@ -108,22 +106,22 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
+    public void syncToClient(ServerPlayer player) {
         if (!this.sync)
             return;
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(REGISTRY.size());
 
         for (T schema : REGISTRY.values()) {
-            buf.encodeAsJson(this.codec, schema);
+            buf.writeJsonWithCodec(this.codec, schema);
         }
 
         ServerPlayNetworking.send(player, this.packet, buf);
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
         if (!this.sync)
             return;
 
@@ -132,7 +130,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            this.register(buf.decodeAsJson(this.codec));
+            this.register(buf.readJsonWithCodec(this.codec));
         }
 
         AmbleKit.LOGGER.info("Read {} {} from server", size, this.name);
@@ -145,18 +143,18 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return SimpleDatapackRegistry.this.name;
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         // this.clearCache();
         this.defaults();
 
-        for (Identifier id : manager
-                .findResources(this.name.getPath(), filename -> filename.getPath().endsWith(".json")).keySet()) {
-            try (InputStream stream = manager.getResource(id).get().getInputStream()) {
+        for (ResourceLocation id : manager
+                .listResources(this.name.getPath(), filename -> filename.getPath().endsWith(".json")).keySet()) {
+            try (InputStream stream = manager.getResource(id).get().open()) {
                 T created = this.read(stream);
 
                 if (created == null) {

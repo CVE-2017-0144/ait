@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITBlocks;
@@ -90,7 +87,7 @@ public class EngineSystem extends DurableSubSystem {
 
     private void tryUpdateStatus() {
         if (ServerLifecycleHooks.get() == null) return;
-        if (ServerLifecycleHooks.get().getTicks() % 40 != 0) return;
+        if (ServerLifecycleHooks.get().getTickCount() % 40 != 0) return;
 
         this.status = Status.from(this);
         this.sync();
@@ -106,7 +103,7 @@ public class EngineSystem extends DurableSubSystem {
     public List<ItemStack> toStacks() {
         List<ItemStack> stacks = new ArrayList<>();
 
-        stacks.add(AITBlocks.ENGINE_BLOCK.asItem().getDefaultStack());
+        stacks.add(AITBlocks.ENGINE_BLOCK.asItem().getDefaultInstance());
 
         return stacks;
     }
@@ -176,13 +173,13 @@ public class EngineSystem extends DurableSubSystem {
             return new Phaser(
                     (phaser) -> {
                         ServerTardis tdis = sTardis.asServer();
-                        TardisUtil.sendMessageToLinked(tdis, Text.translatable("tardis.message.engine.phasing").formatted(Formatting.RED));
-                        tdis.alarm().enable(Text.translatable("tardis.message.engine.phasing").formatted(Formatting.RED));
+                        TardisUtil.sendMessageToLinked(tdis, Component.translatable("tardis.message.engine.phasing").withStyle(ChatFormatting.RED));
+                        tdis.alarm().enable(Component.translatable("tardis.message.engine.phasing").withStyle(ChatFormatting.RED));
                         tdis.getDesktop().playSoundAtEveryConsole(AITSounds.HOP_DEMAT);
                         tdis.getExterior().playSound(AITSounds.HOP_DEMAT);
                         sTardis.subsystems().demat().removeDurability(5);
 
-                        sTardis.asServer().world().getPlayers().forEach(player ->
+                        sTardis.asServer().world().players().forEach(player ->
                                 TardisCriterions.ENGINES_PHASE.trigger(player));
                     },
                     (phaser) -> {

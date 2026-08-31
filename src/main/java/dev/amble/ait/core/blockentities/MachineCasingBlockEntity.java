@@ -2,20 +2,17 @@ package dev.amble.ait.core.blockentities;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.item.SonicItem;
@@ -30,52 +27,52 @@ public class MachineCasingBlockEntity extends BlockEntity {
         super(AITBlockEntityTypes.MACHINE_CASING_ENTITY_TYPE, pos, state);
     }
 
-    public void onUse(World world, ItemStack stack, PlayerEntity player) {
-        if (stack.isEmpty() && player.isSneaking()) {
+    public void onUse(Level world, ItemStack stack, Player player) {
+        if (stack.isEmpty() && player.isShiftKeyDown()) {
             if (this.parts.isEmpty())
                 return;
 
-            StackUtil.spawn(world, this.pos, parts.pop());
+            StackUtil.spawn(world, this.worldPosition, parts.pop());
             return;
         }
 
         if (!(stack.getItem() instanceof SonicItem)) {
             this.parts.push(stack.copyWithCount(1));
-            stack.decrement(1);
+            stack.shrink(1);
         }
     }
 
     public void construct() {
         MachineRecipeRegistry.getInstance().findMatching(this.parts).ifPresent(schema -> {
-            StackUtil.spawn(world, this.pos, schema.output());
+            StackUtil.spawn(level, this.worldPosition, schema.output());
 
-            world.removeBlock(this.pos, false);
-            this.markRemoved();
+            level.removeBlock(this.worldPosition, false);
+            this.setRemoved();
         });
     }
 
-    public void onBreak(World world) {
+    public void onBreak(Level world) {
         this.parts.add(new ItemStack(AITBlocks.MACHINE_CASING.asItem())); // don't care about the parts now anyway
-        StackUtil.scatter(world, pos.up(1), this.parts);
+        StackUtil.scatter(world, worldPosition.above(1), this.parts);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
+    public void load(CompoundTag nbt) {
         StackUtil.writeUnordered(nbt, this.parts);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
+    protected void saveAdditional(CompoundTag nbt) {
         StackUtil.readUnordered(nbt, this.parts);
     }
 
     @Nullable @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return createNbt();
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
     }
 }

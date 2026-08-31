@@ -7,10 +7,8 @@ import java.util.UUID;
 import dev.amble.ait.client.screens.widget.SwitcherManager;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -21,7 +19,7 @@ import dev.amble.ait.data.properties.Value;
 
 public class PermissionHandler extends KeyedTardisComponent {
 
-    private static final Identifier P19_LOYALTY_SYNC = AITMod.id("p19_loyalty");
+    private static final ResourceLocation P19_LOYALTY_SYNC = AITMod.id("p19_loyalty");
 
     private static final Property<Loyalty.Type> P19_LOYALTY = Property.forEnum("p19_loyalty", Loyalty.Type.class,
             Loyalty.Type.COMPANION);
@@ -45,7 +43,7 @@ public class PermissionHandler extends KeyedTardisComponent {
                         return;
 
                     PermissionHandler permissions = tardis.handler(Id.PERMISSIONS);
-                    Loyalty.Type type = buf.readEnumConstant(Loyalty.Type.class);
+                    Loyalty.Type type = buf.readEnum(Loyalty.Type.class);
 
                     permissions.p19Loyalty.set(type);
                 })));
@@ -57,18 +55,18 @@ public class PermissionHandler extends KeyedTardisComponent {
     }
 
     public static void p19Loyalty(ClientTardis tardis, Loyalty.Type type) {
-        SwitcherManager.sync(tardis, buf -> buf.writeEnumConstant(type), P19_LOYALTY_SYNC);
+        SwitcherManager.sync(tardis, buf -> buf.writeEnum(type), P19_LOYALTY_SYNC);
     }
 
     public Value<Loyalty.Type> p19Loyalty() {
         return p19Loyalty;
     }
 
-    public boolean check(ServerPlayerEntity player, Permission permission) {
+    public boolean check(ServerPlayer player, Permission permission) {
         return this.getPermissionMap(player).get(permission);
     }
 
-    public boolean set(ServerPlayerEntity player, Permission permission, boolean value) {
+    public boolean set(ServerPlayer player, Permission permission, boolean value) {
         PermissionMap map = this.getPermissionMap(player);
         map.put(permission, value);
 
@@ -76,14 +74,14 @@ public class PermissionHandler extends KeyedTardisComponent {
         return value;
     }
 
-    private PermissionMap getPermissionMap(ServerPlayerEntity player) {
-        PermissionMap result = permissions.get(player.getUuid());
+    private PermissionMap getPermissionMap(ServerPlayer player) {
+        PermissionMap result = permissions.get(player.getUUID());
 
         if (result != null)
             return result;
 
         result = new PermissionMap();
-        permissions.put(player.getUuid(), result);
+        permissions.put(player.getUUID(), result);
         return result;
     }
 }

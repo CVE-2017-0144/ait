@@ -1,10 +1,9 @@
 package dev.amble.ait.core.item.sonic;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.data.schema.sonic.SonicSchema;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class InactiveSonicMode extends SonicMode {
 
@@ -13,8 +12,8 @@ public class InactiveSonicMode extends SonicMode {
     }
 
     @Override
-    public Text text() {
-        return Text.translatable("sonic.ait.mode.inactive").formatted(Formatting.GRAY, Formatting.BOLD);
+    public Component text() {
+        return Component.translatable("sonic.ait.mode.inactive").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD);
     }
 
     @Override
@@ -23,7 +22,7 @@ public class InactiveSonicMode extends SonicMode {
     }
 
     @Override
-    public Identifier model(SonicSchema.Models models) {
+    public ResourceLocation model(SonicSchema.Models models) {
         return models.inactive();
     }
 

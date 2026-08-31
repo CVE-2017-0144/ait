@@ -11,6 +11,6 @@ public class ClientDoomDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new DoomDoorModel(DoomDoorModel.getTexturedModelData().createModel());
+        return new DoomDoorModel(DoomDoorModel.getTexturedModelData().bakeRoot());
     }
 }

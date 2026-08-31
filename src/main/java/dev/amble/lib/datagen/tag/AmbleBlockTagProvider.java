@@ -8,11 +8,9 @@ import dev.amble.lib.datagen.util.HoeMineable;
 import dev.amble.lib.datagen.util.ShovelMineable;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.BlockTags;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.datagen.util.PickaxeMineable;
 import dev.amble.lib.util.ReflectionUtil;
@@ -20,16 +18,16 @@ import dev.amble.lib.util.ReflectionUtil;
 public class AmbleBlockTagProvider extends FabricTagProvider.BlockTagProvider {
     protected Queue<Class<? extends BlockContainer>> blockClass;
 
-    public AmbleBlockTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+    public AmbleBlockTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
 
         this.blockClass = new LinkedList<>();
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
+    protected void addTags(HolderLookup.Provider wrapperLookup) {
         this.blockClass.forEach(clazz -> {
-            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE);
+            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_PICKAXE);
             HashMap<Block, Optional<PickaxeMineable>> pickaxeBlocks = ReflectionUtil.getAnnotatedValues(clazz, Block.class, PickaxeMineable.class, false);
 
             for (Block block : pickaxeBlocks.keySet()) {
@@ -42,7 +40,7 @@ public class AmbleBlockTagProvider extends FabricTagProvider.BlockTagProvider {
             }
         });
         this.blockClass.forEach(clazz -> {
-            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.AXE_MINEABLE);
+            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_AXE);
             HashMap<Block, Optional<AxeMineable>> axeBlocks = ReflectionUtil.getAnnotatedValues(clazz, Block.class, AxeMineable.class, false);
 
             for (Block block : axeBlocks.keySet()) {
@@ -55,7 +53,7 @@ public class AmbleBlockTagProvider extends FabricTagProvider.BlockTagProvider {
             }
         });
         this.blockClass.forEach(clazz -> {
-            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.HOE_MINEABLE);
+            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_HOE);
             HashMap<Block, Optional<HoeMineable>> axeBlocks = ReflectionUtil.getAnnotatedValues(clazz, Block.class, HoeMineable.class, false);
 
             for (Block block : axeBlocks.keySet()) {
@@ -68,7 +66,7 @@ public class AmbleBlockTagProvider extends FabricTagProvider.BlockTagProvider {
             }
         });
         this.blockClass.forEach(clazz -> {
-            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.SHOVEL_MINEABLE);
+            FabricTagBuilder pickaxeBuilder = getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_SHOVEL);
             HashMap<Block, Optional<ShovelMineable>> axeBlocks = ReflectionUtil.getAnnotatedValues(clazz, Block.class, ShovelMineable.class, false);
 
             for (Block block : axeBlocks.keySet()) {

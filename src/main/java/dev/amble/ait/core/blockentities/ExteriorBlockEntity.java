@@ -7,29 +7,33 @@ import java.util.UUID;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BrushItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.core.*;
+import net.minecraft.world.phys.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BrushItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
@@ -72,14 +76,14 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         this.link(tardis);
     }
 
-    public void useOn(ServerWorld world, boolean sneaking, PlayerEntity player) {
+    public void useOn(ServerLevel world, boolean sneaking, Player player) {
         if (this.tardis().isEmpty() || player == null)
             return;
 
         if (!this.validateExteriorPosition()) return;
 
         ServerTardis tardis = (ServerTardis) this.tardis().get();
-        ItemStack hand = player.getMainHandStack();
+        ItemStack hand = player.getMainHandItem();
 
         if (tardis.isGrowth()) {
             if (tardis.interiorChanging().hasCage()) {
@@ -87,19 +91,19 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
                     int plasmic = tardis.interiorChanging().plasmicMaterialAmount();
                     if (plasmic < MAX_PLASMIC_MATERIAL_AMOUNT) {
                         tardis.interiorChanging().addPlasmicMaterial(1);
-                        world.playSound(null, pos, SoundEvents.ENTITY_MAGMA_CUBE_SQUISH, SoundCategory.BLOCKS, 1F, (float) plasmic / 8);
-                        hand.decrement(1);
+                        world.playSound(null, worldPosition, SoundEvents.MAGMA_CUBE_SQUISH, SoundSource.BLOCKS, 1F, (float) plasmic / 8);
+                        hand.shrink(1);
                     }
                 }
             } else {
                 if (hand.getItem() == AITItems.CORAL_CAGE) {
-                    world.playSound(null, pos, SoundEvents.BLOCK_CHAIN_HIT, SoundCategory.BLOCKS, 1F, 0.7f);
+                    world.playSound(null, worldPosition, SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 1F, 0.7f);
                     tardis.interiorChanging().setHasCage(true);
-                    hand.decrement(1);
+                    hand.shrink(1);
                     return;
                 }
-                world.playSound(null, pos, SoundEvents.BLOCK_CORAL_BLOCK_HIT, SoundCategory.BLOCKS, 1F, 0.3f);
-                player.sendMessage(Text.translatable("tardis.message.growth.no_cage"), true);
+                world.playSound(null, worldPosition, SoundEvents.CORAL_BLOCK_HIT, SoundSource.BLOCKS, 1F, 0.3f);
+                player.displayClientMessage(Component.translatable("tardis.message.growth.no_cage"), true);
             }
          return;
         }
@@ -107,7 +111,7 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         SonicHandler handler = tardis.sonic();
 
         boolean hasSonic = handler.getExteriorSonic() != null;
-        boolean shouldEject = player.isSneaking();
+        boolean shouldEject = player.isShiftKeyDown();
 
         if (hand.getItem() instanceof BrushItem && tardis.<BiomeHandler>handler(TardisComponent.Id.BIOME).getBiomeKey()
                 != BiomeHandler.BiomeType.DEFAULT) {
@@ -117,11 +121,11 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
 
         if (hand.getItem() instanceof KeyItem key && !tardis.siege().isActive()
                 && !tardis.interiorChanging().queued().get()) {
-            if (hand.isOf(AITItems.SKELETON_KEY) || key.isOf(hand, tardis)) {
-                tardis.door().interactToggleLock((ServerPlayerEntity) player);
+            if (hand.is(AITItems.SKELETON_KEY) || key.isOf(hand, tardis)) {
+                tardis.door().interactToggleLock((ServerPlayer) player);
             } else {
-                world.playSound(null, pos, SoundEvents.BLOCK_NOTE_BLOCK_BIT.value(), SoundCategory.BLOCKS, 1F, 0.2F);
-                player.sendMessage(Text.translatable("tardis.key.identity_error"), true); // TARDIS does not identify
+                world.playSound(null, worldPosition, SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.BLOCKS, 1F, 0.2F);
+                player.displayClientMessage(Component.translatable("tardis.key.identity_error"), true); // TARDIS does not identify
                                                                                             // with key
             }
 
@@ -130,15 +134,15 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
 
         if (hasSonic) {
             if (shouldEject) {
-                player.getInventory().offerOrDrop(handler.takeExteriorSonic());
-                world.playSound(null, pos, SoundEvents.BLOCK_RESPAWN_ANCHOR_DEPLETE.value(), SoundCategory.BLOCKS, 1F,
+                player.getInventory().placeItemBackInInventory(handler.takeExteriorSonic());
+                world.playSound(null, worldPosition, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.BLOCKS, 1F,
                         0.2F);
                 return;
             }
 
-            player.sendMessage(Text.translatable("tardis.exterior.sonic.repairing")
-                    .append(Text.literal(": " + tardis.crash().getRepairTicksAsSeconds() + "s")
-                            .formatted(Formatting.BOLD, Formatting.GOLD)),
+            player.displayClientMessage(Component.translatable("tardis.exterior.sonic.repairing")
+                    .append(Component.literal(": " + tardis.crash().getRepairTicksAsSeconds() + "s")
+                            .withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD)),
                     true);
             return;
         }
@@ -149,17 +153,17 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
                     && tardis.door().isClosed() && tardis.crash().getRepairTicks() > 0) {
                 if (sonic.isOf(hand, tardis)) {
                     handler.insertExteriorSonic(hand);
-                    player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+                    player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                     tardis.alarm().disable();
-                    world.playSound(null, pos, AITSounds.SONIC_ON, SoundCategory.BLOCKS, 1F, 1F);
-                    world.playSound(null, pos, AITSounds.SONIC_MENDING, SoundCategory.BLOCKS, 1F, 1F);
+                    world.playSound(null, worldPosition, AITSounds.SONIC_ON, SoundSource.BLOCKS, 1F, 1F);
+                    world.playSound(null, worldPosition, AITSounds.SONIC_MENDING, SoundSource.BLOCKS, 1F, 1F);
                     Scheduler.get().runTaskLater(() -> {
-                        world.playSound(null, pos, AITSounds.TARDIS_BLING, SoundCategory.BLOCKS, 1F, 1F);
+                        world.playSound(null, worldPosition, AITSounds.TARDIS_BLING, SoundSource.BLOCKS, 1F, 1F);
                     }, TaskStage.END_SERVER_TICK, TimeUnit.SECONDS, 15);
 
                 } else {
-                    world.playSound(null, pos, SoundEvents.BLOCK_RESPAWN_ANCHOR_DEPLETE.value(), SoundCategory.BLOCKS, 1F, 0.2F);
-                    player.sendMessage(Text.translatable("tardis.tool.cannot_repair"), true);
+                    world.playSound(null, worldPosition, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.BLOCKS, 1F, 0.2F);
+                    player.displayClientMessage(Component.translatable("tardis.tool.cannot_repair"), true);
                 }
                 return;
             }
@@ -168,15 +172,15 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
             EngineSystem.Phaser phasing = tardis.subsystems().engine().phaser();
 
             if (phasing.isPhasing() && SonicItem.mode(hand) == SonicMode.Modes.TARDIS) {
-                    world.playSound(null, pos, AITSounds.SONIC_USE, SoundCategory.PLAYERS, 1F, 1F);
+                    world.playSound(null, worldPosition, AITSounds.SONIC_USE, SoundSource.PLAYERS, 1F, 1F);
                     phasing.cancel();
                 return;
             }
         }
 
         // Change disguise via sonic
-        if (player.getOffHandStack().getItem() instanceof SonicItem
-                && SonicItem.mode(player.getOffHandStack()) == SonicMode.Modes.INTERACTION
+        if (player.getOffhandItem().getItem() instanceof SonicItem
+                && SonicItem.mode(player.getOffhandItem()) == SonicMode.Modes.INTERACTION
                 && tardis.getExterior().getCategory().id().equals(AdaptiveCategory.REFERENCE)
                 && tardis.door().isClosed()
                 && !tardis.siege().isActive()
@@ -186,7 +190,7 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
             Loyalty playerLoyalty = tardis.loyalty().get(player);
             Loyalty pilotLoyalty = Loyalty.fromLevel(Loyalty.Type.PILOT.level);
             // Follows isomorphic security if enabled, otherwise requires at least PILOT loyalty or OP.
-            boolean isPermitted = tardis.stats().security().get() ? SecurityControl.hasMatchingKey((ServerPlayerEntity) player, tardis) : playerLoyalty.greaterOrEqual(pilotLoyalty) || player.hasPermissionLevel(2);
+            boolean isPermitted = tardis.stats().security().get() ? SecurityControl.hasMatchingKey((ServerPlayer) player, tardis) : playerLoyalty.greaterOrEqual(pilotLoyalty) || player.hasPermissions(2);
 
             if (!isPermitted)
                 return;
@@ -197,14 +201,14 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         }
 
         if (sneaking && !tardis.isSiegeBeingHeld() && tardis.siege().isActive()) {
-            SiegeTardisItem.pickupTardis(tardis, (ServerPlayerEntity) player);
+            SiegeTardisItem.pickupTardis(tardis, (ServerPlayer) player);
             return;
         }
 
         if (!tardis.travel().isLanded())
             return;
 
-        tardis.door().interact((ServerWorld) this.getWorld(), this.getPos(), (ServerPlayerEntity) player);
+        tardis.door().interact((ServerLevel) this.getLevel(), this.getBlockPos(), (ServerPlayer) player);
     }
 
     /**
@@ -222,30 +226,30 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         CachedDirectedGlobalPos expectedPos = tardis.travel().position();
         BlockPos expectedBlockPos = expectedPos.getPos();
 
-        ServerWorld extWorld = (ServerWorld) this.getWorld();
-        BlockPos extPos = this.getPos();
+        ServerLevel extWorld = (ServerLevel) this.getLevel();
+        BlockPos extPos = this.getBlockPos();
 
         if (extPos.equals(expectedBlockPos) && expectedPos.getWorld() == extWorld)
             return true;
 
         AITMod.LOGGER.warn("Invalid exterior at {} {}, expected {} {} for TARDIS {}. Removing..",
-                extWorld.getRegistryKey(), extPos, expectedPos.getDimension(), expectedBlockPos, tardis.getUuid());
+                extWorld.dimension(), extPos, expectedPos.getDimension(), expectedBlockPos, tardis.getUuid());
 
-        extWorld.setBlockState(extPos, Blocks.AIR.getDefaultState());
+        extWorld.setBlockAndUpdate(extPos, Blocks.AIR.defaultBlockState());
         return true;
     }
 
-    public void sitOn(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient()) return;
+    public void sitOn(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (world.isClientSide()) return;
 
         ServerTardis tardis = this.tardis().get().asServer();
         ExteriorVariantSchema variant = tardis.getExterior().getVariant();
 
-        float playerPitch = player.getPitch(1.0F);
+        float playerPitch = player.getViewXRot(1.0F);
         if (variant == null) return;
 
         if (playerPitch > 50.0F) {
-            Vec3d seatPos = new Vec3d(
+            Vec3 seatPos = new Vec3(
                     variant.seatTranslations().x + pos.getX(),
                     variant.seatTranslations().y + pos.getY(),
                     variant.seatTranslations().z + pos.getZ()
@@ -253,15 +257,15 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
 
 
             byte rotation = tardis.travel().position().getRotation();
-            float yaw = RotationPropertyHelper.toDegrees(rotation) + 180.0F;
-            Vec3d adjustedPos = moveForward(seatPos, yaw, variant.seatForwardTranslation());
+            float yaw = RotationSegment.convertToDegrees(rotation) + 180.0F;
+            Vec3 adjustedPos = moveForward(seatPos, yaw, variant.seatForwardTranslation());
 
             summonSeatEntity(world, adjustedPos, player, yaw);
         }
     }
 
     // Moves the seat forward based on yaw direction
-    private Vec3d moveForward(Vec3d pos, float yaw, double distance) {
+    private Vec3 moveForward(Vec3 pos, float yaw, double distance) {
         double radians = Math.toRadians(yaw);
         double offsetX = -Math.sin(radians) * distance;
         double offsetZ = Math.cos(radians) * distance;
@@ -269,28 +273,28 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         return pos.add(offsetX, 0, offsetZ);
     }
 
-    private void summonSeatEntity(World world, Vec3d pos, PlayerEntity player, float yaw) {
-        ArmorStandEntity seat = new ArmorStandEntity(EntityType.ARMOR_STAND, world);
-        seat.setPosition(pos.x, pos.y, pos.z);
+    private void summonSeatEntity(Level world, Vec3 pos, Player player, float yaw) {
+        ArmorStand seat = new ArmorStand(EntityType.ARMOR_STAND, world);
+        seat.setPos(pos.x, pos.y, pos.z);
         seat.setInvisible(true);
         seat.setNoGravity(true);
         seat.setInvulnerable(true);
-        seat.setYaw(yaw);
+        seat.setYRot(yaw);
 
-        world.spawnEntity(seat);
+        world.addFreshEntity(seat);
 
         player.startRiding(seat, true);
 
-        this.setSeatEntity(seat.getUuid());
+        this.setSeatEntity(seat.getUUID());
     }
 
     public void setSeatEntity(UUID seatUUID) {
         this.seatEntityUUID = seatUUID;
     }
 
-    public Entity getSeatEntity(World world) {
+    public Entity getSeatEntity(Level world) {
         if (seatEntityUUID == null) return null;
-        return ((ServerWorld) world).getEntity(seatEntityUUID);
+        return ((ServerLevel) world).getEntity(seatEntityUUID);
     }
 
     public void onEntityCollision(Entity entity) {
@@ -322,14 +326,14 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
             TardisUtil.teleportInside(tardis, entity);
 
         if (tardis.door().isClosed()
-                && entity instanceof PlayerEntity player
+                && entity instanceof Player player
                 && tardis.isGrowth()) {
-            player.sendMessage(Text.translatable("tardis.message.growth.in_progress").formatted(Formatting.RED), true);
+            player.displayClientMessage(Component.translatable("tardis.message.growth.in_progress").withStyle(ChatFormatting.RED), true);
         }
     }
 
     @Override
-    public void tick(World world, BlockPos pos, BlockState blockState, ExteriorBlockEntity blockEntity) {
+    public void tick(Level world, BlockPos pos, BlockState blockState, ExteriorBlockEntity blockEntity) {
         TardisRef ref = this.tardis();
 
         if (ref == null || ref.isEmpty())
@@ -340,9 +344,9 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         TravelHandlerBase travel = tardis.travel();
         TravelHandlerBase.State state = travel.getState();
 
-        if (!world.isClient()) {
+        if (!world.isClientSide()) {
             if (tardis.travel().isLanded())
-                world.scheduleBlockTick(this.getPos(), AITBlocks.EXTERIOR_BLOCK, 2);
+                world.scheduleTick(this.getBlockPos(), AITBlocks.EXTERIOR_BLOCK, 2);
 
             return;
         }
@@ -352,20 +356,20 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
                 double offsetX = AITMod.RANDOM.nextGaussian() * 0.125f;
                 double offsetY = AITMod.RANDOM.nextGaussian() * 0.125f;
                 double offsetZ = AITMod.RANDOM.nextGaussian() * 0.125f;
-                Vec3d vec = new Vec3d(offsetX, offsetY, offsetZ);
+                Vec3 vec = new Vec3(offsetX, offsetY, offsetZ);
                 float offsetMultiplier = -0.1f;
-                Vec3d vec3d = Vec3d.ofCenter(pos);
-                int i = Direction.UP.getOffsetX();
-                int j = Direction.UP.getOffsetY();
-                int k = Direction.UP.getOffsetZ();
-                double d = vec3d.x + (i == 0 ? MathHelper.nextDouble(world.random, -0.5, 0.5) : (double) i * offsetMultiplier);
-                double e = vec3d.y + (j == 0 ? MathHelper.nextDouble(world.random, -0.5, 0.5) : (double) j * offsetMultiplier) - 0.35f;
-                double f = vec3d.z + (k == 0 ? MathHelper.nextDouble(world.random, -0.5, 0.5) : (double) k * offsetMultiplier);
-                double g = i == 0 ? vec.getX() : 0.0;
-                double h = j == 0 ? vec.getY() : 0.0;
-                double l = k == 0 ? vec.getZ() : 0.0;
+                Vec3 vec3d = Vec3.atCenterOf(pos);
+                int i = Direction.UP.getStepX();
+                int j = Direction.UP.getStepY();
+                int k = Direction.UP.getStepZ();
+                double d = vec3d.x + (i == 0 ? Mth.nextDouble(world.random, -0.5, 0.5) : (double) i * offsetMultiplier);
+                double e = vec3d.y + (j == 0 ? Mth.nextDouble(world.random, -0.5, 0.5) : (double) j * offsetMultiplier) - 0.35f;
+                double f = vec3d.z + (k == 0 ? Mth.nextDouble(world.random, -0.5, 0.5) : (double) k * offsetMultiplier);
+                double g = i == 0 ? vec.x() : 0.0;
+                double h = j == 0 ? vec.y() : 0.0;
+                double l = k == 0 ? vec.z() : 0.0;
                 world.addParticle(ParticleTypes.CLOUD, d, e, f, g, h, l);
-                world.addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, world.getBlockState(pos.down())), d, e, f, g, h, l);
+                world.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, world.getBlockState(pos.below())), d, e, f, g, h, l);
             }
         }
 
@@ -376,13 +380,13 @@ public class ExteriorBlockEntity extends AbstractLinkableBlockEntity implements 
         if (!state.animated())
             return;
 
-        if (!blockState.isOf(AITBlocks.EXTERIOR_BLOCK))
+        if (!blockState.is(AITBlocks.EXTERIOR_BLOCK))
             return;
 
         if (!this.isLinked()) return;
 
         Tardis tardis = this.tardis().get();
 
-        this.getWorld().setBlockState(pos, blockState.with(ExteriorBlock.LEVEL_4, MathHelper.clamp(Math.round(tardis.travel().getAlpha() * 4), 0, 15)));
+        this.getLevel().setBlockAndUpdate(pos, blockState.setValue(ExteriorBlock.LEVEL_4, Mth.clamp(Math.round(tardis.travel().getAlpha() * 4), 0, 15)));
     }
 }

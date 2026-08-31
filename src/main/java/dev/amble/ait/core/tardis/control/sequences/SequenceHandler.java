@@ -4,18 +4,16 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.tardis.TardisDesktop;
@@ -27,7 +25,7 @@ import dev.amble.ait.registry.impl.SequenceRegistry;
 
 public class SequenceHandler extends KeyedTardisComponent implements TardisTickable {
 
-    private static final Random RANDOM = Random.create();
+    private static final RandomSource RANDOM = RandomSource.create();
     private static final BoolProperty HAS_ACTIVE_SEQUENCE = new BoolProperty("has_active_sequence", false);
 
     @Exclude
@@ -67,23 +65,23 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
         hasActiveSequence.of(this, HAS_ACTIVE_SEQUENCE);
     }
 
-    public void setActivePlayer(ServerPlayerEntity player) {
-        this.playerUUID = player.getUuid();
+    public void setActivePlayer(ServerPlayer player) {
+        this.playerUUID = player.getUUID();
     }
 
-    public ServerPlayerEntity getActivePlayer() {
+    public ServerPlayer getActivePlayer() {
         if (this.playerUUID == null)
             return null;
 
-        ServerWorld world = this.tardis.asServer().world();
+        ServerLevel world = this.tardis.asServer().world();
 
         if (world == null)
             return null;
 
-        return (ServerPlayerEntity) world.getPlayerByUuid(this.playerUUID);
+        return (ServerPlayer) world.getPlayerByUUID(this.playerUUID);
     }
 
-    public void add(Control control, ServerPlayerEntity player, BlockPos console) {
+    public void add(Control control, ServerPlayer player, BlockPos console) {
         if (this.getActiveSequence() == null || recent == null)
             return;
 
@@ -125,24 +123,24 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
         if (this.activeSequence == null)
             return;
 
-        this.activeSequence.sendMessageToInteriorPlayers(tardis.asServer().world().getPlayers());
+        this.activeSequence.sendMessageToInteriorPlayers(tardis.asServer().world().players());
     }
 
     public void triggerRandomSequence(boolean setTicksTo0) {
         if (setTicksTo0)
             ticks = 0;
 
-        int rand = RANDOM.nextBetween(0, SequenceRegistry.REGISTRY.size());
-        Sequence sequence = SequenceRegistry.REGISTRY.get(rand);
+        int rand = RANDOM.nextIntBetweenInclusive(0, SequenceRegistry.REGISTRY.size());
+        Sequence sequence = SequenceRegistry.REGISTRY.byId(rand);
 
         if (sequence == null)
             return;
 
         this.activeSequence = sequence;
         this.hasActiveSequence.set(true);
-        this.activeSequence.sendMessageToInteriorPlayers(tardis.asServer().world().getPlayers());
+        this.activeSequence.sendMessageToInteriorPlayers(tardis.asServer().world().players());
 
-        this.tardis().getDesktop().playSoundAtEveryConsole(SoundEvents.BLOCK_BEACON_POWER_SELECT);
+        this.tardis().getDesktop().playSoundAtEveryConsole(SoundEvents.BEACON_POWER_SELECT);
     }
 
     @Nullable public Sequence getActiveSequence() {
@@ -174,7 +172,7 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
     }
 
     private void doMissedControlEffects(@Nullable BlockPos console) {
-        ServerWorld world = this.tardis.asServer().world();
+        ServerLevel world = this.tardis.asServer().world();
 
         if (console == null) {
             this.tardis.getDesktop().getConsolePos().forEach(pos -> SequenceHandler.missedControlEffects(world, pos));
@@ -184,23 +182,23 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
         SequenceHandler.missedControlEffects(world, console);
     }
 
-    public static void missedControlEffects(ServerWorld world, BlockPos pos) {
-        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 3f, 1f);
-        Vec3d vec3d = Vec3d.ofBottomCenter(pos).add(0.0, 1.2f, 0.0);
+    public static void missedControlEffects(ServerLevel world, BlockPos pos) {
+        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 3f, 1f);
+        Vec3 vec3d = Vec3.atBottomCenterOf(pos).add(0.0, 1.2f, 0.0);
 
-        world.spawnParticles(ParticleTypes.SMALL_FLAME, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 20, 0.4F, 1F, 0.4F,
+        world.sendParticles(ParticleTypes.SMALL_FLAME, vec3d.x(), vec3d.y(), vec3d.z(), 20, 0.4F, 1F, 0.4F,
                 5.0F);
-        world.spawnParticles(ParticleTypes.ANGRY_VILLAGER, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 1, 0.4F, 1F, 0.4F,
+        world.sendParticles(ParticleTypes.ANGRY_VILLAGER, vec3d.x(), vec3d.y(), vec3d.z(), 1, 0.4F, 1F, 0.4F,
                 0.5F);
-        world.spawnParticles(ParticleTypes.LAVA, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 7, 0.4F, 1F, 0.4F,
+        world.sendParticles(ParticleTypes.LAVA, vec3d.x(), vec3d.y(), vec3d.z(), 7, 0.4F, 1F, 0.4F,
                 0.5F);
-        world.spawnParticles(ParticleTypes.FLASH, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 4, 0.4F, 1F, 0.4F, 5.0F);
-        world.spawnParticles(new DustParticleEffect(new Vector3f(0.2f, 0.2f, 0.2f), 4f), vec3d.getX(), vec3d.getY(),
-                vec3d.getZ(), 20, 0.0F, 1F, 0.0F, 2.0F);
+        world.sendParticles(ParticleTypes.FLASH, vec3d.x(), vec3d.y(), vec3d.z(), 4, 0.4F, 1F, 0.4F, 5.0F);
+        world.sendParticles(new DustParticleOptions(new Vector3f(0.2f, 0.2f, 0.2f), 4f), vec3d.x(), vec3d.y(),
+                vec3d.z(), 20, 0.0F, 1F, 0.0F, 2.0F);
     }
 
     private void doCompletedControlEffects(@Nullable BlockPos console) {
-        ServerWorld world = this.tardis.asServer().world();
+        ServerLevel world = this.tardis.asServer().world();
 
         if (console == null) {
             this.tardis.getDesktop().getConsolePos().forEach(pos -> SequenceHandler.completedControlEffects(world, pos));
@@ -210,17 +208,17 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
         SequenceHandler.completedControlEffects(world, console);
     }
 
-    public static void completedControlEffects(ServerWorld world, BlockPos pos) {
-        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 3f, 1f);
-        Vec3d vec3d = Vec3d.ofBottomCenter(pos).add(0.0, 1.2f, 0.0);
+    public static void completedControlEffects(ServerLevel world, BlockPos pos) {
+        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 3f, 1f);
+        Vec3 vec3d = Vec3.atBottomCenterOf(pos).add(0.0, 1.2f, 0.0);
 
         spawnControlParticles(world, vec3d);
-        world.spawnParticles(ParticleTypes.HEART, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 1, 0.4F, 1F, 0.4F, 0.5F);
+        world.sendParticles(ParticleTypes.HEART, vec3d.x(), vec3d.y(), vec3d.z(), 1, 0.4F, 1F, 0.4F, 0.5F);
     }
 
-    public static void spawnControlParticles(ServerWorld world, Vec3d vec3d) {
-        world.spawnParticles(ParticleTypes.GLOW, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 12, 0.4F, 1F, 0.4F, 5.0F);
-        world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 12, 0.4F, 1F, 0.4F,
+    public static void spawnControlParticles(ServerLevel world, Vec3 vec3d) {
+        world.sendParticles(ParticleTypes.GLOW, vec3d.x(), vec3d.y(), vec3d.z(), 12, 0.4F, 1F, 0.4F, 5.0F);
+        world.sendParticles(ParticleTypes.ELECTRIC_SPARK, vec3d.x(), vec3d.y(), vec3d.z(), 12, 0.4F, 1F, 0.4F,
                 5.0F);
     }
 

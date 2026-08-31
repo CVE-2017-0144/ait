@@ -1,20 +1,19 @@
 package dev.amble.lib.container.impl;
 
-import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-
 import dev.amble.lib.container.RegistryContainer;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.CreativeModeTab;
 
-public interface ItemGroupContainer extends RegistryContainer<ItemGroup> {
+public interface ItemGroupContainer extends RegistryContainer<CreativeModeTab> {
 
     @Override
-    default Registry<ItemGroup> getRegistry() {
-        return Registries.ITEM_GROUP;
+    default Registry<CreativeModeTab> getRegistry() {
+        return BuiltInRegistries.CREATIVE_MODE_TAB;
     }
 
     @Override
-    default Class<ItemGroup> getTargetClass() {
-        return ItemGroup.class;
+    default Class<CreativeModeTab> getTargetClass() {
+        return CreativeModeTab.class;
     }
 }

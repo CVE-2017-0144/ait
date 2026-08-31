@@ -2,25 +2,24 @@ package dev.drtheo.queue.api.util.block;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.scheduler.api.TimeUnit;
 
 import dev.drtheo.scheduler.api.common.TaskStage;
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
 
 public abstract class BlockQueue {
 
-    public ActionQueue schedulePlace(ServerWorld world, TimeUnit unit, int period, int maxTime, int flags) {
+    public ActionQueue schedulePlace(ServerLevel world, TimeUnit unit, int period, int maxTime, int flags) {
         return this.schedulePlace(new ActionQueue(), world, unit, period, maxTime, flags);
     }
 
     /**
      * @param maxTime Max time (in ms) a single cycle can perform
      */
-    public ActionQueue schedulePlace(ActionQueue queue, ServerWorld world, TimeUnit unit, int period, int maxTime, int flags) {
+    public ActionQueue schedulePlace(ActionQueue queue, ServerLevel world, TimeUnit unit, int period, int maxTime, int flags) {
         return queue.thenRunSteps(() -> {
             BlockData block = this.pollBlock();
 
@@ -29,7 +28,7 @@ public abstract class BlockQueue {
 
             int blockFlags = block.flags() == -1 ? flags : block.flags();
 
-            world.setBlockState(block.pos(), block.state(), blockFlags);
+            world.setBlock(block.pos(), block.state(), blockFlags);
             return false;
         }, TaskStage.startWorldTick(world), unit, period, maxTime);
     }

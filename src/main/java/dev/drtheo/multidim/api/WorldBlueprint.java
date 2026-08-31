@@ -3,25 +3,25 @@ package dev.drtheo.multidim.api;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Lifecycle;
 import dev.drtheo.multidim.impl.AbstractWorldGenListener;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.random.RandomSequencesState;
-import net.minecraft.world.SaveProperties;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.dimension.DimensionOptions;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.level.ServerWorldProperties;
-import net.minecraft.world.level.UnmodifiableLevelProperties;
-import net.minecraft.world.level.storage.LevelStorage;
-import net.minecraft.world.spawner.Spawner;
+import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.world.RandomSequences;
+import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.storage.DerivedLevelData;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -29,12 +29,12 @@ import java.util.concurrent.Executor;
 
 public class WorldBlueprint {
 
-    private final Identifier id;
+    private final ResourceLocation id;
 
     private long seed;
     private boolean tickTime = true;
 
-    private Identifier typeId;
+    private ResourceLocation typeId;
     private DimensionType type;
 
     private WorldCreator creator = MultiDimServerWorld::new;
@@ -42,14 +42,14 @@ public class WorldBlueprint {
 
     private boolean autoLoad = true;
     private boolean persistent = true;
-    private DimensionOptions options;
+    private LevelStem options;
 
-    public WorldBlueprint(Identifier id) {
+    public WorldBlueprint(ResourceLocation id) {
         this.id = id;
     }
 
     public WorldBlueprint withSeed(long seed) {
-        this.seed = BiomeAccess.hashSeed(seed);
+        this.seed = BiomeManager.obfuscateSeed(seed);
         return this;
     }
 
@@ -62,7 +62,7 @@ public class WorldBlueprint {
         return this;
     }
 
-    public WorldBlueprint withType(Identifier id) {
+    public WorldBlueprint withType(ResourceLocation id) {
         this.typeId = id;
         return this;
     }
@@ -71,7 +71,7 @@ public class WorldBlueprint {
         return this.withType(null, type);
     }
 
-    public WorldBlueprint withType(Identifier id, DimensionType type) {
+    public WorldBlueprint withType(ResourceLocation id, DimensionType type) {
         this.typeId = id;
         this.type = type;
         return this;
@@ -91,7 +91,7 @@ public class WorldBlueprint {
         return this.tickTime;
     }
 
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -113,26 +113,26 @@ public class WorldBlueprint {
         return autoLoad;
     }
 
-    public MultiDimServerWorld createWorld(MinecraftServer server, RegistryKey<World> key, DimensionOptions options, boolean created) {
-        SaveProperties saveProps = server.getSaveProperties();
+    public MultiDimServerWorld createWorld(MinecraftServer server, ResourceKey<Level> key, LevelStem options, boolean created) {
+        WorldData saveProps = server.getWorldData();
 
         return this.creator.create(
-                this, server, Util.getMainWorkerExecutor(), ((MultiDimServer) server).multidim$getSession(),
-                new UnmodifiableLevelProperties(saveProps, saveProps.getMainWorldProperties()), key, options,
+                this, server, Util.backgroundExecutor(), ((MultiDimServer) server).multidim$getSession(),
+                new DerivedLevelData(saveProps, saveProps.overworldData()), key, options,
                 new AbstractWorldGenListener(), ImmutableList.of(), null, created
         );
     }
 
-    private RegistryEntry<DimensionType> resolveType(MinecraftServer server) {
-        SimpleRegistry<DimensionType> typeRegistry = (SimpleRegistry<DimensionType>) server.getRegistryManager().get(RegistryKeys.DIMENSION_TYPE);
+    private Holder<DimensionType> resolveType(MinecraftServer server) {
+        MappedRegistry<DimensionType> typeRegistry = (MappedRegistry<DimensionType>) server.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
 
         if (this.typeId == null)
             this.typeId = this.id;
 
-        RegistryKey<DimensionType> typeKey = RegistryKey.of(RegistryKeys.DIMENSION_TYPE, this.typeId);
+        ResourceKey<DimensionType> typeKey = ResourceKey.create(Registries.DIMENSION_TYPE, this.typeId);
 
         if (this.type == null) {
-            RegistryEntry<DimensionType> entry = typeRegistry.getEntry(typeKey).orElse(null);
+            Holder<DimensionType> entry = typeRegistry.getHolder(typeKey).orElse(null);
 
             if (entry == null)
                 return null;
@@ -141,24 +141,24 @@ public class WorldBlueprint {
             return entry;
         }
 
-        if (!typeRegistry.contains(typeKey))
-            return typeRegistry.add(typeKey, this.type, Lifecycle.stable());
+        if (!typeRegistry.containsKey(typeKey))
+            return typeRegistry.register(typeKey, this.type, Lifecycle.stable());
 
-        return typeRegistry.getEntry(typeKey).orElse(null);
+        return typeRegistry.getHolder(typeKey).orElse(null);
     }
 
-    public DimensionOptions createOptions(MinecraftServer server) {
+    public LevelStem createOptions(MinecraftServer server) {
         if (this.options != null) return this.options;
 
-        RegistryEntry<DimensionType> typeEntry = this.resolveType(server);
+        Holder<DimensionType> typeEntry = this.resolveType(server);
 
         if (typeEntry == null)
             throw new IllegalArgumentException("Dimension type is required to create dimension options!");
 
-        return new DimensionOptions(typeEntry, this.generator);
+        return new LevelStem(typeEntry, this.generator);
     }
 
     public interface WorldCreator {
-        MultiDimServerWorld create(WorldBlueprint blueprint, MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, List<Spawner> spawners, @Nullable RandomSequencesState randomSequencesState, boolean created);
+        MultiDimServerWorld create(WorldBlueprint blueprint, MinecraftServer server, Executor workerExecutor, LevelStorageSource.LevelStorageAccess session, ServerLevelData properties, ResourceKey<Level> worldKey, LevelStem dimensionOptions, ChunkProgressListener worldGenerationProgressListener, List<CustomSpawner> spawners, @Nullable RandomSequences randomSequencesState, boolean created);
     }
 }

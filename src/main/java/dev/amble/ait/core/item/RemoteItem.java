@@ -3,23 +3,20 @@ package dev.amble.ait.core.item;
 import static dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase.State.LANDED;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
@@ -30,52 +27,52 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class RemoteItem extends LinkableItem {
 
-    public RemoteItem(Settings settings) {
+    public RemoteItem(Properties settings) {
         super(settings, true);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getBlockPos();
-        PlayerEntity player = context.getPlayer();
-        ItemStack itemStack = context.getStack();
+    public InteractionResult useOn(UseOnContext context) {
+        Level world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        Player player = context.getPlayer();
+        ItemStack itemStack = context.getItemInHand();
 
         if (player == null)
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
-        if (!(world instanceof ServerWorld serverWorld))
-            return ActionResult.PASS;
+        if (!(world instanceof ServerLevel serverWorld))
+            return InteractionResult.PASS;
 
         Tardis tardis = RemoteItem.getTardisStatic(world, itemStack);
 
         if (tardis == null)
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             if (!tardis.travel().inFlight()) {
                 if (!tardis.fuel().hasPower()) {
                     tardis.fuel().enablePower();
-                    player.sendMessage(Text.translatable("message.ait.remoteitem.powering_up"), true);
-                    tardis.getExterior().playSound(AITSounds.POWERUP, SoundCategory.BLOCKS);
-                    world.playSound(null, pos, AITSounds.REMOTE, SoundCategory.BLOCKS);
+                    player.displayClientMessage(Component.translatable("message.ait.remoteitem.powering_up"), true);
+                    tardis.getExterior().playSound(AITSounds.POWERUP, SoundSource.BLOCKS);
+                    world.playSound(null, pos, AITSounds.REMOTE, SoundSource.BLOCKS);
                 } else {
                     tardis.fuel().disablePower();
-                    player.sendMessage(Text.translatable("message.ait.remoteitem.powering_down"), true);
-                    tardis.getExterior().playSound(AITSounds.SHUTDOWN, SoundCategory.BLOCKS);
-                    world.playSound(null, pos, AITSounds.REMOTE, SoundCategory.BLOCKS);
+                    player.displayClientMessage(Component.translatable("message.ait.remoteitem.powering_down"), true);
+                    tardis.getExterior().playSound(AITSounds.SHUTDOWN, SoundSource.BLOCKS);
+                    world.playSound(null, pos, AITSounds.REMOTE, SoundSource.BLOCKS);
                 }
             } else if (tardis.travel().inFlight() || !tardis.travel().isLanded()) {
-                player.sendMessage(Text.translatable("message.ait.remoteitem.power_switch_disabled"), true);
+                player.displayClientMessage(Component.translatable("message.ait.remoteitem.power_switch_disabled"), true);
             }
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
 
         if (tardis.getFuel() <= 0)
-            player.sendMessage(Text.translatable("message.ait.remoteitem.warning1"));
+            player.sendSystemMessage(Component.translatable("message.ait.remoteitem.warning1"));
 
         if (tardis.isRefueling())
-            player.sendMessage(Text.translatable("message.ait.remoteitem.cancel.refuel"));
+            player.sendSystemMessage(Component.translatable("message.ait.remoteitem.cancel.refuel"));
 
         //It was dematting before anyway so as a lazy fix its a feature now!!
         //player.sendMessage(Text.translatable("message.ait.remoteitem.warning2"));
@@ -86,35 +83,35 @@ public class RemoteItem extends LinkableItem {
         CachedDirectedGlobalPos currentPosition = tardis.travel().position();
 
         if (currentPosition.getPos().equals(pos))
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
-        if (!TardisServerWorld.isTardisDimension((ServerWorld) world)) {
-            world.playSound(null, pos, AITSounds.REMOTE, SoundCategory.BLOCKS);
+        if (!TardisServerWorld.isTardisDimension((ServerLevel) world)) {
+            world.playSound(null, pos, AITSounds.REMOTE, SoundSource.BLOCKS);
 
-            BlockPos temp = pos.up();
+            BlockPos temp = pos.above();
 
-            if (world.getBlockState(pos).isReplaceable())
+            if (world.getBlockState(pos).canBeReplaced())
                 temp = pos;
                 if (tardis.fuel().hasPower()) {
                     tardis.travel().speed(tardis.travel().maxSpeed().get());
 
                     TravelUtil.travelTo(tardis, CachedDirectedGlobalPos.create(serverWorld, temp, DirectionControl
-                            .getGeneralizedRotation(RotationPropertyHelper.fromYaw(player.getBodyYaw()))));
+                            .getGeneralizedRotation(RotationSegment.convertToSegment(player.getVisualRotationYInDegrees()))));
                 } else {
-                    player.sendMessage(Text.translatable("message.ait.remoteitem.takeoff_failed_powered_off"), true);
+                    player.displayClientMessage(Component.translatable("message.ait.remoteitem.takeoff_failed_powered_off"), true);
                 }
             } else {
-            world.playSound(null, pos, SoundEvents.BLOCK_NOTE_BLOCK_BIT.value(), SoundCategory.BLOCKS, 1F,
+            world.playSound(null, pos, SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.BLOCKS, 1F,
                     0.2F);
-            player.sendMessage(Text.translatable("message.ait.remoteitem.warning3"), true);
+            player.displayClientMessage(Component.translatable("message.ait.remoteitem.warning3"), true);
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
         Tardis tardis = RemoteItem.getTardisStatic(world, stack);
 
@@ -122,7 +119,7 @@ public class RemoteItem extends LinkableItem {
             return;
 
         if (tardis.travel().getState() != LANDED)
-            tooltip.add(Text.literal("→ " + tardis.travel().getDurationAsPercentage() + "%")
-                    .formatted(Formatting.GOLD));
+            tooltip.add(Component.literal("→ " + tardis.travel().getDurationAsPercentage() + "%")
+                    .withStyle(ChatFormatting.GOLD));
     }
 }

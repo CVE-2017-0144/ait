@@ -3,72 +3,69 @@ package dev.amble.ait.core.blocks;
 import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.EnvironmentProjectorBlockEntity;
 import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
 import dev.amble.ait.core.tardis.Tardis;
 
 @SuppressWarnings("deprecation")
-public class EnvironmentProjectorBlock extends HorizontalDirectionalBlock implements BlockEntityProvider {
-    public static final BooleanProperty ENABLED = Properties.ENABLED;
-    public static final BooleanProperty POWERED = Properties.POWERED;
-    public static final BooleanProperty SILENT = BooleanProperty.of("silent");
+public class EnvironmentProjectorBlock extends HorizontalDirectionalBlock implements EntityBlock {
+    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty SILENT = BooleanProperty.create("silent");
 
-    public EnvironmentProjectorBlock(Settings settings) {
-        super(settings.emissiveLighting((state, world, pos) -> state.get(EnvironmentProjectorBlock.ENABLED)).nonOpaque()
-                .luminance(value -> value.get(EnvironmentProjectorBlock.ENABLED) ? 9 : 3));
-        this.setDefaultState(this.getStateManager().getDefaultState().with(FACING, Direction.NORTH));
+    public EnvironmentProjectorBlock(Properties settings) {
+        super(settings.emissiveRendering((state, world, pos) -> state.getValue(EnvironmentProjectorBlock.ENABLED)).noOcclusion()
+                .lightLevel(value -> value.getValue(EnvironmentProjectorBlock.ENABLED) ? 9 : 3));
+        this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
 
     @Nullable @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockState blockState = this.getDefaultState();
-        boolean powered = ctx.getWorld().isReceivingRedstonePower(ctx.getBlockPos());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockState blockState = this.defaultBlockState();
+        boolean powered = ctx.getLevel().hasNeighborSignal(ctx.getClickedPos());
 
-        return blockState.with(ENABLED, powered).with(POWERED, powered).with(SILENT,
-                ctx.getWorld().getBlockState(ctx.getBlockPos().down()).isIn(BlockTags.WOOL))
-                .with(FACING, ctx.getHorizontalPlayerFacing());
+        return blockState.setValue(ENABLED, powered).setValue(POWERED, powered).setValue(SILENT,
+                ctx.getLevel().getBlockState(ctx.getClickedPos().below()).is(BlockTags.WOOL))
+                .setValue(FACING, ctx.getHorizontalDirection());
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, ENABLED, POWERED, SILENT);
     }
 
     @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos,
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos,
                                boolean notify) {
-        if (world.isClient())
+        if (world.isClientSide())
             return;
 
         if (world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector)
@@ -76,65 +73,65 @@ public class EnvironmentProjectorBlock extends HorizontalDirectionalBlock implem
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
                               BlockHitResult hit) {
-        if (world.isClient())
-            return ActionResult.PASS;
+        if (world.isClientSide())
+            return InteractionResult.PASS;
 
-        if (hand != Hand.MAIN_HAND)
-            return ActionResult.PASS;
+        if (hand != InteractionHand.MAIN_HAND)
+            return InteractionResult.PASS;
 
-        if(player.isSneaking()) {
+        if(player.isShiftKeyDown()) {
             if (world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity proj){
                 proj.onUse(state, world, pos, player);
             }
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity) {
             player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 1.0F);
-            AITMod.openScreen((ServerPlayerEntity) player, 3, pos);
-            return ActionResult.SUCCESS;
+            AITMod.openScreen((ServerPlayer) player, 3, pos);
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public boolean hasSidedTransparency(BlockState state) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
         return true;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
-    public static void toggle(Tardis tardis, @Nullable PlayerEntity player, World world, BlockPos pos, BlockState state,
+    public static void toggle(Tardis tardis, @Nullable Player player, Level world, BlockPos pos, BlockState state,
                               boolean active) {
         if (world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector)
             projector.toggle(tardis, state, active);
 
-        if (state.get(SILENT))
+        if (state.getValue(SILENT))
             return;
 
-        world.playSound(player, pos, active ? SoundEvents.BLOCK_BEACON_ACTIVATE : SoundEvents.BLOCK_BEACON_DEACTIVATE,
-                SoundCategory.BLOCKS, 1.0f, world.getRandom().nextFloat() * 0.1f + 0.9f);
+        world.playSound(player, pos, active ? SoundEvents.BEACON_ACTIVATE : SoundEvents.BEACON_DEACTIVATE,
+                SoundSource.BLOCKS, 1.0f, world.getRandom().nextFloat() * 0.1f + 0.9f);
 
-        world.emitGameEvent(player, active ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, pos);
+        world.gameEvent(player, active ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, pos);
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new EnvironmentProjectorBlockEntity(pos, state);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        super.appendTooltip(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, world, tooltip, options);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            tooltip.add(Text.translatable("tooltip.ait.use_in_tardis").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+            tooltip.add(Component.translatable("tooltip.ait.use_in_tardis").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         });
     }
 }

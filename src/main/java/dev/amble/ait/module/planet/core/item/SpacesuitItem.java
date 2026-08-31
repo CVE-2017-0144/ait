@@ -1,18 +1,15 @@
 package dev.amble.ait.module.planet.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.item.RenderableArmorItem;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
@@ -23,29 +20,29 @@ public class SpacesuitItem extends RenderableArmorItem {
     public static final String OXYGEN_KEY = "oxygen";
     public static final double MAX_OXYGEN = 5.2D;
 
-    public SpacesuitItem(ArmorMaterial material, Type type, Settings settings, boolean hasCustomRendering) {
+    public SpacesuitItem(ArmorMaterial material, Type type, Properties settings, boolean hasCustomRendering) {
         super(material, type, settings, hasCustomRendering);
     }
 
     @Override
-    public ItemStack getDefaultStack() {
+    public ItemStack getDefaultInstance() {
         if (this.type != Type.CHESTPLATE) {
-            return super.getDefaultStack();
+            return super.getDefaultInstance();
         }
         ItemStack stack = new ItemStack(this);
-        NbtCompound compound = stack.getOrCreateNbt();
+        CompoundTag compound = stack.getOrCreateTag();
         compound.putDouble(OXYGEN_KEY, MAX_OXYGEN);
         return stack;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         if (this.type != Type.CHESTPLATE) return;
-        NbtCompound compound = stack.getOrCreateNbt();
+        CompoundTag compound = stack.getOrCreateTag();
 
         if (world == null || world.getServer() == null) return;
 
-        if (world.getServer().getTicks() % 20 != 0) {
+        if (world.getServer().getTickCount() % 20 != 0) {
             return;
         }
 
@@ -59,13 +56,13 @@ public class SpacesuitItem extends RenderableArmorItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
         if (this.type != Type.CHESTPLATE) return;
 
-        double oxygenLevel = stack.getOrCreateNbt().getDouble(OXYGEN_KEY);
+        double oxygenLevel = stack.getOrCreateTag().getDouble(OXYGEN_KEY);
         String oxygenFormatted = String.format("%.1f", oxygenLevel) + "L / " + MAX_OXYGEN + "L";
 
-        tooltip.add(Text.translatable("message.ait.oxygen", oxygenFormatted).formatted(Formatting.BOLD, Formatting.BLUE));
+        tooltip.add(Component.translatable("message.ait.oxygen", oxygenFormatted).withStyle(ChatFormatting.BOLD, ChatFormatting.BLUE));
     }
 }

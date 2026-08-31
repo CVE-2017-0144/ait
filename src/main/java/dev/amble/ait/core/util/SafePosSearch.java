@@ -1,24 +1,21 @@
 package dev.amble.ait.core.util;
 
 import java.util.function.Consumer;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.queue.api.util.Value;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class SafePosSearch {
@@ -49,10 +46,10 @@ public class SafePosSearch {
      */
     @Nullable public static ActionQueue findSafe(CachedDirectedGlobalPos globalPos,
                                        Kind vSearch, boolean hSearch, Value<BlockPos> ref) {
-        ServerWorld world = globalPos.getWorld();
+        ServerLevel world = globalPos.getWorld();
         BlockPos pos = globalPos.getPos();
 
-        final Chunk chunk = globalPos.getWorld().getChunk(pos);
+        final ChunkAccess chunk = globalPos.getWorld().getChunk(pos);
 
         if (isSafe(chunk, pos))
             return null;
@@ -74,19 +71,19 @@ public class SafePosSearch {
         };
     }
 
-    private static ActionQueue findSafeCeiling(ActionQueue queue, Value<BlockPos> result, ServerWorld world, BlockPos original) {
+    private static ActionQueue findSafeCeiling(ActionQueue queue, Value<BlockPos> result, ServerLevel world, BlockPos original) {
         return queue.thenRun(() -> {
             if (result.value != null)
                 return;
 
-            int y = world.getChunk(original).sampleHeightmap(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+            int y = world.getChunk(original).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     original.getX() & 15, original.getZ() & 15) + 1;
 
-            result.value = original.withY(y);
+            result.value = original.atY(y);
         });
     }
 
-    private static ActionQueue findSafeFloor(ActionQueue queue, Value<BlockPos> result, ServerWorld world, BlockPos original) {
+    private static ActionQueue findSafeFloor(ActionQueue queue, Value<BlockPos> result, ServerLevel world, BlockPos original) {
         final SafeFloorHolder holder = new SafeFloorHolder(world, original);
 
         return queue.thenRunSteps(() -> {
@@ -102,7 +99,7 @@ public class SafePosSearch {
         }, TaskStage.startWorldTick(world), TimeUnit.TICKS, 1, 3);
     }
 
-    private static ActionQueue findSafeMedian(ActionQueue queue, Value<BlockPos> result, ServerWorld world, BlockPos original) {
+    private static ActionQueue findSafeMedian(ActionQueue queue, Value<BlockPos> result, ServerLevel world, BlockPos original) {
         final SafeMedianHolder holder = new SafeMedianHolder(world, original);
 
         return queue.thenRunSteps(() -> {
@@ -121,8 +118,8 @@ public class SafePosSearch {
         }, TaskStage.startWorldTick(world), TimeUnit.TICKS, 1, 3);
     }
 
-    private static ActionQueue findSafeXZ(ActionQueue queue, Value<BlockPos> result, ServerWorld world, BlockPos original, int radius) {
-        BlockPos.Mutable pos = original.mutableCopy();
+    private static ActionQueue findSafeXZ(ActionQueue queue, Value<BlockPos> result, ServerLevel world, BlockPos original, int radius) {
+        BlockPos.MutableBlockPos pos = original.mutable();
 
         int minX = pos.getX() - radius;
         int maxX = pos.getX() + radius;
@@ -136,41 +133,41 @@ public class SafePosSearch {
             Iter state = holder.checkAndAdvance();
 
             if (state == Iter.SUCCESS)
-                result.value = holder.pos.toImmutable();
+                result.value = holder.pos.immutable();
 
             return state != Iter.CONTINUE;
         }, TaskStage.startWorldTick(world), TimeUnit.TICKS, 1, 3); // every tick, while the taken time is less than 3ms (1tick = 50ms, 2/50 of a tick, which is 4%)
     }
 
     @SuppressWarnings("deprecation")
-    private static boolean isSafe(Chunk chunk, BlockPos pos) {
-        BlockState floor = chunk.getBlockState(pos.down());
+    private static boolean isSafe(ChunkAccess chunk, BlockPos pos) {
+        BlockState floor = chunk.getBlockState(pos.below());
 
-        if (!floor.blocksMovement())
+        if (!floor.blocksMotion())
             return false;
 
         BlockState curUp = chunk.getBlockState(pos);
-        BlockState aboveUp = chunk.getBlockState(pos.up());
+        BlockState aboveUp = chunk.getBlockState(pos.above());
 
-        return !curUp.blocksMovement() && !aboveUp.blocksMovement();
+        return !curUp.blocksMotion() && !aboveUp.blocksMotion();
     }
 
     @SuppressWarnings("deprecation")
     private static boolean isSafe(BlockState floor, BlockState block1, BlockState block2) {
-        return floor.blocksMovement() && !block1.blocksMovement() && !block2.blocksMovement();
+        return floor.blocksMotion() && !block1.blocksMotion() && !block2.blocksMotion();
     }
 
     static class SafeXZHolder {
         int x;
         int z;
-        Chunk prevChunk;
-        final World world;
-        final BlockPos.Mutable pos;
+        ChunkAccess prevChunk;
+        final Level world;
+        final BlockPos.MutableBlockPos pos;
         final int maxX;
         final int maxZ;
         final int minX;
 
-        public SafeXZHolder(World world, BlockPos.Mutable pos, int maxX, int maxZ, int minX, int minZ) {
+        public SafeXZHolder(Level world, BlockPos.MutableBlockPos pos, int maxX, int maxZ, int minX, int minZ) {
             this.world = world;
             this.pos = pos;
             this.maxX = maxX;
@@ -205,7 +202,7 @@ public class SafePosSearch {
         }
 
         public BlockPos pos() {
-            return pos.toImmutable();
+            return pos.immutable();
         }
     }
 
@@ -215,19 +212,19 @@ public class SafePosSearch {
         BlockState current;
         BlockState above;
 
-        final Chunk chunk;
+        final ChunkAccess chunk;
         final int maxY;
 
-        public SafeFloorHolder(World world, BlockPos pos) {
+        public SafeFloorHolder(Level world, BlockPos pos) {
             this.chunk = world.getChunk(pos);
-            this.maxY = chunk.getTopY();
+            this.maxY = chunk.getMaxBuildHeight();
 
-            int minY = chunk.getBottomY();
-            this.cursor = pos.withY(minY + 2);
+            int minY = chunk.getMinBuildHeight();
+            this.cursor = pos.atY(minY + 2);
 
-            this.floor = chunk.getBlockState(cursor.down());
+            this.floor = chunk.getBlockState(cursor.below());
             this.current = chunk.getBlockState(cursor);
-            this.above = chunk.getBlockState(cursor.up());
+            this.above = chunk.getBlockState(cursor.above());
         }
 
         public Iter checkAndAdvance() {
@@ -237,7 +234,7 @@ public class SafePosSearch {
             if (isSafe(floor, current, above))
                 return Iter.SUCCESS;
 
-            cursor = cursor.up();
+            cursor = cursor.above();
 
             floor = current;
             current = above;
@@ -259,36 +256,36 @@ public class SafePosSearch {
         BlockState curDown;
         BlockState aboveDown;
 
-        final Chunk chunk;
+        final ChunkAccess chunk;
 
-        public SafeMedianHolder(World world, BlockPos pos) {
+        public SafeMedianHolder(Level world, BlockPos pos) {
             this.chunk = world.getChunk(pos);
 
-            this.upCursor = pos.up();
-            this.floorUp = chunk.getBlockState(upCursor.down());
+            this.upCursor = pos.above();
+            this.floorUp = chunk.getBlockState(upCursor.below());
             this.curUp = chunk.getBlockState(upCursor);
-            this.aboveUp = chunk.getBlockState(upCursor.up());
+            this.aboveUp = chunk.getBlockState(upCursor.above());
 
-            this.downCursor = pos.down();
-            this.floorDown = chunk.getBlockState(downCursor.down());
+            this.downCursor = pos.below();
+            this.floorDown = chunk.getBlockState(downCursor.below());
             this.curDown = chunk.getBlockState(downCursor);
-            this.aboveDown = chunk.getBlockState(downCursor.up());
+            this.aboveDown = chunk.getBlockState(downCursor.above());
         }
 
         public DoubleIter checkAndAdvance() {
-            boolean canGoUp = upCursor.getY() < chunk.getTopY();
-            boolean canGoDown = downCursor.getY() > chunk.getBottomY();
+            boolean canGoUp = upCursor.getY() < chunk.getMaxBuildHeight();
+            boolean canGoDown = downCursor.getY() > chunk.getMinBuildHeight();
 
             if (!canGoUp && !canGoDown)
                 return DoubleIter.FAIL;
 
             if (canGoUp) {
                 if (isSafe(floorUp, curUp, aboveUp)) {
-                    upCursor = upCursor.down();
+                    upCursor = upCursor.below();
                     return DoubleIter.SUCCESS_A;
                 }
 
-                upCursor = upCursor.up();
+                upCursor = upCursor.above();
 
                 floorUp = curUp;
                 curUp = aboveUp;
@@ -297,11 +294,11 @@ public class SafePosSearch {
 
             if (canGoDown) {
                 if (isSafe(floorDown, curDown, aboveDown)) {
-                    downCursor = downCursor.up();
+                    downCursor = downCursor.above();
                     return DoubleIter.SUCCESS_B;
                 }
 
-                downCursor = downCursor.down();
+                downCursor = downCursor.below();
 
                 curDown = aboveDown;
                 aboveDown = floorDown;
@@ -325,7 +322,7 @@ public class SafePosSearch {
         CONTINUE
     }
 
-    public enum Kind implements StringIdentifiable {
+    public enum Kind implements StringRepresentable {
         NONE {
             @Override
             public Kind next() {
@@ -352,12 +349,12 @@ public class SafePosSearch {
         };
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return toString();
         }
 
-        public MutableText text() {
-            return Text.translatable("message.ait.control.ylandtype." + this.asString().toLowerCase());
+        public MutableComponent text() {
+            return Component.translatable("message.ait.control.ylandtype." + this.getSerializedName().toLowerCase());
         }
 
         public abstract Kind next();

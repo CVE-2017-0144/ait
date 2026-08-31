@@ -5,10 +5,9 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 
 @Environment(EnvType.CLIENT)
 public class ClientWorldEvents {
@@ -22,13 +21,13 @@ public class ClientWorldEvents {
     static {
         ClientPlayConnectionEvents.JOIN.register((handler, packetSender, client) -> {
             client.execute(() -> {
-                ClientWorldEvents.CHANGE_WORLD.invoker().onChange(client, client.world);
+                ClientWorldEvents.CHANGE_WORLD.invoker().onChange(client, client.level);
             });
         });
     }
 
     @FunctionalInterface
     public interface ChangeWorld {
-        void onChange(MinecraftClient client, @Nullable ClientWorld world);
+        void onChange(Minecraft client, @Nullable ClientLevel world);
     }
 }

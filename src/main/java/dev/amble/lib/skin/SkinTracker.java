@@ -13,11 +13,11 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class SkinTracker extends HashMap<UUID, SkinData> {
-	public static final Identifier SYNC_KEY = AmbleKit.id("skin_sync");
+	public static final ResourceLocation SYNC_KEY = AmbleKit.id("skin_sync");
 
 	private static SkinTracker INSTANCE;
 
@@ -86,28 +86,28 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		return Optional.ofNullable(this.get(id));
 	}
 
-	private PacketByteBuf toBuf(UUID id, SkinData data) {
-		PacketByteBuf buf = PacketByteBufs.create();
+	private FriendlyByteBuf toBuf(UUID id, SkinData data) {
+		FriendlyByteBuf buf = PacketByteBufs.create();
 
 		buf.writeInt(1);
 
-		buf.writeUuid(id);
+		buf.writeUUID(id);
 		data.writeBuf(buf);
 
 		return buf;
 	}
 
-	private PacketByteBuf toBuf() {
+	private FriendlyByteBuf toBuf() {
 		return toBuf(this);
 	}
 
-	private PacketByteBuf toBuf(Map<UUID, SkinData> map) {
-		PacketByteBuf buf = PacketByteBufs.create();
+	private FriendlyByteBuf toBuf(Map<UUID, SkinData> map) {
+		FriendlyByteBuf buf = PacketByteBufs.create();
 
 		buf.writeInt(map.size());
 
 		for (Map.Entry<UUID, SkinData> entry : map.entrySet()) {
-			buf.writeUuid(entry.getKey());
+			buf.writeUUID(entry.getKey());
 
 			entry.getValue().writeBuf(buf);
 		}
@@ -115,18 +115,18 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		return buf;
 	}
 
-	private void sync(PacketByteBuf buf) {
-		ServerLifecycleHooks.get().getPlayerManager().getPlayerList().forEach((p) -> this.sync(buf, p));
+	private void sync(FriendlyByteBuf buf) {
+		ServerLifecycleHooks.get().getPlayerList().getPlayers().forEach((p) -> this.sync(buf, p));
 	}
 
-	private void sync(PacketByteBuf buf, ServerPlayerEntity player) {
+	private void sync(FriendlyByteBuf buf, ServerPlayer player) {
 		ServerPlayNetworking.send(player, SYNC_KEY, buf);
 	}
 
-	private void receive(PacketByteBuf buf) {
+	private void receive(FriendlyByteBuf buf) {
 		int count = buf.readInt();
 		for (int i = 0; i < count; i++) {
-			UUID id = buf.readUuid();
+			UUID id = buf.readUUID();
 			SkinData val = SkinData.readBuf(buf);
 			if (val == null) continue;
 			this.put(id, val);
@@ -137,12 +137,12 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		sync(toBuf());
 	}
 
-	public void sync(ServerPlayerEntity target) {
+	public void sync(ServerPlayer target) {
 		sync(toBuf(), target);
 	}
 
 	private static Path getSavePath(MinecraftServer server) {
-		return server.getSavePath(WorldSavePath.ROOT).resolve("amblekit").resolve("skins.json");
+		return server.getWorldPath(LevelResource.ROOT).resolve("amblekit").resolve("skins.json");
 	}
 
 	private void write(MinecraftServer server) {

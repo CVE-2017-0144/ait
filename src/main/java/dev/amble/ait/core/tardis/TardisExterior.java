@@ -3,12 +3,10 @@ package dev.amble.ait.core.tardis;
 import java.util.Optional;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -26,7 +24,7 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class TardisExterior extends TardisComponent {
 
-    public static final Identifier CHANGE_EXTERIOR = AITMod.id("change_exterior");
+    public static final ResourceLocation CHANGE_EXTERIOR = AITMod.id("change_exterior");
 
     private static final ExteriorCategorySchema MISSING_CATEGORY = CategoryRegistry.getInstance().fallback();
     private static final ExteriorVariantSchema MISSING_VARIANT = ExteriorVariantRegistry.getInstance().fallback();
@@ -37,7 +35,7 @@ public class TardisExterior extends TardisComponent {
     static {
         ServerPlayNetworking.registerGlobalReceiver(CHANGE_EXTERIOR, ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
             boolean variantChange = buf.readBoolean();
-            Identifier variantValue = buf.readIdentifier();
+            ResourceLocation variantValue = buf.readResourceLocation();
 
             ExteriorVariantSchema schema = ExteriorVariantRegistry.getInstance()
                     .get(variantValue);
@@ -61,7 +59,7 @@ public class TardisExterior extends TardisComponent {
             tardis.getExterior().setVariant(variant);
 
         CachedDirectedGlobalPos cached = tardis.travel().position();
-        cached.getWorld().getChunkManager().markForUpdate(cached.getPos());
+        cached.getWorld().getChunkSource().blockChanged(cached.getPos());
 
         TardisEvents.EXTERIOR_CHANGE.invoker().onChange(tardis);
         return true;
@@ -115,7 +113,7 @@ public class TardisExterior extends TardisComponent {
     public Optional<ExteriorBlockEntity> findExteriorBlock() {
         CachedDirectedGlobalPos pos = tardis.travel().position();
 
-        if (pos.getWorld() == null || pos.getWorld().isClient()) return Optional.empty();
+        if (pos.getWorld() == null || pos.getWorld().isClientSide()) return Optional.empty();
 
         BlockEntity found = pos.getWorld().getBlockEntity(pos.getPos());
 
@@ -125,7 +123,7 @@ public class TardisExterior extends TardisComponent {
         return Optional.of(exterior);
     }
 
-    public void playSound(SoundEvent sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(SoundEvent sound, SoundSource category, float volume, float pitch) {
         CachedDirectedGlobalPos pos = tardis.travel().position();
 
         if (pos == null || pos.getWorld() == null) return;
@@ -133,19 +131,19 @@ public class TardisExterior extends TardisComponent {
         pos.getWorld().playSound(null, pos.getPos(), sound, category, volume, pitch);
     }
 
-    public void playSound(SoundEvent sound, SoundCategory category) {
+    public void playSound(SoundEvent sound, SoundSource category) {
         this.playSound(sound, category, 1f, 1f);
     }
 
     public void playSound(SoundEvent sound) {
-        this.playSound(sound, SoundCategory.BLOCKS);
+        this.playSound(sound, SoundSource.BLOCKS);
     }
 
     /**
      * Plays a sound at the tardis position, ignoring whether it exists on the server
      * @author duzo
      */
-    public void playSound(Identifier soundId, SoundCategory category, float volume) {
+    public void playSound(ResourceLocation soundId, SoundSource category, float volume) {
         CachedDirectedGlobalPos pos = tardis.travel().position();
         NetworkUtil.playSound(pos.getDimension(), pos.getPos(), soundId, category, volume);
     }

@@ -1,22 +1,22 @@
 package dev.drtheo.multidim.impl;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ProgressListener;
 
 public class AbstractWorldProgressListener implements ProgressListener {
 
     @Override
-    public void setTitle(Text title) { }
+    public void progressStartNoAbort(Component title) { }
 
     @Override
-    public void setTitleAndTask(Text title) { }
+    public void progressStart(Component title) { }
 
     @Override
-    public void setTask(Text task) { }
+    public void progressStage(Component task) { }
 
     @Override
     public void progressStagePercentage(int percentage) { }
 
     @Override
-    public void setDone() { }
+    public void stop() { }
 }

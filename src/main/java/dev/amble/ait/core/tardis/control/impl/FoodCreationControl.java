@@ -3,15 +3,13 @@ package dev.amble.ait.core.tardis.control.impl;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
@@ -24,7 +22,7 @@ public class FoodCreationControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
                              boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
         if (tardis.fuel().getCurrentFuel() < 500)
@@ -36,11 +34,11 @@ public class FoodCreationControl extends Control {
 
             ItemStack coffeeItem = tardis.extra().getRefreshmentItem();
 
-            Vec3d spawnPosition = Vec3d.ofCenter(console).add(0, 1.5, 1);
+            Vec3 spawnPosition = Vec3.atCenterOf(console).add(0, 1.5, 1);
             ItemEntity coffeeEntity = new ItemEntity(world, spawnPosition.x, spawnPosition.y, spawnPosition.z, coffeeItem);
 
             tardis.removeFuel(500);
-            world.spawnEntity(coffeeEntity);
+            world.addFreshEntity(coffeeEntity);
         }, TaskStage.END_SERVER_TICK, TimeUnit.TICKS, 45);
 
         return Result.SUCCESS;

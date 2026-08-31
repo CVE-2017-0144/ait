@@ -1,13 +1,19 @@
 
 package dev.amble.lib.mixin.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.animation.client.AnimationMetadata;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,16 +22,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class WorldRendererMixin {
 
 	@Final
 	@Shadow
-	private BufferBuilderStorage bufferBuilders;
+	private RenderBuffers renderBuffers;
 
-	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;checkEmpty(Lnet/minecraft/client/util/math/MatrixStack;)V", ordinal = 0))
-	public void render(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f projectionMatrix, CallbackInfo ci) {
-		if (!(camera.getFocusedEntity() instanceof AnimatedEntity animated)) return;
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;checkPoseStack(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ordinal = 0))
+	public void render(PoseStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f projectionMatrix, CallbackInfo ci) {
+		if (!(camera.getEntity() instanceof AnimatedEntity animated)) return;
 
 		BedrockAnimation anim = BedrockAnimation.getFor(animated);
 		
@@ -41,24 +47,24 @@ public class WorldRendererMixin {
 			return;
 		}
 
-		boolean thirdPerson = camera.isThirdPerson();
+		boolean thirdPerson = camera.isDetached();
 		boolean hasCamera = anim.boneTimelines.containsKey("camera");
-		boolean isNear = camera.getPos().distanceTo(camera.getFocusedEntity().getPos().add(0, camera.getFocusedEntity().getStandingEyeHeight(), 0)) <= BedrockAnimation.HEAD_HIDE_DISTANCE;
+		boolean isNear = camera.getPosition().distanceTo(camera.getEntity().position().add(0, camera.getEntity().getEyeHeight(), 0)) <= BedrockAnimation.HEAD_HIDE_DISTANCE;
 
-		Vec3d vec3d = camera.getPos();
+		Vec3 vec3d = camera.getPosition();
 		double d = vec3d.x;
 		double e = vec3d.y;
 		double f = vec3d.z;
-		VertexConsumerProvider.Immediate immediate = this.bufferBuilders.getEntityVertexConsumers();
+		MultiBufferSource.BufferSource immediate = this.renderBuffers.bufferSource();
 		BedrockAnimation.IS_RENDERING_PLAYER = true;
 		BedrockAnimation.IS_RENDERING_HEAD = thirdPerson && hasCamera && !isNear;
-		this.renderEntity(camera.getFocusedEntity(), d, e, f, tickDelta, matrices, immediate);
+		this.renderEntity(camera.getEntity(), d, e, f, tickDelta, matrices, immediate);
 		BedrockAnimation.IS_RENDERING_PLAYER = false;
 	}
 
 	@Shadow
 	private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta,
-	                          MatrixStack matrices, VertexConsumerProvider vertexConsumers) {
+	                          PoseStack matrices, MultiBufferSource vertexConsumers) {
 
 	}
 }

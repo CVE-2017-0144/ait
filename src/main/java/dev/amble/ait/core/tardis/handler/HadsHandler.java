@@ -1,15 +1,13 @@
 package dev.amble.ait.core.tardis.handler;
 
 import java.util.List;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.Box;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
@@ -55,17 +53,17 @@ public class HadsHandler extends KeyedTardisComponent implements TardisTickable 
 
     // @TODO Fix hads idk why its broken. duzo did something to the demat idk what
     // happened lol
-    public void tickingForDanger(World world) {
-        List<Entity> listOfEntities = world.getOtherEntities(null,
-                new Box(tardis.travel().position().getPos()).expand(3f), EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR);
+    public void tickingForDanger(Level world) {
+        List<Entity> listOfEntities = world.getEntities((Entity) null,
+                new AABB(tardis.travel().position().getPos()).inflate(3f), EntitySelector.NO_CREATIVE_OR_SPECTATOR);
 
         for (Entity entity : listOfEntities) {
-            if (entity instanceof CreeperEntity creeperEntity) {
-                if (creeperEntity.getFuseSpeed() > 0) {
+            if (entity instanceof Creeper creeperEntity) {
+                if (creeperEntity.getSwellDir() > 0) {
                     setIsInDanger(true);
                     break;
                 }
-            } else if (entity instanceof TntEntity) {
+            } else if (entity instanceof PrimedTnt) {
                 setIsInDanger(true);
                 break;
             }

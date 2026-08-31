@@ -4,98 +4,98 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.drtheo.multidim.impl.AbstractChunkGenerator;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureSet;
-import net.minecraft.structure.StructureTemplateManager;
-import net.minecraft.util.collection.Pool;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.HeightLimitView;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.SpawnSettings;
-import net.minecraft.world.biome.source.FixedBiomeSource;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.StructureAccessor;
-import net.minecraft.world.gen.chunk.Blender;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.VerticalBlockSample;
-import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
-import net.minecraft.world.gen.noise.NoiseConfig;
-import net.minecraft.world.gen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.NoiseColumn;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class VoidChunkGenerator extends AbstractChunkGenerator {
 
     public static final Codec<VoidChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Biome.REGISTRY_CODEC.stable().fieldOf("biome").forGetter(g -> g.biome)
+            Biome.CODEC.stable().fieldOf("biome").forGetter(g -> g.biome)
     ).apply(instance, instance.stable(VoidChunkGenerator::new)));
 
-    private static final VerticalBlockSample EMPTY_SAMPLE = new VerticalBlockSample(0, new BlockState[0]);
+    private static final NoiseColumn EMPTY_SAMPLE = new NoiseColumn(0, new BlockState[0]);
 
-    private final RegistryEntry<Biome> biome;
+    private final Holder<Biome> biome;
 
-    public VoidChunkGenerator(RegistryEntry<Biome> biome) {
+    public VoidChunkGenerator(Holder<Biome> biome) {
         super(new FixedBiomeSource(biome));
         this.biome = biome;
     }
 
     public VoidChunkGenerator(Registry<Biome> biomeRegistry) {
-        this(biomeRegistry, BiomeKeys.THE_VOID);
+        this(biomeRegistry, Biomes.THE_VOID);
     }
 
-    public VoidChunkGenerator(Registry<Biome> biomeRegistry, RegistryKey<Biome> biome) {
-        this(biomeRegistry.getEntry(biome).get());
+    public VoidChunkGenerator(Registry<Biome> biomeRegistry, ResourceKey<Biome> biome) {
+        this(biomeRegistry.getHolder(biome).get());
     }
 
     @Override
-    protected Codec<? extends ChunkGenerator> getCodec() {
+    protected Codec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
     @Override
-    public void addStructureReferences(StructureWorldAccess world, StructureAccessor accessor, Chunk chunk) { }
+    public void createReferences(WorldGenLevel world, StructureManager accessor, ChunkAccess chunk) { }
 
     @Override
-    public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState noiseConfig, StructureManager structureAccessor, ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 
     @Override
-    public VerticalBlockSample getColumnSample(int x, int z, HeightLimitView world, NoiseConfig noiseConfig) {
+    public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor world, RandomState noiseConfig) {
         return EMPTY_SAMPLE;
     }
 
     @Override
-    public void generateFeatures(StructureWorldAccess world, Chunk chunk, StructureAccessor structureAccessor) { }
+    public void applyBiomeDecoration(WorldGenLevel world, ChunkAccess chunk, StructureManager structureAccessor) { }
 
     @Nullable @Override
-    public Pair<BlockPos, RegistryEntry<Structure>> locateStructure(ServerWorld world, RegistryEntryList<Structure> structures, BlockPos center, int radius, boolean skipReferencedStructures) {
+    public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(ServerLevel world, HolderSet<Structure> structures, BlockPos center, int radius, boolean skipReferencedStructures) {
         return null;
     }
 
     @Override
-    public Pool<SpawnSettings.SpawnEntry> getEntitySpawnList(RegistryEntry<Biome> biome, StructureAccessor accessor, SpawnGroup group, BlockPos pos) {
-        return Pool.empty();
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Holder<Biome> biome, StructureManager accessor, MobCategory group, BlockPos pos) {
+        return WeightedRandomList.create();
     }
 
     @Override
-    public void setStructureStarts(DynamicRegistryManager registryManager, StructurePlacementCalculator placementCalculator, StructureAccessor structureAccessor, Chunk chunk, StructureTemplateManager structureTemplateManager) { }
+    public void createStructures(RegistryAccess registryManager, ChunkGeneratorStructureState placementCalculator, StructureManager structureAccessor, ChunkAccess chunk, StructureTemplateManager structureTemplateManager) { }
 
     @Override
-    public StructurePlacementCalculator createStructurePlacementCalculator(RegistryWrapper<StructureSet> structureSetRegistry, NoiseConfig noiseConfig, long seed) {
-        return StructurePlacementCalculator.create(noiseConfig, seed, biomeSource, Stream.empty());
+    public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> structureSetRegistry, RandomState noiseConfig, long seed) {
+        return ChunkGeneratorStructureState.createForFlat(noiseConfig, seed, biomeSource, Stream.empty());
     }
 }

@@ -3,19 +3,16 @@ package dev.amble.ait.core.item;
 import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.control.impl.DirectionControl;
 import dev.amble.ait.core.util.WorldUtil;
@@ -29,43 +26,43 @@ public abstract class AbstractCoordinateModifierItem extends Item {
 
     public static final String POS_KEY = "pos";
 
-    public AbstractCoordinateModifierItem(Settings settings) {
+    public AbstractCoordinateModifierItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ItemStack getDefaultStack() {
-        return super.getDefaultStack();
+    public ItemStack getDefaultInstance() {
+        return super.getDefaultInstance();
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            NbtCompound main = stack.getOrCreateNbt();
+            CompoundTag main = stack.getOrCreateTag();
 
             if (!main.contains(POS_KEY))
                 return;
 
-            NbtCompound nbt = main.getCompound(POS_KEY);
+            CompoundTag nbt = main.getCompound(POS_KEY);
             DirectedGlobalPos globalPos = DirectedGlobalPos.fromNbt(nbt);
 
             BlockPos pos = globalPos.getPos();
             String dir = DirectionControl.rotationToDirection(globalPos.getRotation());
-            RegistryKey<World> dimension = globalPos.getDimension();
+            ResourceKey<Level> dimension = globalPos.getDimension();
 
-            tooltips.add(Text.translatable("waypoint.position.tooltip")
-                    .append(Text.literal(" > " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ()))
-                    .formatted(Formatting.BLUE));
+            tooltips.add(Component.translatable("waypoint.position.tooltip")
+                    .append(Component.literal(" > " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ()))
+                    .withStyle(ChatFormatting.BLUE));
 
-            tooltips.add(Text.translatable("waypoint.direction.tooltip")
-                    .append(Text.literal(" > " + dir.toUpperCase()))
-                    .formatted(Formatting.BLUE));
+            tooltips.add(Component.translatable("waypoint.direction.tooltip")
+                    .append(Component.literal(" > " + dir.toUpperCase()))
+                    .withStyle(ChatFormatting.BLUE));
 
-            tooltips.add(Text.translatable("waypoint.dimension.tooltip")
-                    .append(Text.literal(" > ").append(WorldUtil.worldText(dimension, false)))
-                    .formatted(Formatting.BLUE));
+            tooltips.add(Component.translatable("waypoint.dimension.tooltip")
+                    .append(Component.literal(" > ").append(WorldUtil.worldText(dimension, false)))
+                    .withStyle(ChatFormatting.BLUE));
         });
     }
 
@@ -76,13 +73,13 @@ public abstract class AbstractCoordinateModifierItem extends Item {
         setPos(stack, pos.getPos());
 
         if (pos.hasName())
-            stack.setCustomName(Text.literal(pos.name()));
+            stack.setHoverName(Component.literal(pos.name()));
 
         return stack;
     }
 
     public static CachedDirectedGlobalPos getPos(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
 
         if (!nbt.contains(POS_KEY))
             return null;
@@ -96,7 +93,7 @@ public abstract class AbstractCoordinateModifierItem extends Item {
     }
 
     public static void setPos(ItemStack stack, DirectedGlobalPos pos) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         if (pos == null) return;
         CachedDirectedGlobalPos cached = CachedDirectedGlobalPos.create(pos.getDimension(), pos.getPos(), pos.getRotation());
         if (cached.getWorld() instanceof TardisServerWorld) {

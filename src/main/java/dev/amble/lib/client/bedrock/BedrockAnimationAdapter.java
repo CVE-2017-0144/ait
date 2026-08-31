@@ -16,8 +16,8 @@ import dev.amble.lib.animation.client.AnimationMetadata;
 import dev.amble.lib.util.JsonUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -63,7 +63,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 			}
 		}
 
-		Map<Double, Identifier> sounds = null;
+		Map<Double, ResourceLocation> sounds = null;
 		if (jsonObj.has("sound_effects")) {
 			sounds = new HashMap<>();
 			JsonObject soundObj = jsonObj.getAsJsonObject("sound_effects");
@@ -85,7 +85,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 					continue;
 				}
 
-				Identifier id = Identifier.tryParse(stringId);
+				ResourceLocation id = ResourceLocation.tryParse(stringId);
 				sounds.put(time, id);
 			}
 		}
@@ -152,7 +152,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 				positions = deserializeKeyframe(bone.getAsJsonObject("position"), BedrockAnimation.Transformation.POSITION);
 			} else if (bone.get("position").isJsonArray()) {
 				JsonArray array = bone.getAsJsonArray("position");
-				positions = new BedrockAnimation.SimpleBoneValue(new Vec3d(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.POSITION);
+				positions = new BedrockAnimation.SimpleBoneValue(new Vec3(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.POSITION);
 			}
 		}
 
@@ -161,7 +161,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 				rotations = deserializeKeyframe(bone.getAsJsonObject("rotation"), BedrockAnimation.Transformation.ROTATION);
 			} else if (bone.get("rotation").isJsonArray()) {
 				JsonArray array = bone.getAsJsonArray("rotation");
-				rotations = new BedrockAnimation.SimpleBoneValue(new Vec3d(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.ROTATION);
+				rotations = new BedrockAnimation.SimpleBoneValue(new Vec3(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.ROTATION);
 			}
 		}
 
@@ -171,7 +171,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 				scale = deserializeKeyframe(json.getAsJsonObject(), BedrockAnimation.Transformation.SCALE);
 			} else if (json.isJsonArray()) {
 				JsonArray array = json.getAsJsonArray();
-				scale = new BedrockAnimation.SimpleBoneValue(new Vec3d(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.SCALE);
+				scale = new BedrockAnimation.SimpleBoneValue(new Vec3(parseMath(array.get(0)), parseMath(array.get(1)), parseMath(array.get(2))), BedrockAnimation.Transformation.SCALE);
 			}
 		}
 
@@ -235,7 +235,7 @@ public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimatio
 	}
 
 	private BedrockAnimation.SimpleBoneValue deserializeSimpleBoneValue(JsonArray array, BedrockAnimation.Transformation transformation) {
-		return new BedrockAnimation.SimpleBoneValue(new Vec3d(parseMath(String.valueOf(array.get(0))),
+		return new BedrockAnimation.SimpleBoneValue(new Vec3(parseMath(String.valueOf(array.get(0))),
 				parseMath(String.valueOf(array.get(1))),
 				parseMath(String.valueOf(array.get(2)))), transformation);
 	}

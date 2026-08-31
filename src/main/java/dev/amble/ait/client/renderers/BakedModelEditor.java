@@ -1,15 +1,15 @@
 package dev.amble.ait.client.renderers;
 
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public interface BakedModelEditor {
-    BakedModel getModel(ModelIdentifier identifier);
+    BakedModel getModel(ModelResourceLocation identifier);
 
-    BakedModel ait$getModel(Identifier identifier);
+    BakedModel ait$getModel(ResourceLocation identifier);
 
-    void ait$setModel(Identifier identifier, BakedModel model);
+    void ait$setModel(ResourceLocation identifier, BakedModel model);
 
-    void ait$setModel(ModelIdentifier identifier, BakedModel model);
+    void ait$setModel(ModelResourceLocation identifier, BakedModel model);
 }

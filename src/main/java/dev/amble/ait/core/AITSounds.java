@@ -1,12 +1,10 @@
 package dev.amble.ait.core;
 
 import java.util.List;
-
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import dev.amble.ait.AITMod;
 
 public class AITSounds {
@@ -298,10 +296,10 @@ public class AITSounds {
     private static SoundEvent register(String name) {
         return register(AITMod.id(name));
     }
-    private static SoundEvent register(Identifier id) {
-        return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
+    private static SoundEvent register(ResourceLocation id) {
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
     }
     public static List<SoundEvent> getSounds(String modid) {
-        return Registries.SOUND_EVENT.stream().filter(sound -> sound.getId().getNamespace().equals(modid)).toList();
+        return BuiltInRegistries.SOUND_EVENT.stream().filter(sound -> sound.getLocation().getNamespace().equals(modid)).toList();
     }
 }

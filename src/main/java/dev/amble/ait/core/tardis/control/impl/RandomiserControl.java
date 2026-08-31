@@ -1,11 +1,5 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
@@ -14,6 +8,11 @@ import dev.amble.ait.core.tardis.control.impl.pos.IncrementManager;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class RandomiserControl extends Control {
 
@@ -22,7 +21,7 @@ public class RandomiserControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         TravelHandler travel = tardis.travel();
@@ -42,14 +41,14 @@ public class RandomiserControl extends Control {
         return 40;
     }
 
-    private void messagePlayer(ServerPlayerEntity player, TravelHandler travel) {
+    private void messagePlayer(ServerPlayer player, TravelHandler travel) {
         CachedDirectedGlobalPos dest = travel.destination();
         BlockPos pos = dest.getPos();
 
-        Text text = Text.translatable("tardis.message.control.randomiser.destination")
-                .append(Text.literal(pos.getX() + " | " + pos.getY() + " | " + pos.getZ()));
+        Component text = Component.translatable("tardis.message.control.randomiser.destination")
+                .append(Component.literal(pos.getX() + " | " + pos.getY() + " | " + pos.getZ()));
 
-        player.sendMessage(text, true);
+        player.displayClientMessage(text, true);
     }
     @Override
     public SoundEvent getFallbackSound() {

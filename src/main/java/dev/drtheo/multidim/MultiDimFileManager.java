@@ -8,14 +8,13 @@ import dev.drtheo.multidim.api.WorldBlueprint;
 import dev.drtheo.multidim.event.ServerCrashEvent;
 import dev.drtheo.multidim.event.WorldSaveEvent;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.WorldSavePath;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,16 +29,16 @@ public class MultiDimFileManager {
     }
 
     public static Path getRootSavePath(MinecraftServer server) {
-        return getRootSavePath(server.getSavePath(WorldSavePath.ROOT));
+        return getRootSavePath(server.getWorldPath(LevelResource.ROOT));
     }
 
-    public static Path getSavePath(MinecraftServer server, Identifier id) {
+    public static Path getSavePath(MinecraftServer server, ResourceLocation id) {
         return getRootSavePath(server).resolve(id.getNamespace()).resolve(id.getPath() + ".json");
     }
 
     public static void init() {
         ServerCrashEvent.EVENT.register((server, report) -> {
-            for (ServerWorld world : server.getWorlds()) {
+            for (ServerLevel world : server.getAllLevels()) {
                 writeIfNeeded(server, world);
             }
         });
@@ -48,14 +47,14 @@ public class MultiDimFileManager {
         ServerLifecycleEvents.SERVER_STARTED.register(MultiDimFileManager::readAll);
     }
 
-    public static void writeIfNeeded(MinecraftServer server, ServerWorld world) {
+    public static void writeIfNeeded(MinecraftServer server, ServerLevel world) {
         if (world instanceof MultiDimServerWorld msw && msw.getBlueprint().persistent())
             write(server, msw);
     }
 
     public static void write(MinecraftServer server, MultiDimServerWorld world) {
-        RegistryKey<World> key = world.getRegistryKey();
-        Path file = getSavePath(server, key.getValue());
+        ResourceKey<Level> key = world.dimension();
+        Path file = getSavePath(server, key.location());
 
         try {
             if (!Files.exists(file)) {
@@ -68,7 +67,7 @@ public class MultiDimFileManager {
 
             Files.writeString(file, gson.toJson(root));
         } catch (IOException e) {
-            MultiDimMod.LOGGER.warn("Couldn't create world file! {}", key.getValue(), e);
+            MultiDimMod.LOGGER.warn("Couldn't create world file! {}", key.location(), e);
         }
     }
 
@@ -118,26 +117,26 @@ public class MultiDimFileManager {
     public static Saved readFromFile(MultiDim multidim, String namespace, Path file) {
         String fileName = file.getFileName().toString();
 
-        Identifier id = new Identifier(
+        ResourceLocation id = new ResourceLocation(
                 namespace, fileName.substring(0, fileName.length() - 5) // remove .json suffix
         );
 
         return read(multidim.server, id);
     }
 
-    private static Saved read(MinecraftServer server, Identifier id) {
+    private static Saved read(MinecraftServer server, ResourceLocation id) {
         Path file = getSavePath(server, id);
 
         try {
             JsonObject element = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-            Identifier blueprint = Identifier.tryParse(element.get("blueprint").getAsString());
+            ResourceLocation blueprint = ResourceLocation.tryParse(element.get("blueprint").getAsString());
 
-            return new Saved(blueprint, RegistryKey.of(RegistryKeys.WORLD, id));
+            return new Saved(blueprint, ResourceKey.create(Registries.DIMENSION, id));
         } catch (Throwable e) {
             MultiDimMod.LOGGER.warn("Couldn't read world file! {}", id, e);
             return null;
         }
     }
 
-    public record Saved(Identifier blueprint, RegistryKey<World> world) { }
+    public record Saved(ResourceLocation blueprint, ResourceKey<Level> world) { }
 }

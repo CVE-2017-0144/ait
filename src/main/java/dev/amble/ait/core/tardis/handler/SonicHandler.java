@@ -3,14 +3,12 @@ package dev.amble.ait.core.tardis.handler;
 import java.util.function.Consumer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
@@ -27,7 +25,7 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class SonicHandler extends KeyedTardisComponent implements ArtronHolderItem, TardisTickable {
 
-    public static final Identifier CHANGE_SONIC = AITMod.id("change_sonic");
+    public static final ResourceLocation CHANGE_SONIC = AITMod.id("change_sonic");
 
     private static final Property<ItemStack> EXTERIOR_SONIC = new Property<>(Property.ITEM_STACK, "exterior_sonic");
 
@@ -36,7 +34,7 @@ public class SonicHandler extends KeyedTardisComponent implements ArtronHolderIt
     static {
         ServerPlayNetworking.registerGlobalReceiver(CHANGE_SONIC,
                 ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
-                    Identifier id = buf.readIdentifier();
+                    ResourceLocation id = buf.readResourceLocation();
                     BlockPos pos = buf.readBlockPos();
                     server.execute(() -> {
                         if (!tardis.isUnlocked(SonicRegistry.getInstance().get(id))) return;
@@ -87,9 +85,9 @@ public class SonicHandler extends KeyedTardisComponent implements ArtronHolderIt
         });
     }
 
-    public static void spawnItem(World world, BlockPos pos, ItemStack sonic) {
+    public static void spawnItem(Level world, BlockPos pos, ItemStack sonic) {
         ItemEntity entity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), sonic);
-        world.spawnEntity(entity);
+        world.addFreshEntity(entity);
     }
 
     public static void spawnItem(CachedDirectedGlobalPos cached, ItemStack sonic) {
@@ -103,7 +101,7 @@ public class SonicHandler extends KeyedTardisComponent implements ArtronHolderIt
 
     @Override
     public void tick(MinecraftServer server) {
-        if (server.getTicks() % 10 != 0)
+        if (server.getTickCount() % 10 != 0)
             return;
 
         ItemStack exteriorSonic = this.exteriorSonic.get();

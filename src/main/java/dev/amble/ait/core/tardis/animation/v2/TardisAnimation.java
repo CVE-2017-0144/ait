@@ -10,14 +10,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.registry.Registries;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.api.tardis.Disposable;
@@ -40,8 +38,8 @@ import dev.amble.lib.util.ServerLifecycleHooks;
  * If you got this from the registry, call {@link TardisAnimation#instantiate()} as to not cause issues.
  */
 public abstract class TardisAnimation implements TardisTickable, Disposable, Identifiable, Linkable, Nameable {
-    private final Identifier id;
-    @Nullable private Identifier soundId;
+    private final ResourceLocation id;
+    @Nullable private ResourceLocation soundId;
 
     private TardisRef ref;
     private boolean isServer = true;
@@ -54,7 +52,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
     @Exclude
     private ActionQueue doneQueue;
 
-    protected TardisAnimation(Identifier id, @Nullable Identifier soundId, KeyframeTracker<Float> alpha, KeyframeTracker<Vector3f> scale, KeyframeTracker<Vector3f> position, KeyframeTracker<Vector3f> rotation) {
+    protected TardisAnimation(ResourceLocation id, @Nullable ResourceLocation soundId, KeyframeTracker<Float> alpha, KeyframeTracker<Vector3f> scale, KeyframeTracker<Vector3f> position, KeyframeTracker<Vector3f> rotation) {
         this.id = id;
         this.soundId = soundId;
 
@@ -64,7 +62,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
         this.rotation = rotation;
     }
 
-    protected TardisAnimation(Identifier id, @Nullable Identifier soundId, BlockbenchParser.Result result) {
+    protected TardisAnimation(ResourceLocation id, @Nullable ResourceLocation soundId, BlockbenchParser.Result result) {
         this(id, soundId, result.alpha().instantiate(), result.scale().instantiate(), result.translation().instantiate(), result.rotation().instantiate());
     }
 
@@ -83,7 +81,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         this.tickCommon();
 
         this.alpha.tick(client);
@@ -107,7 +105,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
         playSound = playSound && this.tryStart(this.rotation, new Vector3f());
 
         if (playSound && !tardis.cloak().silent().get()) {
-            tardis.getExterior().playSound(this.getSoundIdOrDefault(), SoundCategory.BLOCKS,
+            tardis.getExterior().playSound(this.getSoundIdOrDefault(), SoundSource.BLOCKS,
                     AITMod.CONFIG.flightSoundVolume);
         }
 
@@ -152,7 +150,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
         SoundEvent sfx = null;
 
         if (soundId != null) {
-            sfx = Registries.SOUND_EVENT.get(this.soundId);
+            sfx = BuiltInRegistries.SOUND_EVENT.get(this.soundId);
         }
 
         if (sfx == null) {
@@ -163,16 +161,16 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
         return sfx;
     }
 
-    public Optional<Identifier> getBlockbenchId() {
+    public Optional<ResourceLocation> getBlockbenchId() {
         return Optional.of(this.id());
     }
 
-    public Optional<Identifier> getSoundId() {
+    public Optional<ResourceLocation> getSoundId() {
         return Optional.ofNullable(this.soundId);
     }
 
-    public Identifier getSoundIdOrDefault() {
-        return this.getSoundId().orElse(AITSounds.ERROR.getId());
+    public ResourceLocation getSoundIdOrDefault() {
+        return this.getSoundId().orElse(AITSounds.ERROR.getLocation());
     }
 
     @Override
@@ -197,7 +195,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -260,7 +258,7 @@ public abstract class TardisAnimation implements TardisTickable, Disposable, Ide
 
         @Override
         public TardisAnimation deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return TardisAnimationRegistry.getInstance().instantiate(jsonDeserializationContext.deserialize(jsonElement, Identifier.class));
+            return TardisAnimationRegistry.getInstance().instantiate(jsonDeserializationContext.deserialize(jsonElement, ResourceLocation.class));
         }
 
         @Override

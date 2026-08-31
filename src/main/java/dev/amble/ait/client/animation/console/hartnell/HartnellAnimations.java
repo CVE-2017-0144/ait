@@ -4,2010 +4,2009 @@ import static dev.amble.ait.client.animation.AnimationConstants.STEP;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.client.render.entity.animation.Animation;
-import net.minecraft.client.render.entity.animation.AnimationHelper;
-import net.minecraft.client.render.entity.animation.Keyframe;
-import net.minecraft.client.render.entity.animation.Transformation;
+import net.minecraft.client.animation.AnimationChannel;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.Keyframe;
+import net.minecraft.client.animation.KeyframeAnimations;
 
 public class HartnellAnimations {
 
-    public static final Animation ROTOR = Animation.Builder.create(3.4f).looping()
-            .addBoneAnimation("rotor",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.68f, AnimationHelper.createTranslationalVector(0f, -4f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.36f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("compass",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.68f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.36f, AnimationHelper.createRotationalVector(0f, 360f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
+    public static final AnimationDefinition ROTOR = AnimationDefinition.Builder.withLength(3.4f).looping()
+            .addAnimation("rotor",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.68f, KeyframeAnimations.posVec(0f, -4f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.36f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("compass",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.68f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.36f, KeyframeAnimations.degreeVec(0f, 360f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
             .build();
-    public static final Animation HARTNELL_INFLIGHT_ANIMATION = Animation.Builder.create(8f).looping()
-            .addBoneAnimation("rotor",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2f, AnimationHelper.createTranslationalVector(0f, -4f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6f, AnimationHelper.createTranslationalVector(0f, -4f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(8f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("compass",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(8f, AnimationHelper.createRotationalVector(0f, -360f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone166",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP)))
-            .addBoneAnimation("bone169",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP)))
-            .addBoneAnimation("bone167",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone170",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone168",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone171",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone91",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.3433333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5834334f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.2083435f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.7916765f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.041677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.208343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.834333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.416767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone93",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.75f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(5.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.416767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.343333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.676667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone92",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.2916767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4.208343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(5.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.167667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.083433f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.416767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.958343f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone94",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.6766666f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.2916767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.1676665f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.0416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.083433f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4.958343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.541677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.041677f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.791677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.791677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone95",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.2916767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.7916766f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.0834333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.9167667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.2083435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.0834335f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4.208343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(5.416767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.708343f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(5.958343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.958343f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.676667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone109",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.4583433f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.9583434f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.4167667f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.6766667f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.0834335f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.3433335f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.7916765f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.2916765f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.75f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.416767f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.834333f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.375f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.791677f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.041677f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.5f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.916767f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.167667f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.625f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.958343f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone116",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.4583433f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.5834335f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4.791677f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.834333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.958343f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.291677f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.583433f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.834333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(8f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone126",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5416766f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.125f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.625f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.9167667f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.4167665f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.6766665f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.2083435f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.7916765f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.291677f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.583433f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.083433f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.541677f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.167667f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.676667f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.958343f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.458343f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.875f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone127",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.3433333f, AnimationHelper.createRotationalVector(0f, 20f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 40f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.1676667f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.625f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.0834335f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.5f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.9583435f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.25f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.7083435f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.083433f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.416767f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.541677f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.916767f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.625f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.125f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.708343f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.167667f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.458343f, AnimationHelper.createRotationalVector(0f, 45f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.916767f, AnimationHelper.createRotationalVector(0f, 17.5f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone131",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, -0.7f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.4167667f, AnimationHelper.createTranslationalVector(0f, 0f, 0.1f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, 0f, -0.3f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0.7f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.125f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(2.6766665f, AnimationHelper.createTranslationalVector(0f, 0f, 0.6f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(3.2916765f, AnimationHelper.createTranslationalVector(0f, 0f, -0.6f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.041677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.5f, AnimationHelper.createTranslationalVector(0f, 0f, -0.6f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(4.958343f, AnimationHelper.createTranslationalVector(0f, 0f, 0.5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(5.416767f, AnimationHelper.createTranslationalVector(0f, 0f, -0.7f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6f, AnimationHelper.createTranslationalVector(0f, 0f, -0.3f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(6.583433f, AnimationHelper.createTranslationalVector(0f, 0f, -0.6f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.167667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.5f, AnimationHelper.createTranslationalVector(0f, 0f, -0.5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(7.676667f, AnimationHelper.createTranslationalVector(0f, 0f, -0.2f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(8f, AnimationHelper.createTranslationalVector(0f, 0f, -0.7f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-
-    public static final Animation HARTNELL_IDLE_ANIMATION = Animation.Builder.create(8f).looping()
-            .addBoneAnimation("bone33",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.8343333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone91",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.8343334f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.1676665f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.5416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.167667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone93",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.0834335f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.0834335f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.083433f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.291677f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.958343f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone92",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.4167667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.3433335f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.625f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(4.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.875f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.083433f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.676667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone94",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone95",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.2083435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.75f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.083433f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(5.167667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.583433f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(7.416767f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("m_sensor_1",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone109",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.7083434f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.9167666f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.1676667f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.375f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.5834333f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.25f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.4583435f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.6766665f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.2083435f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.4167665f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.5834335f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.625f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.7916765f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.676667f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.875f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.083433f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.75f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.958343f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.167667f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.375f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.583433f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.708343f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.791677f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.916767f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.125f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.375f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.583433f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.791677f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone116",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(2.2083435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.625f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(6.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone126",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.2083433f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.4167667f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.625f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.208343f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.416767f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.583433f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.791677f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone127",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.2916767f, AnimationHelper.createRotationalVector(0f, -8.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5834334f, AnimationHelper.createRotationalVector(0f, -27.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.9167666f, AnimationHelper.createRotationalVector(0f, -7.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.25f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.2916765f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.5834335f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.5834335f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.8343335f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.125f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.834333f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.125f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.375f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.916767f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.167667f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.416767f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.5f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.75f, AnimationHelper.createRotationalVector(0f, -17.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone131",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5834334f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.4583433f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.0416765f, AnimationHelper.createTranslationalVector(0f, 0f, 0.2f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.4583435f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.375f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(3.9583435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.375f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4.708343f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.291677f, AnimationHelper.createTranslationalVector(0f, 0f, -0.4f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(5.708343f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.041677f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.583433f, AnimationHelper.createTranslationalVector(0f, 0f, 0.6f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.834333f, AnimationHelper.createTranslationalVector(0f, 0f, 0.4f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.125f, AnimationHelper.createTranslationalVector(0f, 0f, 0.6f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(7.5f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("compass",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(8f, AnimationHelper.createRotationalVector(0f, -180f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone166",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone169",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone167",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone170",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(5.343333f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone168",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone171",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(2.6766665f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP),
-                            new Keyframe(8f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
+    public static final AnimationDefinition HARTNELL_INFLIGHT_ANIMATION = AnimationDefinition.Builder.withLength(8f).looping()
+            .addAnimation("rotor",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2f, KeyframeAnimations.posVec(0f, -4f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6f, KeyframeAnimations.posVec(0f, -4f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(8f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("compass",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(8f, KeyframeAnimations.degreeVec(0f, -360f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone166",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP)))
+            .addAnimation("bone169",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP)))
+            .addAnimation("bone167",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone170",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone168",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone171",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone91",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.3433333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5834334f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.2083435f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.7916765f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.041677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.208343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.834333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.416767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone93",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.75f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(5.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.416767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.343333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.676667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone92",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.2916767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4.208343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(5.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.167667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.083433f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.416767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.958343f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone94",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.6766666f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.2916767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.1676665f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.0416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.083433f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4.958343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.541677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.041677f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.791677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.791677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone95",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.2916767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.7916766f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.0834333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.9167667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.2083435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.0834335f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4.208343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(5.416767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.708343f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(5.958343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.25f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.958343f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.25f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.676667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone109",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.4583433f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.9583434f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.4167667f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.6766667f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.0834335f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.3433335f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.7916765f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.2916765f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.75f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.416767f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.834333f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.375f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.791677f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.041677f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.5f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.916767f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.167667f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.625f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.958343f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone116",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.4583433f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.5834335f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4.791677f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.834333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.958343f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.291677f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.583433f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.834333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone126",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5416766f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.125f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.625f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.9167667f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.4167665f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.6766665f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.2083435f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.7916765f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.291677f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.583433f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.083433f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.541677f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.167667f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.676667f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.958343f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.458343f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.875f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone127",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.3433333f, KeyframeAnimations.degreeVec(0f, 20f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 40f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.1676667f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.625f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.0834335f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.5f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.9583435f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.25f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.7083435f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.083433f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.416767f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.541677f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.916767f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.625f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.125f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.708343f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.167667f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.458343f, KeyframeAnimations.degreeVec(0f, 45f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.916767f, KeyframeAnimations.degreeVec(0f, 17.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone131",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, -0.7f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.4167667f, KeyframeAnimations.posVec(0f, 0f, 0.1f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, 0f, -0.3f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.5f, KeyframeAnimations.posVec(0f, 0f, 0.7f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.125f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(2.6766665f, KeyframeAnimations.posVec(0f, 0f, 0.6f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(3.2916765f, KeyframeAnimations.posVec(0f, 0f, -0.6f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.041677f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.5f, KeyframeAnimations.posVec(0f, 0f, -0.6f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(4.958343f, KeyframeAnimations.posVec(0f, 0f, 0.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(5.416767f, KeyframeAnimations.posVec(0f, 0f, -0.7f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6f, KeyframeAnimations.posVec(0f, 0f, -0.3f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(6.583433f, KeyframeAnimations.posVec(0f, 0f, -0.6f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.167667f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.5f, KeyframeAnimations.posVec(0f, 0f, -0.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(7.676667f, KeyframeAnimations.posVec(0f, 0f, -0.2f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(8f, KeyframeAnimations.posVec(0f, 0f, -0.7f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
             .build();
 
-    public static final Animation HARTNELL_CONTROL_HAILMARY_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone61",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone97",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_HAILMARY_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone61",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone97",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIMENSION_FIRST_ANIMATION = Animation.Builder.create(1.75f)
-            .addBoneAnimation("bone86",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone87",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone88",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone89",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone90",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone62",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.375f, AnimationHelper.createRotationalVector(0f, 15f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.6766667f, AnimationHelper.createRotationalVector(0f, 312.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.75f, AnimationHelper.createRotationalVector(0f, 360f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone63",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone65",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone64",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone80",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone66",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone81",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.25f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIMENSION_SECOND_ANIMATION = Animation.Builder.create(1.75f)
-            .addBoneAnimation("bone86",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5416766f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone87",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone88",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone89",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.3433333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone90",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone62",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.2083433f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.3433333f, AnimationHelper.createRotationalVector(0f, 15f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.625f, AnimationHelper.createRotationalVector(0f, 312.5f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(1.75f, AnimationHelper.createRotationalVector(0f, 360f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .addBoneAnimation("bone63",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.3433333f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5416766f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone65",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone64",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone80",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.3433333f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone66",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5416766f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone81",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createRotationalVector(0f, 0f, 70f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.2083433f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_RANDOMISER_ANIMATION = Animation.Builder.create(1.75f)
-            .addBoneAnimation("bone85",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.3433333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.4167667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5834334f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.6766666f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.8343334f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.9167666f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.0834333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.1676667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.3433333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.4167667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5834333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.6766667f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone79",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.75f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DOORCONTROL_OPEN_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone117",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, -2f, 0f), STEP)))
-            .addBoneAnimation("bone123",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DOORCONTROL_CLOSE_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone117",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone123",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DOORLOCK_UNLOCKED_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone118",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone125",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DOORLOCK_LOCKED_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone118",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone125",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LANDTYPE_ANIMATION = Animation.Builder.create(1.25f)
-            .addBoneAnimation("bone129",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.08343333f, AnimationHelper.createTranslationalVector(0f, 0f, -0.15f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.20834334f, AnimationHelper.createTranslationalVector(0f, 0f, -1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.2916767f, AnimationHelper.createTranslationalVector(-0.15f, 0f, -1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.4167667f, AnimationHelper.createTranslationalVector(-1f, 0f, -1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(-0.85f, 0f, -1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.7083434f, AnimationHelper.createTranslationalVector(0f, 0f, -1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.7916766f, AnimationHelper.createTranslationalVector(0f, 0f, -1.25f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1f, AnimationHelper.createTranslationalVector(0f, 0f, -2f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.0834333f, AnimationHelper.createTranslationalVector(0f, 0f, -1.58f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_FASTRETURN_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone25",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createTranslationalVector(0f, -0.25f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_XINC_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone70",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone82",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_YINC_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone76",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone83",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_ZINC_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone77",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone84",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_XYZINC_1_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone74",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 120f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_XYZINC_10_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone74",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 25f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_XYZINC_100_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone74",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 25f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 75f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_XYZINC_1000_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone74",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 75f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 120f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_THROTTLE_1_FIRST_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone45",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_THROTTLE_1_SECOND_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone45",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_AUTOPILOT_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone26",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.08343333f, AnimationHelper.createRotationalVector(0f, 5.42f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 62.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone145",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_AUTOPILOT_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone26",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 62.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.08343333f, AnimationHelper.createRotationalVector(0f, 57.08f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone145",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_HANDBRAKE_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone46",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_HANDBRAKE_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone46",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_ANTIGRAV_ON_ANIMATION = Animation.Builder.create(0.125f)
-            .addBoneAnimation("bone33",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.125f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_ANTIGRAV_OFF_ANIMATION = Animation.Builder.create(0.125f)
-            .addBoneAnimation("bone33",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.125f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_REFUELER_ON_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone106",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_REFUELER_OFF_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone106",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIRECTION_NORTH_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone59",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 27.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 117.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIRECTION_EAST_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone59",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 117.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 207.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIRECTION_SOUTH_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone59",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 207.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 297.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_DIRECTION_WEST_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone59",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 297.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 387.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH1_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone34",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH1_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone34",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH2_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone35",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH2_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone35",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH3_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone47",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH3_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone47",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER1_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone138",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone136",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone143",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER1_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone138",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone136",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone143",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 85f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER2_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone135",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone140",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone144",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER2_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone135",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone140",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone144",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 85f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER3_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone139",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone137",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone146",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER3_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone139",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone137",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.5f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone146",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.125f, AnimationHelper.createRotationalVector(0f, 0f, 85f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER4_ON_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone142",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER4_OFF_ANIMATION = Animation.Builder.create(0.5f)
-            .addBoneAnimation("bone142",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 52.5f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK1_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone147",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 55f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK1_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone147",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 55f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK2_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone148",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, -55f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK2_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone148",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -55f, 0f),
-                                    Transformation.Interpolations.CUBIC),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.CUBIC)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH4_ON_ANIMATION = Animation.Builder.create(0.16766666f)
-            .addBoneAnimation("bone124",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH4_OFF_ANIMATION = Animation.Builder.create(0.16766666f)
-            .addBoneAnimation("bone124",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH5_ON_ANIMATION = Animation.Builder.create(0.16766666f)
-            .addBoneAnimation("bone128",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH5_OFF_ANIMATION = Animation.Builder.create(0.16766666f)
-            .addBoneAnimation("bone128",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.16766666f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TOGGLESWITCH1_ON_ANIMATION = Animation.Builder.create(0.75f)
-            .addBoneAnimation("bone120",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone121",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone119",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TOGGLESWITCH1_OFF_ANIMATION = Animation.Builder.create(0.75f)
-            .addBoneAnimation("bone120",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone121",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone119",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TOGGLESWITCH2_ON_ANIMATION = Animation.Builder.create(0.75f)
-            .addBoneAnimation("bone111",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone102",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone115",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone104",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone105",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TOGGLESWITCH2_OFF_ANIMATION = Animation.Builder.create(0.75f)
-            .addBoneAnimation("bone115",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone104",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone105",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.5f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.75f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone111",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone102",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.75f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TURNSWITCH1_ON_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone101",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone108",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TURNSWITCH1_OFF_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone101",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone108",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TURNSWITCH2_ON_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone103",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone107",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_TURNSWITCH2_OFF_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone103",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone107",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 180f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK3_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone75",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 77.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK3_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone75",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 77.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK4_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone78",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 67.5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK4_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone78",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 67.5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER5_ON_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone71",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone96",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_LEVER5_OFF_ANIMATION = Animation.Builder.create(0.375f)
-            .addBoneAnimation("bone71",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 90f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.375f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone96",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH6_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone72",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH6_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone72",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH7_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone73",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH7_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone73",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK5_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone60",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 135f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_CRANK5_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone60",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 135f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH8_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone56",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH8_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone56",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH9_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone57",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH9_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone57",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH10_ON_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone58",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .build();
-    public static final Animation HARTNELL_CONTROL_SWITCH10_OFF_ANIMATION = Animation.Builder.create(0.25f)
-            .addBoneAnimation("bone58",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(1f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(0.25f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
+    public static final AnimationDefinition HARTNELL_IDLE_ANIMATION = AnimationDefinition.Builder.withLength(8f).looping()
+            .addAnimation("bone33",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.8343333f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone91",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.8343334f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.1676665f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.5416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.167667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone93",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.0834335f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.0834335f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.083433f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.291677f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.958343f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone92",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.4167667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.3433335f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.625f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(4.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.875f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.083433f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.676667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone94",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone95",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.2083435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.75f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.083433f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(5.167667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.583433f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(7.416767f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("m_sensor_1",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone109",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.7083434f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.9167666f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.1676667f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.375f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.5834333f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.25f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.4583435f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.6766665f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.2083435f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.4167665f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.5834335f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.625f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.7916765f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.676667f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.875f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.083433f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.75f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.958343f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.167667f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.375f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.583433f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.708343f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.791677f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.916767f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.125f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.375f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.583433f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.791677f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone116",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(2.2083435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.625f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(6.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone126",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.2083433f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.4167667f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.625f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.208343f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.416767f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.583433f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.791677f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone127",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.2916767f, KeyframeAnimations.degreeVec(0f, -8.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5834334f, KeyframeAnimations.degreeVec(0f, -27.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.9167666f, KeyframeAnimations.degreeVec(0f, -7.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.25f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.2916765f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.5834335f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.5834335f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.8343335f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.125f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.834333f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.125f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.375f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.916767f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.167667f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.416767f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.5f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.75f, KeyframeAnimations.degreeVec(0f, -17.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone131",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5834334f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.4583433f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.0416765f, KeyframeAnimations.posVec(0f, 0f, 0.2f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.4583435f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.375f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(3.9583435f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.375f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4.708343f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.291677f, KeyframeAnimations.posVec(0f, 0f, -0.4f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(5.708343f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.041677f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.583433f, KeyframeAnimations.posVec(0f, 0f, 0.6f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.834333f, KeyframeAnimations.posVec(0f, 0f, 0.4f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.125f, KeyframeAnimations.posVec(0f, 0f, 0.6f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(7.5f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("compass",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(8f, KeyframeAnimations.degreeVec(0f, -180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone166",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone169",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone167",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone170",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(5.343333f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone168",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone171",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(2.6766665f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP),
+                            new Keyframe(8f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
             .build();
 
-    public static final Animation HARTNELL_POWER_ON_ANIMATION = Animation.Builder.create(9.291676f)
-            .addBoneAnimation("bone33",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone91",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone93",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.9583435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone92",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.2083435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone94",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(3.9583435f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone95",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.75f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("m_sensor_1",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone109",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone116",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.916767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone126",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone127",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone131",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone166",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP)))
-            .addBoneAnimation("bone169",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f), STEP)))
-            .addBoneAnimation("bone167",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone170",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone168",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, -0.7f, 1f), STEP)))
-            .addBoneAnimation("bone171",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone86",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(9.083434f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone87",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(9.083434f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone88",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(9.083434f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone89",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(9.083434f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone90",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(9.083434f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone82",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(4.343333f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone83",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.125f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone84",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.916767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone85",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.541677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone111",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.291677f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone101",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.916767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone102",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.676667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone103",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(7.167667f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone117",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(5.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone118",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(6.958343f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone135",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.20834334f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone138",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.20834334f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone136",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.7916766f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone139",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(0.7916766f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone137",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5416767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("bone140",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP),
-                            new Keyframe(1.5416767f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP)))
-            .addBoneAnimation("rotor",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, -5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(2.6766665f, AnimationHelper.createTranslationalVector(0f, -5f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(6.5f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("light_3",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(9.291676f, AnimationHelper.createScalingVector(1f, 1f, 1f),
-                                    Transformation.Interpolations.LINEAR)))
+    public static final AnimationDefinition HARTNELL_CONTROL_HAILMARY_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone61",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone97",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
             .build();
-    public static final Animation HARTNELL_POWER_OFF_ANIMATION = Animation.Builder.create(4f)
-            .addBoneAnimation("bone33",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone91",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.0416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone93",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.7083433f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone92",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone94",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.7083433f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone95",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.0416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("m_sensor_1",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone109",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone116",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.5416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone126",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone127",
-                    new Transformation(Transformation.Targets.ROTATE,
-                            new Keyframe(0f, AnimationHelper.createRotationalVector(0f, -40f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone131",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, -0.75f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("bone166",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone169",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, -1.3f, 1f), STEP)))
-            .addBoneAnimation("bone167",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone170",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone168",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, -0.7f, 1f), STEP)))
-            .addBoneAnimation("bone171",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 0f, 1f), STEP)))
-            .addBoneAnimation("bone86",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone87",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone88",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone89",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone90",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.9167665f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone82",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(1.875f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone83",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.2083435f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone84",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.5416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone85",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.25f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone111",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.7083435f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone101",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.5416765f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone102",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.875f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone103",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3.0834335f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone117",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(2.375f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone118",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(3f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone135",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.08343333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone138",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.08343333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone136",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.3433333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone139",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.3433333f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone137",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.6766666f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("bone140",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f), STEP),
-                            new Keyframe(0.6766666f, AnimationHelper.createTranslationalVector(0f, -1f, 0f), STEP)))
-            .addBoneAnimation("rotor",
-                    new Transformation(Transformation.Targets.TRANSLATE,
-                            new Keyframe(0f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(1.375f, AnimationHelper.createTranslationalVector(0f, 0f, 0f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4f, AnimationHelper.createTranslationalVector(0f, -5f, 0f),
-                                    Transformation.Interpolations.LINEAR)))
-            .addBoneAnimation("light_3",
-                    new Transformation(Transformation.Targets.SCALE,
-                            new Keyframe(0f, AnimationHelper.createScalingVector(1f, 1f, 1f),
-                                    Transformation.Interpolations.LINEAR),
-                            new Keyframe(4f, AnimationHelper.createScalingVector(1f, 1f, 1f),
-                                    Transformation.Interpolations.LINEAR)))
+    public static final AnimationDefinition HARTNELL_CONTROL_HAILMARY_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone61",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone97",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIMENSION_FIRST_ANIMATION = AnimationDefinition.Builder.withLength(1.75f)
+            .addAnimation("bone86",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone87",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone88",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone89",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone90",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone62",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.375f, KeyframeAnimations.degreeVec(0f, 15f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.6766667f, KeyframeAnimations.degreeVec(0f, 312.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.75f, KeyframeAnimations.degreeVec(0f, 360f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone63",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone65",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone64",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone80",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone66",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone81",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.25f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIMENSION_SECOND_ANIMATION = AnimationDefinition.Builder.withLength(1.75f)
+            .addAnimation("bone86",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5416766f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone87",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone88",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone89",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.3433333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone90",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone62",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.2083433f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.3433333f, KeyframeAnimations.degreeVec(0f, 15f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.625f, KeyframeAnimations.degreeVec(0f, 312.5f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(1.75f, KeyframeAnimations.degreeVec(0f, 360f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .addAnimation("bone63",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.3433333f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5416766f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone65",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone64",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone80",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.3433333f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone66",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5416766f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone81",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.degreeVec(0f, 0f, 70f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.2083433f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_RANDOMISER_ANIMATION = AnimationDefinition.Builder.withLength(1.75f)
+            .addAnimation("bone85",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.3433333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.4167667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5834334f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.6766666f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.8343334f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.9167666f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.0834333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.1676667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.3433333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.4167667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5834333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.6766667f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone79",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.75f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DOORCONTROL_OPEN_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone117",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, -2f, 0f), STEP)))
+            .addAnimation("bone123",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DOORCONTROL_CLOSE_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone117",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone123",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DOORLOCK_UNLOCKED_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone118",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone125",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DOORLOCK_LOCKED_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone118",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone125",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LANDTYPE_ANIMATION = AnimationDefinition.Builder.withLength(1.25f)
+            .addAnimation("bone129",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.08343333f, KeyframeAnimations.posVec(0f, 0f, -0.15f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.20834334f, KeyframeAnimations.posVec(0f, 0f, -1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.2916767f, KeyframeAnimations.posVec(-0.15f, 0f, -1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.4167667f, KeyframeAnimations.posVec(-1f, 0f, -1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(-0.85f, 0f, -1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.7083434f, KeyframeAnimations.posVec(0f, 0f, -1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.7916766f, KeyframeAnimations.posVec(0f, 0f, -1.25f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1f, KeyframeAnimations.posVec(0f, 0f, -2f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.0834333f, KeyframeAnimations.posVec(0f, 0f, -1.58f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_FASTRETURN_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone25",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.posVec(0f, -0.25f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_XINC_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone70",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone82",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_YINC_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone76",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone83",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_ZINC_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone77",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone84",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_XYZINC_1_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone74",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 120f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_XYZINC_10_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone74",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 25f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_XYZINC_100_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone74",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 25f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 75f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_XYZINC_1000_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone74",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 75f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 120f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_THROTTLE_1_FIRST_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone45",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_THROTTLE_1_SECOND_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone45",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_AUTOPILOT_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone26",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.08343333f, KeyframeAnimations.degreeVec(0f, 5.42f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 62.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone145",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_AUTOPILOT_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone26",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 62.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.08343333f, KeyframeAnimations.degreeVec(0f, 57.08f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone145",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_HANDBRAKE_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone46",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_HANDBRAKE_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone46",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_ANTIGRAV_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.125f)
+            .addAnimation("bone33",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.125f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_ANTIGRAV_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.125f)
+            .addAnimation("bone33",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.125f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_REFUELER_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone106",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_REFUELER_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone106",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIRECTION_NORTH_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone59",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 27.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 117.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIRECTION_EAST_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone59",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 117.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 207.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIRECTION_SOUTH_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone59",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 207.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 297.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_DIRECTION_WEST_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone59",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 297.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 387.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH1_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone34",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH1_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone34",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH2_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone35",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH2_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone35",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH3_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone47",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH3_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone47",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER1_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone138",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone136",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone143",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER1_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone138",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone136",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone143",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 85f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER2_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone135",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone140",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone144",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER2_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone135",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone140",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone144",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 85f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER3_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone139",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone137",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone146",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER3_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone139",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone137",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.5f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone146",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.125f, KeyframeAnimations.degreeVec(0f, 0f, 85f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER4_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone142",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER4_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.5f)
+            .addAnimation("bone142",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 52.5f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK1_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone147",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 55f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK1_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone147",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 55f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK2_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone148",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, -55f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK2_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone148",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -55f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.CATMULLROM)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH4_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.16766666f)
+            .addAnimation("bone124",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH4_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.16766666f)
+            .addAnimation("bone124",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH5_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.16766666f)
+            .addAnimation("bone128",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH5_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.16766666f)
+            .addAnimation("bone128",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.16766666f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TOGGLESWITCH1_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.75f)
+            .addAnimation("bone120",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone121",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone119",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TOGGLESWITCH1_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.75f)
+            .addAnimation("bone120",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone121",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone119",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TOGGLESWITCH2_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.75f)
+            .addAnimation("bone111",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone102",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone115",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone104",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone105",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TOGGLESWITCH2_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.75f)
+            .addAnimation("bone115",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone104",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone105",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.5f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.75f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone111",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone102",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.75f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TURNSWITCH1_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone101",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone108",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TURNSWITCH1_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone101",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone108",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TURNSWITCH2_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone103",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone107",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_TURNSWITCH2_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone103",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone107",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 180f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK3_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone75",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 77.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK3_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone75",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 77.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK4_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone78",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 67.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK4_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone78",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 67.5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER5_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone71",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone96",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_LEVER5_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.375f)
+            .addAnimation("bone71",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 90f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.375f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone96",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH6_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone72",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH6_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone72",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH7_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone73",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH7_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone73",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK5_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone60",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 135f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_CRANK5_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone60",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 135f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH8_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone56",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH8_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone56",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH9_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone57",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH9_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone57",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH10_ON_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone58",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_CONTROL_SWITCH10_OFF_ANIMATION = AnimationDefinition.Builder.withLength(0.25f)
+            .addAnimation("bone58",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(1f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(0.25f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
             .build();
 
-    public static List<Animation> listOfControlAnimations() {
-        List<Animation> animationList = new ArrayList<>();
+    public static final AnimationDefinition HARTNELL_POWER_ON_ANIMATION = AnimationDefinition.Builder.withLength(9.291676f)
+            .addAnimation("bone33",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone91",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone93",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.9583435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone92",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.2083435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone94",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(3.9583435f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone95",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.75f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("m_sensor_1",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone109",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone116",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.916767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone126",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone127",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone131",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone166",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP)))
+            .addAnimation("bone169",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f), STEP)))
+            .addAnimation("bone167",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone170",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone168",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, -0.7f, 1f), STEP)))
+            .addAnimation("bone171",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone86",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(9.083434f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone87",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(9.083434f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone88",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(9.083434f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone89",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(9.083434f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone90",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(9.083434f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone82",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(4.343333f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone83",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.125f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone84",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.916767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone85",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.541677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone111",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.291677f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone101",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.916767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone102",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.676667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone103",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(7.167667f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone117",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(5.5f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone118",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(6.958343f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone135",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.20834334f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone138",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.20834334f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone136",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.7916766f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone139",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(0.7916766f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone137",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5416767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("bone140",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP),
+                            new Keyframe(1.5416767f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP)))
+            .addAnimation("rotor",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, -5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(2.6766665f, KeyframeAnimations.posVec(0f, -5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(6.5f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("light_3",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(9.291676f, KeyframeAnimations.scaleVec(1f, 1f, 1f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+    public static final AnimationDefinition HARTNELL_POWER_OFF_ANIMATION = AnimationDefinition.Builder.withLength(4f)
+            .addAnimation("bone33",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone91",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.0416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone93",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.7083433f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone92",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone94",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.7083433f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone95",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.0416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("m_sensor_1",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone109",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone116",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.5416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone126",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone127",
+                    new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                            new Keyframe(0f, KeyframeAnimations.degreeVec(0f, -40f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone131",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, -0.75f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("bone166",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone169",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, -1.3f, 1f), STEP)))
+            .addAnimation("bone167",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone170",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone168",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, -0.7f, 1f), STEP)))
+            .addAnimation("bone171",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 0f, 1f), STEP)))
+            .addAnimation("bone86",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone87",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone88",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone89",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone90",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.9167665f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone82",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(1.875f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone83",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.2083435f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone84",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.5416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone85",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.25f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone111",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.7083435f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone101",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.5416765f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone102",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.875f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone103",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3.0834335f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone117",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(2.375f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone118",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(3f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone135",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.08343333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone138",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.08343333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone136",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.3433333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone139",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.3433333f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone137",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.6766666f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("bone140",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f), STEP),
+                            new Keyframe(0.6766666f, KeyframeAnimations.posVec(0f, -1f, 0f), STEP)))
+            .addAnimation("rotor",
+                    new AnimationChannel(AnimationChannel.Targets.POSITION,
+                            new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(1.375f, KeyframeAnimations.posVec(0f, 0f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4f, KeyframeAnimations.posVec(0f, -5f, 0f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .addAnimation("light_3",
+                    new AnimationChannel(AnimationChannel.Targets.SCALE,
+                            new Keyframe(0f, KeyframeAnimations.scaleVec(1f, 1f, 1f),
+                                    AnimationChannel.Interpolations.LINEAR),
+                            new Keyframe(4f, KeyframeAnimations.scaleVec(1f, 1f, 1f),
+                                    AnimationChannel.Interpolations.LINEAR)))
+            .build();
+
+    public static List<AnimationDefinition> listOfControlAnimations() {
+        List<AnimationDefinition> animationList = new ArrayList<>();
         animationList.add(HARTNELL_CONTROL_ANTIGRAV_OFF_ANIMATION); // 0
         animationList.add(HARTNELL_CONTROL_ANTIGRAV_ON_ANIMATION); // 1
         animationList.add(HARTNELL_CONTROL_AUTOPILOT_OFF_ANIMATION); // 2

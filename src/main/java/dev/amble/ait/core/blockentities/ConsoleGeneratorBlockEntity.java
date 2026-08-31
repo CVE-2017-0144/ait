@@ -7,23 +7,21 @@ import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.previousVarian
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITBlocks;
@@ -36,10 +34,10 @@ import dev.amble.ait.registry.impl.console.ConsoleRegistry;
 import dev.amble.ait.registry.impl.console.variant.ConsoleVariantRegistry;
 
 public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
-    public static final Identifier SYNC_TYPE = AITMod.id("sync_gen_type");
-    public static final Identifier SYNC_VARIANT = AITMod.id("sync_gen_variant");
-    private Identifier type;
-    private Identifier variant;
+    public static final ResourceLocation SYNC_TYPE = AITMod.id("sync_gen_type");
+    public static final ResourceLocation SYNC_VARIANT = AITMod.id("sync_gen_variant");
+    private ResourceLocation type;
+    private ResourceLocation variant;
 
     public ConsoleGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(AITBlockEntityTypes.CONSOLE_GENERATOR_ENTITY_TYPE, pos, state);
@@ -47,35 +45,35 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         this.type = ConsoleRegistry.HARTNELL.id();
     }
 
-    public ConsoleGeneratorBlockEntity(BlockPos pos, BlockState state, Identifier type, Identifier variant) {
+    public ConsoleGeneratorBlockEntity(BlockPos pos, BlockState state, ResourceLocation type, ResourceLocation variant) {
         super(AITBlockEntityTypes.CONSOLE_GENERATOR_ENTITY_TYPE, pos, state);
 
         this.type = type;
         this.variant = variant;
     }
 
-    public void useOn(World world, boolean sneaking, boolean punching, PlayerEntity player) {
+    public void useOn(Level world, boolean sneaking, boolean punching, Player player) {
         if (!TardisServerWorld.isTardisDimension(world))
             return;
 
         if (!this.isLinked())
             return;
 
-        ItemStack stack = player.getMainHandStack();
+        ItemStack stack = player.getMainHandItem();
 
-        boolean validItem = stack.isOf(AITItems.SONIC_SCREWDRIVER) || stack.isOf(Items.BLAZE_POWDER);
-        boolean decrement = stack.isOf(Items.BLAZE_POWDER);
+        boolean validItem = stack.is(AITItems.SONIC_SCREWDRIVER) || stack.is(Items.BLAZE_POWDER);
+        boolean decrement = stack.is(Items.BLAZE_POWDER);
 
         if (validItem && tardis().get().isUnlocked(this.getConsoleVariant())) {
             if (decrement) {
-                stack.decrement(1);
+                stack.shrink(1);
             }
 
             this.createConsole(player);
             return;
         }
 
-        world.playSound(null, this.pos, SoundEvents.BLOCK_SCULK_CHARGE, SoundCategory.BLOCKS, 0.5f, 1.0f);
+        world.playSound(null, this.worldPosition, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, 0.5f, 1.0f);
 
         if (sneaking) {
             this.changeConsole(punching
@@ -89,8 +87,8 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         if (this.type != null)
             nbt.putString("console", this.type.toString());
@@ -99,29 +97,29 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
             nbt.putString("variant", this.variant.toString());
     }
 
-    private void createConsole(PlayerEntity player) {
-        if (this.getWorld() != null && this.getWorld().isClient()) return;
+    private void createConsole(Player player) {
+        if (this.getLevel() != null && this.getLevel().isClientSide()) return;
 
-        ConsoleBlockEntity be = new ConsoleBlockEntity(pos, AITBlocks.CONSOLE.getDefaultState());
+        ConsoleBlockEntity be = new ConsoleBlockEntity(worldPosition, AITBlocks.CONSOLE.defaultBlockState());
 
         be.setType(this.getConsoleSchema());
         be.setVariant(this.getConsoleVariant());
 
-        if (world == null)
+        if (level == null)
             return;
 
         if (this.tardis().isPresent() && !this.tardis().get().isUnlocked(this.getConsoleVariant())) {
-            player.sendMessage(Text.translatable("message.ait.console_generator.not_unlocked")
-                    .formatted(Formatting.ITALIC), true);
-            world.playSound(null, this.pos, SoundEvents.ENTITY_GLOW_ITEM_FRAME_BREAK, SoundCategory.BLOCKS, 0.5f, 1.0f);
+            player.displayClientMessage(Component.translatable("message.ait.console_generator.not_unlocked")
+                    .withStyle(ChatFormatting.ITALIC), true);
+            level.playSound(null, this.worldPosition, SoundEvents.GLOW_ITEM_FRAME_BREAK, SoundSource.BLOCKS, 0.5f, 1.0f);
             return;
         }
 
         // ConsoleBlockEntity marks for controls when it gets linked
-        world.setBlockState(this.pos, AITBlocks.CONSOLE.getDefaultState());
-        world.addBlockEntity(be);
+        level.setBlockAndUpdate(this.worldPosition, AITBlocks.CONSOLE.defaultBlockState());
+        level.setBlockEntity(be);
 
-        world.playSound(null, this.pos, SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 0.5f, 1.0f);
+        level.playSound(null, this.worldPosition, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.5f, 1.0f);
     }
 
     public ConsoleTypeSchema getConsoleSchema() {
@@ -132,14 +130,14 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         return ConsoleRegistry.getInstance().get(type);
     }
 
-    public void setConsoleSchema(Identifier type) {
+    public void setConsoleSchema(ResourceLocation type) {
         this.type = type;
 
-        this.markDirty();
+        this.setChanged();
         this.syncType();
 
-        if (this.getWorld() instanceof ServerWorld serverWorld)
-            serverWorld.getChunkManager().markForUpdate(this.pos);
+        if (this.getLevel() instanceof ServerLevel serverWorld)
+            serverWorld.getChunkSource().blockChanged(this.worldPosition);
     }
 
     public ConsoleVariantSchema getConsoleVariant() {
@@ -149,14 +147,14 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         return ConsoleVariantRegistry.getInstance().get(this.variant);
     }
 
-    public void setVariant(Identifier variant) {
+    public void setVariant(ResourceLocation variant) {
         this.variant = variant;
 
-        this.markDirty();
+        this.setChanged();
         this.syncVariant();
 
-        if (this.getWorld() instanceof ServerWorld serverWorld)
-            serverWorld.getChunkManager().markForUpdate(this.pos);
+        if (this.getLevel() instanceof ServerLevel serverWorld)
+            serverWorld.getChunkSource().blockChanged(this.worldPosition);
     }
 
     public void changeConsole(ConsoleTypeSchema schema) {
@@ -170,45 +168,45 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
     }
 
     private void syncType() {
-        if (!hasWorld() || world.isClient())
+        if (!hasLevel() || level.isClientSide())
             return;
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
 
-        buf.writeString(getConsoleSchema().id().toString());
-        buf.writeBlockPos(getPos());
+        buf.writeUtf(getConsoleSchema().id().toString());
+        buf.writeBlockPos(getBlockPos());
 
-        for (PlayerEntity player : world.getPlayers()) {
-            ServerPlayNetworking.send((ServerPlayerEntity) player, SYNC_TYPE, buf);
+        for (Player player : level.players()) {
+            ServerPlayNetworking.send((ServerPlayer) player, SYNC_TYPE, buf);
         }
     }
 
     private void syncVariant() {
-        if (!hasWorld() || world.isClient())
+        if (!hasLevel() || level.isClientSide())
             return;
 
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
 
-        buf.writeString(getConsoleVariant().id().toString());
-        buf.writeBlockPos(getPos());
+        buf.writeUtf(getConsoleVariant().id().toString());
+        buf.writeBlockPos(getBlockPos());
 
-        for (PlayerEntity player : world.getPlayers()) {
-            ServerPlayNetworking.send((ServerPlayerEntity) player, SYNC_VARIANT, buf);
+        for (Player player : level.players()) {
+            ServerPlayNetworking.send((ServerPlayer) player, SYNC_VARIANT, buf);
         }
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
+    public void load(CompoundTag nbt) {
         if (nbt.contains("console")) {
-            Identifier console = new Identifier(nbt.getString("console"));
+            ResourceLocation console = new ResourceLocation(nbt.getString("console"));
             this.setConsoleSchema(console);
         }
 
         if (nbt.contains("variant")) {
-            Identifier variant = new Identifier(nbt.getString("variant"));
+            ResourceLocation variant = new ResourceLocation(nbt.getString("variant"));
             this.setVariant(variant);
         }
 
-        super.readNbt(nbt);
+        super.load(nbt);
     }
 }

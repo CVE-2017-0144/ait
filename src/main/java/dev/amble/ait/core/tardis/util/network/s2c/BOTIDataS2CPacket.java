@@ -8,22 +8,20 @@ import java.util.Map;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.tardis.Tardis;
@@ -32,25 +30,25 @@ public class BOTIDataS2CPacket implements FabricPacket {
     public static final PacketType<BOTIDataS2CPacket> TYPE = PacketType.create(AITMod.id("send_boti_data"), BOTIDataS2CPacket::new);
 
     private final BlockPos botiPos;
-    public final NbtCompound chunkData;
+    public final CompoundTag chunkData;
 
-    public BOTIDataS2CPacket(BlockPos botiPos, WorldChunk chunk, BlockPos targetPos) {
+    public BOTIDataS2CPacket(BlockPos botiPos, LevelChunk chunk, BlockPos targetPos) {
         this.botiPos = botiPos;
-        this.chunkData = new NbtCompound();
-        NbtCompound blockStates = new NbtCompound();
-        NbtCompound blockEntities = new NbtCompound();
-        World world = chunk.getWorld();
+        this.chunkData = new CompoundTag();
+        CompoundTag blockStates = new CompoundTag();
+        CompoundTag blockEntities = new CompoundTag();
+        Level world = chunk.getLevel();
         int targetY = targetPos.getY();
         int baseY = targetY & ~15;
         int sectionIndex = chunk.getSectionIndex(targetY);
-        ChunkSection section = chunk.getSection(sectionIndex);
+        LevelChunkSection section = chunk.getSection(sectionIndex);
         ChunkPos chunkPos = chunk.getPos();
 
         try {
             List<BlockState> paletteList = new ArrayList<>();
             Map<BlockState, Integer> stateToIndex = new HashMap<>();
-            paletteList.add(Blocks.AIR.getDefaultState()); // Index 0 = air
-            stateToIndex.put(Blocks.AIR.getDefaultState(), 0);
+            paletteList.add(Blocks.AIR.defaultBlockState()); // Index 0 = air
+            stateToIndex.put(Blocks.AIR.defaultBlockState(), 0);
             BlockState[][][] sectionStates = new BlockState[16][16][16];
             for (int y = 0; y < 16; y++) {
                 for (int x = 0; x < 16; x++) {
@@ -66,9 +64,9 @@ public class BOTIDataS2CPacket implements FabricPacket {
             }
 
             // Build palette NBT
-            NbtList palette = new NbtList();
+            ListTag palette = new ListTag();
             for (BlockState state : paletteList) {
-                NbtCompound stateNbt = (NbtCompound) BlockState.CODEC.encodeStart(NbtOps.INSTANCE, state)
+                CompoundTag stateNbt = (CompoundTag) BlockState.CODEC.encodeStart(NbtOps.INSTANCE, state)
                         .result().orElseThrow(() -> new IllegalStateException("Failed to encode state " + state));
                 palette.add(stateNbt);
             }
@@ -97,10 +95,10 @@ public class BOTIDataS2CPacket implements FabricPacket {
             for (int y = 0; y < 16; y++) {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        BlockPos worldPos = new BlockPos(chunkPos.getStartX() + x, baseY + y, chunkPos.getStartZ() + z);
+                        BlockPos worldPos = new BlockPos(chunkPos.getMinBlockX() + x, baseY + y, chunkPos.getMinBlockZ() + z);
                         BlockEntity be = chunk.getBlockEntity(worldPos);
                         if (be != null) {
-                            NbtCompound blockEntityNbt = be.createNbtWithIdentifyingData();
+                            CompoundTag blockEntityNbt = be.saveWithFullMetadata();
                             String key = x + "_" + y + "_" + z;
                             blockEntities.put(key, blockEntityNbt);
                         }
@@ -118,8 +116,8 @@ public class BOTIDataS2CPacket implements FabricPacket {
         } catch (Exception e) {
             System.out.println("Exception in packet construction: " + e.getMessage());
             AITMod.LOGGER.atTrace();
-            NbtList palette = new NbtList();
-            palette.add(BlockState.CODEC.encodeStart(NbtOps.INSTANCE, Blocks.STONE.getDefaultState())
+            ListTag palette = new ListTag();
+            palette.add(BlockState.CODEC.encodeStart(NbtOps.INSTANCE, Blocks.STONE.defaultBlockState())
                     .result().orElseThrow(() -> new IllegalStateException("Failed to encode stone state")));
             long[] fullData = new long[256];
             java.util.Arrays.fill(fullData, 0);
@@ -129,16 +127,16 @@ public class BOTIDataS2CPacket implements FabricPacket {
             this.chunkData.put("block_states", blockStates);
         }
     }
-    public BOTIDataS2CPacket(BlockPos botiPos, NbtCompound chunkData) {
+    public BOTIDataS2CPacket(BlockPos botiPos, CompoundTag chunkData) {
         this.botiPos = botiPos;
         this.chunkData = chunkData;
     }
-    public BOTIDataS2CPacket(PacketByteBuf buf) {
+    public BOTIDataS2CPacket(FriendlyByteBuf buf) {
         this.botiPos = buf.readBlockPos();
         this.chunkData = buf.readNbt();
     }
     @Override
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(botiPos);
         buf.writeNbt(chunkData);
     }
@@ -149,9 +147,9 @@ public class BOTIDataS2CPacket implements FabricPacket {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> boolean handle(ClientPlayerEntity source, PacketSender response) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        World world = client.world;
+    public <T> boolean handle(LocalPlayer source, PacketSender response) {
+        Minecraft client = Minecraft.getInstance();
+        Level world = client.level;
 
         if (world == null) return false;
 

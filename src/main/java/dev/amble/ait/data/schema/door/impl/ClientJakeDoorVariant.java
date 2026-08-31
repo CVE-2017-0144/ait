@@ -11,6 +11,6 @@ public class ClientJakeDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new GeometricDoorModel(GeometricDoorModel.getTexturedModelData().createModel());
+        return new GeometricDoorModel(GeometricDoorModel.getTexturedModelData().bakeRoot());
     }
 }

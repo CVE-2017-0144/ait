@@ -11,6 +11,6 @@ public class ClientPresentDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new PresentDoorModel(PresentDoorModel.getTexturedModelData().createModel());
+        return new PresentDoorModel(PresentDoorModel.getTexturedModelData().bakeRoot());
     }
 }

@@ -1,10 +1,9 @@
 package dev.amble.ait.client.sounds.engine;
 
-import net.minecraft.client.MinecraftClient;
-
 import dev.amble.ait.client.sounds.SoundHandler;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
+import net.minecraft.client.Minecraft;
 
 public class ClientEngineLoopSoundHandler extends SoundHandler {
     public static EngineLoopSound ENGINE_LOOP;
@@ -46,7 +45,7 @@ public class ClientEngineLoopSoundHandler extends SoundHandler {
         return tardis != null && tardis.fuel().hasPower();
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (tardis == null) {

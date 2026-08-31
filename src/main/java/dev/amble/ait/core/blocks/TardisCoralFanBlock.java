@@ -1,47 +1,53 @@
 package dev.amble.ait.core.blocks;
 
-import net.minecraft.block.*;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TardisCoralFanBlock extends Block implements Waterloggable {
-    public static final DirectionProperty FACING = Properties.FACING;
-    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+public class TardisCoralFanBlock extends Block implements SimpleWaterloggedBlock {
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-    private static final VoxelShape UP_SHAPE = VoxelShapes.cuboid(0.125, 0, 0.125, 0.875, 0.5, 0.875);
-    private static final VoxelShape DOWN_SHAPE = VoxelShapes.cuboid(0.125, 0.5, 0.125, 0.875, 1, 0.875);
-    private static final VoxelShape NORTH_SHAPE = VoxelShapes.cuboid(0.125, 0.125, 0.5, 0.875, 0.875, 1);
-    private static final VoxelShape SOUTH_SHAPE = VoxelShapes.cuboid(0.125, 0.125, 0, 0.875, 0.875, 0.5);
-    private static final VoxelShape EAST_SHAPE = VoxelShapes.cuboid(0, 0.125, 0.125, 0.5, 0.875, 0.875);
-    private static final VoxelShape WEST_SHAPE = VoxelShapes.cuboid(0.5, 0.125, 0.125, 1, 0.875, 0.875);
+    private static final VoxelShape UP_SHAPE = Shapes.box(0.125, 0, 0.125, 0.875, 0.5, 0.875);
+    private static final VoxelShape DOWN_SHAPE = Shapes.box(0.125, 0.5, 0.125, 0.875, 1, 0.875);
+    private static final VoxelShape NORTH_SHAPE = Shapes.box(0.125, 0.125, 0.5, 0.875, 0.875, 1);
+    private static final VoxelShape SOUTH_SHAPE = Shapes.box(0.125, 0.125, 0, 0.875, 0.875, 0.5);
+    private static final VoxelShape EAST_SHAPE = Shapes.box(0, 0.125, 0.125, 0.5, 0.875, 0.875);
+    private static final VoxelShape WEST_SHAPE = Shapes.box(0.5, 0.125, 0.125, 1, 0.875, 0.875);
 
-    public TardisCoralFanBlock(Settings settings) {
+    public TardisCoralFanBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState()
-                .with(FACING, Direction.UP)
-                .with(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.UP)
+                .setValue(WATERLOGGED, false));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED);
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        Direction facing = state.get(FACING);
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        Direction facing = state.getValue(FACING);
 
         return switch (facing) {
             case UP -> UP_SHAPE;
@@ -54,27 +60,27 @@ public class TardisCoralFanBlock extends Block implements Waterloggable {
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        WorldView world = ctx.getWorld();
-        BlockPos pos = ctx.getBlockPos();
-        Direction face = ctx.getSide();
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        LevelReader world = ctx.getLevel();
+        BlockPos pos = ctx.getClickedPos();
+        Direction face = ctx.getClickedFace();
 
-        BlockPos attachedPos = pos.offset(face.getOpposite());
+        BlockPos attachedPos = pos.relative(face.getOpposite());
         BlockState attachedState = world.getBlockState(attachedPos);
 
         if (canPlaceOn(attachedState, face.getOpposite())) {
-            return this.getDefaultState()
-                    .with(FACING, face)
-                    .with(WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).getFluid() == Fluids.WATER);
+            return this.defaultBlockState()
+                    .setValue(FACING, face)
+                    .setValue(WATERLOGGED, ctx.getLevel().getFluidState(ctx.getClickedPos()).getType() == Fluids.WATER);
         }
 
-        for (Direction direction : FACING.getValues()) {
-            attachedPos = pos.offset(direction.getOpposite());
+        for (Direction direction : FACING.getPossibleValues()) {
+            attachedPos = pos.relative(direction.getOpposite());
             attachedState = world.getBlockState(attachedPos);
             if (canPlaceOn(attachedState, direction.getOpposite())) {
-                return this.getDefaultState()
-                        .with(FACING, direction)
-                        .with(WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).getFluid() == Fluids.WATER);
+                return this.defaultBlockState()
+                        .setValue(FACING, direction)
+                        .setValue(WATERLOGGED, ctx.getLevel().getFluidState(ctx.getClickedPos()).getType() == Fluids.WATER);
             }
         }
 
@@ -82,27 +88,27 @@ public class TardisCoralFanBlock extends Block implements Waterloggable {
     }
 
     @Override
-    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        Direction facing = state.get(FACING);
-        BlockPos attachedPos = pos.offset(facing.getOpposite());
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        Direction facing = state.getValue(FACING);
+        BlockPos attachedPos = pos.relative(facing.getOpposite());
         BlockState attachedState = world.getBlockState(attachedPos);
         return canPlaceOn(attachedState, facing.getOpposite());
     }
 
     private boolean canPlaceOn(BlockState state, Direction direction) {
-        return state.isSideSolidFullSquare(
-                BlockView.class.cast(null), BlockPos.ORIGIN, direction);
+        return state.isFaceSturdy(
+                BlockGetter.class.cast(null), BlockPos.ZERO, direction);
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction,
-                                                BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if (state.get(WATERLOGGED)) {
-            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+    public BlockState updateShape(BlockState state, Direction direction,
+                                                BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(WATERLOGGED)) {
+            world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
 
-        if (direction == state.get(FACING).getOpposite() && !state.canPlaceAt(world, pos)) {
-            return Blocks.AIR.getDefaultState();
+        if (direction == state.getValue(FACING).getOpposite() && !state.canSurvive(world, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
 
         return state;
@@ -110,6 +116,6 @@ public class TardisCoralFanBlock extends Block implements Waterloggable {
 
     @Override
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 }

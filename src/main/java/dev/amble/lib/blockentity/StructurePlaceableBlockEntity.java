@@ -1,7 +1,7 @@
 package dev.amble.lib.blockentity;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public interface StructurePlaceableBlockEntity {
-    void amble$onStructurePlaced(NbtCompound nbt);
+    void amble$onStructurePlaced(CompoundTag nbt);
 }

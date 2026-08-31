@@ -3,12 +3,10 @@ package dev.amble.ait.core.bind;
 import java.util.function.Consumer;
 
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.amble.ait.AITMod;
 
 public class KeyBind {
@@ -16,13 +14,13 @@ public class KeyBind {
     protected final String name;
     protected final String category;
 
-    protected final InputUtil.Type type;
+    protected final InputConstants.Type type;
     protected final int code;
 
-    protected KeyBinding self;
-    private final Consumer<MinecraftClient> consumer;
+    protected KeyMapping self;
+    private final Consumer<Minecraft> consumer;
 
-    public KeyBind(String name, String category, InputUtil.Type type, int code, Consumer<MinecraftClient> consumer) {
+    public KeyBind(String name, String category, InputConstants.Type type, int code, Consumer<Minecraft> consumer) {
         this.name = name;
         this.category = category;
 
@@ -32,21 +30,21 @@ public class KeyBind {
         this.consumer = consumer;
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         if (this.shouldTrigger(client))
             this.trigger(client);
     }
 
     public void register() {
-        this.self = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + AITMod.MOD_ID + "." + name, this.type,
+        this.self = KeyBindingHelper.registerKeyBinding(new KeyMapping("key." + AITMod.MOD_ID + "." + name, this.type,
                 this.code, "category." + AITMod.MOD_ID + "." + category));
     }
 
-    protected boolean shouldTrigger(MinecraftClient client) {
-        return this.self.isPressed();
+    protected boolean shouldTrigger(Minecraft client) {
+        return this.self.isDown();
     }
 
-    protected void trigger(MinecraftClient client) {
+    protected void trigger(Minecraft client) {
         this.consumer.accept(client);
     }
 
@@ -54,18 +52,18 @@ public class KeyBind {
 
         private boolean held;
 
-        public Held(String name, String category, InputUtil.Type type, int code, Consumer<MinecraftClient> consumer) {
+        public Held(String name, String category, InputConstants.Type type, int code, Consumer<Minecraft> consumer) {
             super(name, category, type, code, consumer);
         }
 
         @Override
-        protected boolean shouldTrigger(MinecraftClient client) {
-            ClientPlayerEntity player = client.player;
+        protected boolean shouldTrigger(Minecraft client) {
+            LocalPlayer player = client.player;
 
             if (player == null)
                 return false;
 
-            if (!this.self.isPressed()) {
+            if (!this.self.isDown()) {
                 this.held = false;
                 return false;
             }

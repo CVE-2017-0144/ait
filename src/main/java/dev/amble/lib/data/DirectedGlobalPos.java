@@ -2,36 +2,34 @@ package dev.amble.lib.data;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
-
 public class DirectedGlobalPos {
 
     public static final Codec<DirectedGlobalPos> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(World.CODEC.fieldOf("dimension").forGetter(DirectedGlobalPos::getDimension),
+            .group(Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(DirectedGlobalPos::getDimension),
                     BlockPos.CODEC.fieldOf("pos").forGetter(DirectedGlobalPos::getPos),
                     Codec.BYTE.fieldOf("rotation").forGetter(DirectedGlobalPos::getRotation))
             .apply(instance, DirectedGlobalPos::create));
 
-    private final RegistryKey<World> dimension;
+    private final ResourceKey<Level> dimension;
     private final BlockPos pos;
     private final byte rotation;
 
-    protected DirectedGlobalPos(RegistryKey<World> dimension, BlockPos pos, byte rotation) {
+    protected DirectedGlobalPos(ResourceKey<Level> dimension, BlockPos pos, byte rotation) {
         this.dimension = dimension;
         this.pos = pos;
 
@@ -47,25 +45,25 @@ public class DirectedGlobalPos {
     }
 
     public DirectedGlobalPos offset(int x, int y, int z) {
-        return DirectedGlobalPos.create(this.dimension, this.pos.add(x, y, z), this.rotation);
+        return DirectedGlobalPos.create(this.dimension, this.pos.offset(x, y, z), this.rotation);
     }
     public DirectedGlobalPos offset(Direction dir) {
-        return DirectedGlobalPos.create(this.dimension, this.pos.offset(dir), this.rotation);
+        return DirectedGlobalPos.create(this.dimension, this.pos.relative(dir), this.rotation);
     }
 
     public DirectedGlobalPos rotation(byte rotation) {
         return DirectedGlobalPos.create(this.dimension, this.pos, rotation);
     }
 
-    public DirectedGlobalPos world(RegistryKey<World> world) {
+    public DirectedGlobalPos world(ResourceKey<Level> world) {
         return DirectedGlobalPos.create(world, this.pos, this.rotation);
     }
 
-    public static DirectedGlobalPos create(RegistryKey<World> dimension, BlockPos pos, byte rotation) {
+    public static DirectedGlobalPos create(ResourceKey<Level> dimension, BlockPos pos, byte rotation) {
         return new DirectedGlobalPos(dimension, pos, rotation);
     }
 
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return this.dimension;
     }
 
@@ -77,28 +75,28 @@ public class DirectedGlobalPos {
         return this.rotation;
     }
     public float getRotationDegrees() {
-        return RotationPropertyHelper.toDegrees(this.getRotation());
+        return RotationSegment.convertToDegrees(this.getRotation());
     }
     public Direction getRotationDirection() {
-        return Direction.fromRotation(this.getRotationDegrees());
+        return Direction.fromYRot(this.getRotationDegrees());
     }
 
     public Vec3i getVector() {
         return switch (this.rotation) {
-            case 0 -> Direction.NORTH.getVector();
-            case 1, 2, 3 -> Direction.NORTH.getVector().add(Direction.EAST.getVector());
-            case 4 -> Direction.EAST.getVector();
-            case 5, 6, 7 -> Direction.EAST.getVector().add(Direction.SOUTH.getVector());
-            case 8 -> Direction.SOUTH.getVector();
-            case 9, 10, 11 -> Direction.SOUTH.getVector().add(Direction.WEST.getVector());
-            case 12 -> Direction.WEST.getVector();
-            case 13, 14, 15 -> Direction.NORTH.getVector().add(Direction.SOUTH.getVector());
+            case 0 -> Direction.NORTH.getNormal();
+            case 1, 2, 3 -> Direction.NORTH.getNormal().offset(Direction.EAST.getNormal());
+            case 4 -> Direction.EAST.getNormal();
+            case 5, 6, 7 -> Direction.EAST.getNormal().offset(Direction.SOUTH.getNormal());
+            case 8 -> Direction.SOUTH.getNormal();
+            case 9, 10, 11 -> Direction.SOUTH.getNormal().offset(Direction.WEST.getNormal());
+            case 12 -> Direction.WEST.getNormal();
+            case 13, 14, 15 -> Direction.NORTH.getNormal().offset(Direction.SOUTH.getNormal());
             default -> new Vec3i(0, 0, 0);
         };
     }
 
     public DistanceInformation distanceTo(DirectedGlobalPos other) {
-        double distance = Math.sqrt(this.pos.getSquaredDistance(other.pos));
+        double distance = Math.sqrt(this.pos.distSqr(other.pos));
         boolean dimChange = !this.dimension.equals(other.dimension);
         boolean rotChange = this.rotation != other.rotation;
 
@@ -124,32 +122,32 @@ public class DirectedGlobalPos {
         return this.dimension + " " + this.pos + " " + this.rotation;
     }
 
-    public void write(PacketByteBuf buf) {
-        buf.writeRegistryKey(this.dimension);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeResourceKey(this.dimension);
         buf.writeBlockPos(this.pos);
         buf.writeByte(this.rotation);
     }
 
-    public static DirectedGlobalPos read(PacketByteBuf buf) {
-        RegistryKey<World> registryKey = buf.readRegistryKey(RegistryKeys.WORLD);
+    public static DirectedGlobalPos read(FriendlyByteBuf buf) {
+        ResourceKey<Level> registryKey = buf.readResourceKey(Registries.DIMENSION);
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();
 
         return DirectedGlobalPos.create(registryKey, blockPos, rotation);
     }
 
-    public NbtCompound toNbt() {
-        NbtCompound compound = NbtHelper.fromBlockPos(this.pos);
-        compound.putString("dimension", this.dimension.getValue().toString());
+    public CompoundTag toNbt() {
+        CompoundTag compound = NbtUtils.writeBlockPos(this.pos);
+        compound.putString("dimension", this.dimension.location().toString());
         compound.putByte("rotation", this.rotation);
 
         return compound;
     }
 
-    public static DirectedGlobalPos fromNbt(NbtCompound compound) {
-        BlockPos pos = NbtHelper.toBlockPos(compound);
-        RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD,
-                new Identifier(compound.getString("dimension")));
+    public static DirectedGlobalPos fromNbt(CompoundTag compound) {
+        BlockPos pos = NbtUtils.readBlockPos(compound);
+        ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
+                new ResourceLocation(compound.getString("dimension")));
 
         byte rotation = compound.getByte("rotation");
         return DirectedGlobalPos.create(dimension, pos, rotation);
@@ -178,7 +176,7 @@ public class DirectedGlobalPos {
         return (byte) rotation;
     }
     public static byte getGeneralizedRotation(Direction dir) {
-        return getGeneralizedRotation(RotationPropertyHelper.fromDirection(dir));
+        return getGeneralizedRotation(RotationSegment.convertToSegment(dir));
     }
 
     public static String rotationForArrow(int currentRot) {
@@ -209,7 +207,7 @@ public class DirectedGlobalPos {
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
 
-            RegistryKey<World> dimension = context.deserialize(obj.get("dimension"), RegistryKey.class);
+            ResourceKey<Level> dimension = context.deserialize(obj.get("dimension"), ResourceKey.class);
 
             int x = obj.get("x").getAsInt();
             int y = obj.get("y").getAsInt();
@@ -223,7 +221,7 @@ public class DirectedGlobalPos {
         public JsonElement serialize(DirectedGlobalPos src, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject result = new JsonObject();
 
-            result.addProperty("dimension", src.getDimension().getValue().toString());
+            result.addProperty("dimension", src.getDimension().location().toString());
             result.addProperty("x", src.getPos().getX());
             result.addProperty("y", src.getPos().getY());
             result.addProperty("z", src.getPos().getZ());

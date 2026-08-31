@@ -1,11 +1,5 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
@@ -14,6 +8,11 @@ import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.util.SafePosSearch;
 import dev.amble.ait.data.schema.console.variant.coral.*;
 import dev.amble.ait.data.schema.console.variant.renaissance.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 
 public class LandTypeControl extends Control {
     public LandTypeControl() {
@@ -21,7 +20,7 @@ public class LandTypeControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console, boolean leftClick) {
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console, boolean leftClick) {
         super.runServer(tardis, player, world, console, leftClick);
 
         if (leftClick) {
@@ -48,14 +47,14 @@ public class LandTypeControl extends Control {
         return AITSounds.LAND_TYPE;
     }
 
-    public void messageYPlayer(ServerPlayerEntity player, SafePosSearch.Kind value) {
-        player.sendMessage(Text.translatable("message.ait.control.ylandtype", value.text()), true);
+    public void messageYPlayer(ServerPlayer player, SafePosSearch.Kind value) {
+        player.displayClientMessage(Component.translatable("message.ait.control.ylandtype", value.text()), true);
     }
 
-    public void messageXPlayer(ServerPlayerEntity player, boolean var) {
-        Text on = Text.translatable("message.ait.control.xlandtype.on");
-        Text off = Text.translatable("message.ait.control.xlandtype.off");
-        player.sendMessage(var ? on : off, true);
+    public void messageXPlayer(ServerPlayer player, boolean var) {
+        Component on = Component.translatable("message.ait.control.xlandtype.on");
+        Component off = Component.translatable("message.ait.control.xlandtype.off");
+        player.displayClientMessage(var ? on : off, true);
     }
 
     private boolean isRenaissanceVariant(ConsoleBlockEntity consoleBlockEntity) {

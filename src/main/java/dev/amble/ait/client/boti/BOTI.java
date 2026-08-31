@@ -2,15 +2,12 @@ package dev.amble.ait.client.boti;
 
 import java.util.LinkedList;
 import java.util.Queue;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
@@ -19,7 +16,7 @@ import dev.amble.ait.core.entities.BOTIPaintingEntity;
 import dev.amble.ait.core.entities.RiftEntity;
 
 public class BOTI {
-    public static final MinecraftClient client = MinecraftClient.getInstance();
+    public static final Minecraft client = Minecraft.getInstance();
     public static final Queue<RiftEntity> RIFT_RENDERING_QUEUE = new LinkedList<>();
     public static BOTIInit BOTI_HANDLER = new BOTIInit();
     public static AITBufferBuilderStorage AIT_BUF_BUILDER_STORAGE = new AITBufferBuilderStorage();
@@ -37,32 +34,32 @@ public class BOTI {
         EXTERIOR_RENDER_QUEUE.clear();
     }
 
-    public static void copyFramebuffer(Framebuffer src, Framebuffer dest) {
-        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.fbo);
-        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.fbo);
-        GlStateManager._glBlitFrameBuffer(0, 0, src.textureWidth, src.textureHeight, 0, 0, dest.textureWidth, dest.textureHeight, GlConst.GL_DEPTH_BUFFER_BIT | GlConst.GL_COLOR_BUFFER_BIT, GlConst.GL_NEAREST);
+    public static void copyFramebuffer(RenderTarget src, RenderTarget dest) {
+        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.frameBufferId);
+        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.frameBufferId);
+        GlStateManager._glBlitFrameBuffer(0, 0, src.width, src.height, 0, 0, dest.width, dest.height, GlConst.GL_DEPTH_BUFFER_BIT | GlConst.GL_COLOR_BUFFER_BIT, GlConst.GL_NEAREST);
     }
 
-    public static void copyColor(Framebuffer src, Framebuffer dest) {
-        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.fbo);
-        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.fbo);
-        GlStateManager._glBlitFrameBuffer(0, 0, src.textureWidth, src.textureHeight, 0, 0, dest.textureWidth, dest.textureHeight, GlConst.GL_COLOR_BUFFER_BIT, GlConst.GL_NEAREST);
+    public static void copyColor(RenderTarget src, RenderTarget dest) {
+        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.frameBufferId);
+        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.frameBufferId);
+        GlStateManager._glBlitFrameBuffer(0, 0, src.width, src.height, 0, 0, dest.width, dest.height, GlConst.GL_COLOR_BUFFER_BIT, GlConst.GL_NEAREST);
     }
 
-    public static void copyDepth(Framebuffer src, Framebuffer dest) {
-        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.fbo);
-        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.fbo);
-        GlStateManager._glBlitFrameBuffer(0, 0, src.textureWidth, src.textureHeight, 0, 0, dest.textureWidth, dest.textureHeight, GlConst.GL_DEPTH_BUFFER_BIT, GlConst.GL_NEAREST);
+    public static void copyDepth(RenderTarget src, RenderTarget dest) {
+        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.frameBufferId);
+        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.frameBufferId);
+        GlStateManager._glBlitFrameBuffer(0, 0, src.width, src.height, 0, 0, dest.width, dest.height, GlConst.GL_DEPTH_BUFFER_BIT, GlConst.GL_NEAREST);
     }
 
-    public static void setFramebufferColor(Framebuffer src, float r, float g, float b, float a) {
+    public static void setFramebufferColor(RenderTarget src, float r, float g, float b, float a) {
         src.setClearColor(r, g, b, a);
     }
 
     /**
      * Warns the user if they are missing Indium and have a non-Nvidia card.
      */
-    public static void tryWarn(MinecraftClient client) {
+    public static void tryWarn(Minecraft client) {
         if (HAS_BEEN_WARNED)
             return;
 
@@ -74,7 +71,7 @@ public class BOTI {
     /**
      * @return {@code true} if successfully warned the player, {@code false} otherwise
      */
-    private static boolean warn(MinecraftClient client) {
+    private static boolean warn(Minecraft client) {
         if (DependencyChecker.hasMacOs()) {
             tryWarnMac(client);
             return true;
@@ -91,11 +88,11 @@ public class BOTI {
         return false;
     }
 
-    private static void tryWarnMac(MinecraftClient client) {
-        client.player.sendMessage(Text.translatable("message.ait.boti.indium_required.mac").formatted(Formatting.RED), false);
+    private static void tryWarnMac(Minecraft client) {
+        client.player.displayClientMessage(Component.translatable("message.ait.boti.indium_required.mac").withStyle(ChatFormatting.RED), false);
     }
 
-    private static void tryWarnAmd(MinecraftClient client) {
-        client.player.sendMessage(Text.translatable("message.ait.boti.indium_required.amd").formatted(Formatting.RED), false);
+    private static void tryWarnAmd(Minecraft client) {
+        client.player.displayClientMessage(Component.translatable("message.ait.boti.indium_required.amd").withStyle(ChatFormatting.RED), false);
     }
 }

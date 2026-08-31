@@ -1,21 +1,18 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import java.util.Collection;
 import java.util.Collections;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.amble.ait.core.commands.argument.TardisArgumentType;
@@ -25,46 +22,46 @@ import dev.amble.ait.core.util.TextUtil;
 
 public final class TeleportInteriorCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(AITMod.MOD_ID).then(literal("teleport").requires(source -> PermissionAPICompat.hasPermission(source, "ait.command.teleport", 2))
                 .then(argument("tardis", TardisArgumentType.tardis())
                                 .then(literal("interior").executes(TeleportInteriorCommand::tpSelfInterior)
-                                        .then(argument("entities", EntityArgumentType.players())
+                                        .then(argument("entities", EntityArgument.players())
                                                 .executes(TeleportInteriorCommand::tpToInterior)))
                                 .then(literal("exterior").executes(TeleportInteriorCommand::tpSelfExterior)
-                                        .then(argument("entities", EntityArgumentType.players())
+                                        .then(argument("entities", EntityArgument.players())
                                                 .executes(TeleportInteriorCommand::tpToExterior)))
                 )));
     }
 
-    private static int tpSelfInterior(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int tpSelfInterior(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Entity source = context.getSource().getEntity();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
 
         return tpToInterior(tardis, Collections.singleton(source));
     }
 
-    private static int tpSelfExterior(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int tpSelfExterior(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Entity source = context.getSource().getEntity();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
 
         return tpToExterior(tardis, Collections.singleton(source));
     }
 
-    private static int tpToInterior(CommandContext<ServerCommandSource> context)
+    private static int tpToInterior(CommandContext<CommandSourceStack> context)
             throws CommandSyntaxException {
         Entity source = context.getSource().getEntity();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(context, "entities");
+        Collection<? extends Entity> entities = EntityArgument.getEntities(context, "entities");
 
         return tpToInterior(tardis, source, entities);
     }
 
-    private static int tpToExterior(CommandContext<ServerCommandSource> context)
+    private static int tpToExterior(CommandContext<CommandSourceStack> context)
             throws CommandSyntaxException {
         Entity source = context.getSource().getEntity();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(context, "entities");
+        Collection<? extends Entity> entities = EntityArgument.getEntities(context, "entities");
 
         return tpToExterior(tardis, source, entities);
     }
@@ -74,7 +71,7 @@ public final class TeleportInteriorCommand {
             TardisUtil.teleportInside(tardis, player);
         }
 
-        source.sendMessage(Text.translatable("tardis.teleport.interior.success", TextUtil.forTardis(tardis)));
+        source.sendSystemMessage(Component.translatable("tardis.teleport.interior.success", TextUtil.forTardis(tardis)));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -84,7 +81,7 @@ public final class TeleportInteriorCommand {
             TardisUtil.teleportOutside(tardis, player);
         }
 
-        source.sendMessage(Text.translatable("tardis.teleport.exterior.success", TextUtil.forTardis(tardis)));
+        source.sendSystemMessage(Component.translatable("tardis.teleport.exterior.success", TextUtil.forTardis(tardis)));
 
         return Command.SINGLE_SUCCESS;
     }

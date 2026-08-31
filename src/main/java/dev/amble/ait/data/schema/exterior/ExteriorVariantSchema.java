@@ -6,15 +6,13 @@ import java.util.Optional;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.schema.BasicSchema;
@@ -31,27 +29,27 @@ import dev.amble.lib.register.unlockable.Unlockable;
  * This should be registered in {@link ExteriorVariantRegistry} <br>
  * <br>
  * This should <b>ONLY</b> be created once in registry, you should grab the
- * class via {@link ExteriorVariantRegistry#get(Identifier)}, the identifier
+ * class via {@link ExteriorVariantRegistry#get(ResourceLocation)}, the identifier
  * being this variants id variable. <br>
  * <br>
  * It is recommended for implementations of this class to have a static
- * "REFERENCE" {@link Identifier} variable which other things can use to get
+ * "REFERENCE" {@link ResourceLocation} variable which other things can use to get
  * this from the {@link ExteriorVariantRegistry}
  *
  * @author duzo
  * @see ExteriorVariantRegistry
  */
 public abstract class ExteriorVariantSchema extends BasicSchema implements Unlockable {
-    private final Identifier category;
-    private final Identifier id;
+    private final ResourceLocation category;
+    private final ResourceLocation id;
     private final Loyalty loyalty;
 
     public static final double DEFAULT_SEAT_FORWARD_TRANSLATION = 0.5;
-    public static final Vec3d DEFAULT_SEAT_POS = new Vec3d(0.5, 1, 0.5);
+    public static final Vec3 DEFAULT_SEAT_POS = new Vec3(0.5, 1, 0.5);
     @Environment(EnvType.CLIENT)
     private ClientExteriorVariantSchema cachedSchema;
 
-    protected ExteriorVariantSchema(Identifier category, Identifier id, Optional<Loyalty> loyalty) {
+    protected ExteriorVariantSchema(ResourceLocation category, ResourceLocation id, Optional<Loyalty> loyalty) {
         super("exterior");
         this.category = category;
 
@@ -59,10 +57,10 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
         this.loyalty = loyalty.orElse(null);
     }
 
-    protected ExteriorVariantSchema(Identifier category, Identifier id, Loyalty loyalty) {
+    protected ExteriorVariantSchema(ResourceLocation category, ResourceLocation id, Loyalty loyalty) {
         this(category, id, Optional.of(loyalty));
     }
-    protected ExteriorVariantSchema(Identifier category, Identifier id) {
+    protected ExteriorVariantSchema(ResourceLocation category, ResourceLocation id) {
         this(category, id, Optional.empty());
     }
 
@@ -71,7 +69,7 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -85,11 +83,11 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
         return UnlockType.EXTERIOR;
     }
 
-    public Identifier categoryId() {
+    public ResourceLocation categoryId() {
         return this.category;
     }
 
-    public abstract Vec3d seatTranslations();
+    public abstract Vec3 seatTranslations();
 
     public double seatForwardTranslation() {
         return DEFAULT_SEAT_FORWARD_TRANSLATION;
@@ -121,19 +119,19 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
      * @deprecated {@link #getPortalPosition()}
      */
     @Deprecated(forRemoval = true)
-    public Vec3d adjustPortalPos(Vec3d pos, byte direction) {
+    public Vec3 adjustPortalPos(Vec3 pos, byte direction) {
         return pos; // just cus some dont have portals
     }
 
-    @Nullable public Vec3d getPortalPosition() {
-        return adjustPortalPos(Vec3d.ZERO, (byte) 0);
+    @Nullable public Vec3 getPortalPosition() {
+        return adjustPortalPos(Vec3.ZERO, (byte) 0);
     }
 
-    @NotNull public Vec3d getPortalPosition(Vec3d origin, float angle) {
-        Vec3d pos = getPortalPosition();
+    @NotNull public Vec3 getPortalPosition(Vec3 origin, float angle) {
+        Vec3 pos = getPortalPosition();
         if (pos == null) return origin;
 
-        return pos.rotateX((float) Math.toRadians(180)).rotateY((float) Math.toRadians(180 - angle)).multiply(1, -1, 1).add(origin);
+        return pos.xRot((float) Math.toRadians(180)).yRot((float) Math.toRadians(180 - angle)).multiply(1, -1, 1).add(origin);
     }
 
     public double portalWidth() {
@@ -160,11 +158,11 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
         @Override
         public ExteriorVariantSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = AITMod.id("capsule_default");
             }
 

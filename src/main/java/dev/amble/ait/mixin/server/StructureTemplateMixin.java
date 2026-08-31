@@ -2,23 +2,20 @@ package dev.amble.ait.mixin.server;
 
 import java.util.Iterator;
 import java.util.List;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.painting.PaintingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.entities.ConsoleControlEntity;
 
 @Mixin(StructureTemplate.class)
@@ -26,29 +23,29 @@ public abstract class StructureTemplateMixin {
 
     @Shadow
     @Final
-    private List<StructureTemplate.StructureEntityInfo> entities;
+    private List<StructureTemplate.StructureEntityInfo> entityInfoList;
 
-    @Redirect(method = "saveFromWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/structure/StructureTemplate;addEntitiesFromWorld(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)V", ordinal = 0))
-    private void ait$saveFromWorld(StructureTemplate instance, World world, BlockPos firstCorner,
+    @Redirect(method = "fillFromWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;fillEntityList(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)V", ordinal = 0))
+    private void ait$saveFromWorld(StructureTemplate instance, Level world, BlockPos firstCorner,
             BlockPos secondCorner) {
-        List<Entity> list = world.getEntitiesByClass(Entity.class, new Box(firstCorner, secondCorner),
-                (entity) -> !(entity instanceof PlayerEntity) && !(entity instanceof ConsoleControlEntity));
-        this.entities.clear();
+        List<Entity> list = world.getEntitiesOfClass(Entity.class, new AABB(firstCorner, secondCorner),
+                (entity) -> !(entity instanceof Player) && !(entity instanceof ConsoleControlEntity));
+        this.entityInfoList.clear();
 
-        Vec3d vec3d;
-        NbtCompound nbtCompound;
+        Vec3 vec3d;
+        CompoundTag nbtCompound;
         BlockPos blockPos;
-        for (Iterator<Entity> var5 = list.iterator(); var5.hasNext(); this.entities
+        for (Iterator<Entity> var5 = list.iterator(); var5.hasNext(); this.entityInfoList
                 .add(new StructureTemplate.StructureEntityInfo(vec3d, blockPos, nbtCompound.copy()))) {
             Entity entity = var5.next();
-            vec3d = new Vec3d(entity.getX() - (double) firstCorner.getX(), entity.getY() - (double) firstCorner.getY(),
+            vec3d = new Vec3(entity.getX() - (double) firstCorner.getX(), entity.getY() - (double) firstCorner.getY(),
                     entity.getZ() - (double) firstCorner.getZ());
-            nbtCompound = new NbtCompound();
-            entity.saveNbt(nbtCompound);
-            if (entity instanceof PaintingEntity) {
-                blockPos = ((PaintingEntity) entity).getDecorationBlockPos().subtract(firstCorner);
+            nbtCompound = new CompoundTag();
+            entity.save(nbtCompound);
+            if (entity instanceof Painting) {
+                blockPos = ((Painting) entity).getPos().subtract(firstCorner);
             } else {
-                blockPos = BlockPos.ofFloored(vec3d);
+                blockPos = BlockPos.containing(vec3d);
             }
         }
     }

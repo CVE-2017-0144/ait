@@ -3,25 +3,24 @@ package dev.amble.lib.item;
 import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
 import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.resource.featuretoggle.FeatureFlag;
-import net.minecraft.util.Rarity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 
 public class AItemSettings extends FabricItemSettings {
 
-    private ItemGroup group;
+    private CreativeModeTab group;
 
-    public AItemSettings group(ItemGroup group) {
+    public AItemSettings group(CreativeModeTab group) {
         this.group = group;
         return this;
     }
-    public AItemSettings group(RegistryKey<ItemGroup> group) {
-        this.group = Registries.ITEM_GROUP.get(group);
+    public AItemSettings group(ResourceKey<CreativeModeTab> group) {
+        this.group = BuiltInRegistries.CREATIVE_MODE_TAB.get(group);
         return this;
     }
 
@@ -36,28 +35,28 @@ public class AItemSettings extends FabricItemSettings {
     }
 
     @Override
-    public AItemSettings food(FoodComponent foodComponent) {
+    public AItemSettings food(FoodProperties foodComponent) {
         return (AItemSettings) super.food(foodComponent);
     }
 
     @Override
-    public AItemSettings maxCount(int maxCount) {
-        return (AItemSettings) super.maxCount(maxCount);
+    public AItemSettings stacksTo(int maxCount) {
+        return (AItemSettings) super.stacksTo(maxCount);
     }
 
     @Override
-    public AItemSettings maxDamageIfAbsent(int maxDamage) {
-        return (AItemSettings) super.maxDamageIfAbsent(maxDamage);
+    public AItemSettings defaultDurability(int maxDamage) {
+        return (AItemSettings) super.defaultDurability(maxDamage);
     }
 
     @Override
-    public AItemSettings maxDamage(int maxDamage) {
-        return (AItemSettings) super.maxDamage(maxDamage);
+    public AItemSettings durability(int maxDamage) {
+        return (AItemSettings) super.durability(maxDamage);
     }
 
     @Override
-    public AItemSettings recipeRemainder(Item recipeRemainder) {
-        return (AItemSettings) super.recipeRemainder(recipeRemainder);
+    public AItemSettings craftRemainder(Item recipeRemainder) {
+        return (AItemSettings) super.craftRemainder(recipeRemainder);
     }
 
     @Override
@@ -66,16 +65,16 @@ public class AItemSettings extends FabricItemSettings {
     }
 
     @Override
-    public AItemSettings fireproof() {
-        return (AItemSettings) super.fireproof();
+    public AItemSettings fireResistant() {
+        return (AItemSettings) super.fireResistant();
     }
 
     @Override
-    public AItemSettings requires(FeatureFlag... features) {
-        return (AItemSettings) super.requires(features);
+    public AItemSettings requiredFeatures(FeatureFlag... features) {
+        return (AItemSettings) super.requiredFeatures(features);
     }
 
-    public ItemGroup group() {
+    public CreativeModeTab group() {
         return group;
     }
 }

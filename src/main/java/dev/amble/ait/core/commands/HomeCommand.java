@@ -1,24 +1,13 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.DimensionArgumentType;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.amble.ait.core.AITDimensions;
@@ -30,13 +19,22 @@ import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 
 public final class HomeCommand {
 
     private HomeCommand() {
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 literal(AITMod.MOD_ID)
                         .then(literal("home")
@@ -49,9 +47,9 @@ public final class HomeCommand {
                                         .executes(HomeCommand::runSet)
                                         .then(argument("tardis", TardisArgumentType.tardis())
                                                 .executes(HomeCommand::runSet)
-                                                .then(argument("dimension", DimensionArgumentType.dimension())
+                                                .then(argument("dimension", DimensionArgument.dimension())
                                                 .suggests(CommandUtil.NON_TARDIS_DIM_SUGGESTIONS)
-                                                        .then(argument("position", BlockPosArgumentType.blockPos())
+                                                        .then(argument("position", BlockPosArgument.blockPos())
                                                                 .executes(HomeCommand::runSet)
                                                                 .then(argument("facing", StringArgumentType.word())
                                                                         .suggests(CommandUtil.DIRECTION)
@@ -65,7 +63,7 @@ public final class HomeCommand {
         );
     }
 
-    private static int runGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int runGet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerTardis tardis = resolveTardis(context);
         CachedDirectedGlobalPos homePos = tardis.stats().getHome();
 
@@ -75,24 +73,24 @@ public final class HomeCommand {
         return printHome(context, homePos);
     }
 
-    private static int runSet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int runSet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerTardis tardis = resolveTardis(context);
         CachedDirectedGlobalPos homePos = tardis.stats().getHome();
 
         if (CommandUtil.hasArgument(context, "position")) {
-            ServerWorld world = DimensionArgumentType.getDimensionArgument(context, "dimension");
-            RegistryKey<World> key = world.getRegistryKey();
-            BlockPos manualPos = BlockPosArgumentType.getBlockPos(context, "position");
+            ServerLevel world = DimensionArgument.getDimension(context, "dimension");
+            ResourceKey<Level> key = world.dimension();
+            BlockPos manualPos = BlockPosArgument.getBlockPos(context, "position");
             byte rotation;
 
             if (TardisServerWorld.isTardisDimension(world)
-                    || key.getValue().equals(AITDimensions.TIME_VORTEX_WORLD.getValue())
-                    || key.getValue().toString().equals("ait:tardis_dimension_type"))
+                    || key.location().equals(AITDimensions.TIME_VORTEX_WORLD.location())
+                    || key.location().toString().equals("ait:tardis_dimension_type"))
                 return -1;
 
             if (!LockedDimensionRegistry.getInstance().isUnlocked(tardis, world)) {
-                context.getSource().sendError(Text.translatable("command.ait.home.dimension_locked",
-                        WorldUtil.worldText(world.getRegistryKey(), false)));
+                context.getSource().sendFailure(Component.translatable("command.ait.home.dimension_locked",
+                        WorldUtil.worldText(world.dimension(), false)));
                 return -1;
             }
 
@@ -116,18 +114,18 @@ public final class HomeCommand {
         return printHome(context, homePos);
     }
 
-    private static int printHome(CommandContext<ServerCommandSource> context, CachedDirectedGlobalPos homePos) {
+    private static int printHome(CommandContext<CommandSourceStack> context, CachedDirectedGlobalPos homePos) {
         BlockPos blockPos = homePos.getPos();
         String facing = WorldUtil.rot2StringName(homePos.getRotation());
         String arrow = DirectedGlobalPos.rotationForArrow(homePos.getRotation());
-        Identifier dimension = homePos.getDimension().getValue();
+        ResourceLocation dimension = homePos.getDimension().location();
 
-        context.getSource().sendMessage(Text.literal(
+        context.getSource().sendSystemMessage(Component.literal(
                 blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ() + " (" + facing + " " + arrow + ") " + dimension));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static ServerTardis resolveTardis(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static ServerTardis resolveTardis(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         if (CommandUtil.hasArgument(context, "tardis"))
             return TardisArgumentType.getTardis(context, "tardis");
 

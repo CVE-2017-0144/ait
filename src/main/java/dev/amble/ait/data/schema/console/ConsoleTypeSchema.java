@@ -1,7 +1,9 @@
 package dev.amble.ait.data.schema.console;
 
 import java.lang.reflect.Type;
-
+import net.minecraft.ResourceLocationException;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.*;
 import dev.amble.ait.api.Nameable;
 import dev.amble.ait.core.tardis.control.ControlTypes;
@@ -10,21 +12,17 @@ import dev.amble.ait.registry.impl.console.ConsoleRegistry;
 import dev.amble.ait.registry.impl.console.variant.ConsoleVariantRegistry;
 import dev.amble.lib.api.Identifiable;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
 public abstract class ConsoleTypeSchema implements Identifiable, Nameable {
-    private final Identifier id;
+    private final ResourceLocation id;
     private final String name;
-    private final Text text;
+    private final Component text;
 
-    protected ConsoleTypeSchema(Identifier id, String name) {
+    protected ConsoleTypeSchema(ResourceLocation id, String name) {
         this.id = id;
         this.name = name;
 
-        Identifier translationId = this.id.withPath(path -> path.substring(path.lastIndexOf('/') + 1));
-        this.text = Text.translatableWithFallback(translationId.toTranslationKey("console"), this.name);
+        ResourceLocation translationId = this.id.withPath(path -> path.substring(path.lastIndexOf('/') + 1));
+        this.text = Component.translatableWithFallback(translationId.toLanguageKey("console"), this.name);
     }
 
     @Override
@@ -36,7 +34,7 @@ public abstract class ConsoleTypeSchema implements Identifiable, Nameable {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return this.id;
     }
 
@@ -46,7 +44,7 @@ public abstract class ConsoleTypeSchema implements Identifiable, Nameable {
     }
 
     @Override
-    public Text text() {
+    public Component text() {
         return this.text;
     }
 
@@ -75,11 +73,11 @@ public abstract class ConsoleTypeSchema implements Identifiable, Nameable {
         @Override
         public ConsoleTypeSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = CapsuleCategory.REFERENCE;
             }
 

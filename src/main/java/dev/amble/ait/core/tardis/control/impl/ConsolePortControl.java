@@ -1,17 +1,5 @@
 package dev.amble.ait.core.tardis.control.impl;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.StopSoundS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.AITTags;
@@ -22,6 +10,17 @@ import dev.amble.ait.core.tardis.TardisDesktop;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.ait.module.gun.core.item.StaserBoltMagazine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.RecordItem;
 
 public class ConsolePortControl extends Control {
 
@@ -32,7 +31,7 @@ public class ConsolePortControl extends Control {
     }
 
     @Override
-    public Result runServer(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console,
+    public Result runServer(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console,
                              boolean leftClick) {
         if (leftClick) {
             if (!tardis.extra().getInsertedDisc().isEmpty()) {
@@ -44,24 +43,24 @@ public class ConsolePortControl extends Control {
             return Result.SUCCESS;
         }
 
-        ItemStack itemStack = player.getMainHandStack();
+        ItemStack itemStack = player.getMainHandItem();
 
-        if (itemStack.isIn(AITTags.Items.INSERTABLE_DISCS) || itemStack.getItem() instanceof MusicDiscItem) {
+        if (itemStack.is(AITTags.Items.INSERTABLE_DISCS) || itemStack.getItem() instanceof RecordItem) {
             if (!tardis.extra().getInsertedDisc().isEmpty()) return Result.FAILURE;
 
 
             tardis.extra().setInsertedDisc(itemStack.copy());
-            if (itemStack.getItem() instanceof MusicDiscItem musicDisc) {
+            if (itemStack.getItem() instanceof RecordItem musicDisc) {
                 currentMusic = musicDisc.getSound();
-                world.playSound(null, console, currentMusic, SoundCategory.RECORDS, 6f, 1);
+                world.playSound(null, console, currentMusic, SoundSource.RECORDS, 6f, 1);
             }
-            player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
             return Result.SUCCESS;
         }
 
         if (itemStack.getItem() instanceof StaserBoltMagazine) {
-            NbtCompound nbt = itemStack.getOrCreateNbt();
+            CompoundTag nbt = itemStack.getOrCreateTag();
             double currentFuel = nbt.getDouble(StaserBoltMagazine.FUEL_KEY);
             double maxFuel = StaserBoltMagazine.MAX_FUEL;
 
@@ -70,7 +69,7 @@ public class ConsolePortControl extends Control {
                 nbt.putDouble(StaserBoltMagazine.FUEL_KEY, newFuel);
                 tardis.removeFuel(500);
 
-                TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundCategory.PLAYERS, 6f, 1);
+                TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundSource.PLAYERS, 6f, 1);
                 return Result.SUCCESS_ALT;
             }
         }
@@ -81,12 +80,12 @@ public class ConsolePortControl extends Control {
 
             tardis.waypoint().setHasCartridge();
             tardis.waypoint().set(Waypoint.fromStack(itemStack), console, true);
-            player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
-            TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundCategory.PLAYERS, 6f, 1);
+            TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundSource.PLAYERS, 6f, 1);
             return Result.SUCCESS_ALT;
         } else if(itemStack.getItem() instanceof ControlDiscItem) {
-            NbtCompound stackNbt = itemStack.getOrCreateNbt();
+            CompoundTag stackNbt = itemStack.getOrCreateTag();
             if (stackNbt.get(ControlDiscItem.POS_KEY) == null) return Result.FAILURE;
             // We're going to set both cartridge and disc booleans just for parity
             tardis.waypoint().setIsDisc();
@@ -95,27 +94,27 @@ public class ConsolePortControl extends Control {
                 tardis.waypoint().setCanContainPlayers(ControlDiscItem.canContainPlayers(itemStack));
             }
             tardis.waypoint().set(Waypoint.fromStack(itemStack), console, false);
-            player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
 
         return Result.FAILURE;
     }
 
 
-    private void ejectDisc(Tardis tardis, ServerPlayerEntity player, ServerWorld world, BlockPos console) {
+    private void ejectDisc(Tardis tardis, ServerPlayer player, ServerLevel world, BlockPos console) {
         if (tardis.extra().getInsertedDisc().isEmpty()) return;
-        world.playSound(null, console, AITSounds.SLOT_IN, SoundCategory.PLAYERS, 6f, 1);
-        StopSoundS2CPacket stopPacket = new StopSoundS2CPacket(null, SoundCategory.RECORDS);
-        for (ServerPlayerEntity otherPlayer : world.getPlayers()) {
-            otherPlayer.networkHandler.sendPacket(stopPacket);
+        world.playSound(null, console, AITSounds.SLOT_IN, SoundSource.PLAYERS, 6f, 1);
+        ClientboundStopSoundPacket stopPacket = new ClientboundStopSoundPacket(null, SoundSource.RECORDS);
+        for (ServerPlayer otherPlayer : world.players()) {
+            otherPlayer.connection.send(stopPacket);
         }
-        player.giveItemStack(tardis.extra().getInsertedDisc());
+        player.addItem(tardis.extra().getInsertedDisc());
         tardis.extra().setInsertedDisc(ItemStack.EMPTY);
         currentMusic = null;
     }
 
     @Override
     public SoundEvent getFallbackSound() {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 }

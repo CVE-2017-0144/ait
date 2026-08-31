@@ -3,12 +3,10 @@ package dev.amble.ait.registry.impl;
 import java.util.Random;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.sound.SoundEvents;
-
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.CreakSound;
@@ -16,8 +14,8 @@ import dev.amble.ait.data.CreakSound;
 // do i really need a registry for this?? no, but also YES.
 // TODO replace this with sound tags perhaps?
 public class CreakRegistry {
-    public static final SimpleRegistry<CreakSound> REGISTRY = FabricRegistryBuilder
-            .createSimple(RegistryKey.<CreakSound>ofRegistry(AITMod.id("creak")))
+    public static final MappedRegistry<CreakSound> REGISTRY = FabricRegistryBuilder
+            .createSimple(ResourceKey.<CreakSound>createRegistryKey(AITMod.id("creak")))
             .buildAndRegister();
 
     public static CreakSound register(CreakSound schema) {

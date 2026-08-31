@@ -1,8 +1,8 @@
 package dev.amble.ait.core.util;
 
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 
-public enum MonitorStateUtil implements StringIdentifiable {
+public enum MonitorStateUtil implements StringRepresentable {
     DEFAULT("default"),
     BLAZE("blaze");
 
@@ -16,7 +16,7 @@ public enum MonitorStateUtil implements StringIdentifiable {
         return this.name;
     }
 
-    public String asString() {
+    public String getSerializedName() {
         return this.name;
     }
 }

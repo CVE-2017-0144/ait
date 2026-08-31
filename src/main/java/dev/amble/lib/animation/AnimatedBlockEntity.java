@@ -1,13 +1,11 @@
 package dev.amble.lib.animation;
 
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * An interface for block entities that can have animations.
@@ -22,17 +20,17 @@ public interface AnimatedBlockEntity extends AnimatedInstance {
 			throw new UnsupportedOperationException("getUuid() is only supported for BlockEntity instances. Override this method");
 		}
 
-		BlockPos pos = be.getPos();
-		return new UUID(be.getWorld().getRegistryKey().getValue().hashCode(), pos.asLong());
+		BlockPos pos = be.getBlockPos();
+		return new UUID(be.getLevel().dimension().location().hashCode(), pos.asLong());
 	}
 
 	@Override
-	default World getWorld() {
+	default Level getWorld() {
 		if (!(this instanceof BlockEntity be)) {
 			throw new UnsupportedOperationException("getWorld() is only supported for BlockEntity instances. Override this method");
 		}
 
-		return be.getWorld();
+		return be.getLevel();
 	}
 
 	@Override
@@ -41,17 +39,17 @@ public interface AnimatedBlockEntity extends AnimatedInstance {
 	}
 
 	@Override
-	default SoundCategory getSoundCategory() {
-		return SoundCategory.BLOCKS;
+	default SoundSource getSoundCategory() {
+		return SoundSource.BLOCKS;
 	}
 
 	@Override
-	default Vec3d getEffectPosition(float tickDelta) {
+	default Vec3 getEffectPosition(float tickDelta) {
 		if (!(this instanceof BlockEntity be)) {
 			throw new UnsupportedOperationException("getSoundPosition() is only supported for BlockEntity instances. Override this method");
 		}
 
-		return Vec3d.ofCenter(be.getPos());
+		return Vec3.atCenterOf(be.getBlockPos());
 	}
 
 	@Override

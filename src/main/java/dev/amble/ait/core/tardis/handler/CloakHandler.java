@@ -54,7 +54,7 @@ public class CloakHandler extends KeyedTardisComponent implements TardisTickable
             this.tardis.removeFuel(2 * travel.instability()); // idle drain of 2 fuel per tick
         } else {
             this.tardis.removeFuel(4 * travel.instability()); // idle drain of 4 fuel per tick
-            if (server.getTicks() % 20 == 0)
+            if (server.getTickCount() % 20 == 0)
                 this.tardis.subsystems().chameleon().removeDurability(RANDOM.nextInt(5, 16));
         }
     }

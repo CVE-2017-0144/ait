@@ -5,13 +5,11 @@ import java.util.Set;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.text.TranslatableTextContent;
-
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.container.impl.ItemContainer;
@@ -58,7 +56,7 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
      *            The translation.
      */
     public void addTranslation(Item item, String translation) {
-        translations.put(item.getTranslationKey(), translation);
+        translations.put(item.getDescriptionId(), translation);
     }
 
     /**
@@ -69,8 +67,8 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
      * @param translation
      *            The translation.
      */
-    public void addTranslation(ItemGroup itemGroup, String translation) {
-        if (!(itemGroup.getDisplayName().getContent() instanceof TranslatableTextContent translatable))
+    public void addTranslation(CreativeModeTab itemGroup, String translation) {
+        if (!(itemGroup.getDisplayName().getContents() instanceof TranslatableContents translatable))
             return;
 
         translations.put(translatable.getKey(), translation);
@@ -97,7 +95,7 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
      *            The translation
      */
     public void addTranslation(Block block, String translation) {
-        translations.put(block.getTranslationKey(), translation);
+        translations.put(block.getDescriptionId(), translation);
     }
 
     public <T, R extends RegistryContainer<T>> void addTranslation(Class<R> containerClazz, Class<T> valueClazz, Translator<T> translator) {
@@ -111,11 +109,11 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
         addTranslation(container, Item.class, ((provider, value) -> {
             if (value instanceof BlockItem) return;
 
-            provider.addTranslation(value, getNameFromKey(value.getTranslationKey()));
+            provider.addTranslation(value, getNameFromKey(value.getDescriptionId()));
         }));
     }
     public void translateBlocks(Class<? extends BlockContainer> container) {
-        addTranslation(container, Block.class, ((provider, value) -> provider.addTranslation(value, getNameFromKey(value.getTranslationKey()))));
+        addTranslation(container, Block.class, ((provider, value) -> provider.addTranslation(value, getNameFromKey(value.getDescriptionId()))));
     }
 
     @FunctionalInterface

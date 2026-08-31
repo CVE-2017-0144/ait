@@ -1,14 +1,13 @@
 package dev.amble.ait.data.schema.exterior.category;
 
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
+import net.minecraft.resources.ResourceLocation;
 
 public class BoothCategory extends ExteriorCategorySchema {
-    public static final Identifier REFERENCE = AITMod.id("exterior/booth");
+    public static final ResourceLocation REFERENCE = AITMod.id("exterior/booth");
 
     public BoothCategory() {
         super(REFERENCE, "booth");

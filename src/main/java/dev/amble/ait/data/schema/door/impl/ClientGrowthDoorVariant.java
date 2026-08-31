@@ -11,6 +11,6 @@ public class ClientGrowthDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new CoralGrowthDoorModel(CoralGrowthDoorModel.getTexturedModelData().createModel());
+        return new CoralGrowthDoorModel(CoralGrowthDoorModel.getTexturedModelData().bakeRoot());
     }
 }

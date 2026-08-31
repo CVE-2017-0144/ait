@@ -11,18 +11,16 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.ClientWorldEvents;
 import dev.amble.ait.api.tardis.TardisClientEvents;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
@@ -68,22 +66,22 @@ public class ClientTardisUtil {
         });
     }
 
-    public static void changeExteriorWithScreen(UUID uuid, Identifier variant, boolean variantchange) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(uuid);
+    public static void changeExteriorWithScreen(UUID uuid, ResourceLocation variant, boolean variantchange) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(uuid);
         buf.writeBoolean(variantchange);
-        buf.writeIdentifier(variant);
+        buf.writeResourceLocation(variant);
         ClientPlayNetworking.send(TardisExterior.CHANGE_EXTERIOR, buf);
     }
 
-    public static void changeExteriorWithScreen(ClientTardis tardis, Identifier variant, boolean variantchange) {
+    public static void changeExteriorWithScreen(ClientTardis tardis, ResourceLocation variant, boolean variantchange) {
         changeExteriorWithScreen(tardis.getUuid(), variant, variantchange);
     }
 
     public static void changeSonicWithScreen(UUID uuid, SonicSchema schema, BlockPos consolePos) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(uuid);
-        buf.writeIdentifier(schema.id());
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(uuid);
+        buf.writeResourceLocation(schema.id());
         buf.writeBlockPos(consolePos);
         ClientPlayNetworking.send(SonicHandler.CHANGE_SONIC, buf);
     }
@@ -93,8 +91,8 @@ public class ClientTardisUtil {
     }
 
     public static void snapToOpenDoors(UUID uuid) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(uuid);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(uuid);
 
         ClientPlayNetworking.send(SNAP, buf);
     }
@@ -104,9 +102,9 @@ public class ClientTardisUtil {
     }
 
     public static void flyingSpeedPacket(UUID uuid, String direction) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(uuid);
-        buf.writeString(direction);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(uuid);
+        buf.writeUtf(direction);
 
         ClientPlayNetworking.send(FLYING_SPEED, buf);
     }
@@ -116,8 +114,8 @@ public class ClientTardisUtil {
     }
 
     public static void toggleAntigravs(UUID uuid) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(uuid);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(uuid);
 
         ClientPlayNetworking.send(TOGGLE_ANTIGRAVS, buf);
     }
@@ -137,13 +135,13 @@ public class ClientTardisUtil {
     }
 
     public static Optional<ClientTardis> getNearestTardis(double radius) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (player == null)
             return Optional.empty();
 
-        BlockPos pos = player.getBlockPos();
-        RegistryKey<World> dimension = player.getWorld().getRegistryKey();
+        BlockPos pos = player.blockPosition();
+        ResourceKey<Level> dimension = player.level().dimension();
 
         // doesnt find nearest, only finds if within radius.
         // could be more performant though
@@ -172,7 +170,7 @@ public class ClientTardisUtil {
                 return;
 
             BlockPos tPos = tardis.travel().position().getPos();
-            double distanceSquared = pos.getSquaredDistance(tPos);
+            double distanceSquared = pos.distSqr(tPos);
 
             if (radiusSquared > distanceSquared && distanceSquared < nearestDistanceSquared[0]) {
                 nearestDistanceSquared[0] = distanceSquared;
@@ -187,7 +185,7 @@ public class ClientTardisUtil {
         if (!isPlayerInATardis())
             return 0;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (player == null)
             return 0;
@@ -202,11 +200,11 @@ public class ClientTardisUtil {
         if (consoles.isEmpty())
             return 0;
 
-        BlockPos pos = player.getBlockPos();
+        BlockPos pos = player.blockPosition();
         double lowest = Double.MAX_VALUE;
 
         for (BlockPos console : consoles) {
-            double distance = Math.sqrt(pos.getSquaredDistance(console));
+            double distance = Math.sqrt(pos.distSqr(console));
 
             if (distance < lowest)
                 lowest = distance;
@@ -217,24 +215,24 @@ public class ClientTardisUtil {
 
     public static BlockPos getNearestConsole() {
         if (!isPlayerInATardis())
-            return BlockPos.ORIGIN;
+            return BlockPos.ZERO;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (player == null)
-            return BlockPos.ORIGIN;
+            return BlockPos.ZERO;
 
         Tardis tardis = getCurrentTardis();
 
         if (tardis == null)
-            return BlockPos.ORIGIN;
+            return BlockPos.ZERO;
 
-        BlockPos pos = player.getBlockPos();
+        BlockPos pos = player.blockPosition();
         double lowest = Double.MAX_VALUE;
-        BlockPos nearest = BlockPos.ORIGIN;
+        BlockPos nearest = BlockPos.ZERO;
 
         for (BlockPos console : tardis.getDesktop().getConsolePos()) {
-            double distance = Math.sqrt(pos.getSquaredDistance(console));
+            double distance = Math.sqrt(pos.distSqr(console));
 
             if (distance < lowest) {
                 lowest = distance;
@@ -249,7 +247,7 @@ public class ClientTardisUtil {
         if (!isPlayerInATardis())
             return null;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
         if (player == null)
             return null;
@@ -259,13 +257,13 @@ public class ClientTardisUtil {
         if (tardis == null)
             return null;
 
-        BlockPos pos = player.getBlockPos();
+        BlockPos pos = player.blockPosition();
         double lowest = Double.MAX_VALUE;
-        BlockPos nearest = BlockPos.ORIGIN;
+        BlockPos nearest = BlockPos.ZERO;
 
         BlockPos engine = tardis.getDesktop().getEnginePos();
         if (engine != null) {
-            double distance = Math.sqrt(pos.getSquaredDistance(engine));
+            double distance = Math.sqrt(pos.distSqr(engine));
 
             if (distance < lowest) {
                 lowest = distance;
@@ -333,15 +331,15 @@ public class ClientTardisUtil {
 
     public static float[] getPartyColors() {
         final int m = 25;
-        final PlayerEntity player = MinecraftClient.getInstance().player;
+        final Player player = Minecraft.getInstance().player;
 
-        int n = player.age / m + player.getId();
+        int n = player.tickCount / m + player.getId();
         int o = DyeColor.values().length;
         int p = n % o;
         int q = (n + 1) % o;
-        float r = ((float)(player.age % m)) / m;
-        float[] fs = SheepEntity.getRgbColor(DyeColor.byId(p));
-        float[] gs = SheepEntity.getRgbColor(DyeColor.byId(q));
+        float r = ((float)(player.tickCount % m)) / m;
+        float[] fs = Sheep.getColorArray(DyeColor.byId(p));
+        float[] gs = Sheep.getColorArray(DyeColor.byId(q));
 
         float s = fs[0] * (1f - r) + gs[0] * r;
         float t = fs[1] * (1f - r) + gs[1] * r;

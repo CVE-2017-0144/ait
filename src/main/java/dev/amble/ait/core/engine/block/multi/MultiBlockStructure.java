@@ -4,19 +4,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.util.WorldUtil;
@@ -33,13 +30,13 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
         super(offsets);
     }
 
-    public boolean check(World world, BlockPos center) {
+    public boolean check(Level world, BlockPos center) {
         return check(world, center, this, AITMod.LOGGER.isDebugEnabled());
     }
 
-    public static boolean check(World world, BlockPos center, List<BlockOffset> blockOffsets, boolean log) {
+    public static boolean check(Level world, BlockPos center, List<BlockOffset> blockOffsets, boolean log) {
         for (BlockOffset blockOffset : blockOffsets) {
-            BlockPos targetPos = center.add(blockOffset.offset);
+            BlockPos targetPos = center.offset(blockOffset.offset);
             if (!blockOffset.block.contains(world.getBlockState(targetPos))) {
                 if (log)
                     AITMod.LOGGER.error("{} is not {} but {} for {}", targetPos, blockOffset.block, world.getBlockState(targetPos), blockOffsets);
@@ -78,34 +75,34 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
     }
 
     public List<ItemStack> toStacks() {
-        SimpleInventory inv = new SimpleInventory(256);
+        SimpleContainer inv = new SimpleContainer(256);
         for (BlockOffset blockOffset : this) {
             for (ItemStack stack : blockOffset.toStacks()) {
-                inv.addStack(stack);
+                inv.addItem(stack);
             }
         }
 
-        return inv.clearToList();
+        return inv.removeAllItems();
     }
 
-    public static MultiBlockStructure testInteriorRendering(Identifier structure) {
+    public static MultiBlockStructure testInteriorRendering(ResourceLocation structure) {
         if (!ServerLifecycleHooks.isServer()) {
             AITMod.LOGGER.error("Attempted to load multiblock structure on client side");
             // todo SYNC THIS SHI TO CLIENT !!
             return EMPTY;
         }
 
-        StructureTemplate template = WorldUtil.getOverworld().getStructureTemplateManager()
-                .getTemplate(structure).orElse(null);
+        StructureTemplate template = WorldUtil.getOverworld().getStructureManager()
+                .get(structure).orElse(null);
 
         if (template == null) {
             AITMod.LOGGER.error("Failed to find structure template {}", structure);
             return EMPTY;
         }
 
-        List<StructureTemplate.StructureBlockInfo> list = ((StructureTemplateAccessor) template).getBlockInfo().get(0).getAll();
+        List<StructureTemplate.StructureBlockInfo> list = ((StructureTemplateAccessor) template).getBlockInfo().get(0).blocks();
         BlockPos center = list.stream()
-                .filter(info -> info.state().isOf(AITBlocks.DOOR_BLOCK))
+                .filter(info -> info.state().is(AITBlocks.DOOR_BLOCK))
                 .map(StructureTemplate.StructureBlockInfo::pos)
                 .findFirst()
                 .orElse(null);
@@ -117,22 +114,22 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
 
         MultiBlockStructure created = new MultiBlockStructure();
         list.stream()
-                .filter(info -> !info.state().isOf(AITBlocks.DOOR_BLOCK) && !info.state().isAir())
+                .filter(info -> !info.state().is(AITBlocks.DOOR_BLOCK) && !info.state().isAir())
                 .map(info -> new BlockOffset(new AllowedBlocks(info.state().getBlock()), info.pos().subtract(center)))
                 .forEach(created::add);
 
         return created;
     }
 
-    public static MultiBlockStructure from(Identifier structure) {
+    public static MultiBlockStructure from(ResourceLocation structure) {
         if (!ServerLifecycleHooks.isServer()) {
             AITMod.LOGGER.error("Attempted to load multiblock structure on client side");
             // todo SYNC THIS SHI TO CLIENT !!
             return EMPTY;
         }
 
-        StructureTemplate template = WorldUtil.getOverworld().getStructureTemplateManager()
-                .getTemplate(structure).orElse(null);
+        StructureTemplate template = WorldUtil.getOverworld().getStructureManager()
+                .get(structure).orElse(null);
 
         MultiBlockStructure created = new MultiBlockStructure();
         if (template == null) {
@@ -140,10 +137,10 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
             return created;
         }
 
-        List<StructureTemplate.StructureBlockInfo> list = ((StructureTemplateAccessor) template).getBlockInfo().get(0).getAll();
+        List<StructureTemplate.StructureBlockInfo> list = ((StructureTemplateAccessor) template).getBlockInfo().get(0).blocks();
         BlockPos center = null;
         for (StructureTemplate.StructureBlockInfo info : list) {
-            if (info.state().isOf(AITBlocks.GENERIC_SUBSYSTEM)) {
+            if (info.state().is(AITBlocks.GENERIC_SUBSYSTEM)) {
                 center = info.pos();
                 break;
             }
@@ -156,7 +153,7 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
 
         // double iterationwow
         for (StructureTemplate.StructureBlockInfo info : list) {
-            if (info.state().isOf(AITBlocks.GENERIC_SUBSYSTEM)) continue;
+            if (info.state().is(AITBlocks.GENERIC_SUBSYSTEM)) continue;
             if (info.state().isAir()) continue;
 
             BlockPos offset = info.pos().subtract(center);
@@ -174,14 +171,14 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
             this(new AllowedBlocks(block), new BlockPos(x, y, z));
         }
         public BlockOffset(Block block) {
-            this(new AllowedBlocks(block), BlockPos.ORIGIN);
+            this(new AllowedBlocks(block), BlockPos.ZERO);
         }
 
         public BlockOffset offset(int x, int y, int z) {
-            return new BlockOffset(this.block, this.offset.add(x, y, z));
+            return new BlockOffset(this.block, this.offset.offset(x, y, z));
         }
         public BlockOffset offset(BlockPos offset) {
-            return new BlockOffset(this.block, this.offset.add(offset));
+            return new BlockOffset(this.block, this.offset.offset(offset));
         }
         public BlockOffset allow(Block... blocks) {
             this.block.addAll(List.of(blocks));

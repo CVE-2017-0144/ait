@@ -13,24 +13,22 @@ import dev.drtheo.multidim.api.WorldBlueprint;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.RandomSequencesState;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.dimension.DimensionOptions;
-import net.minecraft.world.level.ServerWorldProperties;
-import net.minecraft.world.level.storage.LevelStorage;
-import net.minecraft.world.spawner.Spawner;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.world.RandomSequences;
+import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.tardis.ServerTardis;
@@ -41,11 +39,11 @@ public class TardisServerWorld extends MultiDimServerWorld {
     public static final String NAMESPACE = AITMod.MOD_ID + "-tardis";
 
     private ServerTardis tardis;
-    private RegistryEntry<Biome> cachedBiome;
+    private Holder<Biome> cachedBiome;
 
-    public TardisServerWorld(WorldBlueprint blueprint, MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, List<Spawner> spawners, @Nullable RandomSequencesState randomSequencesState, boolean created) {
+    public TardisServerWorld(WorldBlueprint blueprint, MinecraftServer server, Executor workerExecutor, LevelStorageSource.LevelStorageAccess session, ServerLevelData properties, ResourceKey<Level> worldKey, LevelStem dimensionOptions, ChunkProgressListener worldGenerationProgressListener, List<CustomSpawner> spawners, @Nullable RandomSequences randomSequencesState, boolean created) {
         super(blueprint, server, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, spawners, randomSequencesState, created);
-        this.setMobSpawnOptions(false, false);
+        this.setSpawnSettings(false, false);
     }
 
     @Override
@@ -69,7 +67,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
     }
 
     @Override
-    public RegistryEntry<Biome> getBiome(BlockPos pos) {
+    public Holder<Biome> getBiome(BlockPos pos) {
         if (this.cachedBiome != null)
             return cachedBiome;
 
@@ -87,7 +85,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
 
     public static TardisServerWorld create(ServerTardis tardis) {
         MinecraftServer server = ServerLifecycleHooks.get();
-        if (Thread.currentThread() != server.getThread()) {
+        if (Thread.currentThread() != server.getRunningThread()) {
             AITMod.LOGGER.error("Tried creating a TARDIS world when not on the server thread", new Throwable());
             CompletableFuture<TardisServerWorld> future = new CompletableFuture<>();
             server.execute(() -> {
@@ -120,9 +118,9 @@ public class TardisServerWorld extends MultiDimServerWorld {
 
     public static TardisServerWorld getOrLoad(ServerTardis tardis) {
         MinecraftServer server = ServerLifecycleHooks.get();
-        RegistryKey<World> key = keyForTardis(tardis);
+        ResourceKey<Level> key = keyForTardis(tardis);
 
-        TardisServerWorld result = (TardisServerWorld) server.getWorld(key);
+        TardisServerWorld result = (TardisServerWorld) server.getLevel(key);
 
         if (result != null) {
             result.setTardis(tardis);
@@ -133,7 +131,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
     }
 
     public static TardisServerWorld load(MinecraftServer server, ServerTardis tardis) {
-        if (Thread.currentThread() != server.getThread()) {
+        if (Thread.currentThread() != server.getRunningThread()) {
             AITMod.LOGGER.error("Tried loading a TARDIS world when not on the server thread", new Throwable());
             CompletableFuture<TardisServerWorld> future = new CompletableFuture<>();
             server.execute(() -> {
@@ -158,7 +156,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
 
         MultiDim multidim = MultiDim.get(server);
 
-        RegistryKey<World> key = keyForTardis(tardis);
+        ResourceKey<Level> key = keyForTardis(tardis);
         TardisServerWorld result = (TardisServerWorld) multidim.load(AITDimensions.TARDIS_WORLD_BLUEPRINT, key);
 
         if (result == null) {
@@ -171,39 +169,39 @@ public class TardisServerWorld extends MultiDimServerWorld {
         return result;
     }
 
-    public static RegistryKey<World> keyForTardis(ServerTardis tardis) {
-        return RegistryKey.of(RegistryKeys.WORLD, idForTardis(tardis));
+    public static ResourceKey<Level> keyForTardis(ServerTardis tardis) {
+        return ResourceKey.create(Registries.DIMENSION, idForTardis(tardis));
     }
 
-    private static Identifier idForTardis(ServerTardis tardis) {
-        return new Identifier(NAMESPACE, tardis.getUuid().toString());
+    private static ResourceLocation idForTardis(ServerTardis tardis) {
+        return new ResourceLocation(NAMESPACE, tardis.getUuid().toString());
     }
 
-    public static boolean isTardisDimension(RegistryKey<World> key) {
-        return NAMESPACE.equals(key.getValue().getNamespace());
+    public static boolean isTardisDimension(ResourceKey<Level> key) {
+        return NAMESPACE.equals(key.location().getNamespace());
     }
 
-    public static boolean isTardisDimension(World world) {
-        return world.isClient() ? isTardisDimension((ClientWorld) world) : isTardisDimension((ServerWorld) world);
+    public static boolean isTardisDimension(Level world) {
+        return world.isClientSide() ? isTardisDimension((ClientLevel) world) : isTardisDimension((ServerLevel) world);
     }
 
-    public static boolean isTardisDimension(ServerWorld world) {
+    public static boolean isTardisDimension(ServerLevel world) {
         return world instanceof TardisServerWorld;
     }
 
-    @Nullable public static UUID getTardisId(@Nullable World world) {
+    @Nullable public static UUID getTardisId(@Nullable Level world) {
         if (world == null || !isTardisDimension(world))
             return null;
 
-        return getTardisId(world.getRegistryKey());
+        return getTardisId(world.dimension());
     }
 
-    public static UUID getTardisId(RegistryKey<World> key) {
-        return UUID.fromString(key.getValue().getPath());
+    public static UUID getTardisId(ResourceKey<Level> key) {
+        return UUID.fromString(key.location().getPath());
     }
 
     @Environment(EnvType.CLIENT)
-    public static boolean isTardisDimension(ClientWorld world) {
-        return isTardisDimension(world.getRegistryKey());
+    public static boolean isTardisDimension(ClientLevel world) {
+        return isTardisDimension(world.dimension());
     }
 }

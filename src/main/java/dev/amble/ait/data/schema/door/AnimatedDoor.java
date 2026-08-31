@@ -4,11 +4,9 @@ import java.util.Optional;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.phys.Vec3;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.tardis.handler.DoorHandler;
@@ -24,25 +22,25 @@ public interface AnimatedDoor extends AnimatedFeature {
         return Optional.empty();
     }
 
-    default Vec3d getScale() {
-        return new Vec3d(1, 1, 1);
+    default Vec3 getScale() {
+        return new Vec3(1, 1, 1);
     }
 
-    default Vec3d getOffset() {
-        return Vec3d.ZERO;
+    default Vec3 getOffset() {
+        return Vec3.ZERO;
     }
 
     @Environment(EnvType.CLIENT)
-    default void runAnimations(ModelPart root, MatrixStack matrices, float tickDelta, ClientTardis tardis) {
+    default void runAnimations(ModelPart root, PoseStack matrices, float tickDelta, ClientTardis tardis) {
         DoorHandler doors = tardis.door();
 
-        Vec3d offset = this.getOffset().multiply(-1);
+        Vec3 offset = this.getOffset().scale(-1);
         matrices.translate(offset.x, offset.y, offset.z);
 
-        Vec3d scale = this.getScale();
+        Vec3 scale = this.getScale();
         matrices.scale((float) scale.x, (float) scale.y, (float) scale.z);
 
-        matrices.push();
+        matrices.pushPose();
         float leftProgress = doors.getLeftRot();
         float rightProgress = doors.getRightRot();
 
@@ -69,6 +67,6 @@ public interface AnimatedDoor extends AnimatedFeature {
         float finalLeftProgress = leftProgress - 0.001F;
         this.getLeftAnimation().flatMap(BedrockAnimationReference::get).ifPresent(anim -> anim.apply(root, (int) (finalLeftProgress * anim.animationLength * 20), leftDelta));
         this.getRightAnimation().flatMap(BedrockAnimationReference::get).ifPresent(anim -> anim.apply(root, (int) (finalRightProgress * anim.animationLength * 20), rightDelta));
-        matrices.pop();
+        matrices.popPose();
     }
 }

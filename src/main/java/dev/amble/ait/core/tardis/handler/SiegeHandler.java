@@ -4,17 +4,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -31,23 +29,23 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 
 public class SiegeHandler extends KeyedTardisComponent implements TardisTickable {
 
-    public static final Identifier DEFAULT_TEXTURRE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation DEFAULT_TEXTURRE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/siege_mode.png");
-    public static final Identifier BRICK_TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation BRICK_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/siege_mode_brick.png");
-    public static final Identifier COMPANION_TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation COMPANION_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/companion_cube.png");
-    public static final Identifier APERTURE_TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation APERTURE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/weighted_cube.png");
 
     private static final Property<UUID> HELD_KEY = new Property<>(Property.UUID, "siege_held_uuid");
-    private static final Property<Identifier> TEXTURE = new Property<>(Property.IDENTIFIER, "texture", DEFAULT_TEXTURRE);
+    private static final Property<ResourceLocation> TEXTURE = new Property<>(Property.IDENTIFIER, "texture", DEFAULT_TEXTURRE);
 
     private static final BoolProperty ACTIVE = new BoolProperty("siege_mode", false);
 
     private final Value<UUID> heldKey = HELD_KEY.create(this);
     private final BoolValue active = ACTIVE.create(this);
-    private final Value<Identifier> texture = TEXTURE.create(this);
+    private final Value<ResourceLocation> texture = TEXTURE.create(this);
 
     private int siegeTime;
 
@@ -59,19 +57,19 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
         TardisEvents.DEMAT.register(tardis -> tardis.siege().isActive() ? TardisEvents.Interaction.FAIL : TardisEvents.Interaction.PASS);
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            ServerPlayerEntity player = handler.getPlayer();
+            ServerPlayer player = handler.getPlayer();
 
             ServerTardisManager.getInstance().forEach(tardis -> {
                 if (!tardis.siege().isActive())
                     return;
 
-                if (!Objects.equals(tardis.siege().getHeldPlayerUUID(), player.getUuid()))
+                if (!Objects.equals(tardis.siege().getHeldPlayerUUID(), player.getUUID()))
                     return;
 
-                for (ItemStack itemStack : player.getInventory().main) {
-                    if (itemStack.isOf(AITItems.SIEGE_ITEM)) {
+                for (ItemStack itemStack : player.getInventory().items) {
+                    if (itemStack.is(AITItems.SIEGE_ITEM)) {
                         if (tardis.getUuid().equals(SiegeTardisItem.getTardisIdStatic(itemStack))) {
-                            player.getInventory().setStack(player.getInventory().getSlotWithStack(itemStack), Items.AIR.getDefaultStack());
+                            player.getInventory().setItem(player.getInventory().findSlotMatchingItem(itemStack), Items.AIR.getDefaultInstance());
                         }
                     }
                 }
@@ -130,7 +128,7 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
             this.tardis.fuel().disablePower();
 
             TardisUtil.giveEffectToInteriorPlayers(this.tardis.asServer(),
-                    new StatusEffectInstance(StatusEffects.NAUSEA, 100, 0, false, false));
+                    new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, false));
         } else {
             sound = AITSounds.SIEGE_DISABLE;
             this.tardis.door().setDeadlocked(false);
@@ -145,7 +143,7 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
             this.siegeTime = 0;
         }
 
-        tardis.getDesktop().playSoundAtEveryConsole(sound, SoundCategory.BLOCKS, 3f, 1f);
+        tardis.getDesktop().playSoundAtEveryConsole(sound, SoundSource.BLOCKS, 3f, 1f);
 
         this.tardis.removeFuel(0.01 * FuelHandler.TARDIS_MAX_FUEL * this.tardis.travel().instability());
         this.active.set(siege);
@@ -160,13 +158,13 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
 
         this.siegeTime += 1;
 
-        if (server.getTicks() % 10 == 0)
+        if (server.getTickCount() % 10 == 0)
             return;
 
         boolean freeze = this.siegeTime > 60 * 20 && !this.isSiegeBeingHeld()
                 && !this.tardis.subsystems().lifeSupport().isEnabled();
 
-        this.tardis.asServer().world().getPlayers().forEach(player -> {
+        this.tardis.asServer().world().players().forEach(player -> {
             if (!player.isAlive() || !player.canFreeze())
                 return;
 
@@ -178,18 +176,18 @@ public class SiegeHandler extends KeyedTardisComponent implements TardisTickable
         });
     }
 
-    private void freeze(ServerPlayerEntity player) {
-        int m = player.getFrozenTicks();
-        if (m < 0) player.setFrozenTicks(5);
-        player.setFrozenTicks(Math.min(player.getMinFreezeDamageTicks(), m + 5));
+    private void freeze(ServerPlayer player) {
+        int m = player.getTicksFrozen();
+        if (m < 0) player.setTicksFrozen(5);
+        player.setTicksFrozen(Math.min(player.getTicksRequiredToFreeze(), m + 5));
     }
 
-    private void unfreeze(ServerPlayerEntity player) {
-        if (player.getFrozenTicks() > player.getMinFreezeDamageTicks())
-            player.setFrozenTicks(0);
+    private void unfreeze(ServerPlayer player) {
+        if (player.getTicksFrozen() > player.getTicksRequiredToFreeze())
+            player.setTicksFrozen(0);
     }
 
-    public Value<Identifier> texture() {
+    public Value<ResourceLocation> texture() {
         return texture;
     }
 }

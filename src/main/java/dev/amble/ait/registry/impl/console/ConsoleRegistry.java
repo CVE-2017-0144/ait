@@ -6,10 +6,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.datapack.DatapackConsole;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
@@ -29,16 +27,16 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        PacketByteBuf secondary = PacketByteBufs.create();
+    public void syncToClient(ServerPlayer player) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf secondary = PacketByteBufs.create();
 
         int counter = 0;
         for (ConsoleTypeSchema schema : this.toList()) {
             if (!(schema instanceof DatapackConsole.SimpleType type)) continue;
 
             counter++;
-            secondary.encodeAsJson(DatapackConsole.SimpleType.CODEC, type);
+            secondary.writeJsonWithCodec(DatapackConsole.SimpleType.CODEC, type);
         }
 
         buf.writeInt(counter);
@@ -48,7 +46,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
+    public void readFromServer(FriendlyByteBuf buf) {
         for (ConsoleTypeSchema schema : this.toList()) {
             if (!(schema instanceof DatapackConsole.SimpleType type)) continue;
 
@@ -58,7 +56,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            DatapackConsole.SimpleType type = buf.decodeAsJson(DatapackConsole.SimpleType.CODEC);
+            DatapackConsole.SimpleType type = buf.readJsonWithCodec(DatapackConsole.SimpleType.CODEC);
             this.register(type);
         }
     }

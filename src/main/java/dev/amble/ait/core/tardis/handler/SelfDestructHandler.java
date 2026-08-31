@@ -1,15 +1,14 @@
 package dev.amble.ait.core.tardis.handler;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -49,24 +48,24 @@ public class SelfDestructHandler extends KeyedTardisComponent implements TardisT
 
     private void complete() {
         CachedDirectedGlobalPos exterior = tardis.travel().position();
-        ServerWorld world = exterior.getWorld();
+        ServerLevel world = exterior.getWorld();
         BlockPos pos = exterior.getPos();
 
         this.queued.set(false);
 
         AITMod.LOGGER.warn("Tardis {} has self destructed, expect lag.", tardis.getUuid());
-        world.getServer().executeSync(() -> ServerTardisManager.getInstance().remove(world.getServer(), tardis.asServer()));
+        world.getServer().executeIfPossible(() -> ServerTardisManager.getInstance().remove(world.getServer(), tardis.asServer()));
 
-        world.createExplosion(null, null, TardisUtil.EXPLOSION_BEHAVIOR, pos.getX(), pos.getY(), pos.getZ(), 50, TardisUtil.doCreateFire(world),
-                World.ExplosionSourceType.MOB);
-        world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.CLOUD, pos.getX(), pos.getY(), pos.getZ(), 100, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 250, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.FLAME, pos.getX(), pos.getY(), pos.getZ(), 50, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), pos.getY(), pos.getZ(), 25, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.SMALL_FLAME, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
-        world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 500, 1, 1, 1, 1);
-        world.playSound(null, pos, AITSounds.GROAN, SoundCategory.BLOCKS, 10f, 0.7f);
+        world.explode(null, null, TardisUtil.EXPLOSION_BEHAVIOR, pos.getX(), pos.getY(), pos.getZ(), 50, TardisUtil.doCreateFire(world),
+                Level.ExplosionInteraction.MOB);
+        world.sendParticles(ParticleTypes.EXPLOSION_EMITTER, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.CLOUD, pos.getX(), pos.getY(), pos.getZ(), 100, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 250, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.FLAME, pos.getX(), pos.getY(), pos.getZ(), 50, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), pos.getY(), pos.getZ(), 25, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.SMALL_FLAME, pos.getX(), pos.getY(), pos.getZ(), 10, 1, 1, 1, 1);
+        world.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 500, 1, 1, 1, 1);
+        world.playSound(null, pos, AITSounds.GROAN, SoundSource.BLOCKS, 10f, 0.7f);
 
         ServerTardisManager.getInstance().remove(world.getServer(), tardis.asServer());
     }
@@ -80,8 +79,8 @@ public class SelfDestructHandler extends KeyedTardisComponent implements TardisT
     }
 
     private void warnPlayers() {
-        for (PlayerEntity player : this.tardis.asServer().world().getPlayers()) {
-            player.sendMessage(Text.translatable("tardis.message.self_destruct.warning").formatted(Formatting.RED),
+        for (Player player : this.tardis.asServer().world().players()) {
+            player.displayClientMessage(Component.translatable("tardis.message.self_destruct.warning").withStyle(ChatFormatting.RED),
                     true);
         }
     }

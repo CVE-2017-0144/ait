@@ -4,20 +4,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
@@ -27,11 +24,11 @@ public abstract class LinkableItem extends Item {
     private final boolean showTooltip;
     private final String path;
 
-    public LinkableItem(Settings settings, boolean showTooltip) {
+    public LinkableItem(Properties settings, boolean showTooltip) {
         this(settings, "tardis", showTooltip);
     }
 
-    public LinkableItem(Settings settings, String path, boolean showTooltip) {
+    public LinkableItem(Properties settings, String path, boolean showTooltip) {
         super(settings);
 
         this.path = path;
@@ -39,12 +36,12 @@ public abstract class LinkableItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         this.handleTooltip(stack, tooltip);
-        super.appendTooltip(stack, world, tooltip, context);
+        super.appendHoverText(stack, world, tooltip, context);
     }
 
-    private void handleTooltip(ItemStack stack, List<Text> tooltip) {
+    private void handleTooltip(ItemStack stack, List<Component> tooltip) {
         if (!showTooltip)
             return;
 
@@ -54,17 +51,17 @@ public abstract class LinkableItem extends Item {
             return;
 
         if (!Screen.hasShiftDown()) {
-            tooltip.add(Text.translatable("tooltip.ait.remoteitem.holdformoreinfo").formatted(Formatting.GRAY)
-                    .formatted(Formatting.ITALIC));
+            tooltip.add(Component.translatable("tooltip.ait.remoteitem.holdformoreinfo").withStyle(ChatFormatting.GRAY)
+                    .withStyle(ChatFormatting.ITALIC));
             return;
         }
 
         ClientTardisManager.getInstance().getTardis(id, tardis -> {
             if (tardis != null) {
-                tooltip.add(Text.translatable("tooltip.ait.linked_tardis").formatted(Formatting.BLUE));
-                tooltip.add(Text.literal("> " + tardis.stats().getName()));
-                tooltip.add(Text.literal("> " + tardis.getUuid().toString().substring(0, 8))
-                        .formatted(Formatting.DARK_GRAY));
+                tooltip.add(Component.translatable("tooltip.ait.linked_tardis").withStyle(ChatFormatting.BLUE));
+                tooltip.add(Component.literal("> " + tardis.stats().getName()));
+                tooltip.add(Component.literal("> " + tardis.getUuid().toString().substring(0, 8))
+                        .withStyle(ChatFormatting.DARK_GRAY));
             }
         });
     }
@@ -74,15 +71,15 @@ public abstract class LinkableItem extends Item {
     }
 
     public void link(ItemStack stack, UUID uuid) {
-        stack.getOrCreateNbt().putUuid(this.path, uuid);
+        stack.getOrCreateTag().putUUID(this.path, uuid);
     }
 
     public void unlink(ItemStack stack) {
-        stack.getOrCreateNbt().remove(this.path);
+        stack.getOrCreateTag().remove(this.path);
     }
 
     public boolean isLinked(ItemStack stack) {
-        return stack.getOrCreateNbt().contains(this.path);
+        return stack.getOrCreateTag().contains(this.path);
     }
 
     public boolean isOf(ItemStack stack, Tardis tardis) {
@@ -93,24 +90,24 @@ public abstract class LinkableItem extends Item {
     }
 
     public UUID getTardisId(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        NbtElement element = nbt.get(path);
+        CompoundTag nbt = stack.getOrCreateTag();
+        Tag element = nbt.get(path);
 
         if (element == null)
             return null;
 
         // convert old string data
-        if (element.getType() == NbtElement.STRING_TYPE) {
-            UUID converted = UUID.fromString(element.asString());
+        if (element.getId() == Tag.TAG_STRING) {
+            UUID converted = UUID.fromString(element.getAsString());
 
-            nbt.putUuid(path, converted);
+            nbt.putUUID(path, converted);
             return converted;
         }
 
-        return NbtHelper.toUuid(element);
+        return NbtUtils.loadUUID(element);
     }
 
-    public Tardis getTardis(World world, ItemStack stack) {
+    public Tardis getTardis(Level world, ItemStack stack) {
         if (world == null)
             return null;
 
@@ -157,7 +154,7 @@ public abstract class LinkableItem extends Item {
         return apply(stack, LinkableItem::getTardisId);
     }
 
-    public static Tardis getTardisStatic(World world, ItemStack stack) {
+    public static Tardis getTardisStatic(Level world, ItemStack stack) {
         return apply(stack, (i, s) -> i.getTardis(world, s));
     }
 }

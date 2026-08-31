@@ -11,6 +11,6 @@ public class ClientStallionDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new StallionDoorModel(StallionDoorModel.getTexturedModelData().createModel());
+        return new StallionDoorModel(StallionDoorModel.getTexturedModelData().bakeRoot());
     }
 }

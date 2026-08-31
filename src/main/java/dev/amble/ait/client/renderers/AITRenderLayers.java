@@ -1,85 +1,84 @@
 package dev.amble.ait.client.renderers;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.function.BiFunction;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
-public class AITRenderLayers extends RenderLayer {
+public class AITRenderLayers extends RenderType {
 
-    private static final BiFunction<Identifier, Boolean, RenderLayer> EMISSIVE_CULL_Z_OFFSET = Util
+    private static final BiFunction<ResourceLocation, Boolean, RenderType> EMISSIVE_CULL_Z_OFFSET = Util
             .memoize((texture, affectsOutline) -> {
-                RenderPhase.Texture texture2 = new RenderPhase.Texture(texture, false, false);
-                MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder()
-                        .program(RenderPhase.EYES_PROGRAM)
-                        .texture(texture2)
-                        .cull(DISABLE_CULLING)
-                        .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-                        .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-                        .lightmap(ENABLE_LIGHTMAP)
-                        .writeMaskState(COLOR_MASK)
-                        .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
-                        .build(false);
-                return RenderLayer.of("emissive_cull_z_offset",
-                        VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 256,
+                RenderStateShard.TextureStateShard texture2 = new RenderStateShard.TextureStateShard(texture, false, false);
+                CompositeState multiPhaseParameters = RenderType.CompositeState.builder()
+                        .setShaderState(RenderStateShard.RENDERTYPE_EYES_SHADER)
+                        .setTextureState(texture2)
+                        .setCullState(NO_CULL)
+                        .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                        .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+                        .setLightmapState(LIGHTMAP)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                        .createCompositeState(false);
+                return RenderType.create("emissive_cull_z_offset",
+                        DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256,
                         false, true, multiPhaseParameters);
             });
 
-    public static RenderLayer tardisEmissiveCullZOffset(Identifier texture, boolean affectsOutline) {
+    public static RenderType tardisEmissiveCullZOffset(ResourceLocation texture, boolean affectsOutline) {
         return EMISSIVE_CULL_Z_OFFSET.apply(texture, affectsOutline);
     }
 
-    private AITRenderLayers(String name, VertexFormat vertexFormat, VertexFormat.DrawMode drawMode,
+    private AITRenderLayers(String name, VertexFormat vertexFormat, VertexFormat.Mode drawMode,
                             int expectedBufferSize, boolean hasCrumbling, boolean translucent, Runnable startAction,
                             Runnable endAction) {
         super(name, vertexFormat, drawMode, expectedBufferSize, hasCrumbling, translucent, startAction, endAction);
     }
 
-    public static RenderLayer getBoti() {
-        MultiPhaseParameters parameters = MultiPhaseParameters.builder()
-                .texture(RenderPhase.MIPMAP_BLOCK_ATLAS_TEXTURE)
-                .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-                .layering(RenderPhase.NO_LAYERING)
-                .build(false);
-        return RenderLayer.of("boti", VertexFormats.POSITION_COLOR_TEXTURE_LIGHT,
-                VertexFormat.DrawMode.QUADS, 256, false, true, parameters);
+    public static RenderType getBoti() {
+        CompositeState parameters = CompositeState.builder()
+                .setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setLayeringState(RenderStateShard.NO_LAYERING)
+                .createCompositeState(false);
+        return RenderType.create("boti", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.QUADS, 256, false, true, parameters);
     }
 
-    public static RenderLayer getBotiInteriorEmission(Identifier texture) {
-        MultiPhaseParameters parameters = MultiPhaseParameters.builder()
-                .texture(new Texture(texture, false, false))
-                .program(ENTITY_CUTOUT_NONULL_OFFSET_Z_PROGRAM)
-                .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-                .cull(DISABLE_CULLING)
-                .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-                .lightmap(ENABLE_LIGHTMAP)
-                .overlay(ENABLE_OVERLAY_COLOR)
-                .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
-                .build(false);
-        return RenderLayer.of("boti_interior_emission", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.DrawMode.QUADS, 256, false, true, parameters);
+    public static RenderType getBotiInteriorEmission(ResourceLocation texture) {
+        CompositeState parameters = CompositeState.builder()
+                .setTextureState(new TextureStateShard(texture, false, false))
+                .setShaderState(RENDERTYPE_ENTITY_CUTOUT_NO_CULL_Z_OFFSET_SHADER)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(NO_CULL)
+                .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+                .setLightmapState(LIGHTMAP)
+                .setOverlayState(OVERLAY)
+                .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                .createCompositeState(false);
+        return RenderType.create("boti_interior_emission", DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS, 256, false, true, parameters);
     }
 
-    public static RenderLayer getBotiInterior(Identifier texture) {
-        MultiPhaseParameters parameters = MultiPhaseParameters.builder()
-                .texture(new Texture(texture, false, false))
-                .program(ENTITY_CUTOUT_NONULL_PROGRAM)
-                .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-                .cull(ENABLE_CULLING)
-                .layering(RenderPhase.NO_LAYERING)
-                .lightmap(ENABLE_LIGHTMAP)
-                .overlay(ENABLE_OVERLAY_COLOR)
-                .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
-                .build(false);
-        return RenderLayer.of("boti_interior", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.DrawMode.QUADS, 256, false, true, parameters);
+    public static RenderType getBotiInterior(ResourceLocation texture) {
+        CompositeState parameters = CompositeState.builder()
+                .setTextureState(new TextureStateShard(texture, false, false))
+                .setShaderState(RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(CULL)
+                .setLayeringState(RenderStateShard.NO_LAYERING)
+                .setLightmapState(LIGHTMAP)
+                .setOverlayState(OVERLAY)
+                .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                .createCompositeState(false);
+        return RenderType.create("boti_interior", DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS, 256, false, true, parameters);
     }
 }

@@ -1,19 +1,17 @@
 package dev.amble.ait.data.schema.console.variant.coral.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.CoralConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.coral.BlueCoralVariant;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientBlueCoralVariant extends ClientConsoleVariantSchema {
-    public static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_blue.png"));
-    public static final Identifier EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_blue_emission.png"));
 
     public ClientBlueCoralVariant() {
@@ -21,18 +19,18 @@ public class ClientBlueCoralVariant extends ClientConsoleVariantSchema {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return EMISSION;
     }
 
     @Override
     public SimpleConsoleModel model() {
-        return new CoralConsoleModel(CoralConsoleModel.getTexturedModelData().createModel());
+        return new CoralConsoleModel(CoralConsoleModel.getTexturedModelData().bakeRoot());
     }
 
     @Override

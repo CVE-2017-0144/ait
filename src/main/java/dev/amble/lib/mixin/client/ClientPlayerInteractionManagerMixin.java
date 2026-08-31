@@ -6,31 +6,29 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.lib.api.ICantBreak;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public class ClientPlayerInteractionManagerMixin {
 
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
-    @Inject(method = "breakBlock", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "destroyBlock", at = @At(value = "HEAD"), cancellable = true)
     public void ait$breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        World world = this.client.world;
+        Level world = this.minecraft.level;
         if (world == null)
             return;
 
         Block block = world.getBlockState(pos).getBlock();
         if (block instanceof ICantBreak cantBreak) {
-            cantBreak.onTryBreak(world, pos, world.getBlockState(pos), this.client.player);
+            cantBreak.onTryBreak(world, pos, world.getBlockState(pos), this.minecraft.player);
             cir.setReturnValue(false);
             cir.cancel();
         }

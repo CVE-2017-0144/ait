@@ -1,22 +1,22 @@
 package dev.amble.ait.client.boti;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.util.Window;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.Minecraft;
 
 public class BOTIInit {
-    public Framebuffer afbo;
+    public RenderTarget afbo;
 
     public void setupFramebuffer() {
-        Window window = MinecraftClient.getInstance().getWindow();
+        Window window = Minecraft.getInstance().getWindow();
 
-        if (afbo == null || afbo.textureWidth != window.getFramebufferWidth() || afbo.textureHeight != window.getFramebufferHeight()) {
-            afbo = new SimpleFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, MinecraftClient.IS_SYSTEM_MAC);;
+        if (afbo == null || afbo.width != window.getWidth() || afbo.height != window.getHeight()) {
+            afbo = new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX);;
         }
 
-        afbo.beginWrite(false);
-        afbo.checkFramebufferStatus();
+        afbo.bindWrite(false);
+        afbo.checkStatus();
 
         if (!AITRenderHelper.getIsStencilEnabled(afbo)) {
             AITRenderHelper.setIsStencilEnabled(afbo, true);
@@ -24,8 +24,8 @@ public class BOTIInit {
     }
 
     public void endFBO() {
-        afbo.clear(MinecraftClient.IS_SYSTEM_MAC);
-        afbo.endWrite();
+        afbo.clear(Minecraft.ON_OSX);
+        afbo.unbindWrite();
     }
 
 }

@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.datapack.DatapackSonic;
 import dev.amble.ait.data.schema.sonic.BuiltinSonic;
@@ -55,7 +53,7 @@ public class SonicRegistry extends UnlockableRegistry<SonicSchema> {
 
     public static SonicSchema DEFAULT;
 
-    public void populateModels(Consumer<Identifier> consumer) {
+    public void populateModels(Consumer<ResourceLocation> consumer) {
         for (SonicSchema schema : REGISTRY.values()) {
             SonicSchema.Models models = schema.models();
             models.load(consumer);
@@ -64,8 +62,8 @@ public class SonicRegistry extends UnlockableRegistry<SonicSchema> {
         }
     }
 
-    public Collection<Identifier> models() {
-        List<Identifier> result = new ArrayList<>();
+    public Collection<ResourceLocation> models() {
+        List<ResourceLocation> result = new ArrayList<>();
 
         for (SonicSchema schema : REGISTRY.values()) {
             SonicSchema.Models models = schema.models();

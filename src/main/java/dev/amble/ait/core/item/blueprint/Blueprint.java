@@ -3,12 +3,10 @@ package dev.amble.ait.core.item.blueprint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.core.util.StackUtil;
 
 public class Blueprint {
@@ -23,8 +21,8 @@ public class Blueprint {
         this.requirements = StackUtil.cloneList(initialRequirements);
     }
 
-    public Blueprint(NbtCompound nbt) {
-        this(BlueprintRegistry.getInstance().get(new Identifier(nbt.getString("id"))));
+    public Blueprint(CompoundTag nbt) {
+        this(BlueprintRegistry.getInstance().get(new ResourceLocation(nbt.getString("id"))));
 
         this.requirements.clear();
         this.fromNbt(nbt);
@@ -37,12 +35,12 @@ public class Blueprint {
      */
     public boolean tryAdd(ItemStack stack) {
         for (ItemStack requirement : requirements) {
-            if (ItemStack.areItemsEqual(requirement, stack)) {
+            if (ItemStack.isSameItem(requirement, stack)) {
                 // now we need to check if the stack has the same amount of items
 
                 int deducted = Math.min(requirement.getCount(), stack.getCount());
-                requirement.decrement(deducted);
-                stack.decrement(deducted);
+                requirement.shrink(deducted);
+                stack.shrink(deducted);
 
                 if (requirement.isEmpty())
                     requirements.remove(requirement);
@@ -56,7 +54,7 @@ public class Blueprint {
 
     public int getCountLeftFor(ItemStack stack) {
         for (ItemStack requirement : requirements) {
-            if (ItemStack.areItemsEqual(requirement, stack)) {
+            if (ItemStack.isSameItem(requirement, stack)) {
                 return requirement.getCount();
             }
         }
@@ -92,29 +90,29 @@ public class Blueprint {
 
         for (ItemStack j : requirements) {
             inserted.stream()
-                    .filter(i -> ItemStack.areItemsEqual(i, j))
-                    .forEach(i -> i.decrement(j.getCount()));
+                    .filter(i -> ItemStack.isSameItem(i, j))
+                    .forEach(i -> i.shrink(j.getCount()));
         }
 
         return inserted;
     }
 
-    public NbtCompound toNbt() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString("id", source.id().toString());
 
-        NbtList list = new NbtList();
+        ListTag list = new ListTag();
         for (ItemStack stack : requirements) {
-            list.add(stack.writeNbt(new NbtCompound()));
+            list.add(stack.save(new CompoundTag()));
         }
         nbt.put("requirements", list);
 
         return nbt;
     }
-    protected NbtCompound fromNbt(NbtCompound nbt) {
-        NbtList list = nbt.getList("requirements", 10);
+    protected CompoundTag fromNbt(CompoundTag nbt) {
+        ListTag list = nbt.getList("requirements", 10);
         for (int i = 0; i < list.size(); i++) {
-            requirements.add(ItemStack.fromNbt(list.getCompound(i)));
+            requirements.add(ItemStack.of(list.getCompound(i)));
         }
 
         return nbt;

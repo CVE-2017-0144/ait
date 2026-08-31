@@ -7,9 +7,7 @@ import java.util.Calendar;
 
 import dev.amble.lib.animation.HasBedrockModel;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-
-import net.minecraft.block.entity.BlockEntityType;
-
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import dev.amble.ait.core.blockentities.*;
 import dev.amble.ait.core.blockentities.control.RedstoneControlBlockEntity;
 import dev.amble.ait.core.blocks.PowerConverterBlock;

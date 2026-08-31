@@ -5,57 +5,56 @@ import java.util.Collections;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Arm;
-import net.minecraft.world.World;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public abstract class DummyLivingEntity extends LivingEntity {
 
     protected static final Iterable<ItemStack> ARMOR = Collections.singleton(ItemStack.EMPTY);
     private Brain<?> brain;
 
-    protected DummyLivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
+    protected DummyLivingEntity(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
         NbtOps nbtOps = NbtOps.INSTANCE;
-        this.brain = this.deserializeBrain(new Dynamic<>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
+        this.brain = this.makeBrain(new Dynamic<>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
     }
 
     @Override
-    public Iterable<ItemStack> getArmorItems() {
+    public Iterable<ItemStack> getArmorSlots() {
         return ARMOR;
     }
 
     @Override
-    public boolean hasNoGravity() {
+    public boolean isNoGravity() {
         return true;
     }
 
     @Override
-    public ItemStack getEquippedStack(EquipmentSlot slot) {
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void equipStack(EquipmentSlot slot, ItemStack stack) {
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
     }
 
     @Override
-    public Arm getMainArm() {
-        return Arm.LEFT;
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.LEFT;
     }
 
     @Override
@@ -64,7 +63,7 @@ public abstract class DummyLivingEntity extends LivingEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         return false;
     }
 
@@ -79,7 +78,7 @@ public abstract class DummyLivingEntity extends LivingEntity {
     }
 
     @Override
-    public boolean doesRenderOnFire() {
+    public boolean displayFireAnimation() {
         return false;
     }
 
@@ -90,17 +89,17 @@ public abstract class DummyLivingEntity extends LivingEntity {
 
     @Nullable @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 
     @Override
-    public FallSounds getFallSounds() {
-        return new FallSounds(SoundEvents.INTENTIONALLY_EMPTY, SoundEvents.INTENTIONALLY_EMPTY);
+    public Fallsounds getFallSounds() {
+        return new Fallsounds(SoundEvents.EMPTY, SoundEvents.EMPTY);
     }
 
     @Nullable @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.INTENTIONALLY_EMPTY;
+        return SoundEvents.EMPTY;
     }
 
     @Override
@@ -113,12 +112,12 @@ public abstract class DummyLivingEntity extends LivingEntity {
     }
 
     @Override
-    public boolean addStatusEffect(StatusEffectInstance effect, @Nullable Entity source) {
+    public boolean addEffect(MobEffectInstance effect, @Nullable Entity source) {
         return false;
     }
 
-    public static DefaultAttributeContainer.Builder createDummyAttributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 0);
+    public static AttributeSupplier.Builder createDummyAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0)
+                .add(Attributes.MAX_HEALTH, 20.0).add(Attributes.ATTACK_DAMAGE, 0);
     }
 }

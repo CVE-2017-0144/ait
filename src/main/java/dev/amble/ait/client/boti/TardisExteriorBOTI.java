@@ -1,23 +1,10 @@
 package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.item.Items;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
@@ -29,10 +16,21 @@ import dev.amble.ait.core.tardis.handler.StatsHandler;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 public class TardisExteriorBOTI extends BOTI {
-    public static void renderExteriorBoti(ExteriorBlockEntity exterior, ClientExteriorVariantSchema variant, MatrixStack stack, VertexConsumerProvider consumers, ExteriorModel frame, ModelPart mask, int light) {
-        if (client.world == null
+    public static void renderExteriorBoti(ExteriorBlockEntity exterior, ClientExteriorVariantSchema variant, PoseStack stack, MultiBufferSource consumers, ExteriorModel frame, ModelPart mask, int light) {
+        if (client.level == null
                 || client.player == null) return;
 
         if (!exterior.isLinked())
@@ -40,21 +38,21 @@ public class TardisExteriorBOTI extends BOTI {
 
         ClientTardis tardis = exterior.tardis().get().asClient();
 
-        stack.push();
+        stack.pushPose();
 
-        client.getFramebuffer().endWrite();
+        client.getMainRenderTarget().unbindWrite();
 
         BOTI_HANDLER.setupFramebuffer();
 
-        Vec3d skyColor = client.world.getSkyColor(client.player.getPos(), client.getTickDelta());
+        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getFrameTime());
         if (AITModClient.CONFIG.greenScreenBOTI)
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, 0, 1, 0, 1);
         else
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, (float) skyColor.x, (float) skyColor.y, (float) skyColor.z, 1);
 
-        BOTI.copyFramebuffer(client.getFramebuffer(), BOTI_HANDLER.afbo);
+        BOTI.copyFramebuffer(client.getMainRenderTarget(), BOTI_HANDLER.afbo);
 
-        VertexConsumerProvider.Immediate botiProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
+        MultiBufferSource.BufferSource botiProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         GL11.glStencilMask(0xFF);
@@ -63,80 +61,80 @@ public class TardisExteriorBOTI extends BOTI {
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 
         RenderSystem.depthMask(true);
-        stack.push();
+        stack.pushPose();
         StatsHandler stats = tardis.stats();
         String name = stats.getName();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.mulPose(Axis.YP.rotationDegrees(180));
         Vector3f scale = tardis.travel().getScale();
         if (name.equalsIgnoreCase("grumm") || name.equalsIgnoreCase("dinnerbone")) {
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            stack.mulPose(Axis.XP.rotationDegrees(-90f));
             stack.translate(0, scale.y() + 0.25f, scale.z() - 1.7f);
         }
         ExteriorVariantSchema parent = variant.parent();
-        Vec3d vec = parent.getPortalPosition();
-        if (vec == null) vec = Vec3d.ZERO;
+        Vec3 vec = parent.getPortalPosition();
+        if (vec == null) vec = Vec3.ZERO;
 
         stack.translate(vec.x, -vec.y - parent.portalHeight() / 2f, vec.z);
         stack.scale((float) parent.portalWidth() * scale.x(),
                 (float) parent.portalHeight() * scale.y(), scale.z());
 
-        if (client.getEntityRenderDispatcher().shouldRenderHitboxes()) {
-            stack.push();
+        if (client.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+            stack.pushPose();
             stack.translate(0, 0, 0.8);
-            client.getItemRenderer().renderItem(Items.BLUE_STAINED_GLASS_PANE.getDefaultStack(), ModelTransformationMode.FIXED, LightmapTextureManager.MAX_LIGHT_COORDINATE, 0, stack, consumers, client.world, 0);
-            stack.pop();
+            client.getItemRenderer().renderStatic(Items.BLUE_STAINED_GLASS_PANE.getDefaultInstance(), ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, 0, stack, consumers, client.level, 0);
+            stack.popPose();
         }
 
-        RenderLayer whichOne = AITModClient.CONFIG.greenScreenBOTI ?
-                RenderLayer.getDebugFilledBox() : RenderLayer.getEndGateway();
+        RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
+                RenderType.debugFilledBox() : RenderType.endGateway();
         float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0, 1} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-        mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.DEFAULT_UV, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
-        botiProvider.draw();
-        stack.pop();
+        mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.NO_OVERLAY, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
+        botiProvider.endBatch();
+        stack.popPose();
 
-        copyDepth(BOTI_HANDLER.afbo, client.getFramebuffer());
+        copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
-        BOTI_HANDLER.afbo.beginWrite(false);
+        BOTI_HANDLER.afbo.bindWrite(false);
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.pushPose();
+        stack.mulPose(Axis.YP.rotationDegrees(180));
         if (name.equalsIgnoreCase("grumm") || name.equalsIgnoreCase("dinnerbone")) {
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            stack.mulPose(Axis.XP.rotationDegrees(-90f));
             stack.translate(0, scale.y + 0.25f, scale.z -1.7f);
         }
         stack.scale(scale.x(), scale.y(), scale.z());
 
-        frame.renderDoors(tardis, exterior, frame.getPart(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.DEFAULT_UV, 1, 1F, 1.0F, 1.0F, true);
-        botiProvider.draw();
-        stack.pop();
+        frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, true);
+        botiProvider.endBatch();
+        stack.popPose();
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.pushPose();
+        stack.mulPose(Axis.YP.rotationDegrees(180));
         if (name.equalsIgnoreCase("grumm") || name.equalsIgnoreCase("dinnerbone")) {
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            stack.mulPose(Axis.XP.rotationDegrees(-90f));
             stack.translate(0, scale.y() + 0.25f, scale.z() -1.7f);
         }
         stack.scale(scale.x(), scale.y(), scale.z());
 
         if (variant != ClientExteriorVariantRegistry.CORAL_GROWTH) {
             BiomeHandler handler = tardis.handler(TardisComponent.Id.BIOME);
-            Identifier biomeTexture = handler.getBiomeKey().get(variant.overrides());
+            ResourceLocation biomeTexture = handler.getBiomeKey().get(variant.overrides());
             if (biomeTexture != null)
-                frame.renderDoors(tardis, exterior, frame.getPart(), stack,
-                        botiProvider.getBuffer(AITRenderLayers.getEntityTranslucentCull(biomeTexture)),
-                        light, OverlayTexture.DEFAULT_UV, 1, 1F, 1.0F, 1.0F, true);
+                frame.renderDoors(tardis, exterior, frame.root(), stack,
+                        botiProvider.getBuffer(AITRenderLayers.entityTranslucentCull(biomeTexture)),
+                        light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, true);
         }
-        botiProvider.draw();
-        stack.pop();
+        botiProvider.endBatch();
+        stack.popPose();
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.pushPose();
+        stack.mulPose(Axis.YP.rotationDegrees(180));
         if (name.equalsIgnoreCase("grumm") || name.equalsIgnoreCase("dinnerbone")) {
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+            stack.mulPose(Axis.XP.rotationDegrees(-90f));
             stack.translate(0, scale.y + 0.25f, scale.z -1.7f);
         }
         stack.scale(scale.x(), scale.y(), scale.z());
@@ -147,13 +145,13 @@ public class TardisExteriorBOTI extends BOTI {
 
             if ((stats.getName() != null && "partytardis".equalsIgnoreCase(stats.getName()) || !tardis.extra().getInsertedDisc().isEmpty())) {
                 int m = 25;
-                int n = client.player.age / m + client.player.getId();
+                int n = client.player.tickCount / m + client.player.getId();
                 int o = DyeColor.values().length;
                 int p = n % o;
                 int q = (n + 1) % o;
-                float r = ((float) (client.player.age % m)) / m;
-                float[] fs = SheepEntity.getRgbColor(DyeColor.byId(p));
-                float[] gs = SheepEntity.getRgbColor(DyeColor.byId(q));
+                float r = ((float) (client.player.tickCount % m)) / m;
+                float[] fs = Sheep.getColorArray(DyeColor.byId(p));
+                float[] gs = Sheep.getColorArray(DyeColor.byId(q));
                 s = fs[0] * (1f - r) + gs[0] * r;
                 t = fs[1] * (1f - r) + gs[1] * r;
                 u = fs[2] * (1f - r) + gs[2] * r;
@@ -166,18 +164,18 @@ public class TardisExteriorBOTI extends BOTI {
             float green = power ? alarms ? 0.3f : t : 0;
             float blue = power ? alarms ? 0.3f : u : 0;
 
-            frame.renderDoors(tardis, exterior, frame.getPart(), stack, botiProvider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true)), LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV, red, green, blue, 1, true);
-            botiProvider.draw();
+            frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true)), LightTexture.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY, red, green, blue, 1, true);
+            botiProvider.endBatch();
         }
-        stack.pop();
+        stack.popPose();
 
-        client.getFramebuffer().beginWrite(true);
+        client.getMainRenderTarget().bindWrite(true);
 
-        BOTI.copyColor(BOTI_HANDLER.afbo, client.getFramebuffer());
+        BOTI.copyColor(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
 
-        stack.pop();
+        stack.popPose();
     }
 }

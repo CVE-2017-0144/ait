@@ -11,6 +11,6 @@ public class ClientCapsuleDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new CapsuleDoorModel(CapsuleDoorModel.getTexturedModelData().createModel());
+        return new CapsuleDoorModel(CapsuleDoorModel.getTexturedModelData().bakeRoot());
     }
 }

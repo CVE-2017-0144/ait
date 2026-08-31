@@ -3,44 +3,52 @@ package dev.amble.ait.client.models.decoration;// Made with Blockbench 4.11.2
 // Paste this class into your mod and generate all required imports
 
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.world.entity.Entity;
 
-public class FlagModel extends SinglePartEntityModel {
+public class FlagModel extends HierarchicalModel {
     private final ModelPart flag;
     public FlagModel(ModelPart root) {
         this.flag = root.getChild("flag");
     }
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData flag = modelPartData.addChild("flag", ModelPartBuilder.create().uv(0, 0).cuboid(-0.5F, -32.0F, -0.5F, 1.0F, 32.0F, 1.0F, new Dilation(0.0F))
-                .uv(25, 15).cuboid(-1.0F, -34.0F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition flag = modelPartData.addOrReplaceChild("flag", CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -32.0F, -0.5F, 1.0F, 32.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(25, 15).addBox(-1.0F, -34.0F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        ModelPartData clamp = flag.addChild("clamp", ModelPartBuilder.create().uv(22, 15).cuboid(0.0F, -7.0F, 0.0F, 1.0F, 14.0F, 0.0F, new Dilation(0.05F)), ModelTransform.pivot(0.5F, -25.0F, 0.0F));
+        PartDefinition clamp = flag.addOrReplaceChild("clamp", CubeListBuilder.create().texOffs(22, 15).addBox(0.0F, -7.0F, 0.0F, 1.0F, 14.0F, 0.0F, new CubeDeformation(0.05F)), PartPose.offset(0.5F, -25.0F, 0.0F));
 
-        ModelPartData flag_elements = flag.addChild("flag_elements", ModelPartBuilder.create().uv(5, 0).cuboid(0.0F, -7.0F, 0.5F, 8.0F, 14.0F, 0.0F, new Dilation(0.05F)), ModelTransform.pivot(1.5F, -25.0F, -0.5F));
+        PartDefinition flag_elements = flag.addOrReplaceChild("flag_elements", CubeListBuilder.create().texOffs(5, 0).addBox(0.0F, -7.0F, 0.5F, 8.0F, 14.0F, 0.0F, new CubeDeformation(0.05F)), PartPose.offset(1.5F, -25.0F, -0.5F));
 
-        ModelPartData element2 = flag_elements.addChild("element2", ModelPartBuilder.create().uv(22, 0).cuboid(0.0F, -7.0F, 0.0F, 8.0F, 14.0F, 0.0F, new Dilation(0.05F)), ModelTransform.pivot(8.0F, 0.0F, 0.5F));
+        PartDefinition element2 = flag_elements.addOrReplaceChild("element2", CubeListBuilder.create().texOffs(22, 0).addBox(0.0F, -7.0F, 0.0F, 8.0F, 14.0F, 0.0F, new CubeDeformation(0.05F)), PartPose.offset(8.0F, 0.0F, 0.5F));
 
-        ModelPartData element3 = element2.addChild("element3", ModelPartBuilder.create().uv(5, 15).cuboid(0.0F, -7.0F, 0.0F, 8.0F, 14.0F, 0.0F, new Dilation(0.05F)), ModelTransform.pivot(8.0F, 0.0F, 0.0F));
-        return TexturedModelData.of(modelData, 64, 64);
+        PartDefinition element3 = element2.addOrReplaceChild("element3", CubeListBuilder.create().texOffs(5, 15).addBox(0.0F, -7.0F, 0.0F, 8.0F, 14.0F, 0.0F, new CubeDeformation(0.05F)), PartPose.offset(8.0F, 0.0F, 0.0F));
+        return LayerDefinition.create(modelData, 64, 64);
     }
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
         flag.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return flag;
     }
 
     @Override
-    public void setAngles(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+    public void setupAnim(Entity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
 
     }
 }

@@ -8,9 +8,7 @@ import dev.isxander.yacl3.config.v2.api.autogen.Boolean;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import dev.isxander.yacl3.gui.ValueFormatters;
 import dev.isxander.yacl3.platform.YACLPlatform;
-
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import dev.amble.ait.AITMod;
 
 public class AITClientConfig {
@@ -117,8 +115,8 @@ public class AITClientConfig {
         }
 
         @Override
-        public Text getDisplayName() {
-            return Text.translatable(key);
+        public Component getDisplayName() {
+            return Component.translatable(key);
         }
     }
 }

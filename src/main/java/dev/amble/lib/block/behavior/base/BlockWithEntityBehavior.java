@@ -5,17 +5,17 @@ import dev.amble.lib.block.behavior.api.Archetype;
 import dev.amble.lib.block.behavior.api.BlockBehavior;
 import dev.amble.lib.block.behavior.api.BlockBehaviors;
 import dev.amble.lib.blockentity.ABlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockWithEntityBehavior implements BlockBehavior {
 
@@ -27,7 +27,7 @@ public class BlockWithEntityBehavior implements BlockBehavior {
 
     @Override
     public void init(Block block) {
-        if (!(block instanceof BlockEntityProvider))
+        if (!(block instanceof EntityBlock))
             throw new IllegalStateException("Block " + block.getClass() + " does not implement a block entity provider!");
     }
 
@@ -35,7 +35,7 @@ public class BlockWithEntityBehavior implements BlockBehavior {
         return func.apply(pos, state);
     }
 
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class BlockWithEntityBehavior implements BlockBehavior {
         }
 
         @Override
-        public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
             return ABlockEntity::tick;
         }
 

@@ -11,22 +11,21 @@ import dev.drtheo.gaslighter.impl.FakeChunkSection;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class Gaslighter3000 {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final Map<ChunkPos, ChunkHolder> lookup = new HashMap<>();
 
-    public Gaslighter3000(ServerWorld world) {
+    public Gaslighter3000(ServerLevel world) {
         this.world = world;
     }
 
@@ -65,7 +64,7 @@ public class Gaslighter3000 {
         }
     }
 
-    public void tweet(ServerPlayerEntity player) {
+    public void tweet(ServerPlayer player) {
         for (ChunkHolder holder : lookup.values()) {
             holder.tweet(player);
         }
@@ -73,17 +72,17 @@ public class Gaslighter3000 {
 
     static class ChunkHolder {
 
-        private final ServerWorld world;
+        private final ServerLevel world;
         private final ChunkPos pos;
 
         private final ShortSet[] blockUpdatesBySection;
         private final FakeChunkSection[] sections;
 
-        public ChunkHolder(ServerWorld world, ChunkPos pos) {
+        public ChunkHolder(ServerLevel world, ChunkPos pos) {
             this.world = world;
             this.pos = pos;
 
-            this.blockUpdatesBySection = new ShortSet[world.countVerticalSections()];
+            this.blockUpdatesBySection = new ShortSet[world.getSectionsCount()];
             this.sections = new FakeChunkSection[this.blockUpdatesBySection.length];
         }
 
@@ -124,11 +123,11 @@ public class Gaslighter3000 {
                 if (updates == null)
                     continue;
 
-                int coord = this.world.sectionIndexToCoord(i);
-                ChunkSectionPos csp = ChunkSectionPos.from(this.pos, coord);
+                int coord = this.world.getSectionYFromSectionIndex(i);
+                SectionPos csp = SectionPos.of(this.pos, coord);
 
                 for (short update : updates) {
-                    this.touchGrass(csp.unpackBlockPos(update));
+                    this.touchGrass(csp.relativeToBlockPos(update));
                 }
             }
         }
@@ -146,32 +145,32 @@ public class Gaslighter3000 {
             if (this.blockUpdatesBySection[i] == null)
                 this.blockUpdatesBySection[i] = new ShortOpenHashSet();
 
-            this.blockUpdatesBySection[i].add(ChunkSectionPos.packLocal(pos));
+            this.blockUpdatesBySection[i].add(SectionPos.sectionRelativePos(pos));
         }
 
         private void unmarkForBlockUpdate(BlockPos pos, int i) {
             if (this.blockUpdatesBySection[i] == null)
                 return;
 
-            this.blockUpdatesBySection[i].remove(ChunkSectionPos.packLocal(pos));
+            this.blockUpdatesBySection[i].remove(SectionPos.sectionRelativePos(pos));
         }
 
-        private void makeTweetPackets(Consumer<ChunkDeltaUpdateS2CPacket> consumer) {
+        private void makeTweetPackets(Consumer<ClientboundSectionBlocksUpdatePacket> consumer) {
             for (int i = 0; i < this.blockUpdatesBySection.length; ++i) {
                 ShortSet shortSet = this.blockUpdatesBySection[i];
 
                 if (shortSet == null)
                     continue;
 
-                int j = this.world.sectionIndexToCoord(i);
-                ChunkSectionPos chunkSectionPos = ChunkSectionPos.from(this.pos, j);
+                int j = this.world.getSectionYFromSectionIndex(i);
+                SectionPos chunkSectionPos = SectionPos.of(this.pos, j);
 
-                consumer.accept(new ChunkDeltaUpdateS2CPacket(chunkSectionPos, shortSet, this.sections[i]));
+                consumer.accept(new ClientboundSectionBlocksUpdatePacket(chunkSectionPos, shortSet, this.sections[i]));
             }
         }
 
         public void tweet() {
-            Collection<ServerPlayerEntity> list = PlayerLookup.tracking(this.world, this.pos);
+            Collection<ServerPlayer> list = PlayerLookup.tracking(this.world, this.pos);
 
             if (list.isEmpty())
                 return;
@@ -179,12 +178,12 @@ public class Gaslighter3000 {
             this.makeTweetPackets(packet -> sendPacketToPlayers(list, packet));
         }
 
-        public void tweet(ServerPlayerEntity player) {
-            this.makeTweetPackets(packet -> player.networkHandler.sendPacket(packet));
+        public void tweet(ServerPlayer player) {
+            this.makeTweetPackets(packet -> player.connection.send(packet));
         }
 
-        private static void sendPacketToPlayers(Collection<ServerPlayerEntity> players, Packet<?> packet) {
-            players.forEach(player -> player.networkHandler.sendPacket(packet));
+        private static void sendPacketToPlayers(Collection<ServerPlayer> players, Packet<?> packet) {
+            players.forEach(player -> player.connection.send(packet));
         }
     }
 }

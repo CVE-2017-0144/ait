@@ -11,6 +11,6 @@ public class ClientGeometricDoorVariant extends ClientDoorSchema {
 
     @Override
     public DoorModel model() {
-        return new GeometricDoorModel(GeometricDoorModel.getTexturedModelData().createModel());
+        return new GeometricDoorModel(GeometricDoorModel.getTexturedModelData().bakeRoot());
     }
 }

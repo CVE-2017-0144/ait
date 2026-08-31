@@ -2,33 +2,30 @@ package dev.amble.ait.core.item;
 
 import java.util.List;
 import java.util.Optional;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.AbstractDecorationEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-
 import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
 
 public class AITDecorationItem extends Item {
-    private final EntityType<? extends AbstractDecorationEntity> entityType;
+    private final EntityType<? extends HangingEntity> entityType;
 
-    public AITDecorationItem(EntityType<? extends AbstractDecorationEntity> type, Item.Settings settings) {
+    public AITDecorationItem(EntityType<? extends HangingEntity> type, Item.Properties settings) {
         super(settings);
         this.entityType = type;
     }
@@ -36,67 +33,67 @@ public class AITDecorationItem extends Item {
 
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        BlockPos blockPos = context.getBlockPos();
-        Direction clickedSide = context.getSide();
-        PlayerEntity player = context.getPlayer();
-        ItemStack itemStack = context.getStack();
+    public InteractionResult useOn(UseOnContext context) {
+        BlockPos blockPos = context.getClickedPos();
+        Direction clickedSide = context.getClickedFace();
+        Player player = context.getPlayer();
+        ItemStack itemStack = context.getItemInHand();
 
-        Direction facing = clickedSide.getAxis().isVertical() ? player.getHorizontalFacing().getOpposite() : clickedSide;
+        Direction facing = clickedSide.getAxis().isVertical() ? player.getDirection().getOpposite() : clickedSide;
 
-        BlockPos placementPos = blockPos.offset(facing);
+        BlockPos placementPos = blockPos.relative(facing);
 
         if (player != null && !this.canPlaceOn(player, facing, itemStack, placementPos)) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        World world = context.getWorld();
+        Level world = context.getLevel();
 
         if (this.entityType == AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE || this.entityType == AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE) {
             Optional<BOTIPaintingEntity> optional = BOTIPaintingEntity.placePainting((EntityType<? extends BOTIPaintingEntity>)
                     this.entityType, world, placementPos, facing);
 
             if (optional.isEmpty()) {
-                return ActionResult.CONSUME;
+                return InteractionResult.CONSUME;
             }
 
             BOTIPaintingEntity paintingEntity = optional.get();
 
-            NbtCompound nbtData = itemStack.getNbt();
+            CompoundTag nbtData = itemStack.getTag();
             if (nbtData != null) {
-                EntityType.loadFromEntityNbt(world, player, paintingEntity, nbtData);
+                EntityType.updateCustomEntityTag(world, player, paintingEntity, nbtData);
             }
 
-            if (!world.isClient) {
-                paintingEntity.onPlace();
-                world.emitGameEvent(player, GameEvent.ENTITY_PLACE, paintingEntity.getPos());
-                world.spawnEntity(paintingEntity);
+            if (!world.isClientSide) {
+                paintingEntity.playPlacementSound();
+                world.gameEvent(player, GameEvent.ENTITY_PLACE, paintingEntity.position());
+                world.addFreshEntity(paintingEntity);
             }
 
-            itemStack.decrement(1);
-            return ActionResult.success(world.isClient);
+            itemStack.shrink(1);
+            return InteractionResult.sidedSuccess(world.isClientSide);
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
 
-    protected boolean canPlaceOn(PlayerEntity player, Direction side, ItemStack stack, BlockPos pos) {
-        return !side.getAxis().isVertical() && player.canPlaceOn(pos, side, stack);
+    protected boolean canPlaceOn(Player player, Direction side, ItemStack stack, BlockPos pos) {
+        return !side.getAxis().isVertical() && player.mayUseItemAt(pos, side, stack);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, world, tooltip, context);
 
 
         if (stack.getItem() == AITItems.GALLIFREY_FALLS_PAINTING) {
-            tooltip.add(Text.translatable("painting.ait.gallifrey_falls.title").formatted(Formatting.YELLOW));
-            tooltip.add(Text.translatable("painting.ait.gallifrey_falls.author").formatted(Formatting.GRAY));
+            tooltip.add(Component.translatable("painting.ait.gallifrey_falls.title").withStyle(ChatFormatting.YELLOW));
+            tooltip.add(Component.translatable("painting.ait.gallifrey_falls.author").withStyle(ChatFormatting.GRAY));
         }
         if (stack.getItem() == AITItems.TRENZALORE_PAINTING) {
-            tooltip.add(Text.translatable("painting.ait.trenzalore.title").formatted(Formatting.YELLOW));
-            tooltip.add(Text.translatable("painting.ait.trenzalore.author").formatted(Formatting.GRAY));
+            tooltip.add(Component.translatable("painting.ait.trenzalore.title").withStyle(ChatFormatting.YELLOW));
+            tooltip.add(Component.translatable("painting.ait.trenzalore.author").withStyle(ChatFormatting.GRAY));
         }
     }
 }

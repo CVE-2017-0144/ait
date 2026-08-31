@@ -1,35 +1,34 @@
 package dev.amble.ait.client.sonic;
 
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+public class SonicResourceFinder extends FileToIdConverter {
 
-public class SonicResourceFinder extends ResourceFinder {
+    private final FileToIdConverter parent;
 
-    private final ResourceFinder parent;
-
-    public SonicResourceFinder(ResourceFinder parent, String directoryName, String fileExtension) {
+    public SonicResourceFinder(FileToIdConverter parent, String directoryName, String fileExtension) {
         super(directoryName, fileExtension);
         this.parent = parent;
     }
 
     @Override
-    public Identifier toResourcePath(Identifier id) {
-        return parent.toResourcePath(id);
+    public ResourceLocation idToFile(ResourceLocation id) {
+        return parent.idToFile(id);
     }
 
     @Override
-    public Identifier toResourceId(Identifier path) {
-        return parent.toResourceId(path);
+    public ResourceLocation fileToId(ResourceLocation path) {
+        return parent.fileToId(path);
     }
 
     @Override
-    public Map<Identifier, Resource> findResources(ResourceManager resourceManager) {
-        Map<Identifier, Resource> map = parent.findResources(resourceManager);
-        SonicModelLoader.fromMap(this, super.findResources(resourceManager));
+    public Map<ResourceLocation, Resource> listMatchingResources(ResourceManager resourceManager) {
+        Map<ResourceLocation, Resource> map = parent.listMatchingResources(resourceManager);
+        SonicModelLoader.fromMap(this, super.listMatchingResources(resourceManager));
         return map;
     }
 }

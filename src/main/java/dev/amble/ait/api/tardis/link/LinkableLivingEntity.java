@@ -2,45 +2,43 @@ package dev.amble.ait.api.tardis.link;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.World;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.link.v2.Linkable;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.core.tardis.Tardis;
 
 public abstract class LinkableLivingEntity extends LivingEntity implements Linkable {
 
-    public static final TrackedData<Optional<UUID>> TARDIS_ID  = DataTracker.registerData(
-            LinkableLivingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    public static final EntityDataAccessor<Optional<UUID>> TARDIS_ID  = SynchedEntityData.defineId(
+            LinkableLivingEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     private TardisRef cache;
 
-    protected LinkableLivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
+    protected LinkableLivingEntity(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
 
-        UUID id = nbt.getUuid("Tardis");
+        UUID id = nbt.getUUID("Tardis");
 
         if (id != null)
             this.link(id);
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
 
-        this.tardisId().ifPresent(id -> nbt.putUuid("Tardis", id));
+        this.tardisId().ifPresent(id -> nbt.putUUID("Tardis", id));
     }
 
     @Override
@@ -50,7 +48,7 @@ public abstract class LinkableLivingEntity extends LivingEntity implements Linka
 
     @Override
     public void link(UUID id) {
-        this.dataTracker.set(TARDIS_ID, Optional.of(id));
+        this.entityData.set(TARDIS_ID, Optional.of(id));
         this.createCache(id);
     }
 
@@ -68,14 +66,14 @@ public abstract class LinkableLivingEntity extends LivingEntity implements Linka
     }
 
     @Override
-    protected void initDataTracker() {
-        super.initDataTracker();
-        this.dataTracker.startTracking(TARDIS_ID, Optional.empty());
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(TARDIS_ID, Optional.empty());
     }
 
     @Override
-    public void onTrackedDataSet(TrackedData<?> data) {
-        super.onTrackedDataSet(data);
+    public void onSyncedDataUpdated(EntityDataAccessor<?> data) {
+        super.onSyncedDataUpdated(data);
 
         if (TARDIS_ID.equals(data))
             this.reloadCache();
@@ -90,6 +88,6 @@ public abstract class LinkableLivingEntity extends LivingEntity implements Linka
     }
 
     private Optional<UUID> tardisId() {
-        return this.dataTracker.get(TARDIS_ID);
+        return this.entityData.get(TARDIS_ID);
     }
 }

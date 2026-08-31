@@ -1,17 +1,15 @@
 package dev.amble.ait.data.properties.bool;
 
 import java.util.function.Function;
-
-import net.minecraft.network.PacketByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.PropertyType;
 
 public class BoolProperty extends Property<Boolean> {
 
-    public static final PropertyType<Boolean> TYPE = new PropertyType<>(Boolean.class, PacketByteBuf::writeBoolean,
-            PacketByteBuf::readBoolean);
+    public static final PropertyType<Boolean> TYPE = new PropertyType<>(Boolean.class, FriendlyByteBuf::writeBoolean,
+            FriendlyByteBuf::readBoolean);
 
     public BoolProperty(String name) {
         this(name, false);

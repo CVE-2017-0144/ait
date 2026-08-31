@@ -4,18 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionTypes;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
@@ -36,12 +34,12 @@ public class LockedDimensionRegistry extends SimpleDatapackRegistry<LockedDimens
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override
     protected void defaults() {
-        NETHER = register(new LockedDimension(DimensionTypes.THE_NETHER_ID, new ItemStack(Items.BLAZE_ROD)));
+        NETHER = register(new LockedDimension(BuiltinDimensionTypes.NETHER_EFFECTS, new ItemStack(Items.BLAZE_ROD)));
         // all others should be in datapack
     }
 
@@ -50,8 +48,8 @@ public class LockedDimensionRegistry extends SimpleDatapackRegistry<LockedDimens
         return NETHER;
     }
 
-    public LockedDimension get(World world) {
-        return this.get(world.getRegistryKey().getValue());
+    public LockedDimension get(Level world) {
+        return this.get(world.dimension().location());
     }
     public List<LockedDimension> forStack(ItemStack stack) {
         // ow :(
@@ -66,7 +64,7 @@ public class LockedDimensionRegistry extends SimpleDatapackRegistry<LockedDimens
         return instance;
     }
 
-    public static boolean tryUnlockDimension(ServerPlayerEntity player, ItemStack held, ServerTardis tardis) {
+    public static boolean tryUnlockDimension(ServerPlayer player, ItemStack held, ServerTardis tardis) {
         if (held.isEmpty()) return false;
         if (!AITMod.CONFIG.lockDimensions) return false;
 
@@ -77,18 +75,18 @@ public class LockedDimensionRegistry extends SimpleDatapackRegistry<LockedDimens
         dims.forEach(dim -> {
             tardis.stats().unlock(dim);
 
-            player.sendMessage(Text.translatable("message.ait.dimension.unlocked", dim.text()).formatted(
-                    Formatting.BOLD, Formatting.ITALIC, Formatting.GOLD), false);
+            player.displayClientMessage(Component.translatable("message.ait.dimension.unlocked", dim.text()).withStyle(
+                    ChatFormatting.BOLD, ChatFormatting.ITALIC, ChatFormatting.GOLD), false);
         });
-        player.getServerWorld().playSound(null, player.getBlockPos(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
-                SoundCategory.PLAYERS, 0.2F, 1.0F);
+        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
+                SoundSource.PLAYERS, 0.2F, 1.0F);
 
-        held.decrement(1);
+        held.shrink(1);
 
         return true;
     }
 
-    public boolean isUnlocked(Tardis tardis, World world) {
+    public boolean isUnlocked(Tardis tardis, Level world) {
         if (!AITMod.CONFIG.lockDimensions)
             return true;
 
@@ -98,7 +96,7 @@ public class LockedDimensionRegistry extends SimpleDatapackRegistry<LockedDimens
         LockedDimension dim = this.get(world);
         return dim == null || tardis.isUnlocked(dim);
     }
-    private boolean isEnd(World world) {
-        return world.getRegistryKey().getValue().equals(World.END.getValue());
+    private boolean isEnd(Level world) {
+        return world.dimension().location().equals(Level.END.location());
     }
 }

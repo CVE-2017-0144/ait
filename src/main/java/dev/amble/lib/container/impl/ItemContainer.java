@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.item.AItem;
 
@@ -32,11 +30,11 @@ public abstract class ItemContainer implements RegistryContainer<Item> {
 
     @Override
     public Registry<Item> getRegistry() {
-        return Registries.ITEM;
+        return BuiltInRegistries.ITEM;
     }
 
     @Override
-    public void postProcessField(Identifier identifier, Item value, Field field) {
+    public void postProcessField(ResourceLocation identifier, Item value, Field field) {
         this.items.add(value);
     }
 
@@ -44,18 +42,18 @@ public abstract class ItemContainer implements RegistryContainer<Item> {
     public void finish() {
         ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
             for (Item item : items) {
-                ItemGroup target = ((AItem) item).amble$group();
+                CreativeModeTab target = ((AItem) item).amble$group();
 
                 if (target == null)
                     target = this.getDefaultGroup();
 
                 if (target == group)
-                    entries.add(item);
+                    entries.accept(item);
             }
         });
     }
 
-    @Nullable public ItemGroup getDefaultGroup() {
+    @Nullable public CreativeModeTab getDefaultGroup() {
         return null;
     }
 }

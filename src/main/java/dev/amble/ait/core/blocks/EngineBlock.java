@@ -2,20 +2,26 @@ package dev.amble.ait.core.blocks;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.*;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.blockentities.EngineBlockEntity;
 import dev.amble.ait.core.engine.SubSystem;
@@ -23,53 +29,53 @@ import dev.amble.ait.core.engine.block.SubSystemBlock;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
 import dev.amble.ait.core.world.TardisServerWorld;
 
-public class EngineBlock extends SubSystemBlock implements BlockEntityProvider {
-    public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
+public class EngineBlock extends SubSystemBlock implements EntityBlock {
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
-    protected static final VoxelShape Y_SHAPE = VoxelShapes.fullCube();
+    protected static final VoxelShape Y_SHAPE = Shapes.block();
 
-    public EngineBlock(Settings settings) {
+    public EngineBlock(Properties settings) {
         super(settings, SubSystem.Id.ENGINE);
-        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Nullable @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
     @Override
-    public boolean isShapeFullCube(BlockState state, BlockView world, BlockPos pos) {
+    public boolean isCollisionShapeFullBlock(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
 
     @Nullable @Override
-    public FluidLinkBlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public FluidLinkBlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new EngineBlockEntity(pos, state);
     }
 
     @Override
-    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        return world instanceof World world1 && TardisServerWorld.isTardisDimension(world1);
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        return world instanceof Level world1 && TardisServerWorld.isTardisDimension(world1);
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         if (!(world.getBlockEntity(pos) instanceof EngineBlockEntity engine))
             return;
 
@@ -100,7 +106,7 @@ public class EngineBlock extends SubSystemBlock implements BlockEntityProvider {
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 }

@@ -17,15 +17,13 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.WorldWithTardis;
@@ -92,22 +90,22 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         if (tardis == null)
             return;
 
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeUuid(tardis.getUuid());
+        FriendlyByteBuf data = PacketByteBufs.create();
+        data.writeUUID(tardis.getUuid());
 
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             this.sendTardisRemoval(player, data);
         }
     }
 
-    protected void sendTardisRemoval(ServerPlayerEntity player, ServerTardis tardis) {
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeUuid(tardis.getUuid());
+    protected void sendTardisRemoval(ServerPlayer player, ServerTardis tardis) {
+        FriendlyByteBuf data = PacketByteBufs.create();
+        data.writeUUID(tardis.getUuid());
 
         this.sendTardisRemoval(player, data);
     }
 
-    protected void sendTardisRemoval(ServerPlayerEntity player, PacketByteBuf data) {
+    protected void sendTardisRemoval(ServerPlayer player, FriendlyByteBuf data) {
         ServerPlayNetworking.send(player, REMOVE, data);
     }
 
@@ -178,10 +176,10 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
 
         if (exteriorPos != null) {
-            if (tardis.hasWorld()) tardis.world().getPlayers().forEach(player
+            if (tardis.hasWorld()) tardis.world().players().forEach(player
                     -> TardisUtil.teleportOutside(tardis, player));
 
-            World world = exteriorPos.getWorld();
+            Level world = exteriorPos.getWorld();
             BlockPos pos = exteriorPos.getPos();
 
             world.removeBlock(pos, false);
@@ -211,7 +209,7 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         if (!close)
             return;
 
-        for (ServerWorld world : server.getWorlds()) {
+        for (ServerLevel world : server.getAllLevels()) {
             ((WorldWithTardis) world).ait$withLookup(HashMap::clear);
         }
     }
@@ -234,14 +232,14 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
 
     public static ServerPlayNetworking.PlayChannelHandler receiveTardis(Receiver receiver) {
         return (server, player, handler, buf, responseSender) -> {
-            ServerTardisManager.getInstance().getTardis(server, buf.readUuid(),
+            ServerTardisManager.getInstance().getTardis(server, buf.readUUID(),
                     tardis -> receiver.receive(tardis, server, player, handler, buf, responseSender));
         };
     }
 
     @FunctionalInterface
     public interface Receiver {
-        void receive(ServerTardis tardis, MinecraftServer server, ServerPlayerEntity player,
-                ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender);
+        void receive(ServerTardis tardis, MinecraftServer server, ServerPlayer player,
+                ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender);
     }
 }

@@ -7,25 +7,30 @@ import java.util.function.Consumer;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
-
-import net.minecraft.block.Block;
-import net.minecraft.data.server.recipe.*;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.SingleItemRecipeBuilder;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
+import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
+import net.minecraft.data.recipes.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 import dev.amble.ait.AITMod;
 
 public class AITRecipeProvider extends FabricRecipeProvider {
-    public List<ShapelessRecipeJsonBuilder> shapelessRecipes = new ArrayList<>();
-    public List<ShapedRecipeJsonBuilder> shapedRecipes = new ArrayList<>();
-    public HashMap<SmithingTransformRecipeJsonBuilder, Identifier> smithingTransformRecipes = new HashMap<>();
-    public HashMap<ShapelessRecipeJsonBuilder, Identifier> shapelessRecipesWithNameHashMap = new HashMap<>();
-    public HashMap<SingleItemRecipeJsonBuilder, Identifier> stonecutting = new HashMap<>();
+    public List<ShapelessRecipeBuilder> shapelessRecipes = new ArrayList<>();
+    public List<ShapedRecipeBuilder> shapedRecipes = new ArrayList<>();
+    public HashMap<SmithingTransformRecipeBuilder, ResourceLocation> smithingTransformRecipes = new HashMap<>();
+    public HashMap<ShapelessRecipeBuilder, ResourceLocation> shapelessRecipesWithNameHashMap = new HashMap<>();
+    public HashMap<SingleItemRecipeBuilder, ResourceLocation> stonecutting = new HashMap<>();
     public List<BlastFurnaceRecipeEntry> blasting = new ArrayList<>();
     public List<FurnaceRecipeEntry> smelting = new ArrayList<>();
-    public record FurnaceRecipeEntry(CookingRecipeJsonBuilder builder, Identifier id) {}
-    public record BlastFurnaceRecipeEntry(CookingRecipeJsonBuilder builder, Identifier id) {}
+    public record FurnaceRecipeEntry(SimpleCookingRecipeBuilder builder, ResourceLocation id) {}
+    public record BlastFurnaceRecipeEntry(SimpleCookingRecipeBuilder builder, ResourceLocation id) {}
 
 
     public AITRecipeProvider(FabricDataOutput output) {
@@ -33,77 +38,77 @@ public class AITRecipeProvider extends FabricRecipeProvider {
     }
 
     @Override
-    public void generate(Consumer<RecipeJsonProvider> exporter) {
-        for (ShapelessRecipeJsonBuilder shapelessRecipeJsonBuilder : shapelessRecipes) {
-            shapelessRecipeJsonBuilder.offerTo(exporter);
+    public void buildRecipes(Consumer<FinishedRecipe> exporter) {
+        for (ShapelessRecipeBuilder shapelessRecipeJsonBuilder : shapelessRecipes) {
+            shapelessRecipeJsonBuilder.save(exporter);
         }
-        for (ShapedRecipeJsonBuilder shapedRecipeJsonBuilder : shapedRecipes) {
-            shapedRecipeJsonBuilder.offerTo(exporter);
+        for (ShapedRecipeBuilder shapedRecipeJsonBuilder : shapedRecipes) {
+            shapedRecipeJsonBuilder.save(exporter);
         }
         shapelessRecipesWithNameHashMap.forEach((shapelessRecipeJsonBuilder, identifier) -> {
-            shapelessRecipeJsonBuilder.offerTo(exporter, identifier);
+            shapelessRecipeJsonBuilder.save(exporter, identifier);
         });
         smithingTransformRecipes.forEach((smithingTransformRecipeJsonBuilder, identifier) -> {
-            smithingTransformRecipeJsonBuilder.offerTo(exporter, identifier);
+            smithingTransformRecipeJsonBuilder.save(exporter, identifier);
         });
 
         stonecutting.forEach((stonecuttingRecipeJsonBuilder, identifier) -> {
-            stonecuttingRecipeJsonBuilder.offerTo(exporter, identifier);
+            stonecuttingRecipeJsonBuilder.save(exporter, identifier);
         });
 
         for (BlastFurnaceRecipeEntry entry : blasting) {
-            entry.builder().offerTo(exporter, entry.id());
+            entry.builder().save(exporter, entry.id());
         }
 
         for (FurnaceRecipeEntry entry : smelting) {
-            entry.builder().offerTo(exporter, entry.id());
+            entry.builder().save(exporter, entry.id());
         }
 
 
     }
 
-    public void addShapelessRecipe(ShapelessRecipeJsonBuilder builder) {
+    public void addShapelessRecipe(ShapelessRecipeBuilder builder) {
         if (!shapelessRecipes.contains(builder)) {
             shapelessRecipes.add(builder);
         }
     }
 
-    public void addShapelessRecipeWithCustomname(ShapelessRecipeJsonBuilder builder, Identifier id) {
+    public void addShapelessRecipeWithCustomname(ShapelessRecipeBuilder builder, ResourceLocation id) {
         shapelessRecipesWithNameHashMap.put(builder, id);
     }
 
-    public void addSmithingTransformRecipe(SmithingTransformRecipeJsonBuilder builder, Identifier id) {
+    public void addSmithingTransformRecipe(SmithingTransformRecipeBuilder builder, ResourceLocation id) {
         smithingTransformRecipes.put(builder, id);
     }
 
 
-    public void addShapedRecipe(ShapedRecipeJsonBuilder builder) {
+    public void addShapedRecipe(ShapedRecipeBuilder builder) {
         if (!shapedRecipes.contains(builder)) {
             shapedRecipes.add(builder);
         }
     }
 
     public void addStonecutting(Block in, Block out, int count) {
-        Identifier id = getStonecuttingIdentifier(in, out);
+        ResourceLocation id = getStonecuttingIdentifier(in, out);
 
-        stonecutting.put(SingleItemRecipeJsonBuilder.createStonecutting(Ingredient.ofItems(in), RecipeCategory.BUILDING_BLOCKS, out, count).criterion("has_block", VanillaRecipeProvider.conditionsFromItem(in)), id);
+        stonecutting.put(SingleItemRecipeBuilder.stonecutting(Ingredient.of(in), RecipeCategory.BUILDING_BLOCKS, out, count).unlockedBy("has_block", VanillaRecipeProvider.has(in)), id);
     }
     public void addStonecutting(Block in, Block out) {
         addStonecutting(in, out, 1);
     }
 
-    private Identifier getStonecuttingIdentifier(Block in, Block out) {
-        return AITMod.id(fixupBlockKey(in.getTranslationKey()) + "_to_" + fixupBlockKey(out.getTranslationKey()) + "_stonecutting");
+    private ResourceLocation getStonecuttingIdentifier(Block in, Block out) {
+        return AITMod.id(fixupBlockKey(in.getDescriptionId()) + "_to_" + fixupBlockKey(out.getDescriptionId()) + "_stonecutting");
     }
     private String fixupBlockKey(String key) {
         return key.substring(key.lastIndexOf(".") + 1);
     }
 
-    public void addBlastFurnaceRecipe(CookingRecipeJsonBuilder cookingBuilder, Identifier id) {
+    public void addBlastFurnaceRecipe(SimpleCookingRecipeBuilder cookingBuilder, ResourceLocation id) {
         blasting.add(new BlastFurnaceRecipeEntry(cookingBuilder, id));
     }
 
-    public void addFurnaceRecipe(CookingRecipeJsonBuilder cookingBuilder, Identifier id) {
+    public void addFurnaceRecipe(SimpleCookingRecipeBuilder cookingBuilder, ResourceLocation id) {
         smelting.add(new FurnaceRecipeEntry(cookingBuilder, id));
     }
 

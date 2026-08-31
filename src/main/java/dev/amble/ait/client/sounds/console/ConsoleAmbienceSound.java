@@ -1,18 +1,17 @@
 package dev.amble.ait.client.sounds.console;
 
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITSounds;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
 
 
 public class ConsoleAmbienceSound extends PositionedLoopingSound {
     private int ticks = 0;
 
     public ConsoleAmbienceSound() {
-        super(AITSounds.CONSOLE_AMBIENT, SoundCategory.BLOCKS, new BlockPos(0, 0, 0), 0.5f);
+        super(AITSounds.CONSOLE_AMBIENT, SoundSource.BLOCKS, new BlockPos(0, 0, 0), 0.5f);
     }
 
     @Override

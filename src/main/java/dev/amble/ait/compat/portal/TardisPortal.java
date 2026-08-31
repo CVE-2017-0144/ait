@@ -4,17 +4,15 @@ import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.util.EntityRef;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
 import qouteall.imm_ptl.core.portal.Portal;
-
-import net.minecraft.entity.EntityType;
-import net.minecraft.world.World;
-
 import dev.amble.ait.client.AITModClient;
 import qouteall.imm_ptl.core.portal.PortalManipulation;
 
 import java.util.UUID;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 
 public class TardisPortal extends Portal {
 
@@ -22,12 +20,12 @@ public class TardisPortal extends Portal {
 
     private Tardis tardis;
 
-    public TardisPortal(Tardis tardis, World world) {
+    public TardisPortal(Tardis tardis, Level world) {
         this(ENTITY_TYPE, world);
         this.tardis = tardis;
     }
 
-    public TardisPortal(EntityType<TardisPortal> type, World world) {
+    public TardisPortal(EntityType<TardisPortal> type, Level world) {
         super(type, world);
     }
 
@@ -37,13 +35,13 @@ public class TardisPortal extends Portal {
     }
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
+    protected void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
 
-        if (!(this.getWorld() instanceof ServerWorld serverWorld) || !nbt.contains("Tardis"))
+        if (!(this.level() instanceof ServerLevel serverWorld) || !nbt.contains("Tardis"))
             return;
 
-        this.tardis = ServerTardisManager.getInstance().demandTardis(serverWorld.getServer(), nbt.getUuid("Tardis"));
+        this.tardis = ServerTardisManager.getInstance().demandTardis(serverWorld.getServer(), nbt.getUUID("Tardis"));
 
         if (this.tardis == null) {
             PortalManipulation.removeConnectedPortals(this, (p) -> {});
@@ -56,7 +54,7 @@ public class TardisPortal extends Portal {
         EntityRef<TardisPortal> extPortal = portalsHandler.getExteriorRef();
         EntityRef<TardisPortal> intPortal = portalsHandler.getInteriorRef();
 
-        UUID id = this.getUuid();
+        UUID id = this.getUUID();
 
         if ((extPortal == null || !id.equals(extPortal.getId())) &&
                 (intPortal == null || !id.equals(intPortal.getId()))) {
@@ -66,10 +64,10 @@ public class TardisPortal extends Portal {
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    protected void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
         if (tardis != null) {
-            nbt.putUuid("Tardis", tardis.getUuid());
+            nbt.putUUID("Tardis", tardis.getUuid());
         }
     }
 }

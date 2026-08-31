@@ -25,22 +25,21 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.minecraft.util.math.MathHelper.catmullRom;
+import static net.minecraft.util.Mth.catmullrom;
 
 
 @AllArgsConstructor
@@ -80,7 +79,7 @@ public class BedrockAnimation {
 	public final Map<String, BoneTimeline> boneTimelines;
 	public final boolean overrideBones;
 	public final AnimationMetadata metadata;
-	public final Map<Double, Identifier> sounds;
+	public final Map<Double, ResourceLocation> sounds;
 	public String name;
 
 	@Nullable
@@ -114,7 +113,7 @@ public class BedrockAnimation {
 	 * traversing and checking hasChild for every possible name.
 	 */
 	private static void buildBoneMap(ModelPart part, Map<String, ModelPart> map) {
-		part.traverse().forEach(p -> {
+		part.getAllParts().forEach(p -> {
 			try {
 				Map<String, ModelPart> children = ((ModelPartDuck) (Object) p).amblekit$getChildren();
 				map.putAll(children);
@@ -135,7 +134,7 @@ public class BedrockAnimation {
 	 * Checks if a Vec3d contains valid (non-NaN, non-Infinite) values.
 	 * Invalid values can corrupt the render state and cause black screens.
 	 */
-	private static boolean isValidVec3d(Vec3d vec) {
+	private static boolean isValidVec3d(Vec3 vec) {
 		return Double.isFinite(vec.x) && Double.isFinite(vec.y) && Double.isFinite(vec.z);
 	}
 
@@ -147,7 +146,7 @@ public class BedrockAnimation {
 		if (bone != null) return bone;
 
 		// Cache miss - bone name wasn't in the cache, fall back to slow path and cache it
-		bone = root.traverse()
+		bone = root.getAllParts()
 				.filter(part -> part.hasChild(boneName))
 				.findFirst()
 				.map(part -> part.getChild(boneName))
@@ -181,54 +180,54 @@ public class BedrockAnimation {
 				}
 
 				if (!timeline.position.isEmpty()) {
-					Vec3d position = timeline.position.resolve(runningSeconds);
+					Vec3 position = timeline.position.resolve(runningSeconds);
 
 					// Guard against NaN/Infinity corrupting render state
 					if (!isValidVec3d(position)) return;
 
 					if (metadata.cumulative()) {
 						// traverse includes self
-						bone.traverse().forEach(child -> {
-							child.pivotX += (float) position.x;
-							child.pivotY += (float) position.y;
-							child.pivotZ += (float) position.z;
+						bone.getAllParts().forEach(child -> {
+							child.x += (float) position.x;
+							child.y += (float) position.y;
+							child.z += (float) position.z;
 						});
 					} else {
-						bone.pivotX += (float) position.x;
-						bone.pivotY += (float) position.y;
-						bone.pivotZ += (float) position.z;
+						bone.x += (float) position.x;
+						bone.y += (float) position.y;
+						bone.z += (float) position.z;
 					}
 				}
 
 				if (!timeline.rotation.isEmpty()) {
-					Vec3d rotation = timeline.rotation.resolve(runningSeconds);
+					Vec3 rotation = timeline.rotation.resolve(runningSeconds);
 
 					// Guard against NaN/Infinity corrupting render state
 					if (!isValidVec3d(rotation)) return;
 
 					if (metadata.cumulative()) {
 						// traverse includes self
-						bone.traverse().forEach(child -> {
-							child.pitch += (float) Math.toRadians((float) rotation.x);
-							child.yaw += (float) Math.toRadians((float) rotation.y);
-							child.roll += (float) Math.toRadians((float) rotation.z);
+						bone.getAllParts().forEach(child -> {
+							child.xRot += (float) Math.toRadians((float) rotation.x);
+							child.yRot += (float) Math.toRadians((float) rotation.y);
+							child.zRot += (float) Math.toRadians((float) rotation.z);
 						});
 					} else {
-						bone.pitch += (float) Math.toRadians((float) rotation.x);
-						bone.yaw += (float) Math.toRadians((float) rotation.y);
-						bone.roll += (float) Math.toRadians((float) rotation.z);
+						bone.xRot += (float) Math.toRadians((float) rotation.x);
+						bone.yRot += (float) Math.toRadians((float) rotation.y);
+						bone.zRot += (float) Math.toRadians((float) rotation.z);
 					}
 				}
 
 				if (!timeline.scale.isEmpty()) {
-					Vec3d scale = timeline.scale.resolve(runningSeconds);
+					Vec3 scale = timeline.scale.resolve(runningSeconds);
 
 					// Guard against NaN/Infinity corrupting render state
 					if (!isValidVec3d(scale)) return;
 
 					if (metadata.cumulative()) {
 						// traverse includes self
-						bone.traverse().forEach(child -> {
+						bone.getAllParts().forEach(child -> {
 							child.xScale *= (float) scale.x;
 							child.yScale *= (float) scale.y;
 							child.zScale *= (float) scale.z;
@@ -267,31 +266,31 @@ public class BedrockAnimation {
 
 		if (provider instanceof Entity entity) {
 			if (!this.metadata.movement()) {
-				entity.setVelocity(Vec3d.ZERO);
+				entity.setDeltaMovement(Vec3.ZERO);
 				entity.fallDistance = 0;
 
 				if (entity instanceof LivingEntity living) {
-					living.limbAnimator.setSpeed(0F);
+					living.walkAnimation.setSpeed(0F);
 				}
 			}
 		}
 
 		if (this.sounds == null || this.sounds.isEmpty()) return;
 
-		for (Map.Entry<Double, Identifier> entry : this.sounds.entrySet()) {
+		for (Map.Entry<Double, ResourceLocation> entry : this.sounds.entrySet()) {
 			double time = entry.getKey();
-			Identifier soundId = entry.getValue();
+			ResourceLocation soundId = entry.getValue();
 
 			if (previous <= time && current >= time) {
-				SoundEvent event = SoundEvent.of(soundId);
+				SoundEvent event = SoundEvent.createVariableRangeEvent(soundId);
 
 				if (provider != null) {
 					if (!provider.isSilent()) {
-						Vec3d pos = provider.getEffectPosition(MinecraftClient.getInstance().getTickDelta());
-						provider.getWorld().playSound(MinecraftClient.getInstance().player, pos.x, pos.y, pos.z, event, provider.getSoundCategory(), 1F, 1F);
+						Vec3 pos = provider.getEffectPosition(Minecraft.getInstance().getFrameTime());
+						provider.getWorld().playSound(Minecraft.getInstance().player, pos.x, pos.y, pos.z, event, provider.getSoundCategory(), 1F, 1F);
 					}
 				} else {
-					MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(event, 1F, 1F));
+					Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(event, 1F, 1F));
 				}
 			}
 		}
@@ -301,7 +300,7 @@ public class BedrockAnimation {
 	public void apply(ModelPart root, AnimationState state, float progress, float speedMultiplier, @Nullable EffectProvider source) {
 		double previous = getRunningSeconds(state);
 		double seconds = getRunningSeconds(state, progress, speedMultiplier);
-		state.run(s -> {
+		state.ifStarted(s -> {
 			apply(root, seconds);
 			applyEffects(source, seconds, previous, root);
 		});
@@ -328,13 +327,13 @@ public class BedrockAnimation {
 	}
 
 	public double getRunningSeconds(AnimationState state, float progress, float speedMultiplier) {
-		state.update(progress, speedMultiplier);
+		state.updateTime(progress, speedMultiplier);
 
 		return getRunningSeconds(state);
 	}
 
 	public double getRunningSeconds(AnimationState state) {
-		float f = (float)state.getTimeRunning() / 1000.0F;
+		float f = (float)state.getAccumulatedTime() / 1000.0F;
 		double seconds;
 		
 		switch (this.loopMode) {
@@ -367,7 +366,7 @@ public class BedrockAnimation {
 
 	public void resetBones(ModelPart root, boolean resetAll) {
 		if (resetAll) {
-			root.traverse().forEach(ModelPart::resetTransform);
+			root.getAllParts().forEach(ModelPart::resetPose);
 			return;
 		}
 
@@ -387,7 +386,7 @@ public class BedrockAnimation {
 					}
 				}
 
-				bone.traverse().forEach(ModelPart::resetTransform);
+				bone.getAllParts().forEach(ModelPart::resetPose);
 			} catch (Exception e) {
 				//AmbleKit.LOGGER.error("Failed to reset animation on {} in model. Skipping animation reset for this bone.", boneName, e);
 			}
@@ -397,10 +396,10 @@ public class BedrockAnimation {
 	/**
 	 * @return Pair<pitch, yaw> rotation for a given bone
 	 */
-	public Pair<Float, Float> getRotations(String part, float progress) {
-		if (!this.boneTimelines.containsKey(part)) return new Pair<>(0F, 0F);
+	public Tuple<Float, Float> getRotations(String part, float progress) {
+		if (!this.boneTimelines.containsKey(part)) return new Tuple<>(0F, 0F);
 
-		Vec3d rotation = this.boneTimelines.get(part).rotation().resolve(progress);
+		Vec3 rotation = this.boneTimelines.get(part).rotation().resolve(progress);
 
 		return eulerToPitchYaw(rotation);
 	}
@@ -408,27 +407,27 @@ public class BedrockAnimation {
 	/**
 	 * @return Pair<pitch, yaw> rotation for a given bone
 	 */
-	public static Pair<Float, Float> eulerToPitchYaw(Vec3d rotation) {
+	public static Tuple<Float, Float> eulerToPitchYaw(Vec3 rotation) {
 		double xRad = Math.toRadians(rotation.x);
 		double yRad = Math.toRadians(rotation.y);
 		double zRad = Math.toRadians(rotation.z);
 
-		Vec3d vec = new Vec3d(0, 0, 1);
+		Vec3 vec = new Vec3(0, 0, 1);
 
 		// Rotate around X (pitch)
-		vec = new Vec3d(
+		vec = new Vec3(
 				vec.x,
 				vec.y * Math.cos(xRad) - vec.z * Math.sin(xRad),
 				vec.y * Math.sin(xRad) + vec.z * Math.cos(xRad)
 		);
 		// Rotate around Y (yaw)
-		vec = new Vec3d(
+		vec = new Vec3(
 				vec.x * Math.cos(yRad) + vec.z * Math.sin(yRad),
 				vec.y,
 				-vec.x * Math.sin(yRad) + vec.z * Math.cos(yRad)
 		);
 		// Rotate around Z (roll)
-		vec = new Vec3d(
+		vec = new Vec3(
 				vec.x * Math.cos(zRad) - vec.y * Math.sin(zRad),
 				vec.x * Math.sin(zRad) + vec.y * Math.cos(zRad),
 				vec.z
@@ -437,7 +436,7 @@ public class BedrockAnimation {
 		float animYaw = (float) Math.toDegrees(Math.atan2(-vec.x, vec.z));
 		float animPitch = (float) Math.toDegrees(Math.asin(-vec.y / vec.length()));
 
-		return new Pair<>(animPitch, animYaw);
+		return new Tuple<>(animPitch, animYaw);
 	}
 
 	public static class Group {
@@ -450,16 +449,16 @@ public class BedrockAnimation {
 	}
 
 	public static class SimpleBoneValue implements BoneValue {
-		public final Vec3d value;
+		public final Vec3 value;
 		public final Transformation transformation;
 
-		public SimpleBoneValue(Vec3d value, Transformation transformation) {
+		public SimpleBoneValue(Vec3 value, Transformation transformation) {
 			this.value = value.multiply(1, (transformation == Transformation.POSITION) ? -1 : 1, 1);
 			this.transformation = transformation;
 		}
 
 		@Override
-		public Vec3d resolve(double time) {
+		public Vec3 resolve(double time) {
 			return value;
 		}
 
@@ -479,7 +478,7 @@ public class BedrockAnimation {
 		}
 
 		@Override
-		public Vec3d resolve(double time) {
+		public Vec3 resolve(double time) {
 			List<Double> keyList = new ArrayList<>(this.keySet());
 
 			Integer afterIndex = null;
@@ -502,8 +501,8 @@ public class BedrockAnimation {
 			KeyFrame after = getAtIndex(this, afterIndex);
 			KeyFrame before = getAtIndex(this, beforeIndex);
 
-			Vec3d afterData = (after != null && after.getPre() != null) ? after.getPre().resolve(time) : Vec3d.ZERO;
-			Vec3d beforeData = (before != null && before.getPost() != null) ? before.getPost().resolve(time) : Vec3d.ZERO;
+			Vec3 afterData = (after != null && after.getPre() != null) ? after.getPre().resolve(time) : Vec3.ZERO;
+			Vec3 beforeData = (before != null && before.getPost() != null) ? before.getPost().resolve(time) : Vec3.ZERO;
 
 			if (before != null || after != null) {
 				boolean smoothBefore = before != null && before.interpolationType == InterpolationType.SMOOTH;
@@ -523,15 +522,15 @@ public class BedrockAnimation {
 						Integer afterPlusIndex = afterIndex == this.size() - 1 ? null : afterIndex + 1;
 						KeyFrame afterPlus = getAtIndex(this, afterPlusIndex);
 
-						Vec3d beforePlusData = (beforePlus != null && beforePlus.getPost() != null) ? beforePlus.getPost().resolve(time) : beforeData;
-						Vec3d afterPlusData = (afterPlus != null && afterPlus.getPre() != null) ? afterPlus.getPre().resolve(time) : afterData;
+						Vec3 beforePlusData = (beforePlus != null && beforePlus.getPost() != null) ? beforePlus.getPost().resolve(time) : beforeData;
+						Vec3 afterPlusData = (afterPlus != null && afterPlus.getPre() != null) ? afterPlus.getPre().resolve(time) : afterData;
 
 						double t = (time - before.time) / timeDiff;
 
-						return new Vec3d(
-								catmullRom((float) t, (float) beforePlusData.x, (float) beforeData.x, (float) afterData.x, (float) afterPlusData.x),
-								catmullRom((float) t, (float) beforePlusData.y, (float) beforeData.y, (float) afterData.y, (float) afterPlusData.y),
-								catmullRom((float) t, (float) beforePlusData.z, (float) beforeData.z, (float) afterData.z, (float) afterPlusData.z)
+						return new Vec3(
+								catmullrom((float) t, (float) beforePlusData.x, (float) beforeData.x, (float) afterData.x, (float) afterPlusData.x),
+								catmullrom((float) t, (float) beforePlusData.y, (float) beforeData.y, (float) afterData.y, (float) afterPlusData.y),
+								catmullrom((float) t, (float) beforePlusData.z, (float) beforeData.z, (float) afterData.z, (float) afterPlusData.z)
 						);
 					} else if (before != null) {
 						return beforeData;
@@ -548,10 +547,10 @@ public class BedrockAnimation {
 
 						double alpha = (time - before.time) / timeDiff;
 
-						return new Vec3d(
-								beforeData.getX() + (afterData.getX() - beforeData.getX()) * alpha,
-								beforeData.getY() + (afterData.getY() - beforeData.getY()) * alpha,
-								beforeData.getZ() + (afterData.getZ() - beforeData.getZ()) * alpha
+						return new Vec3(
+								beforeData.x() + (afterData.x() - beforeData.x()) * alpha,
+								beforeData.y() + (afterData.y() - beforeData.y()) * alpha,
+								beforeData.z() + (afterData.z() - beforeData.z()) * alpha
 						);
 					} else if (before != null) {
 						return beforeData;
@@ -560,7 +559,7 @@ public class BedrockAnimation {
 					}
 				}
 			} else {
-				return new Vec3d(0.0, 0.0, 0.0);
+				return new Vec3(0.0, 0.0, 0.0);
 			}
 		}
 	}
@@ -571,8 +570,8 @@ public class BedrockAnimation {
 		private EmptyBoneValue() {}
 
 		@Override
-		public Vec3d resolve(double time) {
-			return Vec3d.ZERO;
+		public Vec3 resolve(double time) {
+			return Vec3.ZERO;
 		}
 
 		@Override
@@ -583,7 +582,7 @@ public class BedrockAnimation {
 
 
 	public interface BoneValue {
-		Vec3d resolve(double time);
+		Vec3 resolve(double time);
 		boolean isEmpty();
 	}
 

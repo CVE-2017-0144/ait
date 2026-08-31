@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-
-import net.minecraft.resource.ResourceType;
-
+import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
@@ -27,7 +25,7 @@ public class DrinkRegistry extends SimpleDatapackRegistry<Drink> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override

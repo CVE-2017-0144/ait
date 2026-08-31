@@ -1,10 +1,9 @@
 package dev.amble.ait.data;
 
-import net.minecraft.item.ItemStack;
-
 import dev.amble.ait.core.item.ControlDiscItem;
 import dev.amble.ait.core.item.WaypointItem;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.world.item.ItemStack;
 
 public class Waypoint {
 
@@ -44,10 +43,10 @@ public class Waypoint {
     // This is stupid :) - Loqor
     public static Waypoint fromStack(ItemStack stack) {
         if (stack.getItem() instanceof WaypointItem) {
-            return new Waypoint(stack.getName().getString(), WaypointItem.getPos(stack));
+            return new Waypoint(stack.getHoverName().getString(), WaypointItem.getPos(stack));
         }
         if (stack.getItem() instanceof ControlDiscItem) {
-            return new Waypoint(stack.getName().getString(), ControlDiscItem.getPos(stack));
+            return new Waypoint(stack.getHoverName().getString(), ControlDiscItem.getPos(stack));
         }
         return null;
     }

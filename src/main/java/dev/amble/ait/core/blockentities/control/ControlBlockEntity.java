@@ -1,19 +1,16 @@
 package dev.amble.ait.core.blockentities.control;
 
 import java.util.Optional;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.blocks.control.RedstoneControlBlock;
@@ -35,8 +32,8 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         if (this.getControl() != null)
             nbt.putString(ControlBlockItem.CONTROL_ID_KEY, this.getControl().id().toString());
@@ -46,14 +43,14 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
         if (nbt.contains(ControlBlockItem.CONTROL_ID_KEY))
-            this.setControlId(new Identifier(nbt.getString(ControlBlockItem.CONTROL_ID_KEY)));
+            this.setControlId(new ResourceLocation(nbt.getString(ControlBlockItem.CONTROL_ID_KEY)));
 
         if (nbt.contains(ControlBlockItem.CONSOLE_TYPE_ID_KEY))
-            this.setConsoleId(new Identifier(nbt.getString(ControlBlockItem.CONSOLE_TYPE_ID_KEY)));
+            this.setConsoleId(new ResourceLocation(nbt.getString(ControlBlockItem.CONSOLE_TYPE_ID_KEY)));
     }
 
     /**
@@ -74,7 +71,7 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
         return this.consoleType;
     }
 
-    public void setControlId(Identifier id) {
+    public void setControlId(ResourceLocation id) {
         Optional<Control> found = ControlRegistry.fromId(id);
 
         if (found.isEmpty())
@@ -83,7 +80,7 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
         this.control = found.get();
     }
 
-    public void setConsoleId(Identifier id) {
+    public void setConsoleId(ResourceLocation id) {
         Optional<ConsoleTypeSchema> found = ConsoleRegistry.getInstance().getOptional(id);
 
         if (found.isEmpty())
@@ -92,7 +89,7 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
         this.consoleType = found.get();
     }
 
-    public boolean run(ServerPlayerEntity user, boolean isMine) {
+    public boolean run(ServerPlayer user, boolean isMine) {
         if (this.getControl() == null || this.onDelay)
             return false;
 
@@ -107,13 +104,13 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
         if (this.control.shouldHaveDelay(tardis) && !this.onDelay)
             this.createDelay(this.control.getDelayLength(tardis));
 
-        Control.Result result = this.control.handleRun(tardis, user, user.getServerWorld(), this.pos, isMine);
-        this.getWorld().playSound(null, pos, this.control.getSound(this.getConsoleType(), result), SoundCategory.BLOCKS, 0.7f, 1f);
+        Control.Result result = this.control.handleRun(tardis, user, user.serverLevel(), this.worldPosition, isMine);
+        this.getLevel().playSound(null, worldPosition, this.control.getSound(this.getConsoleType(), result), SoundSource.BLOCKS, 0.7f, 1f);
 
         return result.isSuccess();
     }
 
-    public boolean run(ServerPlayerEntity user, RedstoneControlBlock.Mode mode) {
+    public boolean run(ServerPlayer user, RedstoneControlBlock.Mode mode) {
         return this.run(user, mode == RedstoneControlBlock.Mode.PUNCH);
     }
 

@@ -7,13 +7,11 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.datapack.DatapackConsole;
 import dev.amble.ait.data.datapack.DatapackExterior;
@@ -54,18 +52,18 @@ public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSch
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public void syncToClient(ServerPlayer player) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(REGISTRY.size());
 
         for (ConsoleVariantSchema schema : REGISTRY.values()) {
             if (schema instanceof DatapackConsole variant) {
-                buf.encodeAsJson(DatapackConsole.CODEC, variant);
+                buf.writeJsonWithCodec(DatapackConsole.CODEC, variant);
                 continue;
             }
 
-            buf.encodeAsJson(DatapackConsole.CODEC, new DatapackConsole(schema.id(), Optional.of(schema.parent().id()),
-                    DatapackExterior.DEFAULT_TEXTURE, DatapackExterior.DEFAULT_TEXTURE, List.of(), new Vector3f(), List.of(), new Vector3f(), Optional.empty(), Vec3d.ZERO, Vec3d.ZERO, null, Optional.empty(), false));
+            buf.writeJsonWithCodec(DatapackConsole.CODEC, new DatapackConsole(schema.id(), Optional.of(schema.parent().id()),
+                    DatapackExterior.DEFAULT_TEXTURE, DatapackExterior.DEFAULT_TEXTURE, List.of(), new Vector3f(), List.of(), new Vector3f(), Optional.empty(), Vec3.ZERO, Vec3.ZERO, null, Optional.empty(), false));
         }
 
         ServerPlayNetworking.send(player, this.packet, buf);
@@ -75,12 +73,12 @@ public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSch
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(this);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
-        PacketByteBuf copy = PacketByteBufs.copy(buf);
+    public void readFromServer(FriendlyByteBuf buf) {
+        FriendlyByteBuf copy = PacketByteBufs.copy(buf);
         ClientConsoleVariantRegistry.getInstance().readFromServer(copy);
 
         REGISTRY.clear();
@@ -89,7 +87,7 @@ public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSch
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            DatapackConsole variant = buf.decodeAsJson(DatapackConsole.CODEC);
+            DatapackConsole variant = buf.readJsonWithCodec(DatapackConsole.CODEC);
             if (!variant.wasDatapack())
                 continue;
 

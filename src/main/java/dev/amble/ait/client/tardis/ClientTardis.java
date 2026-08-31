@@ -2,11 +2,8 @@ package dev.amble.ait.client.tardis;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
-
+import net.minecraft.client.Minecraft;
 import com.google.gson.InstanceCreator;
-
-import net.minecraft.client.MinecraftClient;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.TardisComponent;
@@ -41,7 +38,7 @@ public class ClientTardis extends Tardis implements Disposable {
         this.exterior = exterior;
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         this.getHandlers().tick(client);
 
         if (ClientTardisUtil.getCurrentTardis() != this)

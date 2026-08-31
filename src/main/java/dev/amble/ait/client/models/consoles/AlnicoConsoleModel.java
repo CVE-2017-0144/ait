@@ -1,16 +1,24 @@
 package dev.amble.ait.client.models.consoles;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.animation.Animation;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.animation.console.alnico.AlnicoAnimations;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -31,1423 +39,1423 @@ public class AlnicoConsoleModel extends SimpleConsoleModel {
         this.alnico = root.getChild("alnico");
     }
 
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData alnico = modelPartData.addChild("alnico", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 12.0F, 0.0F));
-
-        ModelPartData section1 = alnico.addChild("section1", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 12.0F, 0.0F));
-
-        ModelPartData desktop = section1.addChild("desktop", ModelPartBuilder.create().uv(45, 21).cuboid(-9.5F, -13.25F,
-                -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r1 = desktop.addChild("cube_r1",
-                ModelPartBuilder.create().uv(156, 29)
-                        .cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(93, 157)
-                        .cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(106, 143)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.001F)).uv(121, 143)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.001F)).uv(65, 0)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(148, 155)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(155, 155)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(0, 86)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(0, 127)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars = section1.addChild("pillars", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F, -19.0F,
-                -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r2 = pillars.addChild("cube_r2",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r3 = pillars.addChild("cube_r3",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r4 = pillars
-                .addChild("cube_r4",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r5 = pillars.addChild("cube_r5",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top = section1.addChild("top", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r6 = top.addChild("cube_r6",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r7 = top.addChild("cube_r7",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r8 = top.addChild("cube_r8", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom = section1.addChild("bottom",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r9 = bottom.addChild("cube_r9", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r10 = bottom.addChild("cube_r10",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls = section1.addChild("controls", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData biglever = controls.addChild("biglever",
-                ModelPartBuilder.create().uv(23, 151).cuboid(-1.0F, -2.0F, -3.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F))
-                        .uv(106, 11).cuboid(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -16.25F, -11.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bigleverlights = biglever.addChild("bigleverlights", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData red1 = bigleverlights.addChild("red1", ModelPartBuilder.create().uv(80, 117).cuboid(-1.0F, -2.05F,
-                -3.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.5F, 0.0F, 0.0F));
-
-        ModelPartData yellow1 = bigleverlights.addChild("yellow1", ModelPartBuilder.create().uv(115, 41).cuboid(-0.5F,
-                -2.05F, -1.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData green1 = bigleverlights.addChild("green1",
-                ModelPartBuilder.create().uv(90, 27).cuboid(-0.5F, -2.05F, 0.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData bone = biglever.addChild("bone",
-                ModelPartBuilder.create().uv(27, 142)
-                        .cuboid(-1.5F, -3.8F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F)).uv(113, 21)
-                        .cuboid(1.5F, -3.8F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F)).uv(155, 141)
-                        .cuboid(-1.5F, -3.8F, -0.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(98, 0)
-                        .cuboid(-0.5F, -6.8F, -0.5F, 1.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(141, 151)
-                        .cuboid(0.5F, -3.8F, -0.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, -0.2F, -1.0F));
-
-        ModelPartData tinyswitch = controls.addChild("tinyswitch",
-                ModelPartBuilder.create().uv(155, 11).cuboid(10.0F, -1.0F, -3.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(-8.0F, -15.95F, -12.55F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone3 = tinyswitch.addChild("bone3",
-                ModelPartBuilder.create().uv(128, 104).cuboid(-1.0F, -0.75F, 0.0F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(157, 73).cuboid(-0.5F, -0.75F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)),
-                ModelTransform.pivot(11.0F, -1.0F, -2.0F));
-
-        ModelPartData tinyswitch2 = controls.addChild("tinyswitch2",
-                ModelPartBuilder.create().uv(155, 7).cuboid(10.0F, -1.0F, -3.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(-14.0F, -15.95F, -12.55F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone2 = tinyswitch2.addChild("bone2",
-                ModelPartBuilder.create().uv(128, 4).cuboid(-1.0F, -0.75F, 0.0F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(157, 56).cuboid(-0.5F, -0.75F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)),
-                ModelTransform.pivot(11.0F, -1.0F, -2.0F));
-
-        ModelPartData sideswitches = controls
-                .addChild("sideswitches",
-                        ModelPartBuilder.create().uv(128, 100).cuboid(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
-
-        ModelPartData sideswitch1 = sideswitches.addChild("sideswitch1",
-                ModelPartBuilder.create().uv(154, 21).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(68, 151).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, 2.5F));
-
-        ModelPartData sideswitch2 = sideswitches.addChild("sideswitch2",
-                ModelPartBuilder.create().uv(125, 152).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(85, 151).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, -1.5F));
-
-        ModelPartData geiger1 = controls.addChild("geiger1",
-                ModelPartBuilder.create().uv(0, 151).cuboid(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(4.25F, -14.0F, -18.0F));
-
-        ModelPartData needle1 = geiger1.addChild("needle1", ModelPartBuilder.create().uv(110, 21).cuboid(-0.5F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(-3.0F, 1.0F, -2.0F));
-
-        ModelPartData geiger2 = controls.addChild("geiger2",
-                ModelPartBuilder.create().uv(87, 150).cuboid(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(1.75F, -14.0F, -18.0F));
-
-        ModelPartData needle2 = geiger2.addChild("needle2", ModelPartBuilder.create().uv(10, 101).cuboid(-0.5F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(2.0F, 1.0F, -2.0F));
-
-        ModelPartData multiswitchpanel = controls.addChild("multiswitchpanel",
-                ModelPartBuilder.create().uv(27, 135).cuboid(-3.0F, -3.0F, -1.0F, 6.0F, 3.0F, 3.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -8.25F, -26.65F));
-
-        ModelPartData longswitch1 = multiswitchpanel.addChild("longswitch1",
-                ModelPartBuilder.create().uv(90, 157).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(17, 157).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.25F, -2.5F, -0.5F));
-
-        ModelPartData longswitch2 = multiswitchpanel.addChild("longswitch2",
-                ModelPartBuilder.create().uv(87, 157).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(35, 157).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-0.75F, -2.5F, -0.5F));
-
-        ModelPartData longswitch3 = multiswitchpanel.addChild("longswitch3",
-                ModelPartBuilder.create().uv(40, 157).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(47, 157).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.75F, -2.5F, -0.5F));
-
-        ModelPartData longswitch4 = multiswitchpanel.addChild("longswitch4",
-                ModelPartBuilder.create().uv(65, 156).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(52, 157).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(2.25F, -2.5F, -0.5F));
-
-        ModelPartData fliplever1 = controls.addChild("fliplever1",
-                ModelPartBuilder.create().uv(151, 90).cuboid(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 3.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.15F, -12.25F, -21.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData bone5 = fliplever1.addChild("bone5",
-                ModelPartBuilder.create().uv(100, 150).cuboid(-0.5F, -7.0F, -1.0F, 1.0F, 8.0F, 2.0F, new Dilation(0.0F))
-                        .uv(113, 52).cuboid(-0.5F, -7.0F, 1.0F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(118, 119)
-                        .cuboid(-1.0F, -6.5F, 1.5F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F)).uv(10, 101)
-                        .cuboid(0.0F, -10.5F, 1.5F, 0.0F, 5.0F, 3.0F, new Dilation(0.001F)).uv(111, 100)
-                        .cuboid(0.5F, -7.0F, 1.0F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(0, 120)
-                        .cuboid(0.0F, -9.0F, 0.0F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(133, 59)
-                        .cuboid(-0.5F, -13.0F, 0.0F, 1.0F, 4.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -1.0F, 0.5F));
-
-        ModelPartData bell = controls.addChild("bell",
-                ModelPartBuilder.create().uv(0, 21).cuboid(0.0F, -7.0F, -3.0F, 0.0F, 7.0F, 4.0F, new Dilation(0.001F)),
-                ModelTransform.of(9.5F, -14.0F, -24.0F, 0.2618F, -0.3491F, 0.0F));
-
-        ModelPartData bone4 = bell.addChild("bone4", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, -6.0F, -3.0F));
-
-        ModelPartData cube_r11 = bone4.addChild("cube_r11",
-                ModelPartBuilder.create().uv(38, 99).cuboid(-1.5F, -3.0F, -6.0F, 3.0F, 1.0F, 3.0F, new Dilation(0.0F))
-                        .uv(151, 51).cuboid(-1.0F, -5.0F, -5.5F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 6.0F, 3.0F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData dial5 = controls.addChild("dial5",
-                ModelPartBuilder.create().uv(156, 96).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(155, 126).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(83, 87)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(-3.0F, -13.75F, -21.15F, -1.309F, 0.0F, 0.0F));
-
-        ModelPartData dial6 = controls.addChild("dial6",
-                ModelPartBuilder.create().uv(152, 114).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(22, 152).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(70, 0)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(-1.25F, -13.75F, -21.15F, -1.309F, 0.0F, 0.0F));
-
-        ModelPartData section2 = alnico.addChild("section2", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
-
-        ModelPartData desktop2 = section2.addChild("desktop2", ModelPartBuilder.create().uv(22, 37).cuboid(-9.5F,
-                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r12 = desktop2.addChild("cube_r12",
-                ModelPartBuilder.create().uv(146, 59).cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F))
-                        .uv(106, 147).cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)).uv(142, 93)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(143, 35)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(55, 59)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(141, 154)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(155, 136)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(53, 82)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(117, 126)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars2 = section2.addChild("pillars2", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F,
-                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r13 = pillars2.addChild("cube_r13",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r14 = pillars2.addChild("cube_r14",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r15 = pillars2
-                .addChild("cube_r15",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r16 = pillars2.addChild("cube_r16",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top2 = section2.addChild("top2", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r17 = top2.addChild("cube_r17",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r18 = top2.addChild("cube_r18",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r19 = top2.addChild("cube_r19", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom2 = section2.addChild("bottom2",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r20 = bottom2.addChild("cube_r20", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r21 = bottom2.addChild("cube_r21",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls2 = section2.addChild("controls2", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData computer = controls2.addChild("computer",
-                ModelPartBuilder.create().uv(53, 70).cuboid(-4.0F, -0.25F, -4.95F, 8.0F, 2.0F, 9.0F, new Dilation(0.0F))
-                        .uv(56, 113).cuboid(-3.0F, -4.25F, -2.95F, 6.0F, 4.0F, 6.0F, new Dilation(0.0F)).uv(62, 99)
-                        .cuboid(-3.0F, -4.25F, -3.95F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(53, 99)
-                        .cuboid(3.0F, -4.25F, -3.95F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(0, 15)
-                        .cuboid(-3.0F, -4.25F, -3.95F, 6.0F, 0.0F, 1.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, -16.25F, -13.95F));
-
-        ModelPartData computernob = computer.addChild("computernob",
-                ModelPartBuilder.create().uv(12, 157).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(134, 156).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(38, 91)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(2.5F, 0.75F, -4.95F));
-
-        ModelPartData pumpswitch1 = controls2.addChild("pumpswitch1", ModelPartBuilder.create().uv(145, 138)
-                .cuboid(-1.0F, -1.0F, -2.4F, 2.0F, 2.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-6.0F, -13.0F, -24.25F));
-
-        ModelPartData bone6 = pumpswitch1.addChild("bone6",
-                ModelPartBuilder.create().uv(156, 85).cuboid(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 1.0F, new Dilation(0.0F))
-                        .uv(148, 9).cuboid(0.0F, -0.5F, -1.0F, 0.0F, 1.0F, 6.0F, new Dilation(0.001F)).uv(36, 145)
-                        .cuboid(-0.5F, 0.0F, -1.0F, 1.0F, 0.0F, 6.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, 0.0F, -2.4F));
-
-        ModelPartData pumpswitch2 = controls2.addChild("pumpswitch2",
-                ModelPartBuilder.create().uv(144, 21).cuboid(-1.0F, -1.0F, -2.4F, 2.0F, 2.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(6.0F, -13.0F, -24.25F));
-
-        ModelPartData bone7 = pumpswitch2.addChild("bone7",
-                ModelPartBuilder.create().uv(80, 156).cuboid(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 1.0F, new Dilation(0.0F))
-                        .uv(145, 111).cuboid(0.0F, -0.5F, -1.0F, 0.0F, 1.0F, 6.0F, new Dilation(0.001F)).uv(46, 67)
-                        .cuboid(-0.5F, 0.0F, -1.0F, 1.0F, 0.0F, 6.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, 0.0F, -2.4F));
-
-        ModelPartData dial1 = controls2.addChild("dial1",
-                ModelPartBuilder.create().uv(129, 156).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(124, 156).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(31, 91)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-3.0F, -11.25F, -25.65F));
-
-        ModelPartData dial2 = controls2.addChild("dial2",
-                ModelPartBuilder.create().uv(151, 96).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(32, 151).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(69, 18)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-1.0F, -11.25F, -25.65F));
-
-        ModelPartData dial3 = controls2.addChild("dial3",
-                ModelPartBuilder.create().uv(9, 151).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(76, 149).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(49, 67)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(1.0F, -11.25F, -25.65F));
-
-        ModelPartData dial4 = controls2.addChild("dial4",
-                ModelPartBuilder.create().uv(45, 148).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(148, 44).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(60, 59)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(3.0F, -11.25F, -25.65F));
-
-        ModelPartData waypointcatridge = controls2.addChild("waypointcatridge",
-                ModelPartBuilder.create().uv(92, 130).cuboid(-1.5F, -4.0F, -1.0F, 3.0F, 4.0F, 6.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -12.4F, -20.9F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData toastlever = waypointcatridge.addChild("toastlever",
-                ModelPartBuilder.create().uv(65, 5).cuboid(-1.0F, -0.5F, -1.0F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -3.0F, -1.0F));
-
-        ModelPartData toast1 = waypointcatridge.addChild("toast1", ModelPartBuilder.create().uv(69, 149).cuboid(-0.5F,
-                -3.75F, -2.0F, 1.0F, 4.0F, 4.0F, new Dilation(-0.25F)), ModelTransform.pivot(-0.75F, -1.25F, 2.0F));
-
-        ModelPartData toast2 = waypointcatridge.addChild("toast2", ModelPartBuilder.create().uv(47, 148).cuboid(-0.5F,
-                -3.75F, -2.0F, 1.0F, 4.0F, 4.0F, new Dilation(-0.25F)), ModelTransform.pivot(0.75F, -1.25F, 2.0F));
-
-        ModelPartData section3 = alnico.addChild("section3", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, -2.0944F, 0.0F));
-
-        ModelPartData desktop3 = section3.addChild("desktop3", ModelPartBuilder.create().uv(45, 21).cuboid(-9.5F,
-                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r22 = desktop3.addChild("cube_r22",
-                ModelPartBuilder.create().uv(144, 29).cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F))
-                        .uv(91, 145).cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)).uv(142, 50)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(142, 68)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(59, 37)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(140, 93)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(80, 151)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(80, 16)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(39, 124)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars3 = section3.addChild("pillars3", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F,
-                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r23 = pillars3.addChild("cube_r23",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r24 = pillars3.addChild("cube_r24",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r25 = pillars3
-                .addChild("cube_r25",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r26 = pillars3.addChild("cube_r26",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top3 = section3.addChild("top3", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r27 = top3.addChild("cube_r27",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r28 = top3.addChild("cube_r28",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r29 = top3.addChild("cube_r29", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom3 = section3.addChild("bottom3",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r30 = bottom3.addChild("cube_r30", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r31 = bottom3.addChild("cube_r31",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls3 = section3.addChild("controls3", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData telepathiccircuit = controls3.addChild("telepathiccircuit", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, -14.5967F, -18.0647F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData crystal = telepathiccircuit.addChild("crystal",
-                ModelPartBuilder.create().uv(0, 101).cuboid(0.0F, -9.0F, -4.5F, 0.0F, 9.0F, 9.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, 0.0F, 1.2F));
-
-        ModelPartData cube_r32 = crystal.addChild("cube_r32",
-                ModelPartBuilder.create().uv(43, 99).cuboid(0.0F, -9.0F, -4.5F, 0.0F, 9.0F, 9.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
-
-        ModelPartData lowerlever = controls3.addChild("lowerlever",
-                ModelPartBuilder.create().uv(137, 21).cuboid(-1.5F, -1.0F, -1.0F, 3.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(6.0F, -11.25F, -26.6F));
-
-        ModelPartData bone8 = lowerlever.addChild("bone8",
-                ModelPartBuilder.create().uv(13, 79).cuboid(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F))
-                        .uv(91, 141).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-0.75F, -0.5F, -0.5F));
-
-        ModelPartData bone9 = lowerlever.addChild("bone9",
-                ModelPartBuilder.create().uv(0, 79).cuboid(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F))
-                        .uv(137, 74).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.75F, -0.5F, -0.5F));
-
-        ModelPartData lowerlever2 = controls3.addChild("lowerlever2",
-                ModelPartBuilder.create().uv(122, 47).cuboid(-1.5F, -1.0F, -1.0F, 3.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-6.0F, -11.25F, -26.6F));
-
-        ModelPartData bone10 = lowerlever2.addChild("bone10",
-                ModelPartBuilder.create().uv(64, 36).cuboid(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F))
-                        .uv(133, 69).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-0.75F, -0.5F, -0.5F));
-
-        ModelPartData bone11 = lowerlever2.addChild("bone11",
-                ModelPartBuilder.create().uv(0, 21).cuboid(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F))
-                        .uv(109, 65).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.75F, -0.5F, -0.5F));
-
-        ModelPartData geiger = controls3.addChild("geiger",
-                ModelPartBuilder.create().uv(151, 67).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F))
-                        .uv(43, 118).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.2F)),
-                ModelTransform.pivot(-0.5F, -10.75F, -26.6F));
-
-        ModelPartData needle = geiger.addChild("needle", ModelPartBuilder.create().uv(48, 99).cuboid(-0.25F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.5F, 0.25F, -1.0F));
-
-        ModelPartData siegemode = controls3.addChild("siegemode",
-                ModelPartBuilder.create().uv(53, 99).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(136, 143).cuboid(-0.5F, -1.25F, -4.5F, 1.0F, 1.0F, 6.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -12.9F, -20.833F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r33 = siegemode.addChild("cube_r33", ModelPartBuilder.create().uv(151, 44).cuboid(-1.0F,
-                0.0F, -3.0F, 2.0F, 3.0F, 3.0F, new Dilation(-0.001F)),
-                ModelTransform.of(0.0F, -2.0F, 0.0F, 1.0036F, 0.0F, 0.0F));
-
-        ModelPartData lever = siegemode.addChild("lever",
-                ModelPartBuilder.create().uv(142, 117)
-                        .cuboid(-0.6F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F)).uv(30, 142)
-                        .cuboid(0.6F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F)).uv(22, 45)
-                        .cuboid(-0.5F, -8.0F, -0.997F, 1.0F, 5.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -0.75F, -3.5F));
-
-        ModelPartData sideswitches2 = controls3.addChild("sideswitches2",
-                ModelPartBuilder.create().uv(128, 4).cuboid(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
-
-        ModelPartData sideswitch3 = sideswitches2.addChild("sideswitch3",
-                ModelPartBuilder.create().uv(151, 17).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(133, 50).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, 2.5F));
-
-        ModelPartData sideswitch4 = sideswitches2.addChild("sideswitch4",
-                ModelPartBuilder.create().uv(142, 129).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(112, 130).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, -1.5F));
-
-        ModelPartData sideswitches5 = controls3.addChild("sideswitches5",
-                ModelPartBuilder.create().uv(25, 125).cuboid(-1.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(7.5F, -14.7806F, -20.0173F, 0.2472F, -0.3594F, -0.0043F));
-
-        ModelPartData sideswitch9 = sideswitches5.addChild("sideswitch9",
-                ModelPartBuilder.create().uv(142, 102).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(25, 130).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.5F, 0.0F, 2.5F));
-
-        ModelPartData sideswitch10 = sideswitches5.addChild("sideswitch10",
-                ModelPartBuilder.create().uv(142, 77).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(128, 117).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.5F, 0.0F, -1.5F));
-
-        ModelPartData section4 = alnico.addChild("section4", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
-
-        ModelPartData desktop4 = section4.addChild("desktop4", ModelPartBuilder.create().uv(45, 21).cuboid(-9.5F,
-                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r34 = desktop4.addChild("cube_r34",
-                ModelPartBuilder.create().uv(142, 4).cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F))
-                        .uv(142, 9).cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)).uv(142, 0)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(27, 142)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(22, 56)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(88, 50)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(21, 118)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(79, 70)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(121, 119)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars4 = section4.addChild("pillars4", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F,
-                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r35 = pillars4.addChild("cube_r35",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r36 = pillars4.addChild("cube_r36",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r37 = pillars4
-                .addChild("cube_r37",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r38 = pillars4.addChild("cube_r38",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top4 = section4.addChild("top4", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r39 = top4.addChild("cube_r39",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r40 = top4.addChild("cube_r40",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r41 = top4.addChild("cube_r41", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom4 = section4.addChild("bottom4",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r42 = bottom4.addChild("cube_r42", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r43 = bottom4.addChild("cube_r43",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls4 = section4.addChild("controls4", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData biglever2 = controls4.addChild("biglever2",
-                ModelPartBuilder.create().uv(149, 119)
-                        .cuboid(8.75F, -19.25F, 3.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)).uv(58, 87)
-                        .cuboid(7.75F, -18.25F, 4.0F, 4.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(-20.75F, 5.5F, -16.5F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bone12 = biglever2.addChild("bone12",
-                ModelPartBuilder.create().uv(9, 25).cuboid(-1.5F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F))
-                        .uv(62, 107).cuboid(1.5F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new Dilation(0.001F)).uv(99, 117)
-                        .cuboid(-1.5F, -3.5F, -0.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(13, 10)
-                        .cuboid(-0.5F, -6.5F, -0.5F, 1.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(104, 117)
-                        .cuboid(0.5F, -3.5F, -0.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(9.75F, -17.75F, 5.0F));
-
-        ModelPartData bigleverlights2 = biglever2.addChild("bigleverlights2", ModelPartBuilder.create(),
-                ModelTransform.pivot(9.75F, -17.25F, 6.0F));
-
-        ModelPartData red2 = bigleverlights2.addChild("red2",
-                ModelPartBuilder.create().uv(88, 48).cuboid(-1.0F, -2.05F, -3.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.5F, 0.0F, 0.0F));
-
-        ModelPartData yellow2 = bigleverlights2.addChild("yellow2",
-                ModelPartBuilder.create().uv(53, 29).cuboid(-0.5F, -2.05F, -1.5F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData green2 = bigleverlights2.addChild("green2",
-                ModelPartBuilder.create().uv(20, 37).cuboid(-0.5F, -2.05F, 0.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData tinyswitch3 = controls4.addChild("tinyswitch3", ModelPartBuilder.create(),
-                ModelTransform.of(-3.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData cube_r44 = tinyswitch3.addChild("cube_r44",
-                ModelPartBuilder.create().uv(147, 85).cuboid(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone16 = tinyswitch3.addChild("bone16", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, -1.9F, -0.5F));
-
-        ModelPartData cube_r45 = bone16.addChild("cube_r45", ModelPartBuilder.create().uv(96, 150).cuboid(-0.75F, -3.0F,
-                0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData tinyswitch4 = controls4.addChild("tinyswitch4", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData cube_r46 = tinyswitch4.addChild("cube_r46",
-                ModelPartBuilder.create().uv(138, 50).cuboid(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone13 = tinyswitch4.addChild("bone13", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, -1.9F, -0.5F));
-
-        ModelPartData cube_r47 = bone13.addChild("cube_r47", ModelPartBuilder.create().uv(149, 136).cuboid(-0.75F,
-                -3.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData tinyswitch5 = controls4.addChild("tinyswitch5", ModelPartBuilder.create(),
-                ModelTransform.of(3.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData cube_r48 = tinyswitch5.addChild("cube_r48",
-                ModelPartBuilder.create().uv(23, 125).cuboid(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone14 = tinyswitch5.addChild("bone14", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, -1.9F, -0.5F));
-
-        ModelPartData cube_r49 = bone14.addChild("cube_r49", ModelPartBuilder.create().uv(149, 109).cuboid(-0.75F,
-                -3.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData tinylight = controls4.addChild("tinylight",
-                ModelPartBuilder.create().uv(152, 109)
-                        .cuboid(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(-0.4F)).uv(36, 142)
-                        .cuboid(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(-3.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone87 = tinylight.addChild("bone87", ModelPartBuilder.create().uv(107, 152).cuboid(-7.0F, -1.0F,
-                -3.7F, 2.0F, 2.0F, 2.0F, new Dilation(-0.38F)), ModelTransform.pivot(6.0F, 0.075F, 2.7F));
-
-        ModelPartData tinylight2 = controls4.addChild("tinylight2",
-                ModelPartBuilder.create().uv(36, 152)
-                        .cuboid(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(-0.4F)).uv(105, 130)
-                        .cuboid(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone15 = tinylight2.addChild("bone15", ModelPartBuilder.create().uv(152, 35).cuboid(-7.0F, -1.0F,
-                -3.7F, 2.0F, 2.0F, 2.0F, new Dilation(-0.38F)), ModelTransform.pivot(6.0F, 0.075F, 2.7F));
-
-        ModelPartData tinylight3 = controls4.addChild("tinylight3",
-                ModelPartBuilder.create().uv(13, 152)
-                        .cuboid(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(-0.4F)).uv(71, 18)
-                        .cuboid(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(3.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone17 = tinylight3.addChild("bone17", ModelPartBuilder.create().uv(134, 151).cuboid(-7.0F, -1.0F,
-                -3.7F, 2.0F, 2.0F, 2.0F, new Dilation(-0.38F)), ModelTransform.pivot(6.0F, 0.075F, 2.7F));
-
-        ModelPartData keyboard = controls4.addChild("keyboard", ModelPartBuilder.create().uv(113, 52).cuboid(-5.0F,
-                -2.0F, -3.0F, 10.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -13.25F, -19.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData wrench1 = controls4.addChild("wrench1",
-                ModelPartBuilder.create().uv(94, 117).cuboid(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-6.5F, -10.25F, -26.6F));
-
-        ModelPartData bone18 = wrench1.addChild("bone18",
-                ModelPartBuilder.create().uv(22, 56).cuboid(-1.5F, -1.5F, 0.0F, 3.0F, 7.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, -1.5F, 0.0F));
-
-        ModelPartData wrench2 = controls4.addChild("wrench2",
-                ModelPartBuilder.create().uv(92, 41).cuboid(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.5F, -10.25F, -26.6F));
-
-        ModelPartData bone19 = wrench2.addChild("bone19",
-                ModelPartBuilder.create().uv(0, 101).cuboid(-1.5F, -1.5F, 0.0F, 3.0F, 8.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, -1.5F, 0.0F));
-
-        ModelPartData wrench3 = controls4.addChild("wrench3",
-                ModelPartBuilder.create().uv(33, 91).cuboid(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(3.5F, -10.25F, -26.6F));
-
-        ModelPartData bone20 = wrench3.addChild("bone20", ModelPartBuilder.create().uv(58, 151).cuboid(-1.5F, -1.5F,
-                0.0F, 3.0F, 9.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(-0.5F, -1.5F, 0.0F));
-
-        ModelPartData wrench4 = controls4.addChild("wrench4",
-                ModelPartBuilder.create().uv(5, 21).cuboid(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(7.5F, -10.25F, -26.6F));
-
-        ModelPartData bone21 = wrench4.addChild("bone21",
-                ModelPartBuilder.create().uv(44, 0).cuboid(-1.5F, -1.5F, 0.0F, 3.0F, 10.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, -1.5F, 0.0F));
-
-        ModelPartData section5 = alnico.addChild("section5", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, 2.0944F, 0.0F));
-
-        ModelPartData desktop5 = section5.addChild("desktop5", ModelPartBuilder.create().uv(45, 21).cuboid(-9.5F,
-                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r50 = desktop5.addChild("cube_r50",
-                ModelPartBuilder.create().uv(137, 26).cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F))
-                        .uv(137, 78).cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)).uv(140, 120)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(91, 141)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(55, 48)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(65, 0)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(22, 67)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(65, 11)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(0, 120)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars5 = section5.addChild("pillars5", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F,
-                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r51 = pillars5.addChild("cube_r51",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r52 = pillars5.addChild("cube_r52",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r53 = pillars5
-                .addChild("cube_r53",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r54 = pillars5.addChild("cube_r54",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top5 = section5.addChild("top5", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r55 = top5.addChild("cube_r55",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r56 = top5.addChild("cube_r56",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r57 = top5.addChild("cube_r57", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom5 = section5.addChild("bottom5",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r58 = bottom5.addChild("cube_r58", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r59 = bottom5.addChild("cube_r59",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls5 = section5.addChild("controls5", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData taperecorder = controls5.addChild("taperecorder",
-                ModelPartBuilder.create().uv(111, 75).cuboid(-5.0F, -1.0F, -3.0F, 10.0F, 2.0F, 5.0F, new Dilation(0.0F))
-                        .uv(98, 0).cuboid(-1.0F, -2.0F, -3.0F, 2.0F, 1.0F, 5.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -16.5F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData bone30 = taperecorder.addChild("bone30", ModelPartBuilder.create(),
-                ModelTransform.of(2.3579F, -1.5F, -1.265F, 0.0F, -0.3491F, 0.0F));
-
-        ModelPartData bone32 = bone30.addChild("bone32",
-                ModelPartBuilder.create().uv(88, 65).cuboid(-1.5F, -0.5F, 0.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData bone29 = taperecorder.addChild("bone29", ModelPartBuilder.create(),
-                ModelTransform.of(-2.4095F, -1.5F, -1.265F, 0.0F, 0.3491F, 0.0F));
-
-        ModelPartData bone31 = bone29.addChild("bone31",
-                ModelPartBuilder.create().uv(22, 72).cuboid(-1.5F, -0.5F, 0.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData bone22 = taperecorder.addChild("bone22",
-                ModelPartBuilder.create().uv(120, 69).cuboid(-2.0F, 0.0F, -2.0F, 4.0F, 1.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(-3.5F, -2.0F, 0.5F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData bone23 = taperecorder.addChild("bone23",
-                ModelPartBuilder.create().uv(0, 79).cuboid(-2.0F, 0.0F, -2.0F, 4.0F, 1.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(3.5F, -2.0F, 0.5F));
-
-        ModelPartData geiger4 = controls5.addChild("geiger4", ModelPartBuilder.create().uv(149, 129).cuboid(-1.0F,
-                -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(-4.25F, -14.0F, -18.0F));
-
-        ModelPartData needle4 = geiger4.addChild("needle4", ModelPartBuilder.create().uv(38, 99).cuboid(-0.5F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.0F, 1.0F, -2.0F));
-
-        ModelPartData geiger3 = controls5.addChild("geiger3", ModelPartBuilder.create().uv(149, 102).cuboid(-1.0F,
-                -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(4.25F, -14.0F, -18.0F));
-
-        ModelPartData needle3 = geiger3.addChild("needle3", ModelPartBuilder.create().uv(55, 45).cuboid(-0.5F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.0F, 1.0F, -2.0F));
-
-        ModelPartData tinyswitch6 = controls5.addChild("tinyswitch6", ModelPartBuilder.create().uv(9, 0).cuboid(7.4378F,
-                -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-11.5F, -10.7F, -12.55F));
-
-        ModelPartData bone24 = tinyswitch6.addChild("bone24",
-                ModelPartBuilder.create().uv(55, 70)
-                        .cuboid(-1.0622F, -0.7749F, -0.0364F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F)).uv(88, 79)
-                        .cuboid(-0.5622F, -0.7749F, -0.5364F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)),
-                ModelTransform.pivot(8.5F, -3.45F, -11.2F));
-
-        ModelPartData tinyswitch7 = controls5.addChild("tinyswitch7", ModelPartBuilder.create().uv(101, 37).cuboid(6.5F,
-                -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-7.5F, -10.7F, -12.55F));
-
-        ModelPartData bone25 = tinyswitch7.addChild("bone25",
-                ModelPartBuilder.create().uv(115, 31)
-                        .cuboid(-1.0F, -0.7249F, 0.0136F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F)).uv(28, 101)
-                        .cuboid(-0.5F, -0.7249F, -0.4864F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)),
-                ModelTransform.pivot(7.5F, -3.5F, -11.25F));
-
-        ModelPartData tinyswitch9 = controls5.addChild("tinyswitch9", ModelPartBuilder.create().uv(92, 37)
-                .cuboid(-9.4378F, -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(11.5F, -10.7F, -12.55F));
-
-        ModelPartData bone26 = tinyswitch9.addChild("bone26",
-                ModelPartBuilder.create().uv(58, 92)
-                        .cuboid(-0.9378F, -0.7749F, -0.0364F, 2.0F, 1.0F, 1.0F, new Dilation(0.0F)).uv(14, 101)
-                        .cuboid(-0.4378F, -0.7749F, -0.5364F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)),
-                ModelTransform.pivot(-8.5F, -3.45F, -11.2F));
-
-        ModelPartData tinylight4 = controls5.addChild("tinylight4",
-                ModelPartBuilder.create().uv(119, 11)
-                        .cuboid(2.0F, -2.2699F, -6.0191F, 2.0F, 2.0F, 2.0F, new Dilation(-0.4F)).uv(62, 18)
-                        .cuboid(2.0F, -1.4199F, -6.0191F, 2.0F, 0.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-9.0F, -11.925F, -19.1F));
-
-        ModelPartData bone27 = tinylight4.addChild("bone27", ModelPartBuilder.create().uv(91, 91).cuboid(-4.0F,
-                -2.3449F, -8.7191F, 2.0F, 2.0F, 2.0F, new Dilation(-0.38F)), ModelTransform.pivot(6.0F, 0.075F, 2.7F));
-
-        ModelPartData tinylight5 = controls5.addChild("tinylight5",
-                ModelPartBuilder.create().uv(76, 87)
-                        .cuboid(-4.0F, -2.2699F, -6.0191F, 2.0F, 2.0F, 2.0F, new Dilation(-0.4F)).uv(53, 18)
-                        .cuboid(-4.0F, -1.4199F, -6.0191F, 2.0F, 0.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(9.0F, -11.925F, -19.1F));
-
-        ModelPartData bone28 = tinylight5.addChild("bone28", ModelPartBuilder.create().uv(53, 74).cuboid(2.0F, -2.3449F,
-                -8.7191F, 2.0F, 2.0F, 2.0F, new Dilation(-0.38F)), ModelTransform.pivot(-6.0F, 0.075F, 2.7F));
-
-        ModelPartData cassetteplayer = controls5.addChild("cassetteplayer",
-                ModelPartBuilder.create().uv(96, 65).cuboid(-2.0F, 0.0F, -1.0F, 4.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -15.0306F, -20.0173F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData refueler = controls5.addChild("refueler",
-                ModelPartBuilder.create().uv(134, 28).cuboid(-2.0F, -5.0F, -1.0F, 3.0F, 9.0F, 3.0F, new Dilation(0.0F))
-                        .uv(106, 91).cuboid(-1.75F, -6.0F, -0.5F, 0.0F, 1.0F, 2.0F, new Dilation(0.001F)).uv(60, 48)
-                        .cuboid(-2.25F, -6.0F, -0.5F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)).uv(60, 18)
-                        .cuboid(-2.25F, -6.0F, 1.5F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)).uv(27, 45)
-                        .cuboid(0.25F, -6.0F, 1.5F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)).uv(81, 92)
-                        .cuboid(0.75F, -6.0F, -0.5F, 0.0F, 1.0F, 2.0F, new Dilation(0.001F)).uv(49, 11)
-                        .cuboid(0.25F, -6.0F, -0.5F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(-11.0F, -13.4F, -20.083F, 1.309F, 0.5236F, 0.0F));
-
-        ModelPartData gasknob = refueler.addChild("gasknob",
-                ModelPartBuilder.create().uv(118, 69).cuboid(-0.5F, -0.8F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(-0.2F))
-                        .uv(106, 75).cuboid(-1.0F, -1.4F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(-0.2F)),
-                ModelTransform.pivot(-0.5F, -5.0F, 0.5F));
-
-        ModelPartData multiswitchpanel2 = controls5.addChild("multiswitchpanel2",
-                ModelPartBuilder.create().uv(132, 14).cuboid(-3.0F, -3.0F, -1.0F, 6.0F, 3.0F, 3.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -8.25F, -26.65F));
-
-        ModelPartData longswitch5 = multiswitchpanel2.addChild("longswitch5",
-                ModelPartBuilder.create().uv(44, 156).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(145, 146).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.25F, -2.5F, -0.5F));
-
-        ModelPartData longswitch6 = multiswitchpanel2.addChild("longswitch6",
-                ModelPartBuilder.create().uv(65, 151).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(36, 145).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-0.75F, -2.5F, -0.5F));
-
-        ModelPartData longswitch7 = multiswitchpanel2.addChild("longswitch7",
-                ModelPartBuilder.create().uv(149, 9).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(143, 44).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.75F, -2.5F, -0.5F));
-
-        ModelPartData longswitch8 = multiswitchpanel2.addChild("longswitch8",
-                ModelPartBuilder.create().uv(141, 82).cuboid(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new Dilation(0.001F))
-                        .uv(105, 133).cuboid(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(2.25F, -2.5F, -0.5F));
-
-        ModelPartData computernob2 = controls5.addChild("computernob2",
-                ModelPartBuilder.create().uv(87, 21).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                        .uv(86, 34).cuboid(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new Dilation(-0.25F)).uv(9, 31)
-                        .cuboid(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -15.7F, -16.9F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData section6 = alnico.addChild("section6", ModelPartBuilder.create(),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
-
-        ModelPartData desktop6 = section6.addChild("desktop6", ModelPartBuilder.create().uv(45, 21).cuboid(-9.5F,
-                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r60 = desktop6.addChild("cube_r60",
-                ModelPartBuilder.create().uv(133, 117).cuboid(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F))
-                        .uv(134, 41).cuboid(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new Dilation(0.0F)).uv(134, 41)
-                        .cuboid(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(138, 84)
-                        .cuboid(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new Dilation(0.0F)).uv(22, 45)
-                        .cuboid(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new Dilation(0.0F)).uv(55, 48)
-                        .cuboid(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(55, 59)
-                        .cuboid(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(57, 29)
-                        .cuboid(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(119, 83)
-                        .cuboid(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
-
-        ModelPartData pillars6 = section6.addChild("pillars6", ModelPartBuilder.create().uv(111, 91).cuboid(-6.0F,
-                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r61 = pillars6.addChild("cube_r61",
-                ModelPartBuilder.create().uv(66, 87).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r62 = pillars6.addChild("cube_r62",
-                ModelPartBuilder.create().uv(96, 91).cuboid(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
-
-        ModelPartData cube_r63 = pillars6
-                .addChild("cube_r63",
-                        ModelPartBuilder.create().uv(81, 91).cuboid(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
-                                new Dilation(0.0F)),
-                        ModelTransform.of(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
-
-        ModelPartData cube_r64 = pillars6.addChild("cube_r64",
-                ModelPartBuilder.create().uv(28, 99).cuboid(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
-
-        ModelPartData top6 = section6.addChild("top6", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r65 = top6.addChild("cube_r65",
-                ModelPartBuilder.create().uv(90, 21).cuboid(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                        .uv(148, 59).cuboid(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.05F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r66 = top6.addChild("cube_r66",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r67 = top6.addChild("cube_r67", ModelPartBuilder.create().uv(35, 0).cuboid(-3.0F, -18.0F,
-                -22.0F, 6.0F, 0.0F, 17.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
-
-        ModelPartData bottom6 = section6.addChild("bottom6",
-                ModelPartBuilder.create().uv(0, 91).cuboid(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 2.0F));
-
-        ModelPartData cube_r68 = bottom6.addChild("cube_r68", ModelPartBuilder.create().uv(116, 16).cuboid(-2.5F, -9.0F,
-                -19.0F, 5.0F, 9.0F, 5.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r69 = bottom6.addChild("cube_r69",
-                ModelPartBuilder.create().uv(147, 77).cuboid(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F))
-                        .uv(147, 147).cuboid(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new Dilation(0.0F)).uv(0, 21)
-                        .cuboid(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
-
-        ModelPartData controls6 = section6.addChild("controls6", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData randomizer3 = controls6.addChild("randomizer3",
-                ModelPartBuilder.create().uv(71, 124).cuboid(-1.0F, -1.5F, -0.5F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(-12.0F, -12.9F, -20.833F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData sideswitches3 = controls6.addChild("sideswitches3",
-                ModelPartBuilder.create().uv(57, 124).cuboid(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
-
-        ModelPartData sideswitch5 = sideswitches3.addChild("sideswitch5",
-                ModelPartBuilder.create().uv(137, 0).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(128, 14).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, 2.5F));
-
-        ModelPartData sideswitch6 = sideswitches3.addChild("sideswitch6",
-                ModelPartBuilder.create().uv(128, 0).cuboid(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F))
-                        .uv(118, 83).cuboid(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.pivot(-0.5F, 0.0F, -1.5F));
-
-        ModelPartData geiger5 = controls6.addChild("geiger5",
-                ModelPartBuilder.create().uv(151, 0).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F))
-                        .uv(100, 141).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.2F)),
-                ModelTransform.pivot(-0.5F, -10.75F, -26.6F));
-
-        ModelPartData needle5 = geiger5.addChild("needle5", ModelPartBuilder.create().uv(45, 29).cuboid(-0.25F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.5F, 0.25F, -1.0F));
-
-        ModelPartData geiger6 = controls6.addChild("geiger6",
-                ModelPartBuilder.create().uv(147, 29).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F))
-                        .uv(115, 143).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.2F)),
-                ModelTransform.pivot(-4.5F, -10.75F, -26.6F));
-
-        ModelPartData needle6 = geiger6.addChild("needle6", ModelPartBuilder.create().uv(45, 21).cuboid(-0.25F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.5F, 0.25F, -1.0F));
-
-        ModelPartData geiger7 = controls6.addChild("geiger7",
-                ModelPartBuilder.create().uv(130, 143).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F))
-                        .uv(122, 31).cuboid(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.2F)),
-                ModelTransform.pivot(3.5F, -10.75F, -26.6F));
-
-        ModelPartData needle7 = geiger7.addChild("needle7", ModelPartBuilder.create().uv(15, 15).cuboid(-0.25F, -2.0F,
-                -0.02F, 1.0F, 2.0F, 0.0F, new Dilation(0.001F)), ModelTransform.pivot(0.5F, 0.25F, -1.0F));
-
-        ModelPartData cashregister = controls6.addChild("cashregister",
-                ModelPartBuilder.create().uv(91, 27).cuboid(-4.0F, -2.0F, -6.0F, 8.0F, 2.0F, 7.0F, new Dilation(0.0F))
-                        .uv(98, 119).cuboid(-4.0F, -9.0F, -2.0F, 8.0F, 7.0F, 3.0F, new Dilation(0.0F)).uv(128, 110)
-                        .cuboid(-4.0F, -5.0F, -5.0F, 8.0F, 3.0F, 3.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -13.0F, -15.0F));
-
-        ModelPartData registerlever = cashregister.addChild("registerlever",
-                ModelPartBuilder.create().uv(44, 11).cuboid(0.0F, -1.0F, -1.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F))
-                        .uv(0, 0).cuboid(0.5F, -3.0F, -0.5F, 0.0F, 2.0F, 1.0F, new Dilation(0.001F)).uv(108, 0)
-                        .cuboid(0.0F, -5.0F, -0.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(4.0F, -3.5F, -3.5F));
-
-        ModelPartData registerswitches = cashregister.addChild("registerswitches",
-                ModelPartBuilder.create().uv(75, 113).cuboid(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new Dilation(0.001F))
-                        .uv(124, 100).cuboid(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.75F, -4.5F, -4.0F));
-
-        ModelPartData registerswitches2 = cashregister.addChild("registerswitches2",
-                ModelPartBuilder.create().uv(46, 67).cuboid(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new Dilation(0.001F))
-                        .uv(111, 83).cuboid(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-0.25F, -4.5F, -4.0F));
-
-        ModelPartData registerswitches3 = cashregister.addChild("registerswitches3",
-                ModelPartBuilder.create().uv(13, 4).cuboid(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new Dilation(0.001F))
-                        .uv(110, 37).cuboid(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(2.25F, -4.5F, -4.0F));
-
-        ModelPartData column = alnico.addChild("column",
-                ModelPartBuilder.create().uv(89, 52).cuboid(-4.0F, -72.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F))
-                        .uv(130, 133).cuboid(-4.0F, -80.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 12.0F, 0.0F));
-
-        ModelPartData cube_r70 = column.addChild("cube_r70", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F,
-                -10.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.01F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
-
-        ModelPartData cube_r71 = column.addChild("cube_r71",
-                ModelPartBuilder.create().uv(130, 133)
-                        .cuboid(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)).uv(89, 52)
-                        .cuboid(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -49.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
-
-        ModelPartData cube_r72 = column.addChild("cube_r72",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
-
-        ModelPartData cube_r73 = column.addChild("cube_r73", ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F,
-                -9.0F, 0.0F, 46.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -36.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
-
-        ModelPartData cube_r74 = column.addChild("cube_r74",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
-
-        ModelPartData cube_r75 = column
-                .addChild(
-                        "cube_r75", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F, -10.0F, 2.0F, 12.0F,
-                                2.0F, new Dilation(0.01F)),
-                        ModelTransform.of(0.0F, 0.0F, 0.0F, 3.1416F, 0.5236F, -3.1416F));
-
-        ModelPartData cube_r76 = column.addChild("cube_r76",
-                ModelPartBuilder.create().uv(130, 133)
-                        .cuboid(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)).uv(89, 52)
-                        .cuboid(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -49.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
-
-        ModelPartData cube_r77 = column.addChild("cube_r77",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
-
-        ModelPartData cube_r78 = column
-                .addChild("cube_r78",
-                        ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F, -9.0F, 0.0F, 46.0F, 2.0F,
-                                new Dilation(0.001F)),
-                        ModelTransform.of(0.0F, -36.0F, 0.0F, 3.1416F, 0.5236F, -3.1416F));
-
-        ModelPartData cube_r79 = column.addChild("cube_r79",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, -3.1416F, 0.5236F, 3.1416F));
-
-        ModelPartData cube_r80 = column
-                .addChild(
-                        "cube_r80", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F, -10.0F, 2.0F, 12.0F,
-                                2.0F, new Dilation(0.01F)),
-                        ModelTransform.of(0.0F, 0.0F, 0.0F, 3.1416F, -0.5236F, -3.1416F));
-
-        ModelPartData cube_r81 = column.addChild("cube_r81",
-                ModelPartBuilder.create().uv(130, 133)
-                        .cuboid(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)).uv(89, 52)
-                        .cuboid(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -49.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
-
-        ModelPartData cube_r82 = column.addChild("cube_r82",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
-
-        ModelPartData cube_r83 = column
-                .addChild("cube_r83",
-                        ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F, -9.0F, 0.0F, 46.0F, 2.0F,
-                                new Dilation(0.001F)),
-                        ModelTransform.of(0.0F, -36.0F, 0.0F, 3.1416F, -0.5236F, -3.1416F));
-
-        ModelPartData cube_r84 = column.addChild("cube_r84",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, -3.1416F, -0.5236F, 3.1416F));
-
-        ModelPartData cube_r85 = column.addChild("cube_r85", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F,
-                -10.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.01F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData cube_r86 = column.addChild("cube_r86",
-                ModelPartBuilder.create().uv(130, 133)
-                        .cuboid(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)).uv(89, 52)
-                        .cuboid(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -49.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
-
-        ModelPartData cube_r87 = column.addChild("cube_r87",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
-
-        ModelPartData cube_r88 = column.addChild("cube_r88", ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F,
-                -9.0F, 0.0F, 46.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -36.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData cube_r89 = column.addChild("cube_r89",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData cube_r90 = column.addChild("cube_r90", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F,
-                -10.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.01F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
-
-        ModelPartData cube_r91 = column.addChild("cube_r91",
-                ModelPartBuilder.create().uv(130, 133)
-                        .cuboid(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new Dilation(0.0F)).uv(89, 52)
-                        .cuboid(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -49.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
-
-        ModelPartData cube_r92 = column.addChild("cube_r92",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
-
-        ModelPartData cube_r93 = column.addChild("cube_r93", ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F,
-                -9.0F, 0.0F, 46.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -36.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
-
-        ModelPartData cube_r94 = column.addChild("cube_r94",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
-
-        ModelPartData cube_r95 = column.addChild("cube_r95", ModelPartBuilder.create().uv(17, 37).cuboid(0.0F, -32.0F,
-                -9.0F, 0.0F, 46.0F, 2.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, -36.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r96 = column.addChild("cube_r96",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 12.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r97 = column.addChild("cube_r97", ModelPartBuilder.create().uv(139, 59).cuboid(-1.0F, -80.0F,
-                -10.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.01F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData cube_r98 = column.addChild("cube_r98",
-                ModelPartBuilder.create().uv(22, 67).cuboid(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -26.0F, 0.0F, 0.0F, 0.0F, 0.0F));
-
-        ModelPartData glass = column.addChild("glass", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F, -6.93F,
-                8.0F, 41.0F, 0.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData cube_r99 = glass.addChild("cube_r99", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F,
-                -6.93F, 8.0F, 41.0F, 0.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
-
-        ModelPartData cube_r100 = glass
-                .addChild(
-                        "cube_r100", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
-                                0.0F, new Dilation(0.0F)),
-                        ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
-
-        ModelPartData cube_r101 = glass
-                .addChild(
-                        "cube_r101", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
-                                0.0F, new Dilation(0.0F)),
-                        ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
-
-        ModelPartData cube_r102 = glass
-                .addChild(
-                        "cube_r102", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
-                                0.0F, new Dilation(0.0F)),
-                        ModelTransform.of(0.0F, 0.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
-
-        ModelPartData cube_r103 = glass.addChild("cube_r103", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -67.0F,
-                -6.93F, 8.0F, 41.0F, 0.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
-
-        ModelPartData timerotor = column.addChild("timerotor", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
-
-        ModelPartData bottomgizmo = timerotor.addChild("bottomgizmo",
-                ModelPartBuilder.create().uv(111, 100)
-                        .cuboid(-2.0F, -14.0F, -2.0F, 4.0F, 14.0F, 4.0F, new Dilation(0.0F)).uv(33, 87)
-                        .cuboid(-4.0F, -4.0F, -4.0F, 8.0F, 3.0F, 8.0F, new Dilation(0.0F)).uv(106, 0)
-                        .cuboid(-3.5F, -8.0F, -3.5F, 7.0F, 3.0F, 7.0F, new Dilation(0.0F)).uv(115, 37)
-                        .cuboid(-3.0F, -12.0F, -3.0F, 6.0F, 3.0F, 6.0F, new Dilation(0.0F)).uv(0, 134)
-                        .cuboid(-6.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)).uv(19, 101)
-                        .cuboid(2.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)).uv(82, 136)
-                        .cuboid(-1.0F, -19.0F, -1.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -26.0F, 0.0F));
-
-        ModelPartData cube_r104 = bottomgizmo.addChild("cube_r104",
-                ModelPartBuilder.create().uv(46, 131)
-                        .cuboid(2.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)).uv(35, 0)
-                        .cuboid(-6.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 26.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData topgizmo = timerotor.addChild("topgizmo",
-                ModelPartBuilder.create().uv(81, 117)
-                        .cuboid(-2.0F, -14.0F, -2.0F, 4.0F, 14.0F, 4.0F, new Dilation(0.0F)).uv(86, 79)
-                        .cuboid(-4.0F, -4.0F, -4.0F, 8.0F, 3.0F, 8.0F, new Dilation(0.0F)).uv(93, 41)
-                        .cuboid(-3.5F, -8.0F, -3.5F, 7.0F, 3.0F, 7.0F, new Dilation(0.0F)).uv(114, 59)
-                        .cuboid(-3.0F, -12.0F, -3.0F, 6.0F, 3.0F, 6.0F, new Dilation(0.0F)).uv(55, 134)
-                        .cuboid(-6.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)).uv(64, 134)
-                        .cuboid(2.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)).uv(73, 134)
-                        .cuboid(-1.0F, -19.0F, -1.0F, 2.0F, 12.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -67.0F, 0.0F, 3.1416F, 0.0F, 0.0F));
-
-        ModelPartData cube_r105 = topgizmo.addChild("cube_r105",
-                ModelPartBuilder.create().uv(9, 134).cuboid(2.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F))
-                        .uv(18, 135).cuboid(-6.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new Dilation(0.001F)),
-                ModelTransform.of(0.0F, 26.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
-
-        ModelPartData holographicmonitor = alnico.addChild("holographicmonitor", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 12.0F, 0.0F));
-
-        ModelPartData monitor = holographicmonitor.addChild("monitor",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -34.0F, 0.0F));
-
-        ModelPartData monitorhandle = monitor.addChild("monitorhandle",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData monitor2 = holographicmonitor.addChild("monitor2",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -34.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
-
-        ModelPartData monitorhandle2 = monitor2.addChild("monitorhandle2",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData monitor3 = holographicmonitor.addChild("monitor3",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -34.0F, 0.0F, 0.0F, -2.0944F, 0.0F));
-
-        ModelPartData monitorhandle3 = monitor3.addChild("monitorhandle3",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData monitor4 = holographicmonitor.addChild("monitor4",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(111, 133)
-                        .cuboid(-4.5F, 0.5F, -14.25F, 9.0F, 9.0F, 0.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -34.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
-
-        ModelPartData monitorhandle4 = monitor4.addChild("monitorhandle4",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData monitor5 = holographicmonitor.addChild("monitor5",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -34.0F, 0.0F, 0.0F, 2.0944F, 0.0F));
-
-        ModelPartData monitorhandle5 = monitor5.addChild("monitorhandle5",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-
-        ModelPartData monitor6 = holographicmonitor.addChild("monitor6",
-                ModelPartBuilder.create().uv(57, 34)
-                        .cuboid(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new Dilation(0.001F)).uv(79, 75)
-                        .cuboid(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.of(0.0F, -34.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
-
-        ModelPartData monitorhandle6 = monitor6.addChild("monitorhandle6",
-                ModelPartBuilder.create().uv(116, 152)
-                        .cuboid(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(43, 104)
-                        .cuboid(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new Dilation(0.0F)).uv(45, 29)
-                        .cuboid(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new Dilation(0.001F)),
-                ModelTransform.of(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
-        return TexturedModelData.of(modelData, 256, 256);
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition alnico = modelPartData.addOrReplaceChild("alnico", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 12.0F, 0.0F));
+
+        PartDefinition section1 = alnico.addOrReplaceChild("section1", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 12.0F, 0.0F));
+
+        PartDefinition desktop = section1.addOrReplaceChild("desktop", CubeListBuilder.create().texOffs(45, 21).addBox(-9.5F, -13.25F,
+                -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r1 = desktop.addOrReplaceChild("cube_r1",
+                CubeListBuilder.create().texOffs(156, 29)
+                        .addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(93, 157)
+                        .addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(106, 143)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.001F)).texOffs(121, 143)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.001F)).texOffs(65, 0)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(148, 155)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(155, 155)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(0, 86)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(0, 127)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars = section1.addOrReplaceChild("pillars", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F, -19.0F,
+                -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r2 = pillars.addOrReplaceChild("cube_r2",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r3 = pillars.addOrReplaceChild("cube_r3",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r4 = pillars
+                .addOrReplaceChild("cube_r4",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r5 = pillars.addOrReplaceChild("cube_r5",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top = section1.addOrReplaceChild("top", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r6 = top.addOrReplaceChild("cube_r6",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r7 = top.addOrReplaceChild("cube_r7",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r8 = top.addOrReplaceChild("cube_r8", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom = section1.addOrReplaceChild("bottom",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r9 = bottom.addOrReplaceChild("cube_r9", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r10 = bottom.addOrReplaceChild("cube_r10",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls = section1.addOrReplaceChild("controls", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition biglever = controls.addOrReplaceChild("biglever",
+                CubeListBuilder.create().texOffs(23, 151).addBox(-1.0F, -2.0F, -3.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(106, 11).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -16.25F, -11.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bigleverlights = biglever.addOrReplaceChild("bigleverlights", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition red1 = bigleverlights.addOrReplaceChild("red1", CubeListBuilder.create().texOffs(80, 117).addBox(-1.0F, -2.05F,
+                -3.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.5F, 0.0F, 0.0F));
+
+        PartDefinition yellow1 = bigleverlights.addOrReplaceChild("yellow1", CubeListBuilder.create().texOffs(115, 41).addBox(-0.5F,
+                -2.05F, -1.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition green1 = bigleverlights.addOrReplaceChild("green1",
+                CubeListBuilder.create().texOffs(90, 27).addBox(-0.5F, -2.05F, 0.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition bone = biglever.addOrReplaceChild("bone",
+                CubeListBuilder.create().texOffs(27, 142)
+                        .addBox(-1.5F, -3.8F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(113, 21)
+                        .addBox(1.5F, -3.8F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(155, 141)
+                        .addBox(-1.5F, -3.8F, -0.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(98, 0)
+                        .addBox(-0.5F, -6.8F, -0.5F, 1.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(141, 151)
+                        .addBox(0.5F, -3.8F, -0.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, -0.2F, -1.0F));
+
+        PartDefinition tinyswitch = controls.addOrReplaceChild("tinyswitch",
+                CubeListBuilder.create().texOffs(155, 11).addBox(10.0F, -1.0F, -3.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-8.0F, -15.95F, -12.55F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone3 = tinyswitch.addOrReplaceChild("bone3",
+                CubeListBuilder.create().texOffs(128, 104).addBox(-1.0F, -0.75F, 0.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(157, 73).addBox(-0.5F, -0.75F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
+                PartPose.offset(11.0F, -1.0F, -2.0F));
+
+        PartDefinition tinyswitch2 = controls.addOrReplaceChild("tinyswitch2",
+                CubeListBuilder.create().texOffs(155, 7).addBox(10.0F, -1.0F, -3.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-14.0F, -15.95F, -12.55F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone2 = tinyswitch2.addOrReplaceChild("bone2",
+                CubeListBuilder.create().texOffs(128, 4).addBox(-1.0F, -0.75F, 0.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(157, 56).addBox(-0.5F, -0.75F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
+                PartPose.offset(11.0F, -1.0F, -2.0F));
+
+        PartDefinition sideswitches = controls
+                .addOrReplaceChild("sideswitches",
+                        CubeListBuilder.create().texOffs(128, 100).addBox(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
+
+        PartDefinition sideswitch1 = sideswitches.addOrReplaceChild("sideswitch1",
+                CubeListBuilder.create().texOffs(154, 21).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(68, 151).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, 2.5F));
+
+        PartDefinition sideswitch2 = sideswitches.addOrReplaceChild("sideswitch2",
+                CubeListBuilder.create().texOffs(125, 152).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(85, 151).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, -1.5F));
+
+        PartDefinition geiger1 = controls.addOrReplaceChild("geiger1",
+                CubeListBuilder.create().texOffs(0, 151).addBox(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(4.25F, -14.0F, -18.0F));
+
+        PartDefinition needle1 = geiger1.addOrReplaceChild("needle1", CubeListBuilder.create().texOffs(110, 21).addBox(-0.5F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(-3.0F, 1.0F, -2.0F));
+
+        PartDefinition geiger2 = controls.addOrReplaceChild("geiger2",
+                CubeListBuilder.create().texOffs(87, 150).addBox(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(1.75F, -14.0F, -18.0F));
+
+        PartDefinition needle2 = geiger2.addOrReplaceChild("needle2", CubeListBuilder.create().texOffs(10, 101).addBox(-0.5F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(2.0F, 1.0F, -2.0F));
+
+        PartDefinition multiswitchpanel = controls.addOrReplaceChild("multiswitchpanel",
+                CubeListBuilder.create().texOffs(27, 135).addBox(-3.0F, -3.0F, -1.0F, 6.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -8.25F, -26.65F));
+
+        PartDefinition longswitch1 = multiswitchpanel.addOrReplaceChild("longswitch1",
+                CubeListBuilder.create().texOffs(90, 157).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(17, 157).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-2.25F, -2.5F, -0.5F));
+
+        PartDefinition longswitch2 = multiswitchpanel.addOrReplaceChild("longswitch2",
+                CubeListBuilder.create().texOffs(87, 157).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(35, 157).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-0.75F, -2.5F, -0.5F));
+
+        PartDefinition longswitch3 = multiswitchpanel.addOrReplaceChild("longswitch3",
+                CubeListBuilder.create().texOffs(40, 157).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(47, 157).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.75F, -2.5F, -0.5F));
+
+        PartDefinition longswitch4 = multiswitchpanel.addOrReplaceChild("longswitch4",
+                CubeListBuilder.create().texOffs(65, 156).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(52, 157).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(2.25F, -2.5F, -0.5F));
+
+        PartDefinition fliplever1 = controls.addOrReplaceChild("fliplever1",
+                CubeListBuilder.create().texOffs(151, 90).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.15F, -12.25F, -21.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition bone5 = fliplever1.addOrReplaceChild("bone5",
+                CubeListBuilder.create().texOffs(100, 150).addBox(-0.5F, -7.0F, -1.0F, 1.0F, 8.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(113, 52).addBox(-0.5F, -7.0F, 1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(118, 119)
+                        .addBox(-1.0F, -6.5F, 1.5F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(10, 101)
+                        .addBox(0.0F, -10.5F, 1.5F, 0.0F, 5.0F, 3.0F, new CubeDeformation(0.001F)).texOffs(111, 100)
+                        .addBox(0.5F, -7.0F, 1.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(0, 120)
+                        .addBox(0.0F, -9.0F, 0.0F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(133, 59)
+                        .addBox(-0.5F, -13.0F, 0.0F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -1.0F, 0.5F));
+
+        PartDefinition bell = controls.addOrReplaceChild("bell",
+                CubeListBuilder.create().texOffs(0, 21).addBox(0.0F, -7.0F, -3.0F, 0.0F, 7.0F, 4.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(9.5F, -14.0F, -24.0F, 0.2618F, -0.3491F, 0.0F));
+
+        PartDefinition bone4 = bell.addOrReplaceChild("bone4", CubeListBuilder.create(),
+                PartPose.offset(0.0F, -6.0F, -3.0F));
+
+        PartDefinition cube_r11 = bone4.addOrReplaceChild("cube_r11",
+                CubeListBuilder.create().texOffs(38, 99).addBox(-1.5F, -3.0F, -6.0F, 3.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(151, 51).addBox(-1.0F, -5.0F, -5.5F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 6.0F, 3.0F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition dial5 = controls.addOrReplaceChild("dial5",
+                CubeListBuilder.create().texOffs(156, 96).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(155, 126).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(83, 87)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-3.0F, -13.75F, -21.15F, -1.309F, 0.0F, 0.0F));
+
+        PartDefinition dial6 = controls.addOrReplaceChild("dial6",
+                CubeListBuilder.create().texOffs(152, 114).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(22, 152).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(70, 0)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-1.25F, -13.75F, -21.15F, -1.309F, 0.0F, 0.0F));
+
+        PartDefinition section2 = alnico.addOrReplaceChild("section2", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
+
+        PartDefinition desktop2 = section2.addOrReplaceChild("desktop2", CubeListBuilder.create().texOffs(22, 37).addBox(-9.5F,
+                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r12 = desktop2.addOrReplaceChild("cube_r12",
+                CubeListBuilder.create().texOffs(146, 59).addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(106, 147).addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(142, 93)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(143, 35)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(55, 59)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(141, 154)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(155, 136)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(53, 82)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(117, 126)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars2 = section2.addOrReplaceChild("pillars2", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F,
+                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r13 = pillars2.addOrReplaceChild("cube_r13",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r14 = pillars2.addOrReplaceChild("cube_r14",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r15 = pillars2
+                .addOrReplaceChild("cube_r15",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r16 = pillars2.addOrReplaceChild("cube_r16",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top2 = section2.addOrReplaceChild("top2", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r17 = top2.addOrReplaceChild("cube_r17",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r18 = top2.addOrReplaceChild("cube_r18",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r19 = top2.addOrReplaceChild("cube_r19", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom2 = section2.addOrReplaceChild("bottom2",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r20 = bottom2.addOrReplaceChild("cube_r20", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r21 = bottom2.addOrReplaceChild("cube_r21",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls2 = section2.addOrReplaceChild("controls2", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition computer = controls2.addOrReplaceChild("computer",
+                CubeListBuilder.create().texOffs(53, 70).addBox(-4.0F, -0.25F, -4.95F, 8.0F, 2.0F, 9.0F, new CubeDeformation(0.0F))
+                        .texOffs(56, 113).addBox(-3.0F, -4.25F, -2.95F, 6.0F, 4.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(62, 99)
+                        .addBox(-3.0F, -4.25F, -3.95F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(53, 99)
+                        .addBox(3.0F, -4.25F, -3.95F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(0, 15)
+                        .addBox(-3.0F, -4.25F, -3.95F, 6.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, -16.25F, -13.95F));
+
+        PartDefinition computernob = computer.addOrReplaceChild("computernob",
+                CubeListBuilder.create().texOffs(12, 157).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(134, 156).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(38, 91)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(2.5F, 0.75F, -4.95F));
+
+        PartDefinition pumpswitch1 = controls2.addOrReplaceChild("pumpswitch1", CubeListBuilder.create().texOffs(145, 138)
+                .addBox(-1.0F, -1.0F, -2.4F, 2.0F, 2.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-6.0F, -13.0F, -24.25F));
+
+        PartDefinition bone6 = pumpswitch1.addOrReplaceChild("bone6",
+                CubeListBuilder.create().texOffs(156, 85).addBox(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 9).addBox(0.0F, -0.5F, -1.0F, 0.0F, 1.0F, 6.0F, new CubeDeformation(0.001F)).texOffs(36, 145)
+                        .addBox(-0.5F, 0.0F, -1.0F, 1.0F, 0.0F, 6.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, 0.0F, -2.4F));
+
+        PartDefinition pumpswitch2 = controls2.addOrReplaceChild("pumpswitch2",
+                CubeListBuilder.create().texOffs(144, 21).addBox(-1.0F, -1.0F, -2.4F, 2.0F, 2.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(6.0F, -13.0F, -24.25F));
+
+        PartDefinition bone7 = pumpswitch2.addOrReplaceChild("bone7",
+                CubeListBuilder.create().texOffs(80, 156).addBox(-1.0F, -1.0F, -2.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(145, 111).addBox(0.0F, -0.5F, -1.0F, 0.0F, 1.0F, 6.0F, new CubeDeformation(0.001F)).texOffs(46, 67)
+                        .addBox(-0.5F, 0.0F, -1.0F, 1.0F, 0.0F, 6.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, 0.0F, -2.4F));
+
+        PartDefinition dial1 = controls2.addOrReplaceChild("dial1",
+                CubeListBuilder.create().texOffs(129, 156).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(124, 156).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(31, 91)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-3.0F, -11.25F, -25.65F));
+
+        PartDefinition dial2 = controls2.addOrReplaceChild("dial2",
+                CubeListBuilder.create().texOffs(151, 96).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(32, 151).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(69, 18)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-1.0F, -11.25F, -25.65F));
+
+        PartDefinition dial3 = controls2.addOrReplaceChild("dial3",
+                CubeListBuilder.create().texOffs(9, 151).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(76, 149).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(49, 67)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(1.0F, -11.25F, -25.65F));
+
+        PartDefinition dial4 = controls2.addOrReplaceChild("dial4",
+                CubeListBuilder.create().texOffs(45, 148).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 44).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(60, 59)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(3.0F, -11.25F, -25.65F));
+
+        PartDefinition waypointcatridge = controls2.addOrReplaceChild("waypointcatridge",
+                CubeListBuilder.create().texOffs(92, 130).addBox(-1.5F, -4.0F, -1.0F, 3.0F, 4.0F, 6.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -12.4F, -20.9F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition toastlever = waypointcatridge.addOrReplaceChild("toastlever",
+                CubeListBuilder.create().texOffs(65, 5).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -3.0F, -1.0F));
+
+        PartDefinition toast1 = waypointcatridge.addOrReplaceChild("toast1", CubeListBuilder.create().texOffs(69, 149).addBox(-0.5F,
+                -3.75F, -2.0F, 1.0F, 4.0F, 4.0F, new CubeDeformation(-0.25F)), PartPose.offset(-0.75F, -1.25F, 2.0F));
+
+        PartDefinition toast2 = waypointcatridge.addOrReplaceChild("toast2", CubeListBuilder.create().texOffs(47, 148).addBox(-0.5F,
+                -3.75F, -2.0F, 1.0F, 4.0F, 4.0F, new CubeDeformation(-0.25F)), PartPose.offset(0.75F, -1.25F, 2.0F));
+
+        PartDefinition section3 = alnico.addOrReplaceChild("section3", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, -2.0944F, 0.0F));
+
+        PartDefinition desktop3 = section3.addOrReplaceChild("desktop3", CubeListBuilder.create().texOffs(45, 21).addBox(-9.5F,
+                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r22 = desktop3.addOrReplaceChild("cube_r22",
+                CubeListBuilder.create().texOffs(144, 29).addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(91, 145).addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(142, 50)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(142, 68)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(59, 37)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(140, 93)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(80, 151)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(80, 16)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(39, 124)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars3 = section3.addOrReplaceChild("pillars3", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F,
+                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r23 = pillars3.addOrReplaceChild("cube_r23",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r24 = pillars3.addOrReplaceChild("cube_r24",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r25 = pillars3
+                .addOrReplaceChild("cube_r25",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r26 = pillars3.addOrReplaceChild("cube_r26",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top3 = section3.addOrReplaceChild("top3", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r27 = top3.addOrReplaceChild("cube_r27",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r28 = top3.addOrReplaceChild("cube_r28",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r29 = top3.addOrReplaceChild("cube_r29", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom3 = section3.addOrReplaceChild("bottom3",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r30 = bottom3.addOrReplaceChild("cube_r30", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r31 = bottom3.addOrReplaceChild("cube_r31",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls3 = section3.addOrReplaceChild("controls3", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition telepathiccircuit = controls3.addOrReplaceChild("telepathiccircuit", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, -14.5967F, -18.0647F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition crystal = telepathiccircuit.addOrReplaceChild("crystal",
+                CubeListBuilder.create().texOffs(0, 101).addBox(0.0F, -9.0F, -4.5F, 0.0F, 9.0F, 9.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, 0.0F, 1.2F));
+
+        PartDefinition cube_r32 = crystal.addOrReplaceChild("cube_r32",
+                CubeListBuilder.create().texOffs(43, 99).addBox(0.0F, -9.0F, -4.5F, 0.0F, 9.0F, 9.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+
+        PartDefinition lowerlever = controls3.addOrReplaceChild("lowerlever",
+                CubeListBuilder.create().texOffs(137, 21).addBox(-1.5F, -1.0F, -1.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(6.0F, -11.25F, -26.6F));
+
+        PartDefinition bone8 = lowerlever.addOrReplaceChild("bone8",
+                CubeListBuilder.create().texOffs(13, 79).addBox(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(91, 141).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-0.75F, -0.5F, -0.5F));
+
+        PartDefinition bone9 = lowerlever.addOrReplaceChild("bone9",
+                CubeListBuilder.create().texOffs(0, 79).addBox(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(137, 74).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.75F, -0.5F, -0.5F));
+
+        PartDefinition lowerlever2 = controls3.addOrReplaceChild("lowerlever2",
+                CubeListBuilder.create().texOffs(122, 47).addBox(-1.5F, -1.0F, -1.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-6.0F, -11.25F, -26.6F));
+
+        PartDefinition bone10 = lowerlever2.addOrReplaceChild("bone10",
+                CubeListBuilder.create().texOffs(64, 36).addBox(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(133, 69).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-0.75F, -0.5F, -0.5F));
+
+        PartDefinition bone11 = lowerlever2.addOrReplaceChild("bone11",
+                CubeListBuilder.create().texOffs(0, 21).addBox(0.0F, -1.5F, -0.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(109, 65).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.75F, -0.5F, -0.5F));
+
+        PartDefinition geiger = controls3.addOrReplaceChild("geiger",
+                CubeListBuilder.create().texOffs(151, 67).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(43, 118).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.2F)),
+                PartPose.offset(-0.5F, -10.75F, -26.6F));
+
+        PartDefinition needle = geiger.addOrReplaceChild("needle", CubeListBuilder.create().texOffs(48, 99).addBox(-0.25F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.5F, 0.25F, -1.0F));
+
+        PartDefinition siegemode = controls3.addOrReplaceChild("siegemode",
+                CubeListBuilder.create().texOffs(53, 99).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(136, 143).addBox(-0.5F, -1.25F, -4.5F, 1.0F, 1.0F, 6.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -12.9F, -20.833F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r33 = siegemode.addOrReplaceChild("cube_r33", CubeListBuilder.create().texOffs(151, 44).addBox(-1.0F,
+                0.0F, -3.0F, 2.0F, 3.0F, 3.0F, new CubeDeformation(-0.001F)),
+                PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, 1.0036F, 0.0F, 0.0F));
+
+        PartDefinition lever = siegemode.addOrReplaceChild("lever",
+                CubeListBuilder.create().texOffs(142, 117)
+                        .addBox(-0.6F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(30, 142)
+                        .addBox(0.6F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(22, 45)
+                        .addBox(-0.5F, -8.0F, -0.997F, 1.0F, 5.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -0.75F, -3.5F));
+
+        PartDefinition sideswitches2 = controls3.addOrReplaceChild("sideswitches2",
+                CubeListBuilder.create().texOffs(128, 4).addBox(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
+
+        PartDefinition sideswitch3 = sideswitches2.addOrReplaceChild("sideswitch3",
+                CubeListBuilder.create().texOffs(151, 17).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(133, 50).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, 2.5F));
+
+        PartDefinition sideswitch4 = sideswitches2.addOrReplaceChild("sideswitch4",
+                CubeListBuilder.create().texOffs(142, 129).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(112, 130).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, -1.5F));
+
+        PartDefinition sideswitches5 = controls3.addOrReplaceChild("sideswitches5",
+                CubeListBuilder.create().texOffs(25, 125).addBox(-1.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(7.5F, -14.7806F, -20.0173F, 0.2472F, -0.3594F, -0.0043F));
+
+        PartDefinition sideswitch9 = sideswitches5.addOrReplaceChild("sideswitch9",
+                CubeListBuilder.create().texOffs(142, 102).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(25, 130).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.5F, 0.0F, 2.5F));
+
+        PartDefinition sideswitch10 = sideswitches5.addOrReplaceChild("sideswitch10",
+                CubeListBuilder.create().texOffs(142, 77).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(128, 117).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.5F, 0.0F, -1.5F));
+
+        PartDefinition section4 = alnico.addOrReplaceChild("section4", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+
+        PartDefinition desktop4 = section4.addOrReplaceChild("desktop4", CubeListBuilder.create().texOffs(45, 21).addBox(-9.5F,
+                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r34 = desktop4.addOrReplaceChild("cube_r34",
+                CubeListBuilder.create().texOffs(142, 4).addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(142, 9).addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(142, 0)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(27, 142)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(22, 56)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(88, 50)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(21, 118)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(79, 70)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(121, 119)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars4 = section4.addOrReplaceChild("pillars4", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F,
+                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r35 = pillars4.addOrReplaceChild("cube_r35",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r36 = pillars4.addOrReplaceChild("cube_r36",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r37 = pillars4
+                .addOrReplaceChild("cube_r37",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r38 = pillars4.addOrReplaceChild("cube_r38",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top4 = section4.addOrReplaceChild("top4", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r39 = top4.addOrReplaceChild("cube_r39",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r40 = top4.addOrReplaceChild("cube_r40",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r41 = top4.addOrReplaceChild("cube_r41", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom4 = section4.addOrReplaceChild("bottom4",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r42 = bottom4.addOrReplaceChild("cube_r42", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r43 = bottom4.addOrReplaceChild("cube_r43",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls4 = section4.addOrReplaceChild("controls4", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition biglever2 = controls4.addOrReplaceChild("biglever2",
+                CubeListBuilder.create().texOffs(149, 119)
+                        .addBox(8.75F, -19.25F, 3.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(58, 87)
+                        .addBox(7.75F, -18.25F, 4.0F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-20.75F, 5.5F, -16.5F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bone12 = biglever2.addOrReplaceChild("bone12",
+                CubeListBuilder.create().texOffs(9, 25).addBox(-1.5F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(62, 107).addBox(1.5F, -3.5F, -0.5F, 0.0F, 4.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(99, 117)
+                        .addBox(-1.5F, -3.5F, -0.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(13, 10)
+                        .addBox(-0.5F, -6.5F, -0.5F, 1.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(104, 117)
+                        .addBox(0.5F, -3.5F, -0.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(9.75F, -17.75F, 5.0F));
+
+        PartDefinition bigleverlights2 = biglever2.addOrReplaceChild("bigleverlights2", CubeListBuilder.create(),
+                PartPose.offset(9.75F, -17.25F, 6.0F));
+
+        PartDefinition red2 = bigleverlights2.addOrReplaceChild("red2",
+                CubeListBuilder.create().texOffs(88, 48).addBox(-1.0F, -2.05F, -3.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.5F, 0.0F, 0.0F));
+
+        PartDefinition yellow2 = bigleverlights2.addOrReplaceChild("yellow2",
+                CubeListBuilder.create().texOffs(53, 29).addBox(-0.5F, -2.05F, -1.5F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition green2 = bigleverlights2.addOrReplaceChild("green2",
+                CubeListBuilder.create().texOffs(20, 37).addBox(-0.5F, -2.05F, 0.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition tinyswitch3 = controls4.addOrReplaceChild("tinyswitch3", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(-3.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition cube_r44 = tinyswitch3.addOrReplaceChild("cube_r44",
+                CubeListBuilder.create().texOffs(147, 85).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone16 = tinyswitch3.addOrReplaceChild("bone16", CubeListBuilder.create(),
+                PartPose.offset(0.0F, -1.9F, -0.5F));
+
+        PartDefinition cube_r45 = bone16.addOrReplaceChild("cube_r45", CubeListBuilder.create().texOffs(96, 150).addBox(-0.75F, -3.0F,
+                0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition tinyswitch4 = controls4.addOrReplaceChild("tinyswitch4", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition cube_r46 = tinyswitch4.addOrReplaceChild("cube_r46",
+                CubeListBuilder.create().texOffs(138, 50).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone13 = tinyswitch4.addOrReplaceChild("bone13", CubeListBuilder.create(),
+                PartPose.offset(0.0F, -1.9F, -0.5F));
+
+        PartDefinition cube_r47 = bone13.addOrReplaceChild("cube_r47", CubeListBuilder.create().texOffs(149, 136).addBox(-0.75F,
+                -3.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition tinyswitch5 = controls4.addOrReplaceChild("tinyswitch5", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(3.0F, -14.25F, -14.0F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition cube_r48 = tinyswitch5.addOrReplaceChild("cube_r48",
+                CubeListBuilder.create().texOffs(23, 125).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone14 = tinyswitch5.addOrReplaceChild("bone14", CubeListBuilder.create(),
+                PartPose.offset(0.0F, -1.9F, -0.5F));
+
+        PartDefinition cube_r49 = bone14.addOrReplaceChild("cube_r49", CubeListBuilder.create().texOffs(149, 109).addBox(-0.75F,
+                -3.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 1.9F, 0.5F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition tinylight = controls4.addOrReplaceChild("tinylight",
+                CubeListBuilder.create().texOffs(152, 109)
+                        .addBox(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.4F)).texOffs(36, 142)
+                        .addBox(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-3.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone87 = tinylight.addOrReplaceChild("bone87", CubeListBuilder.create().texOffs(107, 152).addBox(-7.0F, -1.0F,
+                -3.7F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.38F)), PartPose.offset(6.0F, 0.075F, 2.7F));
+
+        PartDefinition tinylight2 = controls4.addOrReplaceChild("tinylight2",
+                CubeListBuilder.create().texOffs(36, 152)
+                        .addBox(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.4F)).texOffs(105, 130)
+                        .addBox(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone15 = tinylight2.addOrReplaceChild("bone15", CubeListBuilder.create().texOffs(152, 35).addBox(-7.0F, -1.0F,
+                -3.7F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.38F)), PartPose.offset(6.0F, 0.075F, 2.7F));
+
+        PartDefinition tinylight3 = controls4.addOrReplaceChild("tinylight3",
+                CubeListBuilder.create().texOffs(13, 152)
+                        .addBox(-1.0F, -0.925F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.4F)).texOffs(71, 18)
+                        .addBox(-1.0F, -0.075F, -1.0F, 2.0F, 0.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(3.0F, -14.975F, -16.2F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone17 = tinylight3.addOrReplaceChild("bone17", CubeListBuilder.create().texOffs(134, 151).addBox(-7.0F, -1.0F,
+                -3.7F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.38F)), PartPose.offset(6.0F, 0.075F, 2.7F));
+
+        PartDefinition keyboard = controls4.addOrReplaceChild("keyboard", CubeListBuilder.create().texOffs(113, 52).addBox(-5.0F,
+                -2.0F, -3.0F, 10.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -13.25F, -19.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition wrench1 = controls4.addOrReplaceChild("wrench1",
+                CubeListBuilder.create().texOffs(94, 117).addBox(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-6.5F, -10.25F, -26.6F));
+
+        PartDefinition bone18 = wrench1.addOrReplaceChild("bone18",
+                CubeListBuilder.create().texOffs(22, 56).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 7.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, -1.5F, 0.0F));
+
+        PartDefinition wrench2 = controls4.addOrReplaceChild("wrench2",
+                CubeListBuilder.create().texOffs(92, 41).addBox(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-2.5F, -10.25F, -26.6F));
+
+        PartDefinition bone19 = wrench2.addOrReplaceChild("bone19",
+                CubeListBuilder.create().texOffs(0, 101).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 8.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, -1.5F, 0.0F));
+
+        PartDefinition wrench3 = controls4.addOrReplaceChild("wrench3",
+                CubeListBuilder.create().texOffs(33, 91).addBox(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(3.5F, -10.25F, -26.6F));
+
+        PartDefinition bone20 = wrench3.addOrReplaceChild("bone20", CubeListBuilder.create().texOffs(58, 151).addBox(-1.5F, -1.5F,
+                0.0F, 3.0F, 9.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(-0.5F, -1.5F, 0.0F));
+
+        PartDefinition wrench4 = controls4.addOrReplaceChild("wrench4",
+                CubeListBuilder.create().texOffs(5, 21).addBox(-1.0F, -2.0F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(7.5F, -10.25F, -26.6F));
+
+        PartDefinition bone21 = wrench4.addOrReplaceChild("bone21",
+                CubeListBuilder.create().texOffs(44, 0).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 10.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, -1.5F, 0.0F));
+
+        PartDefinition section5 = alnico.addOrReplaceChild("section5", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 2.0944F, 0.0F));
+
+        PartDefinition desktop5 = section5.addOrReplaceChild("desktop5", CubeListBuilder.create().texOffs(45, 21).addBox(-9.5F,
+                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r50 = desktop5.addOrReplaceChild("cube_r50",
+                CubeListBuilder.create().texOffs(137, 26).addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(137, 78).addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(140, 120)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(91, 141)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(55, 48)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(65, 0)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(22, 67)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(65, 11)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(0, 120)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars5 = section5.addOrReplaceChild("pillars5", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F,
+                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r51 = pillars5.addOrReplaceChild("cube_r51",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r52 = pillars5.addOrReplaceChild("cube_r52",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r53 = pillars5
+                .addOrReplaceChild("cube_r53",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r54 = pillars5.addOrReplaceChild("cube_r54",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top5 = section5.addOrReplaceChild("top5", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r55 = top5.addOrReplaceChild("cube_r55",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r56 = top5.addOrReplaceChild("cube_r56",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r57 = top5.addOrReplaceChild("cube_r57", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom5 = section5.addOrReplaceChild("bottom5",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r58 = bottom5.addOrReplaceChild("cube_r58", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r59 = bottom5.addOrReplaceChild("cube_r59",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls5 = section5.addOrReplaceChild("controls5", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition taperecorder = controls5.addOrReplaceChild("taperecorder",
+                CubeListBuilder.create().texOffs(111, 75).addBox(-5.0F, -1.0F, -3.0F, 10.0F, 2.0F, 5.0F, new CubeDeformation(0.0F))
+                        .texOffs(98, 0).addBox(-1.0F, -2.0F, -3.0F, 2.0F, 1.0F, 5.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -16.5F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition bone30 = taperecorder.addOrReplaceChild("bone30", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(2.3579F, -1.5F, -1.265F, 0.0F, -0.3491F, 0.0F));
+
+        PartDefinition bone32 = bone30.addOrReplaceChild("bone32",
+                CubeListBuilder.create().texOffs(88, 65).addBox(-1.5F, -0.5F, 0.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition bone29 = taperecorder.addOrReplaceChild("bone29", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(-2.4095F, -1.5F, -1.265F, 0.0F, 0.3491F, 0.0F));
+
+        PartDefinition bone31 = bone29.addOrReplaceChild("bone31",
+                CubeListBuilder.create().texOffs(22, 72).addBox(-1.5F, -0.5F, 0.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition bone22 = taperecorder.addOrReplaceChild("bone22",
+                CubeListBuilder.create().texOffs(120, 69).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-3.5F, -2.0F, 0.5F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition bone23 = taperecorder.addOrReplaceChild("bone23",
+                CubeListBuilder.create().texOffs(0, 79).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(3.5F, -2.0F, 0.5F));
+
+        PartDefinition geiger4 = controls5.addOrReplaceChild("geiger4", CubeListBuilder.create().texOffs(149, 129).addBox(-1.0F,
+                -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(-4.25F, -14.0F, -18.0F));
+
+        PartDefinition needle4 = geiger4.addOrReplaceChild("needle4", CubeListBuilder.create().texOffs(38, 99).addBox(-0.5F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.0F, 1.0F, -2.0F));
+
+        PartDefinition geiger3 = controls5.addOrReplaceChild("geiger3", CubeListBuilder.create().texOffs(149, 102).addBox(-1.0F,
+                -1.0F, -2.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(4.25F, -14.0F, -18.0F));
+
+        PartDefinition needle3 = geiger3.addOrReplaceChild("needle3", CubeListBuilder.create().texOffs(55, 45).addBox(-0.5F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.0F, 1.0F, -2.0F));
+
+        PartDefinition tinyswitch6 = controls5.addOrReplaceChild("tinyswitch6", CubeListBuilder.create().texOffs(9, 0).addBox(7.4378F,
+                -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-11.5F, -10.7F, -12.55F));
+
+        PartDefinition bone24 = tinyswitch6.addOrReplaceChild("bone24",
+                CubeListBuilder.create().texOffs(55, 70)
+                        .addBox(-1.0622F, -0.7749F, -0.0364F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(88, 79)
+                        .addBox(-0.5622F, -0.7749F, -0.5364F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
+                PartPose.offset(8.5F, -3.45F, -11.2F));
+
+        PartDefinition tinyswitch7 = controls5.addOrReplaceChild("tinyswitch7", CubeListBuilder.create().texOffs(101, 37).addBox(6.5F,
+                -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-7.5F, -10.7F, -12.55F));
+
+        PartDefinition bone25 = tinyswitch7.addOrReplaceChild("bone25",
+                CubeListBuilder.create().texOffs(115, 31)
+                        .addBox(-1.0F, -0.7249F, 0.0136F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(28, 101)
+                        .addBox(-0.5F, -0.7249F, -0.4864F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
+                PartPose.offset(7.5F, -3.5F, -11.25F));
+
+        PartDefinition tinyswitch9 = controls5.addOrReplaceChild("tinyswitch9", CubeListBuilder.create().texOffs(92, 37)
+                .addBox(-9.4378F, -3.4749F, -12.2364F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(11.5F, -10.7F, -12.55F));
+
+        PartDefinition bone26 = tinyswitch9.addOrReplaceChild("bone26",
+                CubeListBuilder.create().texOffs(58, 92)
+                        .addBox(-0.9378F, -0.7749F, -0.0364F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(14, 101)
+                        .addBox(-0.4378F, -0.7749F, -0.5364F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
+                PartPose.offset(-8.5F, -3.45F, -11.2F));
+
+        PartDefinition tinylight4 = controls5.addOrReplaceChild("tinylight4",
+                CubeListBuilder.create().texOffs(119, 11)
+                        .addBox(2.0F, -2.2699F, -6.0191F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.4F)).texOffs(62, 18)
+                        .addBox(2.0F, -1.4199F, -6.0191F, 2.0F, 0.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-9.0F, -11.925F, -19.1F));
+
+        PartDefinition bone27 = tinylight4.addOrReplaceChild("bone27", CubeListBuilder.create().texOffs(91, 91).addBox(-4.0F,
+                -2.3449F, -8.7191F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.38F)), PartPose.offset(6.0F, 0.075F, 2.7F));
+
+        PartDefinition tinylight5 = controls5.addOrReplaceChild("tinylight5",
+                CubeListBuilder.create().texOffs(76, 87)
+                        .addBox(-4.0F, -2.2699F, -6.0191F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.4F)).texOffs(53, 18)
+                        .addBox(-4.0F, -1.4199F, -6.0191F, 2.0F, 0.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(9.0F, -11.925F, -19.1F));
+
+        PartDefinition bone28 = tinylight5.addOrReplaceChild("bone28", CubeListBuilder.create().texOffs(53, 74).addBox(2.0F, -2.3449F,
+                -8.7191F, 2.0F, 2.0F, 2.0F, new CubeDeformation(-0.38F)), PartPose.offset(-6.0F, 0.075F, 2.7F));
+
+        PartDefinition cassetteplayer = controls5.addOrReplaceChild("cassetteplayer",
+                CubeListBuilder.create().texOffs(96, 65).addBox(-2.0F, 0.0F, -1.0F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -15.0306F, -20.0173F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition refueler = controls5.addOrReplaceChild("refueler",
+                CubeListBuilder.create().texOffs(134, 28).addBox(-2.0F, -5.0F, -1.0F, 3.0F, 9.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(106, 91).addBox(-1.75F, -6.0F, -0.5F, 0.0F, 1.0F, 2.0F, new CubeDeformation(0.001F)).texOffs(60, 48)
+                        .addBox(-2.25F, -6.0F, -0.5F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(60, 18)
+                        .addBox(-2.25F, -6.0F, 1.5F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(27, 45)
+                        .addBox(0.25F, -6.0F, 1.5F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(81, 92)
+                        .addBox(0.75F, -6.0F, -0.5F, 0.0F, 1.0F, 2.0F, new CubeDeformation(0.001F)).texOffs(49, 11)
+                        .addBox(0.25F, -6.0F, -0.5F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-11.0F, -13.4F, -20.083F, 1.309F, 0.5236F, 0.0F));
+
+        PartDefinition gasknob = refueler.addOrReplaceChild("gasknob",
+                CubeListBuilder.create().texOffs(118, 69).addBox(-0.5F, -0.8F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.2F))
+                        .texOffs(106, 75).addBox(-1.0F, -1.4F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(-0.2F)),
+                PartPose.offset(-0.5F, -5.0F, 0.5F));
+
+        PartDefinition multiswitchpanel2 = controls5.addOrReplaceChild("multiswitchpanel2",
+                CubeListBuilder.create().texOffs(132, 14).addBox(-3.0F, -3.0F, -1.0F, 6.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -8.25F, -26.65F));
+
+        PartDefinition longswitch5 = multiswitchpanel2.addOrReplaceChild("longswitch5",
+                CubeListBuilder.create().texOffs(44, 156).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(145, 146).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-2.25F, -2.5F, -0.5F));
+
+        PartDefinition longswitch6 = multiswitchpanel2.addOrReplaceChild("longswitch6",
+                CubeListBuilder.create().texOffs(65, 151).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(36, 145).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-0.75F, -2.5F, -0.5F));
+
+        PartDefinition longswitch7 = multiswitchpanel2.addOrReplaceChild("longswitch7",
+                CubeListBuilder.create().texOffs(149, 9).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(143, 44).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.75F, -2.5F, -0.5F));
+
+        PartDefinition longswitch8 = multiswitchpanel2.addOrReplaceChild("longswitch8",
+                CubeListBuilder.create().texOffs(141, 82).addBox(0.0F, -2.5F, -0.5F, 0.0F, 3.0F, 1.0F, new CubeDeformation(0.001F))
+                        .texOffs(105, 133).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(2.25F, -2.5F, -0.5F));
+
+        PartDefinition computernob2 = controls5.addOrReplaceChild("computernob2",
+                CubeListBuilder.create().texOffs(87, 21).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(86, 34).addBox(-0.5F, -0.5F, -0.9F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)).texOffs(9, 31)
+                        .addBox(-0.75F, -0.75F, -0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -15.7F, -16.9F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition section6 = alnico.addOrReplaceChild("section6", CubeListBuilder.create(),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
+
+        PartDefinition desktop6 = section6.addOrReplaceChild("desktop6", CubeListBuilder.create().texOffs(45, 21).addBox(-9.5F,
+                -13.25F, -27.65F, 19.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r60 = desktop6.addOrReplaceChild("cube_r60",
+                CubeListBuilder.create().texOffs(133, 117).addBox(-8.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(134, 41).addBox(7.0F, -4.0F, -8.0F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(134, 41)
+                        .addBox(6.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(138, 84)
+                        .addBox(-7.0F, -4.0F, -8.0F, 1.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(22, 45)
+                        .addBox(-6.0F, -4.0F, -8.0F, 12.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(55, 48)
+                        .addBox(-5.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(55, 59)
+                        .addBox(4.0F, -4.0F, 0.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(57, 29)
+                        .addBox(-9.0F, -4.0F, -10.0F, 18.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(119, 83)
+                        .addBox(-4.0F, -4.0F, 0.0F, 8.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -14.0F, 0.2618F, 0.0F, 0.0F));
+
+        PartDefinition pillars6 = section6.addOrReplaceChild("pillars6", CubeListBuilder.create().texOffs(111, 91).addBox(-6.0F,
+                -19.0F, -12.0F, 12.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r61 = pillars6.addOrReplaceChild("cube_r61",
+                CubeListBuilder.create().texOffs(66, 87).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(10.9554F, -14.2676F, -27.1301F, -1.8326F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r62 = pillars6.addOrReplaceChild("cube_r62",
+                CubeListBuilder.create().texOffs(96, 91).addBox(-2.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(12.0F, -13.75F, -30.0F, -1.309F, -0.3491F, 0.0F));
+
+        PartDefinition cube_r63 = pillars6
+                .addOrReplaceChild("cube_r63",
+                        CubeListBuilder.create().texOffs(81, 91).addBox(-1.0F, -10.0F, -2.5F, 2.0F, 20.0F, 5.0F,
+                                new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(-6.6827F, -8.1365F, -18.3146F, -1.8326F, 0.3491F, 0.0F));
+
+        PartDefinition cube_r64 = pillars6.addOrReplaceChild("cube_r64",
+                CubeListBuilder.create().texOffs(28, 99).addBox(0.0F, -21.0F, 0.9F, 2.0F, 20.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -13.75F, -30.0F, -1.309F, 0.3491F, 0.0F));
+
+        PartDefinition top6 = section6.addOrReplaceChild("top6", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r65 = top6.addOrReplaceChild("cube_r65",
+                CubeListBuilder.create().texOffs(90, 21).addBox(-4.0F, -12.4F, -27.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(148, 59).addBox(-1.5F, -19.0F, -12.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.05F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r66 = top6.addOrReplaceChild("cube_r66",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -28.9F, 8.0F, 2.0F, 18.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r67 = top6.addOrReplaceChild("cube_r67", CubeListBuilder.create().texOffs(35, 0).addBox(-3.0F, -18.0F,
+                -22.0F, 6.0F, 0.0F, 17.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2618F, 0.5236F, 0.0F));
+
+        PartDefinition bottom6 = section6.addOrReplaceChild("bottom6",
+                CubeListBuilder.create().texOffs(0, 91).addBox(-7.0F, -7.0F, -15.0F, 14.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 0.0F, 2.0F));
+
+        PartDefinition cube_r68 = bottom6.addOrReplaceChild("cube_r68", CubeListBuilder.create().texOffs(116, 16).addBox(-2.5F, -9.0F,
+                -19.0F, 5.0F, 9.0F, 5.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, -2.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r69 = bottom6.addOrReplaceChild("cube_r69",
+                CubeListBuilder.create().texOffs(147, 77).addBox(8.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(147, 147).addBox(-11.0F, -3.0F, -1.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(0, 21)
+                        .addBox(-8.0F, -3.0F, -1.0F, 16.0F, 3.0F, 12.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -9.0F, -24.7F, -0.2618F, 0.0F, 0.0F));
+
+        PartDefinition controls6 = section6.addOrReplaceChild("controls6", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition randomizer3 = controls6.addOrReplaceChild("randomizer3",
+                CubeListBuilder.create().texOffs(71, 124).addBox(-1.0F, -1.5F, -0.5F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-12.0F, -12.9F, -20.833F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition sideswitches3 = controls6.addOrReplaceChild("sideswitches3",
+                CubeListBuilder.create().texOffs(57, 124).addBox(-2.0F, -1.0F, -3.0F, 3.0F, 2.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(-7.5F, -14.7806F, -20.0173F, 0.2472F, 0.3594F, 0.0043F));
+
+        PartDefinition sideswitch5 = sideswitches3.addOrReplaceChild("sideswitch5",
+                CubeListBuilder.create().texOffs(137, 0).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(128, 14).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, 2.5F));
+
+        PartDefinition sideswitch6 = sideswitches3.addOrReplaceChild("sideswitch6",
+                CubeListBuilder.create().texOffs(128, 0).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(118, 83).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offset(-0.5F, 0.0F, -1.5F));
+
+        PartDefinition geiger5 = controls6.addOrReplaceChild("geiger5",
+                CubeListBuilder.create().texOffs(151, 0).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(100, 141).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.2F)),
+                PartPose.offset(-0.5F, -10.75F, -26.6F));
+
+        PartDefinition needle5 = geiger5.addOrReplaceChild("needle5", CubeListBuilder.create().texOffs(45, 29).addBox(-0.25F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.5F, 0.25F, -1.0F));
+
+        PartDefinition geiger6 = controls6.addOrReplaceChild("geiger6",
+                CubeListBuilder.create().texOffs(147, 29).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(115, 143).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.2F)),
+                PartPose.offset(-4.5F, -10.75F, -26.6F));
+
+        PartDefinition needle6 = geiger6.addOrReplaceChild("needle6", CubeListBuilder.create().texOffs(45, 21).addBox(-0.25F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.5F, 0.25F, -1.0F));
+
+        PartDefinition geiger7 = controls6.addOrReplaceChild("geiger7",
+                CubeListBuilder.create().texOffs(130, 143).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(122, 31).addBox(-1.0F, -2.0F, -1.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.2F)),
+                PartPose.offset(3.5F, -10.75F, -26.6F));
+
+        PartDefinition needle7 = geiger7.addOrReplaceChild("needle7", CubeListBuilder.create().texOffs(15, 15).addBox(-0.25F, -2.0F,
+                -0.02F, 1.0F, 2.0F, 0.0F, new CubeDeformation(0.001F)), PartPose.offset(0.5F, 0.25F, -1.0F));
+
+        PartDefinition cashregister = controls6.addOrReplaceChild("cashregister",
+                CubeListBuilder.create().texOffs(91, 27).addBox(-4.0F, -2.0F, -6.0F, 8.0F, 2.0F, 7.0F, new CubeDeformation(0.0F))
+                        .texOffs(98, 119).addBox(-4.0F, -9.0F, -2.0F, 8.0F, 7.0F, 3.0F, new CubeDeformation(0.0F)).texOffs(128, 110)
+                        .addBox(-4.0F, -5.0F, -5.0F, 8.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -13.0F, -15.0F));
+
+        PartDefinition registerlever = cashregister.addOrReplaceChild("registerlever",
+                CubeListBuilder.create().texOffs(44, 11).addBox(0.0F, -1.0F, -1.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+                        .texOffs(0, 0).addBox(0.5F, -3.0F, -0.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(108, 0)
+                        .addBox(0.0F, -5.0F, -0.5F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(4.0F, -3.5F, -3.5F));
+
+        PartDefinition registerswitches = cashregister.addOrReplaceChild("registerswitches",
+                CubeListBuilder.create().texOffs(75, 113).addBox(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.001F))
+                        .texOffs(124, 100).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-2.75F, -4.5F, -4.0F));
+
+        PartDefinition registerswitches2 = cashregister.addOrReplaceChild("registerswitches2",
+                CubeListBuilder.create().texOffs(46, 67).addBox(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.001F))
+                        .texOffs(111, 83).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-0.25F, -4.5F, -4.0F));
+
+        PartDefinition registerswitches3 = cashregister.addOrReplaceChild("registerswitches3",
+                CubeListBuilder.create().texOffs(13, 4).addBox(0.0F, -2.0F, -1.0F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.001F))
+                        .texOffs(110, 37).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(2.25F, -4.5F, -4.0F));
+
+        PartDefinition column = alnico.addOrReplaceChild("column",
+                CubeListBuilder.create().texOffs(89, 52).addBox(-4.0F, -72.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F))
+                        .texOffs(130, 133).addBox(-4.0F, -80.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 12.0F, 0.0F));
+
+        PartDefinition cube_r70 = column.addOrReplaceChild("cube_r70", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F,
+                -10.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.01F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+
+        PartDefinition cube_r71 = column.addOrReplaceChild("cube_r71",
+                CubeListBuilder.create().texOffs(130, 133)
+                        .addBox(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(89, 52)
+                        .addBox(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -49.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
+
+        PartDefinition cube_r72 = column.addOrReplaceChild("cube_r72",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
+
+        PartDefinition cube_r73 = column.addOrReplaceChild("cube_r73", CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F,
+                -9.0F, 0.0F, 46.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+
+        PartDefinition cube_r74 = column.addOrReplaceChild("cube_r74",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+
+        PartDefinition cube_r75 = column
+                .addOrReplaceChild(
+                        "cube_r75", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F, -10.0F, 2.0F, 12.0F,
+                                2.0F, new CubeDeformation(0.01F)),
+                        PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 3.1416F, 0.5236F, -3.1416F));
+
+        PartDefinition cube_r76 = column.addOrReplaceChild("cube_r76",
+                CubeListBuilder.create().texOffs(130, 133)
+                        .addBox(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(89, 52)
+                        .addBox(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -49.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
+
+        PartDefinition cube_r77 = column.addOrReplaceChild("cube_r77",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
+
+        PartDefinition cube_r78 = column
+                .addOrReplaceChild("cube_r78",
+                        CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F, -9.0F, 0.0F, 46.0F, 2.0F,
+                                new CubeDeformation(0.001F)),
+                        PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 3.1416F, 0.5236F, -3.1416F));
+
+        PartDefinition cube_r79 = column.addOrReplaceChild("cube_r79",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, -3.1416F, 0.5236F, 3.1416F));
+
+        PartDefinition cube_r80 = column
+                .addOrReplaceChild(
+                        "cube_r80", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F, -10.0F, 2.0F, 12.0F,
+                                2.0F, new CubeDeformation(0.01F)),
+                        PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 3.1416F, -0.5236F, -3.1416F));
+
+        PartDefinition cube_r81 = column.addOrReplaceChild("cube_r81",
+                CubeListBuilder.create().texOffs(130, 133)
+                        .addBox(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(89, 52)
+                        .addBox(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -49.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
+
+        PartDefinition cube_r82 = column.addOrReplaceChild("cube_r82",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
+
+        PartDefinition cube_r83 = column
+                .addOrReplaceChild("cube_r83",
+                        CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F, -9.0F, 0.0F, 46.0F, 2.0F,
+                                new CubeDeformation(0.001F)),
+                        PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 3.1416F, -0.5236F, -3.1416F));
+
+        PartDefinition cube_r84 = column.addOrReplaceChild("cube_r84",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, -3.1416F, -0.5236F, 3.1416F));
+
+        PartDefinition cube_r85 = column.addOrReplaceChild("cube_r85", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F,
+                -10.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.01F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition cube_r86 = column.addOrReplaceChild("cube_r86",
+                CubeListBuilder.create().texOffs(130, 133)
+                        .addBox(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(89, 52)
+                        .addBox(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -49.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
+
+        PartDefinition cube_r87 = column.addOrReplaceChild("cube_r87",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
+
+        PartDefinition cube_r88 = column.addOrReplaceChild("cube_r88", CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F,
+                -9.0F, 0.0F, 46.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition cube_r89 = column.addOrReplaceChild("cube_r89",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition cube_r90 = column.addOrReplaceChild("cube_r90", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F,
+                -10.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.01F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
+
+        PartDefinition cube_r91 = column.addOrReplaceChild("cube_r91",
+                CubeListBuilder.create().texOffs(130, 133)
+                        .addBox(-4.0F, -31.0F, -7.93F, 8.0F, 8.0F, 1.0F, new CubeDeformation(0.0F)).texOffs(89, 52)
+                        .addBox(-4.0F, -23.0F, -6.93F, 8.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -49.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
+
+        PartDefinition cube_r92 = column.addOrReplaceChild("cube_r92",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
+
+        PartDefinition cube_r93 = column.addOrReplaceChild("cube_r93", CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F,
+                -9.0F, 0.0F, 46.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
+
+        PartDefinition cube_r94 = column.addOrReplaceChild("cube_r94",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, -0.5236F, 0.0F));
+
+        PartDefinition cube_r95 = column.addOrReplaceChild("cube_r95", CubeListBuilder.create().texOffs(17, 37).addBox(0.0F, -32.0F,
+                -9.0F, 0.0F, 46.0F, 2.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, -36.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r96 = column.addOrReplaceChild("cube_r96",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -37.0F, -11.0F, 2.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r97 = column.addOrReplaceChild("cube_r97", CubeListBuilder.create().texOffs(139, 59).addBox(-1.0F, -80.0F,
+                -10.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.01F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition cube_r98 = column.addOrReplaceChild("cube_r98",
+                CubeListBuilder.create().texOffs(22, 67).addBox(-4.0F, 0.0F, -6.93F, 8.0F, 11.0F, 7.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -26.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+
+        PartDefinition glass = column.addOrReplaceChild("glass", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F, -6.93F,
+                8.0F, 41.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition cube_r99 = glass.addOrReplaceChild("cube_r99", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F,
+                -6.93F, 8.0F, 41.0F, 0.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
+
+        PartDefinition cube_r100 = glass
+                .addOrReplaceChild(
+                        "cube_r100", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
+                                0.0F, new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, 1.0472F, 3.1416F));
+
+        PartDefinition cube_r101 = glass
+                .addOrReplaceChild(
+                        "cube_r101", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
+                                0.0F, new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, 0.0F, 3.1416F));
+
+        PartDefinition cube_r102 = glass
+                .addOrReplaceChild(
+                        "cube_r102", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F, -6.93F, 8.0F, 41.0F,
+                                0.0F, new CubeDeformation(0.0F)),
+                        PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -3.1416F, -1.0472F, 3.1416F));
+
+        PartDefinition cube_r103 = glass.addOrReplaceChild("cube_r103", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -67.0F,
+                -6.93F, 8.0F, 41.0F, 0.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
+
+        PartDefinition timerotor = column.addOrReplaceChild("timerotor", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition bottomgizmo = timerotor.addOrReplaceChild("bottomgizmo",
+                CubeListBuilder.create().texOffs(111, 100)
+                        .addBox(-2.0F, -14.0F, -2.0F, 4.0F, 14.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(33, 87)
+                        .addBox(-4.0F, -4.0F, -4.0F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(106, 0)
+                        .addBox(-3.5F, -8.0F, -3.5F, 7.0F, 3.0F, 7.0F, new CubeDeformation(0.0F)).texOffs(115, 37)
+                        .addBox(-3.0F, -12.0F, -3.0F, 6.0F, 3.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(0, 134)
+                        .addBox(-6.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(19, 101)
+                        .addBox(2.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(82, 136)
+                        .addBox(-1.0F, -19.0F, -1.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -26.0F, 0.0F));
+
+        PartDefinition cube_r104 = bottomgizmo.addOrReplaceChild("cube_r104",
+                CubeListBuilder.create().texOffs(46, 131)
+                        .addBox(2.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(35, 0)
+                        .addBox(-6.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 26.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition topgizmo = timerotor.addOrReplaceChild("topgizmo",
+                CubeListBuilder.create().texOffs(81, 117)
+                        .addBox(-2.0F, -14.0F, -2.0F, 4.0F, 14.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(86, 79)
+                        .addBox(-4.0F, -4.0F, -4.0F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.0F)).texOffs(93, 41)
+                        .addBox(-3.5F, -8.0F, -3.5F, 7.0F, 3.0F, 7.0F, new CubeDeformation(0.0F)).texOffs(114, 59)
+                        .addBox(-3.0F, -12.0F, -3.0F, 6.0F, 3.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(55, 134)
+                        .addBox(-6.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(64, 134)
+                        .addBox(2.0F, -16.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)).texOffs(73, 134)
+                        .addBox(-1.0F, -19.0F, -1.0F, 2.0F, 12.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -67.0F, 0.0F, 3.1416F, 0.0F, 0.0F));
+
+        PartDefinition cube_r105 = topgizmo.addOrReplaceChild("cube_r105",
+                CubeListBuilder.create().texOffs(9, 134).addBox(2.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F))
+                        .texOffs(18, 135).addBox(-6.0F, -42.0F, 0.0F, 4.0F, 16.0F, 0.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(0.0F, 26.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition holographicmonitor = alnico.addOrReplaceChild("holographicmonitor", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 12.0F, 0.0F));
+
+        PartDefinition monitor = holographicmonitor.addOrReplaceChild("monitor",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, -34.0F, 0.0F));
+
+        PartDefinition monitorhandle = monitor.addOrReplaceChild("monitorhandle",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition monitor2 = holographicmonitor.addOrReplaceChild("monitor2",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -34.0F, 0.0F, 0.0F, -1.0472F, 0.0F));
+
+        PartDefinition monitorhandle2 = monitor2.addOrReplaceChild("monitorhandle2",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition monitor3 = holographicmonitor.addOrReplaceChild("monitor3",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -34.0F, 0.0F, 0.0F, -2.0944F, 0.0F));
+
+        PartDefinition monitorhandle3 = monitor3.addOrReplaceChild("monitorhandle3",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition monitor4 = holographicmonitor.addOrReplaceChild("monitor4",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(111, 133)
+                        .addBox(-4.5F, 0.5F, -14.25F, 9.0F, 9.0F, 0.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -34.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+
+        PartDefinition monitorhandle4 = monitor4.addOrReplaceChild("monitorhandle4",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition monitor5 = holographicmonitor.addOrReplaceChild("monitor5",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -34.0F, 0.0F, 0.0F, 2.0944F, 0.0F));
+
+        PartDefinition monitorhandle5 = monitor5.addOrReplaceChild("monitorhandle5",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+
+        PartDefinition monitor6 = holographicmonitor.addOrReplaceChild("monitor6",
+                CubeListBuilder.create().texOffs(57, 34)
+                        .addBox(-6.5F, 0.0F, -13.25F, 13.0F, 0.0F, 1.0F, new CubeDeformation(0.001F)).texOffs(79, 75)
+                        .addBox(-5.5F, -0.5F, -15.25F, 11.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offsetAndRotation(0.0F, -34.0F, 0.0F, 0.0F, 1.0472F, 0.0F));
+
+        PartDefinition monitorhandle6 = monitor6.addOrReplaceChild("monitorhandle6",
+                CubeListBuilder.create().texOffs(116, 152)
+                        .addBox(-0.975F, -1.0F, -1.0335F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(43, 104)
+                        .addBox(-0.975F, -0.5F, -6.0335F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)).texOffs(45, 29)
+                        .addBox(-0.975F, 0.0F, -4.0335F, 2.0F, 0.0F, 3.0F, new CubeDeformation(0.001F)),
+                PartPose.offsetAndRotation(-4.5F, 0.0F, -7.75F, 0.0F, 0.5236F, 0.0F));
+        return LayerDefinition.create(modelData, 256, 256);
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
             float green, float blue, float alpha) {
         alnico.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 
     @Override
-    public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, MatrixStack matrices,
+    public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTickDelta();
-        matrices.push();
+        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getFrameTime();
+        matrices.pushPose();
         matrices.translate(0.5f, -1.5f, -0.5f);
 
         // Throttle Control
         ModelPart throttle = alnico.getChild("section1").getChild("controls").getChild("fliplever1").getChild("bone5");
         float throttleTarget = tardis.travel().maxSpeed().get() > 0 ? ((float) tardis.travel().speed() / (float) tardis.travel().maxSpeed().get()) * 1.5f: 0f;
-        throttle.pitch = getAngle(console, "throttle", throttleTarget, delta);
+        throttle.xRot = getAngle(console, "throttle", throttleTarget, delta);
 
         // Handbrake Control
         ModelPart handbrake = alnico.getChild("section1").getChild("controls").getChild("biglever").getChild("bone");
         float handbrakeTarget = !tardis.travel().handbrake() ? -0.9f : 0.9f;
-        handbrake.pitch = getAngle(console, "handbrake", handbrakeTarget, delta);
+        handbrake.xRot = getAngle(console, "handbrake", handbrakeTarget, delta);
 
         // Power Control
         ModelPart power = alnico.getChild("section4").getChild("controls4").getChild("biglever2").getChild("bone12");
         float powerTarget = !tardis.fuel().hasPower() ? -0.9f : 0.9f;
-        power.pitch = getAngle(console, "power", powerTarget, delta);
+        power.xRot = getAngle(console, "power", powerTarget, delta);
 
         // Auto Pilot Control
         ModelPart autoPilot = alnico.getChild("section1").getChild("controls").getChild("multiswitchpanel")
                 .getChild("longswitch1");
         float autopilotTarget = tardis.travel().autopilot() ? 0.5f : 0;
-        autoPilot.pitch = getAngle(console, "autopilot", autopilotTarget, delta);
+        autoPilot.xRot = getAngle(console, "autopilot", autopilotTarget, delta);
 
         // Security Control
         ModelPart security = alnico.getChild("section1").getChild("controls").getChild("multiswitchpanel")
                 .getChild("longswitch4");
         float securityTarget = tardis.stats().security().get() ? 0.5f : 0;
-        security.pitch = getAngle(console, "security", securityTarget, delta);
+        security.xRot = getAngle(console, "security", securityTarget, delta);
 
         // Siege Mode Control
         ModelPart siegeMode = alnico.getChild("section3").getChild("controls3").getChild("siegemode").getChild("lever");
         float siegeTarget = tardis.siege().isActive() ? 0.9f : 0;
-        siegeMode.pitch = getAngle(console, "siege_mode", siegeTarget, delta);
+        siegeMode.xRot = getAngle(console, "siege_mode", siegeTarget, delta);
 
         // Refueler
         ModelPart refueler = alnico.getChild("section5").getChild("controls5").getChild("refueler").getChild("gasknob");
         float refuelerTarget = !tardis.isRefueling() ? -0.7854f : 0;
-        refueler.yaw = getAngle(console, "refueler", refuelerTarget, delta);
+        refueler.yRot = getAngle(console, "refueler", refuelerTarget, delta);
 
         // Fuel Gauge
         ModelPart fuelGauge = alnico.getChild("section3").getChild("controls3").getChild("geiger").getChild("needle");
-        fuelGauge.roll = (float) (((tardis.getFuel() / FuelHandler.TARDIS_MAX_FUEL) * 2) - 1);
+        fuelGauge.zRot = (float) (((tardis.getFuel() / FuelHandler.TARDIS_MAX_FUEL) * 2) - 1);
 
         // Increment Control
         ModelPart increment = alnico.getChild("section5").getChild("controls5").getChild("multiswitchpanel2").getChild("longswitch5");
@@ -1465,35 +1473,35 @@ public class AlnicoConsoleModel extends SimpleConsoleModel {
         } else {
             targetOffset = 1.5f;
         }
-        increment.pitch = getAngle(console, "increment", targetOffset, delta);
+        increment.xRot = getAngle(console, "increment", targetOffset, delta);
 
         // Shield Control
         ModelPart shield = alnico.getChild("section5").getChild("controls5").getChild("multiswitchpanel2")
                 .getChild("longswitch8");
         float shieldTarget = tardis.shields().shielded().get() ? 1f : 0;
-        shield.pitch = getAngle(console, "shields", shieldTarget, delta);
+        shield.xRot = getAngle(console, "shields", shieldTarget, delta);
 
         // Land Type
         ModelPart landtype = alnico.getChild("section1").getChild("controls").getChild("tinyswitch2").getChild("bone2");
         float landTypeTarget = tardis.travel().horizontalSearch().get() ? 1.5708f : 0;
-        landtype.yaw = getAngle(console, "landtype", landTypeTarget, delta);
+        landtype.yRot = getAngle(console, "landtype", landTypeTarget, delta);
 
         // Anti Gravs
         ModelPart antigravs = alnico.getChild("section1").getChild("controls").getChild("tinyswitch").getChild("bone3");
         float antigravsTarget = tardis.travel().antigravs().get() ? -1.5708f : 0;
-        antigravs.yaw = getAngle(console, "antigravs", antigravsTarget, delta);
+        antigravs.yRot = getAngle(console, "antigravs", antigravsTarget, delta);
 
         // Door Control
         ModelPart doorControl = alnico.getChild("section5").getChild("controls5").getChild("tinyswitch6")
                 .getChild("bone24");
         float doorControlTarget = tardis.door().isOpen() ? tardis.door().isRightOpen() ? 1.5708f * 2f : 1.5708f : 0;
-        doorControl.yaw = getAngle(console, "door_control", doorControlTarget, delta);
+        doorControl.yRot = getAngle(console, "door_control", doorControlTarget, delta);
 
         // Door Lock
         ModelPart doorLock = alnico.getChild("section5").getChild("controls5").getChild("tinyswitch7")
                 .getChild("bone25");
         float doorLockTarget = tardis.door().locked() ? 1.5708f : 0;
-        doorLock.yaw = getAngle(console, "door_lock", doorLockTarget, delta);
+        doorLock.yRot = getAngle(console, "door_lock", doorLockTarget, delta);
 
         // Waypoints
         ModelPart toast1 = alnico.getChild("section2").getChild("controls2").getChild("waypointcatridge")
@@ -1503,79 +1511,79 @@ public class AlnicoConsoleModel extends SimpleConsoleModel {
         ModelPart toast2 = alnico.getChild("section2").getChild("controls2").getChild("waypointcatridge")
                 .getChild("toast2");
         toast1.visible = tardis.waypoint().hasCartridge();
-        toastlever.pivotY = toastlever.pivotY + (!tardis.waypoint().hasCartridge() ? 2f : 0);
+        toastlever.y = toastlever.y + (!tardis.waypoint().hasCartridge() ? 2f : 0);
         toast2.visible = tardis.waypoint().hasCartridge();
 
         // Direction Control
         ModelPart direction = alnico.getChild("section5").getChild("controls5").getChild("tinyswitch9")
                 .getChild("bone26");
         float directionTargetDegrees = (0.3927f * tardis.travel().destination().getRotation()) * (180f / (float) Math.PI);
-        direction.yaw = getLerpedDegrees(console, "direction", directionTargetDegrees, delta);
+        direction.yRot = getLerpedDegrees(console, "direction", directionTargetDegrees, delta);
 
         super.renderWithAnimations(console, tardis, root, matrices, vertices, light, overlay, red, green, blue, pAlpha);
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public void renderMonitorText(Tardis tardis, ConsoleBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void renderMonitorText(Tardis tardis, ConsoleBlockEntity entity, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
         super.renderMonitorText(tardis, entity, matrices, vertexConsumers, light, overlay);
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        TextRenderer renderer = client.textRenderer;
+        Minecraft client = Minecraft.getInstance();
+        Font renderer = client.font;
         TravelHandler travel = tardis.travel();
         CachedDirectedGlobalPos abpd = travel.destination();
         BlockPos abpdPos = abpd.getPos();
-        matrices.push();
+        matrices.pushPose();
         // TODO dont forget to add variant.getConsoleTextPosition()!
         matrices.translate(1.86, 0.47, 0.30);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
+        matrices.mulPose(Axis.XP.rotationDegrees(180f));
         matrices.scale(0.004f, 0.004f, 0.004f);
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(60f));
+        matrices.mulPose(Axis.YN.rotationDegrees(60f));
         matrices.translate(-252f, -228, 5f);
         String destinationPosText = abpdPos.getX() + ", " + abpdPos.getY() + ", " + abpdPos.getZ();
-        Text destinationDimensionText = WorldUtil.worldText(abpd.getDimension(), false);
+        Component destinationDimensionText = WorldUtil.worldText(abpd.getDimension(), false);
         String destinationDirectionText = DirectionControl.rotationToDirection(abpd.getRotation()).toUpperCase();
         String fuelText = Math.round((tardis.getFuel() / FuelHandler.TARDIS_MAX_FUEL) * 100) + "%";
         int y = 41;
-        renderer.drawWithOutline(Text.of("\uD83E\uDC97").asOrderedText(), 0, y, 0xFF0000, 0x000000,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        renderer.drawWithOutline(Text.of(destinationPosText).asOrderedText(), 8, y, 0xFFFFFF, 0x000000,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        renderer.drawWithOutline(destinationDimensionText.asOrderedText(), 8, y + 8, 0xFFFFFF, 0x000000,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        renderer.drawWithOutline(Text.of(destinationDirectionText).asOrderedText(), 8, y + 16, 0xFFFFFF, 0x000000,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        renderer.drawWithOutline(Text.translatable("ait.monitor.fuel_with_text", fuelText).asOrderedText(), 8, y + 24, 0xFFFFFF, 0x000000,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        matrices.pop();
+        renderer.drawInBatch8xOutline(Component.nullToEmpty("\uD83E\uDC97").getVisualOrderText(), 0, y, 0xFF0000, 0x000000,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch8xOutline(Component.nullToEmpty(destinationPosText).getVisualOrderText(), 8, y, 0xFFFFFF, 0x000000,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch8xOutline(destinationDimensionText.getVisualOrderText(), 8, y + 8, 0xFFFFFF, 0x000000,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch8xOutline(Component.nullToEmpty(destinationDirectionText).getVisualOrderText(), 8, y + 16, 0xFFFFFF, 0x000000,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch8xOutline(Component.translatable("ait.monitor.fuel_with_text", fuelText).getVisualOrderText(), 8, y + 24, 0xFFFFFF, 0x000000,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        matrices.popPose();
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0.41, 1.40, 0.38);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(150f));
+        matrices.mulPose(Axis.XP.rotationDegrees(150f));
         matrices.scale(0.015f, 0.015f, 0.015f);
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180f));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-30.5f));
+        matrices.mulPose(Axis.YN.rotationDegrees(180f));
+        matrices.mulPose(Axis.XP.rotationDegrees(-30.5f));
         String progressText = tardis.travel().getState() == TravelHandlerBase.State.LANDED
                 ? "0"
                 : tardis.travel().getDurationAsPercentage() + " ";
         matrices.translate(0, -38, -52);
-        renderer.drawWithOutline(Text.of(progressText).asOrderedText(), 0 - renderer.getWidth(progressText) / 2, 0, 0xffffff, 0x03cffc,
-                matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
-        matrices.pop();
+        renderer.drawInBatch8xOutline(Component.nullToEmpty(progressText).getVisualOrderText(), 0 - renderer.width(progressText) / 2, 0, 0xffffff, 0x03cffc,
+                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        matrices.popPose();
     }
 
     @Override
-    public ModelPart getPart() {
+    public ModelPart root() {
         return alnico;
     }
 
     @Override
-    public Animation getAnimationForState(TravelHandlerBase.State state) {
+    public AnimationDefinition getAnimationForState(TravelHandlerBase.State state) {
         return switch (state) {
             case FLIGHT, MAT, DEMAT -> AlnicoAnimations.CONSOLE_ALNICO_FLIGHT;
             case LANDED -> AlnicoAnimations.CONSOLE_ALNICO_IDLE;
-            default -> Animation.Builder.create(0).build();
+            default -> AnimationDefinition.Builder.withLength(0).build();
         };
     }
 }

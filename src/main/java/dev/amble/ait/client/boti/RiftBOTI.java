@@ -3,36 +3,34 @@ package dev.amble.ait.client.boti;
 import static dev.amble.ait.client.renderers.entities.RiftEntityRenderer.CIRCLE_TEXTURE;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import org.lwjgl.opengl.GL11;
-
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.renderers.VortexRender;
+import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class RiftBOTI extends BOTI {
-    public static void renderRiftBoti(MatrixStack stack, SinglePartEntityModel frame, int pack) {
+    public static void renderRiftBoti(PoseStack stack, HierarchicalModel frame, int pack) {
         if (!AITModClient.CONFIG.enableTardisBOTI)
             return;
 
-        if (client.world == null
+        if (client.level == null
                 || client.player == null) return;
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.pushPose();
+        stack.mulPose(Axis.YP.rotationDegrees(180));
 
-        client.getFramebuffer().endWrite();
+        client.getMainRenderTarget().unbindWrite();
 
         BOTI_HANDLER.setupFramebuffer();
 
-        BOTI.copyFramebuffer(client.getFramebuffer(), BOTI_HANDLER.afbo);
+        BOTI.copyFramebuffer(client.getMainRenderTarget(), BOTI_HANDLER.afbo);
 
-        VertexConsumerProvider.Immediate portalProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
+        MultiBufferSource.BufferSource portalProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
 
         // Enable stencil testing and clear the stencil buffer
         GL11.glEnable(GL11.GL_STENCIL_TEST);
@@ -42,22 +40,22 @@ public class RiftBOTI extends BOTI {
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 
         RenderSystem.depthMask(true);
-        stack.push();
+        stack.pushPose();
         stack.translate(0, -0.7f, 0.05);
         stack.scale(1.1f, 1.1f, 1.1f);
-        frame.render(stack, portalProvider.getBuffer(RenderLayer.getEntityTranslucentCull(CIRCLE_TEXTURE)), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
-        portalProvider.draw();
-        stack.pop();
-        copyDepth(BOTI_HANDLER.afbo, client.getFramebuffer());
+        frame.renderToBuffer(stack, portalProvider.getBuffer(RenderType.entityTranslucentCull(CIRCLE_TEXTURE)), 0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        portalProvider.endBatch();
+        stack.popPose();
+        copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
-        BOTI_HANDLER.afbo.beginWrite(false);
+        BOTI_HANDLER.afbo.bindWrite(false);
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
-        stack.push();
-        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(5 * (client.getTickDelta() + client.player.age)));
+        stack.pushPose();
+        stack.mulPose(Axis.ZP.rotationDegrees(5 * (client.getFrameTime() + client.player.tickCount)));
         stack.translate(0, -1, 400);
 
         // --- DISABLE FOG ---
@@ -71,23 +69,23 @@ public class RiftBOTI extends BOTI {
         util.render(stack);
 
         // Ensure the provider draws while the fog is disabled
-        portalProvider.draw();
+        portalProvider.endBatch();
 
         // --- RESTORE FOG ---
         // Bring the fog back to normal for the rest of the game world
         RenderSystem.setShaderFogStart(oldFogStart);
         RenderSystem.setShaderFogEnd(oldFogEnd);
 
-        stack.pop();
+        stack.popPose();
 
-        client.getFramebuffer().beginWrite(true);
+        client.getMainRenderTarget().bindWrite(true);
 
-        BOTI.copyColor(BOTI_HANDLER.afbo, client.getFramebuffer());
+        BOTI.copyColor(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
 
         RenderSystem.depthMask(true);
 
-        stack.pop();
+        stack.popPose();
     }
 }

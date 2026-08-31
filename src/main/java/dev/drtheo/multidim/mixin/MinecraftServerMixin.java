@@ -4,12 +4,12 @@ import com.google.common.collect.Maps;
 import dev.drtheo.multidim.MultiDimMod;
 import dev.drtheo.multidim.api.MultiDimServer;
 import dev.drtheo.multidim.event.ServerCrashEvent;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.CrashReport;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.world.World;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -25,59 +25,59 @@ import java.util.Map;
 public abstract class MinecraftServerMixin implements MultiDimServer {
 
     @Shadow @Final
-    protected LevelStorage.Session session;
+    protected LevelStorageSource.LevelStorageAccess storageSource;
 
     @Shadow
     @Final
     @Mutable
-    private Map<RegistryKey<World>, ServerWorld> worlds;
+    private Map<ResourceKey<Level>, ServerLevel> levels;
 
     @Override
-    public void multidim$addWorld(ServerWorld world) {
+    public void multidim$addWorld(ServerLevel world) {
         // use read-copy-update to avoid concurrency issues
         // from immersive portals
-        LinkedHashMap<RegistryKey<World>, ServerWorld> newMap =
+        LinkedHashMap<ResourceKey<Level>, ServerLevel> newMap =
                 Maps.newLinkedHashMap();
 
-        Map<RegistryKey<World>, ServerWorld> oldMap = this.worlds;
+        Map<ResourceKey<Level>, ServerLevel> oldMap = this.levels;
 
         newMap.putAll(oldMap);
-        newMap.put(world.getRegistryKey(), world);
+        newMap.put(world.dimension(), world);
 
-        this.worlds = newMap;
+        this.levels = newMap;
     }
 
     @Override
-    public boolean multidim$hasWorld(RegistryKey<World> key) {
-        return this.worlds.containsKey(key);
+    public boolean multidim$hasWorld(ResourceKey<Level> key) {
+        return this.levels.containsKey(key);
     }
 
     @Override
-    public ServerWorld multidim$removeWorld(RegistryKey<World> key) {
+    public ServerLevel multidim$removeWorld(ResourceKey<Level> key) {
         // use read-copy-update to avoid concurrency issues
         // from immersive portals
-        LinkedHashMap<RegistryKey<World>, ServerWorld> newMap =
+        LinkedHashMap<ResourceKey<Level>, ServerLevel> newMap =
                 Maps.newLinkedHashMap();
 
-        Map<RegistryKey<World>, ServerWorld> oldMap = this.worlds;
+        Map<ResourceKey<Level>, ServerLevel> oldMap = this.levels;
 
-        for (Map.Entry<RegistryKey<World>, ServerWorld> entry : oldMap.entrySet()) {
+        for (Map.Entry<ResourceKey<Level>, ServerLevel> entry : oldMap.entrySet()) {
             if (entry.getKey() != key) {
                 newMap.put(entry.getKey(), entry.getValue());
             }
         }
 
-        this.worlds = newMap;
+        this.levels = newMap;
 
         return oldMap.get(key);
     }
 
     @Override
-    public LevelStorage.Session multidim$getSession() {
-        return this.session;
+    public LevelStorageSource.LevelStorageAccess multidim$getSession() {
+        return this.storageSource;
     }
 
-    @Inject(method = "setCrashReport", at = @At("TAIL"))
+    @Inject(method = "onServerCrash", at = @At("TAIL"))
     private void ait$setCrashReport(CrashReport report, CallbackInfo info) {
         MultiDimMod.LOGGER.error("Crash Detected - nice one m8");
         ServerCrashEvent.EVENT.invoker().onServerCrash((MinecraftServer) (Object) this, report);

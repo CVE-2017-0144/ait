@@ -3,14 +3,13 @@ package dev.amble.plushies;
 import dev.amble.lib.block.ABlockSettings;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.item.AItemSettings;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class PlushieBlocks extends BlockContainer {
 
@@ -30,7 +29,7 @@ public class PlushieBlocks extends BlockContainer {
     }
 
     @Override
-    public Item.Settings createBlockItemSettings(Block block) {
+    public Item.Properties createBlockItemSettings(Block block) {
         return new AItemSettings().group(PlushieItemGroups.PLUSHIES);
     }
 
@@ -41,12 +40,12 @@ public class PlushieBlocks extends BlockContainer {
         for (String name : DEVS) {
             ABlockSettings settings = new ABlockSettings();
             Block block = new MarketablePlushieBlock(settings, name);
-            Identifier id = new Identifier(namespace, name + "_marketable_plushie");
+            ResourceLocation id = new ResourceLocation(namespace, name + "_marketable_plushie");
 
-            Registry.register(Registries.BLOCK, id, block);
+            Registry.register(BuiltInRegistries.BLOCK, id, block);
 
             Item item = self.createBlockItem(block, settings.itemSettings());
-            Registry.register(Registries.ITEM, id, item);
+            Registry.register(BuiltInRegistries.ITEM, id, item);
             self.items.add(item);
 
             MARKETABLE_PLUSHIES.add(block);
@@ -55,5 +54,5 @@ public class PlushieBlocks extends BlockContainer {
         self.finish();
     }
 
-    public static final Block GIFT_BOX = new GiftBoxBlock(ABlockSettings.create().itemSettings(new AItemSettings().group(PlushieItemGroups.PLUSHIES).maxCount(16)).breakInstantly());
+    public static final Block GIFT_BOX = new GiftBoxBlock(ABlockSettings.of().itemSettings(new AItemSettings().group(PlushieItemGroups.PLUSHIES).stacksTo(16)).instabreak());
 }

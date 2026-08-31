@@ -1,17 +1,5 @@
 package dev.amble.ait.core.item.sonic;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.item.SonicItem;
 import dev.amble.ait.core.tardis.Tardis;
@@ -20,6 +8,17 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
 
 public class TardisSonicMode extends SonicMode {
 
@@ -28,15 +27,15 @@ public class TardisSonicMode extends SonicMode {
     }
 
     @Override
-    public void tick(ItemStack stack, World world, LivingEntity user, int ticks, int ticksLeft) {
-        if (!(world instanceof ServerWorld) || !(user instanceof PlayerEntity player) || ticks % 10 != 0)
+    public void tick(ItemStack stack, Level world, LivingEntity user, int ticks, int ticksLeft) {
+        if (!(world instanceof ServerLevel) || !(user instanceof Player player) || ticks % 10 != 0)
             return;
 
         this.process(stack, world, player);
     }
 
-    public boolean process(ItemStack stack, World world, PlayerEntity user) {
-        if (!(user instanceof ServerPlayerEntity player))
+    public boolean process(ItemStack stack, Level world, Player user) {
+        if (!(user instanceof ServerPlayer player))
             return false;
 
         Tardis tardis = SonicItem.getTardisStatic(world, stack);
@@ -44,21 +43,21 @@ public class TardisSonicMode extends SonicMode {
         if (tardis == null)
             return false;
 
-        boolean isMainHand = user.getMainHandStack().getItem() == stack.getItem();
+        boolean isMainHand = user.getMainHandItem().getItem() == stack.getItem();
         if (isMainHand) {
             HitResult hitResult = SonicMode.getHitResult(user, 2);
 
             // summon to selected block
-            return this.interactBlock(stack, world, player, BlockPos.ofFloored(hitResult.getPos()));
+            return this.interactBlock(stack, world, player, BlockPos.containing(hitResult.getLocation()));
         }
-        boolean isLookingUp = user.getPitch() < 0;
+        boolean isLookingUp = user.getXRot() < 0;
 
         if (isLookingUp) {
             // send tardis to flight and disengage handbrake
             tardis.travel().handbrake(false);
             tardis.travel().dematerialize();
 
-            player.sendMessage(Text.translatable("sonic.ait.mode.tardis.flight"), true);
+            player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.flight"), true);
 
             return true;
         }
@@ -67,12 +66,12 @@ public class TardisSonicMode extends SonicMode {
         tardis.travel().handbrake(true);
         tardis.fuel().refueling().set(true);
 
-        player.sendMessage(Text.translatable("sonic.ait.mode.tardis.refuel"), true);
+        player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.refuel"), true);
 
         return true;
     }
 
-    private boolean interactBlock(ItemStack stack, World world, ServerPlayerEntity player, BlockPos pos) {
+    private boolean interactBlock(ItemStack stack, Level world, ServerPlayer player, BlockPos pos) {
         // summon tardis to block
         Tardis tardis = SonicItem.getTardisStatic(world, stack);
 
@@ -83,31 +82,31 @@ public class TardisSonicMode extends SonicMode {
         if (TardisServerWorld.isTardisDimension(world)) return false;
 
         // get position of player
-        CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(player.getServerWorld().getRegistryKey(), pos, DirectedGlobalPos.getGeneralizedRotation(player.getMovementDirection()));
+        CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(player.serverLevel().dimension(), pos, DirectedGlobalPos.getGeneralizedRotation(player.getMotionDirection()));
 
         if (!tardis.subsystems().get(SubSystem.Id.STABILISERS).isUsable()) {
-            player.sendMessage(Text.translatable("sonic.ait.mode.tardis.does_not_have_stabilisers"), true);
+            player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.does_not_have_stabilisers"), true);
             return false;
         }
 
         // check if player is within range of and in same world as TARDIS
-        World tardisWorld = tardis.travel().position().getWorld();
-        boolean inSameWorld = player.getWorld().equals(tardisWorld);
+        Level tardisWorld = tardis.travel().position().getWorld();
+        boolean inSameWorld = player.level().equals(tardisWorld);
         boolean isNearTardis = TardisUtil.isNearTardis(player, tardis, 256);
         double distance = TardisUtil.distanceFromTardis(player, tardis);
 
         if (!tardis.fuel().hasPower()){
-            player.sendMessage(Text.translatable("sonic.ait.mode.tardis.does_not_have_power"), true);
+            player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.does_not_have_power"), true);
             return false;
         }
 
         if (tardis.fuel().getCurrentFuel() <= TardisUtil.estimatedFuelCost(player, tardis, distance)) {
-            player.sendMessage(Text.translatable("sonic.ait.mode.tardis.insufficient_fuel"), true);
+            player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.insufficient_fuel"), true);
             return false;
         }
 
         if (!inSameWorld || !isNearTardis) {
-            player.sendMessage(Text.translatable("sonic.ait.mode.tardis.is_not_in_range"), true);
+            player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.is_not_in_range"), true);
             return false;
         }
 
@@ -116,14 +115,14 @@ public class TardisSonicMode extends SonicMode {
         tardis.travel().dematerialize();
 
         // inform player
-        player.sendMessage(Text.translatable("sonic.ait.mode.tardis.location_summon"), true);
+        player.displayClientMessage(Component.translatable("sonic.ait.mode.tardis.location_summon"), true);
 
         return true;
     }
 
     @Override
-    public Text text() {
-        return Text.translatable("sonic.ait.mode.tardis").formatted(Formatting.BLUE, Formatting.BOLD);
+    public Component text() {
+        return Component.translatable("sonic.ait.mode.tardis").withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD);
     }
 
     @Override
@@ -132,7 +131,7 @@ public class TardisSonicMode extends SonicMode {
     }
 
     @Override
-    public Identifier model(SonicSchema.Models models) {
+    public ResourceLocation model(SonicSchema.Models models) {
         return models.tardis();
     }
 }

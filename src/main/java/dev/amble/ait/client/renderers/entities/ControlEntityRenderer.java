@@ -3,24 +3,27 @@ package dev.amble.ait.client.renderers.entities;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.joml.Matrix4f;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.consoles.ControlModel;
@@ -33,17 +36,17 @@ import dev.amble.ait.core.tardis.control.Control;
 @Environment(value = EnvType.CLIENT)
 public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> {
 
-    private static final Identifier TEXTURE = AITMod.id("textures/entity/control/sequenced.png");
+    private static final ResourceLocation TEXTURE = AITMod.id("textures/entity/control/sequenced.png");
 
-    ControlModel model = new ControlModel(ControlModel.getTexturedModelData().createModel());
+    ControlModel model = new ControlModel(ControlModel.getTexturedModelData().bakeRoot());
 
-    public ControlEntityRenderer(EntityRendererFactory.Context context) {
+    public ControlEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void render(ConsoleControlEntity entity, float yaw, float tickDelta, MatrixStack matrixStack,
-            VertexConsumerProvider vertexConsumerProvider, int light) {
+    public void render(ConsoleControlEntity entity, float yaw, float tickDelta, PoseStack matrixStack,
+            MultiBufferSource vertexConsumerProvider, int light) {
         super.render(entity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
 
         if (SonicRendering.isPlayerHoldingScanningSonic() && AITModClient.CONFIG.showControlHitboxes) {
@@ -52,14 +55,14 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
     }
 
     @Override
-    protected void renderLabelIfPresent(ConsoleControlEntity entity, Text text, MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers, int light) {
-        double d = this.dispatcher.getSquaredDistanceToCamera(entity);
+    protected void renderNameTag(ConsoleControlEntity entity, Component text, PoseStack matrices,
+            MultiBufferSource vertexConsumers, int light) {
+        double d = this.entityRenderDispatcher.distanceToSqr(entity);
 
         if (d > 4096.0)
             return;
 
-        Text name = entity.getCustomName();
+        Component name = entity.getCustomName();
 
         if (name == null)
             return;
@@ -73,31 +76,31 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
             return;
 
         Control control = entity.getControl();
-        Text label = control != null ? control.getName(tardis) : name;
+        Component label = control != null ? control.getName(tardis) : name;
 
-        TextRenderer textRenderer = this.getTextRenderer();
-        float h = (float) -textRenderer.getWidth(label) / 2;
-        float f = entity.getNameLabelHeight() - 0.3f;
+        Font textRenderer = this.getFont();
+        float h = (float) -textRenderer.width(label) / 2;
+        float f = entity.getNameTagOffsetY() - 0.3f;
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0.0f, f, 0.0f);
-        matrices.multiply(this.dispatcher.getRotation());
+        matrices.mulPose(this.entityRenderDispatcher.cameraOrientation());
         matrices.scale(-0.0075f, -0.0075f, 0.0075f);
 
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-        HitResult hitresult = MinecraftClient.getInstance().crosshairTarget;
+        Matrix4f matrix4f = matrices.last().pose();
+        HitResult hitresult = Minecraft.getInstance().hitResult;
 
         if (hitresult != null) {
             boolean isPlayerLookingWithSonic = isPlayerLookingAtControlWithSonic(hitresult, entity);
-            OrderedText nameOrdered = label.asOrderedText();
+            FormattedCharSequence nameOrdered = label.getVisualOrderText();
 
             if (isPlayerLookingWithSonic) {
-                textRenderer.drawWithOutline(nameOrdered, h, 0f, 0xF0F0F0, 0x000000,
+                textRenderer.drawInBatch8xOutline(nameOrdered, h, 0f, 0xF0F0F0, 0x000000,
                         matrix4f, vertexConsumers, 0xFF);
             }
         }
 
-        matrices.pop();
+        matrices.popPose();
 
         if (hitresult == null)
             return;
@@ -107,43 +110,43 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
 
         if (!entity.isPartOfSequence() || (!sonicInConsole && !handlesInConsole)) return;
 
-        matrices.push();
+        matrices.pushPose();
         matrices.scale(0.4f, 0.4f, 0.4f);
-        matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(180f));
-        matrices.translate(0, (-2 - entity.getControlHeight() / 2) + entity.getWorld().random.nextFloat() * 0.02, 0);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().getTickDelta() % 180));
+        matrices.mulPose(Axis.XN.rotationDegrees(180f));
+        matrices.translate(0, (-2 - entity.getControlHeight() / 2) + entity.level().random.nextFloat() * 0.02, 0);
+        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getFrameTime() % 180));
 
-        float alpha = entity.getWorld().random.nextInt(32) != 6 ? 0.4f : 0.05f;
+        float alpha = entity.level().random.nextInt(32) != 6 ? 0.4f : 0.05f;
         float red = entity.wasSequenced() ? 0.0f : 1.0f;
         float green = (entity.wasSequenced()) ? 1.0f : 1 - (entity.getSequencePercentage());
 
-        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(TEXTURE)), light,
-                OverlayTexture.DEFAULT_UV,
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light,
+                OverlayTexture.NO_OVERLAY,
                 red,
                 green,
                 0,
                 alpha);
 
-        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEyes(TEXTURE)), 0xFF00F0,
-                OverlayTexture.DEFAULT_UV,
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.eyes(TEXTURE)), 0xFF00F0,
+                OverlayTexture.NO_OVERLAY,
                 red,
                 green,
                 0,
                 alpha);
 
-        matrices.pop();
+        matrices.popPose();
     }
 
-    private static void renderOutline(Entity entity, MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers) {
-        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.LINES);
+    private static void renderOutline(Entity entity, PoseStack matrices,
+            MultiBufferSource vertexConsumers) {
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderType.LINES);
 
-        Box box = entity.getBoundingBox().offset(-entity.getX(), -entity.getY(), -entity.getZ());
-        WorldRenderer.drawBox(matrices, vertices, box, 0.0f, 0.8f, 1.0f, 1.0f);
+        AABB box = entity.getBoundingBox().move(-entity.getX(), -entity.getY(), -entity.getZ());
+        LevelRenderer.renderLineBox(matrices, vertices, box, 0.0f, 0.8f, 1.0f, 1.0f);
     }
 
     private static boolean isPlayerLookingAtControlWithSonic(HitResult hitResult, ConsoleControlEntity entity) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (player == null || !(hitResult instanceof EntityHitResult entityHit))
             return false;
@@ -188,7 +191,7 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
     }
 
     @Override
-    public Identifier getTexture(ConsoleControlEntity controlEntity) {
+    public ResourceLocation getTextureLocation(ConsoleControlEntity controlEntity) {
         return TEXTURE;
     }
 }

@@ -2,8 +2,7 @@ package dev.amble.ait.core.devteam;
 
 import java.util.Set;
 import java.util.UUID;
-
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 /**
  * @author Loqor
@@ -48,6 +47,6 @@ public class DevTeam {
     }
 
     public static boolean isDev() {
-        return isDev(MinecraftClient.getInstance().getSession().getProfile().getId());
+        return isDev(Minecraft.getInstance().getUser().getGameProfile().getId());
     }
 }

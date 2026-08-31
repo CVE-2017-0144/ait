@@ -1,19 +1,17 @@
 package dev.amble.ait.data.schema.console.variant.crystalline.client;
 
 import org.joml.Vector3f;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.CrystallineConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.crystalline.CrystallineVariant;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClientCrystallineVariant extends ClientConsoleVariantSchema {
-    public static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/crystalline.png"));
-    public static final Identifier EMISSION = new Identifier(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
             ("textures/blockentities/consoles/crystalline_emission.png"));
 
     public ClientCrystallineVariant() {
@@ -21,18 +19,18 @@ public class ClientCrystallineVariant extends ClientConsoleVariantSchema {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 
     @Override
-    public Identifier emission() {
+    public ResourceLocation emission() {
         return EMISSION;
     }
 
     @Override
     public SimpleConsoleModel model() {
-        return new CrystallineConsoleModel(CrystallineConsoleModel.getTexturedModelData().createModel());
+        return new CrystallineConsoleModel(CrystallineConsoleModel.getTexturedModelData().bakeRoot());
     }
 
     @Override

@@ -4,18 +4,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.item.SonicItem;
@@ -26,19 +24,19 @@ import dev.amble.ait.data.schema.MachineRecipeSchema;
 
 public class AbstractTardisPart extends Item {
 
-    public static final Identifier DISASSEMBLE = AITMod.id("part_disassemble");
-    public static final Identifier ATTACH = AITMod.id("link_attach");
-    public static final Identifier UNATTACH = AITMod.id("link_unattach");
+    public static final ResourceLocation DISASSEMBLE = AITMod.id("part_disassemble");
+    public static final ResourceLocation ATTACH = AITMod.id("link_attach");
+    public static final ResourceLocation UNATTACH = AITMod.id("link_unattach");
 
     private final AbstractLinkItem.Type[] slots;
 
-    public AbstractTardisPart(Settings settings, AbstractLinkItem.Type... slots) {
-        super(settings.maxCount(1));
+    public AbstractTardisPart(Properties settings, AbstractLinkItem.Type... slots) {
+        super(settings.stacksTo(1));
         this.slots = slots;
     }
 
     private static void set(ItemStack stack, AbstractLinkItem item, AbstractLinkItem.Type type) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         StackUtil.write(nbt, type.toString(), item);
     }
 
@@ -55,7 +53,7 @@ public class AbstractTardisPart extends Item {
     }
 
     public static AbstractLinkItem get(ItemStack stack, AbstractLinkItem.Type type) {
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
         Item result = StackUtil.readItem(nbt, type.toString());
 
         if (result != null)
@@ -87,18 +85,18 @@ public class AbstractTardisPart extends Item {
     }
 
     @Override
-    public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) { // slot is the
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction clickType, Player player) { // slot is the
                                                                                                             // machine,
                                                                                                             // stack is
                                                                                                             // the
                                                                                                             // cursor
-        ItemStack machine = slot.getStack();
+        ItemStack machine = slot.getItem();
 
-        if (clickType != ClickType.RIGHT)
+        if (clickType != ClickAction.SECONDARY)
             return false;
 
         // Should this be in SonicItem.Mode.INTERACTION?
-        if (!stack.getRegistryEntry().isIn(AITTags.Items.SONIC_ITEM))
+        if (!stack.getItemHolder().is(AITTags.Items.SONIC_ITEM))
             return false;
 
         if (SonicItem.mode(stack) != SonicMode.Modes.INTERACTION)
@@ -109,15 +107,15 @@ public class AbstractTardisPart extends Item {
     }
 
     @Override
-    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
-            StackReference cursor) {
-        if (player.getWorld().isClient())
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player player,
+            SlotAccess cursor) {
+        if (player.level().isClientSide())
             return false;
 
         if (!(stack.getItem() instanceof AbstractLinkItem))
             return false;
 
-        if (clickType == ClickType.RIGHT)
+        if (clickType == ClickAction.SECONDARY)
             AbstractTardisPart.set(stack, (AbstractLinkItem) StackUtil.take(otherStack).getItem());
         else {
             cursor.set(new ItemStack(StackUtil.orAir(AbstractTardisPart.removeAny(stack))));
@@ -132,41 +130,41 @@ public class AbstractTardisPart extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void disassemble(ItemStack machine) {
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeItemStack(StackUtil.take(machine));
+        FriendlyByteBuf data = PacketByteBufs.create();
+        data.writeItem(StackUtil.take(machine));
 
         ClientPlayNetworking.send(DISASSEMBLE, data);
     }
 
     @Environment(value = EnvType.CLIENT)
     public static void unattach(ItemStack machine, AbstractLinkItem.Type link) {
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeItemStack(machine);
-        data.writeEnumConstant(link);
+        FriendlyByteBuf data = PacketByteBufs.create();
+        data.writeItem(machine);
+        data.writeEnum(link);
 
         ClientPlayNetworking.send(UNATTACH, data);
     }
 
     @Environment(value = EnvType.CLIENT)
     public static void attach(ItemStack machine, AbstractLinkItem link) {
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeItemStack(machine);
+        FriendlyByteBuf data = PacketByteBufs.create();
+        data.writeItem(machine);
         StackUtil.writeItem(data, link);
 
         ClientPlayNetworking.send(ATTACH, data);
     }
 
     @Environment(value = EnvType.SERVER)
-    public static void disassemble(ServerPlayerEntity player, ItemStack machine, MachineRecipeSchema recipe) {
-        machine.decrement(1);
+    public static void disassemble(ServerPlayer player, ItemStack machine, MachineRecipeSchema recipe) {
+        machine.shrink(1);
 
         for (ItemStack input : recipe.input()) {
-            player.dropItem(input, true);
+            player.drop(input, true);
         }
     }
 
     @Environment(value = EnvType.SERVER)
-    public static void unattach(ServerPlayerEntity player, ItemStack machine, AbstractLinkItem.Type type) {
+    public static void unattach(ServerPlayer player, ItemStack machine, AbstractLinkItem.Type type) {
         AbstractTardisPart.remove(machine, type);
     }
 }

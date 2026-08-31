@@ -4,6 +4,8 @@ import static dev.amble.ait.AITMod.*;
 import static dev.amble.ait.core.AITItems.isUnlockedOnThisDay;
 import static dev.amble.ait.core.item.TardisMatrixItem.colorToInt;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
@@ -23,29 +25,25 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.DoorBlock;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.EndRodParticle;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
-import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
-
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.*;
 import dev.amble.ait.client.commands.ConfigCommand;
@@ -109,7 +107,7 @@ import dev.amble.lib.register.AmbleRegistries;
 public class AITModClient implements ClientModInitializer {
 
     public static AITClientConfig CONFIG;
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final Minecraft client = Minecraft.getInstance();
 
     @Override
     public void onInitializeClient() {
@@ -156,7 +154,7 @@ public class AITModClient implements ClientModInitializer {
         HudRenderCallback.EVENT.register(new ExteriorAxeOverlay());
         HudRenderCallback.EVENT.register(new UntemperedSchismOverlay());
 
-        ClientPreAttackCallback.EVENT.register((client, player, clickCount) -> (player.getMainHandStack().getItem() instanceof BaseGunItem));
+        ClientPreAttackCallback.EVENT.register((client, player, clickCount) -> (player.getMainHandItem().getItem() instanceof BaseGunItem));
 
         if (DependencyChecker.hasIris()) {
             WorldRenderEvents.END.register(this::exteriorBOTI);
@@ -175,7 +173,7 @@ public class AITModClient implements ClientModInitializer {
         WorldRenderEvents.END.register(context -> BOTI.clearAll());
 
         // @TODO idk why but this gets rid of other important stuff, not sure
-        DimensionRenderingRegistry.registerDimensionEffects(AITDimensions.MARS.getValue(), new MarsSkyProperties());
+        DimensionRenderingRegistry.registerDimensionEffects(AITDimensions.MARS.location(), new MarsSkyProperties());
 
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
             Tardis tardis = ClientTardisUtil.getCurrentTardis();
@@ -193,12 +191,12 @@ public class AITModClient implements ClientModInitializer {
             if (screen == null)
                 return;
 
-            client.execute(() -> client.setScreenAndRender(screen));
+            client.execute(() -> client.forceSetScreen(screen));
         });
 
         ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN_TARDIS, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
-            UUID uuid = buf.readUuid();
+            UUID uuid = buf.readUUID();
 
             ClientTardisManager.getInstance().getTardis(uuid, tardis -> {
                 Screen screen = screenFromId(id, tardis);
@@ -206,13 +204,13 @@ public class AITModClient implements ClientModInitializer {
                 if (screen == null)
                     return;
 
-                client.execute(() -> client.setScreenAndRender(screen));
+                client.execute(() -> client.forceSetScreen(screen));
             });
         });
 
         ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN_CONSOLE, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
-            UUID uuid = buf.readUuid();
+            UUID uuid = buf.readUUID();
             BlockPos console = buf.readBlockPos();
 
             ClientTardisManager.getInstance().getTardis(uuid, tardis -> {
@@ -221,7 +219,7 @@ public class AITModClient implements ClientModInitializer {
                 if (screen == null)
                     return;
 
-                client.execute(() -> client.setScreenAndRender(screen));
+                client.execute(() -> client.forceSetScreen(screen));
             });
         });
 
@@ -229,7 +227,7 @@ public class AITModClient implements ClientModInitializer {
             int id = buf.readInt();
             BlockPos projector = buf.readBlockPos();
 
-            List<RegistryKey<World>> worldKeys = buf.readList(b -> b.readRegistryKey(RegistryKeys.WORLD));
+            List<ResourceKey<Level>> worldKeys = buf.readList(b -> b.readResourceKey(Registries.DIMENSION));
 
             client.execute(() -> {
                 ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
@@ -240,33 +238,33 @@ public class AITModClient implements ClientModInitializer {
                 Screen screen = screenFromId(id, tardis, projector);
                 if (screen instanceof EnvironmentProjectorScreen projectorScreen) {
                     projectorScreen.setAvailableWorlds(worldKeys);
-                    client.setScreenAndRender(screen);
+                    client.forceSetScreen(screen);
                 }
             });
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ConsoleGeneratorBlockEntity.SYNC_TYPE,
                 (client, handler, buf, responseSender) -> {
-                    if (client.world == null)
+                    if (client.level == null)
                         return;
 
-                    String id = buf.readString();
-                    ConsoleTypeSchema type = ConsoleRegistry.getInstance().get(Identifier.tryParse(id));
+                    String id = buf.readUtf();
+                    ConsoleTypeSchema type = ConsoleRegistry.getInstance().get(ResourceLocation.tryParse(id));
                     BlockPos consolePos = buf.readBlockPos();
 
-                    if (client.world.getBlockEntity(consolePos) instanceof ConsoleGeneratorBlockEntity console)
+                    if (client.level.getBlockEntity(consolePos) instanceof ConsoleGeneratorBlockEntity console)
                         console.setConsoleSchema(type.id());
                 });
 
         ClientPlayNetworking.registerGlobalReceiver(ConsoleGeneratorBlockEntity.SYNC_VARIANT,
                 (client, handler, buf, responseSender) -> {
-                    if (client.world == null)
+                    if (client.level == null)
                         return;
 
-                    Identifier id = Identifier.tryParse(buf.readString());
+                    ResourceLocation id = ResourceLocation.tryParse(buf.readUtf());
                     BlockPos consolePos = buf.readBlockPos();
 
-                    if (client.world.getBlockEntity(consolePos) instanceof ConsoleGeneratorBlockEntity console)
+                    if (client.level.getBlockEntity(consolePos) instanceof ConsoleGeneratorBlockEntity console)
                         console.setVariant(id);
                 });
 
@@ -278,7 +276,7 @@ public class AITModClient implements ClientModInitializer {
         SonicModelLoader.init();
 
         ClientPlayNetworking.registerGlobalReceiver(AstralMapBlock.OPEN_ASTRAL_MAP, (client, handler, buf, responseSender) -> {
-            List<Identifier> ids = buf.readList(PacketByteBuf::readIdentifier);
+            List<ResourceLocation> ids = buf.readList(FriendlyByteBuf::readResourceLocation);
             client.execute(() -> {
                 AstralMapBlock.structureIds = ids;
                 client.setScreen(new AstralMapScreen());
@@ -309,7 +307,7 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public void chargedZeitonCrystalPredicate() {
-        ModelPredicateProviderRegistry.register(AITItems.CHARGED_ZEITON_CRYSTAL, new Identifier("fuel"),
+        ItemProperties.register(AITItems.CHARGED_ZEITON_CRYSTAL, new ResourceLocation("fuel"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null)
                         return 0.0F;
@@ -329,16 +327,16 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void waypointPredicate() {
-        ModelPredicateProviderRegistry.register(AITItems.WAYPOINT_CARTRIDGE, new Identifier("type"),
+        ItemProperties.register(AITItems.WAYPOINT_CARTRIDGE, new ResourceLocation("type"),
                 (stack, clientWorld, livingEntity, integer) ->
-                        stack.getOrCreateNbt().contains(WaypointItem.POS_KEY) ? 1 : 0);
+                        stack.getOrCreateTag().contains(WaypointItem.POS_KEY) ? 1 : 0);
     }
 
     public static void hammerPredicate() {
-        ModelPredicateProviderRegistry.register(AITItems.HAMMER, new Identifier("toymakered"),
+        ItemProperties.register(AITItems.HAMMER, new ResourceLocation("toymakered"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof HammerItem) {
-                        if (itemStack.getName().getString().equalsIgnoreCase("Toymaker Hammer"))
+                        if (itemStack.getHoverName().getString().equalsIgnoreCase("Toymaker Hammer"))
                             return 1.0f;
                         else
                             return 0.0f;
@@ -348,17 +346,17 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void siegeItemPredicate() {
-        ModelPredicateProviderRegistry.register(AITItems.HAMMER, new Identifier("bricked"),
+        ItemProperties.register(AITItems.HAMMER, new ResourceLocation("bricked"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
-                    if (itemStack.getOrCreateNbt().contains(SiegeTardisItem.CURRENT_TEXTURE_KEY)) {
-                        return itemStack.getOrCreateNbt().getInt(SiegeTardisItem.CURRENT_TEXTURE_KEY);
+                    if (itemStack.getOrCreateTag().contains(SiegeTardisItem.CURRENT_TEXTURE_KEY)) {
+                        return itemStack.getOrCreateTag().getInt(SiegeTardisItem.CURRENT_TEXTURE_KEY);
                     }
                     return 0.0f;
                 });
     }
 
     public static void adventItemPredicates() {
-        ModelPredicateProviderRegistry.register(AITItems.HYPERCUBE, new Identifier("advent"),
+        ItemProperties.register(AITItems.HYPERCUBE, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof HypercubeItem) {
                         return isUnlockedOnThisDay(Calendar.JANUARY, 1) ? 1.0F : 0.0F;
@@ -366,7 +364,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ModelPredicateProviderRegistry.register(AITItems.HAZANDRA, new Identifier("advent"),
+        ItemProperties.register(AITItems.HAZANDRA, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof InteriorTeleporterItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 28) ? 1.0F : 0.0F;
@@ -374,7 +372,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ModelPredicateProviderRegistry.register(AITItems.IRON_KEY, new Identifier("advent"),
+        ItemProperties.register(AITItems.IRON_KEY, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -382,7 +380,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ModelPredicateProviderRegistry.register(AITItems.GOLD_KEY, new Identifier("advent"),
+        ItemProperties.register(AITItems.GOLD_KEY, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -390,7 +388,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ModelPredicateProviderRegistry.register(AITItems.NETHERITE_KEY, new Identifier("advent"),
+        ItemProperties.register(AITItems.NETHERITE_KEY, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -398,7 +396,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ModelPredicateProviderRegistry.register(AITItems.CLASSIC_KEY, new Identifier("advent"),
+        ItemProperties.register(AITItems.CLASSIC_KEY, new ResourceLocation("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -408,35 +406,35 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void blockEntityRendererRegister() {
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.CONSOLE_BLOCK_ENTITY_TYPE, ConsoleRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.CONSOLE_GENERATOR_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.CONSOLE_BLOCK_ENTITY_TYPE, ConsoleRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.CONSOLE_GENERATOR_ENTITY_TYPE,
                 ConsoleGeneratorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.EXTERIOR_BLOCK_ENTITY_TYPE, ExteriorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.DOOR_BLOCK_ENTITY_TYPE, DoorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.CORAL_BLOCK_ENTITY_TYPE, CoralRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.MONITOR_BLOCK_ENTITY_TYPE, MonitorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.ARTRON_COLLECTOR_BLOCK_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.EXTERIOR_BLOCK_ENTITY_TYPE, ExteriorRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.DOOR_BLOCK_ENTITY_TYPE, DoorRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.CORAL_BLOCK_ENTITY_TYPE, CoralRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.MONITOR_BLOCK_ENTITY_TYPE, MonitorRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.ARTRON_COLLECTOR_BLOCK_ENTITY_TYPE,
                 ArtronCollectorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.PLAQUE_BLOCK_ENTITY_TYPE, PlaqueRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.WALL_MONITOR_BLOCK_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.PLAQUE_BLOCK_ENTITY_TYPE, PlaqueRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.WALL_MONITOR_BLOCK_ENTITY_TYPE,
                 WallMonitorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.ENGINE_BLOCK_ENTITY_TYPE, EngineRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.FABRICATOR_BLOCK_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.ENGINE_BLOCK_ENTITY_TYPE, EngineRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.FABRICATOR_BLOCK_ENTITY_TYPE,
                 FabricatorRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.WAYPOINT_BANK_BLOCK_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.WAYPOINT_BANK_BLOCK_ENTITY_TYPE,
                 WaypointBankBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.FLAG_BLOCK_ENTITY_TYPE, FlagBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.GENERIC_SUBSYSTEM_BLOCK_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.FLAG_BLOCK_ENTITY_TYPE, FlagBlockEntityRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.GENERIC_SUBSYSTEM_BLOCK_TYPE,
                 GenericSubSystemRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.POWER_CONVERTER_BLOCK_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.POWER_CONVERTER_BLOCK_TYPE,
                 PowerConverterRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.FOOD_MACHINE_BLOCK_ENTITY_TYPE,
+        BlockEntityRenderers.register(AITBlockEntityTypes.FOOD_MACHINE_BLOCK_ENTITY_TYPE,
                 FoodMachineRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.ASTRAL_MAP, AstralMapRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.POTTED_SONIC_SCREWDRIVER_BLOCK_ENTITY_TYPE, PottedSonicScrewdriverRenderer::new);
-        BlockEntityRendererFactories.register(AITBlockEntityTypes.RIFT_RIPPER_BLOCK_ENTITY_TYPE, UntemperedSchismRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.ASTRAL_MAP, AstralMapRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.POTTED_SONIC_SCREWDRIVER_BLOCK_ENTITY_TYPE, PottedSonicScrewdriverRenderer::new);
+        BlockEntityRenderers.register(AITBlockEntityTypes.RIFT_RIPPER_BLOCK_ENTITY_TYPE, UntemperedSchismRenderer::new);
         if (isUnlockedOnThisDay(Calendar.DECEMBER, 30)) {
-            BlockEntityRendererFactories.register(AITBlockEntityTypes.SNOW_GLOBE_BLOCK_ENTITY_TYPE,
+            BlockEntityRenderers.register(AITBlockEntityTypes.SNOW_GLOBE_BLOCK_ENTITY_TYPE,
                     SnowGlobeRenderer::new);
         }
     }
@@ -455,29 +453,29 @@ public class AITModClient implements ClientModInitializer {
 
     public static void setupBlockRendering() {
         BlockRenderLayerMap map = BlockRenderLayerMap.INSTANCE;
-        map.putBlock(AITBlocks.ZEITON_BLOCK, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.BUDDING_ZEITON, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.ENGINE_BLOCK, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.ZEITON_CLUSTER, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.LARGE_ZEITON_BUD, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.MEDIUM_ZEITON_BUD, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.SMALL_ZEITON_BUD, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.MACHINE_CASING, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.FABRICATOR, RenderLayer.getTranslucent());
-        map.putBlock(AITBlocks.ENVIRONMENT_PROJECTOR, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.WAYPOINT_BANK, RenderLayer.getCutout());
+        map.putBlock(AITBlocks.ZEITON_BLOCK, RenderType.cutout());
+        map.putBlock(AITBlocks.BUDDING_ZEITON, RenderType.cutout());
+        map.putBlock(AITBlocks.ENGINE_BLOCK, RenderType.cutout());
+        map.putBlock(AITBlocks.ZEITON_CLUSTER, RenderType.cutout());
+        map.putBlock(AITBlocks.LARGE_ZEITON_BUD, RenderType.cutout());
+        map.putBlock(AITBlocks.MEDIUM_ZEITON_BUD, RenderType.cutout());
+        map.putBlock(AITBlocks.SMALL_ZEITON_BUD, RenderType.cutout());
+        map.putBlock(AITBlocks.MACHINE_CASING, RenderType.cutout());
+        map.putBlock(AITBlocks.FABRICATOR, RenderType.translucent());
+        map.putBlock(AITBlocks.ENVIRONMENT_PROJECTOR, RenderType.cutout());
+        map.putBlock(AITBlocks.WAYPOINT_BANK, RenderType.cutout());
         if (isUnlockedOnThisDay(Calendar.DECEMBER, 30)) {
-            map.putBlock(AITBlocks.SNOW_GLOBE, RenderLayer.getCutout());
+            map.putBlock(AITBlocks.SNOW_GLOBE, RenderType.cutout());
         }
-        map.putBlock(AITBlocks.TARDIS_CORAL_BLOCK, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_FAN, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_WALL, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_FENCE, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.TARDIS_CORAL_LEAVES, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.MATRIX_ENERGIZER, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.GENERIC_SUBSYSTEM, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.POTTED_SONIC_SCREWDRIVER, RenderLayer.getCutout());
-        map.putBlock(AITBlocks.ARTRON_COLLECTOR_BLOCK, RenderLayer.getCutout());
+        map.putBlock(AITBlocks.TARDIS_CORAL_BLOCK, RenderType.cutout());
+        map.putBlock(AITBlocks.TARDIS_CORAL_FAN, RenderType.cutout());
+        map.putBlock(AITBlocks.TARDIS_CORAL_WALL, RenderType.cutout());
+        map.putBlock(AITBlocks.TARDIS_CORAL_FENCE, RenderType.cutout());
+        map.putBlock(AITBlocks.TARDIS_CORAL_LEAVES, RenderType.cutout());
+        map.putBlock(AITBlocks.MATRIX_ENERGIZER, RenderType.cutout());
+        map.putBlock(AITBlocks.GENERIC_SUBSYSTEM, RenderType.cutout());
+        map.putBlock(AITBlocks.POTTED_SONIC_SCREWDRIVER, RenderType.cutout());
+        map.putBlock(AITBlocks.ARTRON_COLLECTOR_BLOCK, RenderType.cutout());
     }
 
     public void registerItemColors() {
@@ -503,7 +501,7 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public void registerParticles() {
-        ParticleFactoryRegistry.getInstance().register(CORAL_PARTICLE, EndRodParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(CORAL_PARTICLE, EndRodParticle.Provider::new);
     }
 
     public static boolean skipBuiltInBOTI() {
@@ -517,9 +515,9 @@ public class AITModClient implements ClientModInitializer {
     public void exteriorBOTI(WorldRenderContext context) {
         if (skipBuiltInBOTI()) return;
 
-        if (client.player == null || client.world == null) return;
-        ClientWorld world = client.world;
-        MatrixStack stack = context.matrixStack();
+        if (client.player == null || client.level == null) return;
+        ClientLevel world = client.level;
+        PoseStack stack = context.matrixStack();
 
         for (ExteriorBlockEntity exterior : BOTI.EXTERIOR_RENDER_QUEUE) {
             if (exterior == null || !exterior.isLinked()) continue;
@@ -527,20 +525,20 @@ public class AITModClient implements ClientModInitializer {
 
             ClientExteriorVariantSchema variant = tardis.getExterior().getVariant().getClient();
             ExteriorModel model = variant.getCachedModel();
-            BlockPos pos = exterior.getPos();
-            stack.push();
+            BlockPos pos = exterior.getBlockPos();
+            stack.pushPose();
             stack.translate(0.5, 0, 0.5);
-            stack.translate(pos.getX() - context.camera().getPos().getX(), pos.getY() - context.camera().getPos().getY(), pos.getZ() - context.camera().getPos().getZ());
+            stack.translate(pos.getX() - context.camera().getPosition().x(), pos.getY() - context.camera().getPosition().y(), pos.getZ() - context.camera().getPosition().z());
             stack.scale(1, -1, -1);
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(RotationPropertyHelper.toDegrees(exterior.getCachedState().get(ExteriorBlock.ROTATION))));
+            stack.mulPose(Axis.YP.rotationDegrees(RotationSegment.convertToDegrees(exterior.getBlockState().getValue(ExteriorBlock.ROTATION))));
 
             if (tardis.door().getLeftRot() > 0 || variant.hasTransparentDoors()) {
-                int light = LightmapTextureManager.pack(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos));
+                int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
                 TardisExteriorBOTI.renderExteriorBoti(exterior, variant, stack, context.consumers(), model,
-                        BotiPortalModel.getTexturedModelData().createModel(), light);
+                        BotiPortalModel.getTexturedModelData().bakeRoot(), light);
             }
 
-            stack.pop();
+            stack.popPose();
         }
 
         BOTI.EXTERIOR_RENDER_QUEUE.clear();
@@ -549,9 +547,9 @@ public class AITModClient implements ClientModInitializer {
     public void doorBOTI(WorldRenderContext context) {
         if (skipBuiltInBOTI()) return;
 
-        if (client.player == null || client.world == null) return;
-        ClientWorld world = client.world;
-        MatrixStack stack = context.matrixStack();
+        if (client.player == null || client.level == null) return;
+        ClientLevel world = client.level;
+        PoseStack stack = context.matrixStack();
 
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
         if (tardis == null) return;
@@ -560,22 +558,22 @@ public class AITModClient implements ClientModInitializer {
         AnimatedModel model = variant.getDoor().model();
         for (DoorBlockEntity door : BOTI.DOOR_RENDER_QUEUE) {
             if (door == null) continue;
-            BlockPos pos = door.getPos();
+            BlockPos pos = door.getBlockPos();
 
-            stack.push();
+            stack.pushPose();
             stack.translate(0.5, 0, 0.5);
-            stack.translate(pos.getX() - context.camera().getPos().getX(), pos.getY() - context.camera().getPos().getY(), pos.getZ() - context.camera().getPos().getZ());
+            stack.translate(pos.getX() - context.camera().getPosition().x(), pos.getY() - context.camera().getPosition().y(), pos.getZ() - context.camera().getPosition().z());
             stack.scale(1, -1, -1);
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(door.getCachedState().get(DoorBlock.FACING).asRotation()));
+            stack.mulPose(Axis.YP.rotationDegrees(door.getBlockState().getValue(DoorBlock.FACING).toYRot()));
 
             if (tardis.door().getLeftRot() > 0 || variant.hasTransparentDoors()) {
-                int light = LightmapTextureManager.pack(world.getLightLevel(LightType.BLOCK, pos), world.getLightLevel(LightType.SKY, pos));
+                int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
                 TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack, context.consumers(),
                         AITMod.id("textures/environment/tardis_sky.png"), model,
-                        BotiPortalModel.getTexturedModelData().createModel(), light, context.tickDelta());
+                        BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickDelta());
             }
 
-            stack.pop();
+            stack.popPose();
         }
 
         BOTI.DOOR_RENDER_QUEUE.clear();
@@ -584,27 +582,27 @@ public class AITModClient implements ClientModInitializer {
     public void gallifreyanBOTI(WorldRenderContext context) {
         if (skipPaintingBOTI()) return;
 
-        SinglePartEntityModel contents = new GallifreyFallsModel(GallifreyFallsModel.getTexturedModelData().createModel());
-        Identifier frameTex = GallifreyanPaintingEntityRenderer.GALLIFREY_FRAME_TEXTURE;
-        Identifier contentsTex = GallifreyanPaintingEntityRenderer.GALLIFREY_PAINTING_TEXTURE;
-        if (client.player == null || client.world == null) return;
-        ClientWorld world = client.world;
-        MatrixStack stack = context.matrixStack();
+        HierarchicalModel contents = new GallifreyFallsModel(GallifreyFallsModel.getTexturedModelData().bakeRoot());
+        ResourceLocation frameTex = GallifreyanPaintingEntityRenderer.GALLIFREY_FRAME_TEXTURE;
+        ResourceLocation contentsTex = GallifreyanPaintingEntityRenderer.GALLIFREY_PAINTING_TEXTURE;
+        if (client.player == null || client.level == null) return;
+        ClientLevel world = client.level;
+        PoseStack stack = context.matrixStack();
         for (BOTIPaintingEntity painting : BOTI.GALLIFREYAN_RENDER_QUEUE) {
             if (painting == null) continue;
-            Vec3d pos = painting.getPos();
-            stack.push();
-            stack.translate(pos.getX() - context.camera().getPos().getX(),
-                    pos.getY() - context.camera().getPos().getY(), pos.getZ() - context.camera().getPos().getZ());
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(painting.getBodyYaw()));
+            Vec3 pos = painting.position();
+            stack.pushPose();
+            stack.translate(pos.x() - context.camera().getPosition().x(),
+                    pos.y() - context.camera().getPosition().y(), pos.z() - context.camera().getPosition().z());
+            stack.mulPose(Axis.XP.rotationDegrees(180f));
+            stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
-            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().createModel());
-            BlockPos blockPos = BlockPos.ofFloored(painting.getClientCameraPosVec(client.getTickDelta()));
+            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getFrameTime()));
             PaintingBOTI.renderBOTIPainting(stack, frame,
-                    LightmapTextureManager.pack(world.getLightLevel(LightType.BLOCK, blockPos),
-                            world.getLightLevel(LightType.SKY, blockPos)), contents, frameTex, contentsTex);
-            stack.pop();
+                    LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
+                            world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
+            stack.popPose();
         }
         BOTI.GALLIFREYAN_RENDER_QUEUE.clear();
     }
@@ -612,27 +610,27 @@ public class AITModClient implements ClientModInitializer {
     public void trenzaloreBOTI(WorldRenderContext context) {
         if (skipPaintingBOTI()) return;
 
-        SinglePartEntityModel contents = new TrenzalorePaintingModel(TrenzalorePaintingModel.getTexturedModelData().createModel());
-        Identifier frameTex = TrenzalorePaintingEntityRenderer.TRENZALORE_FRAME_TEXTURE;
-        Identifier contentsTex = TrenzalorePaintingEntityRenderer.TRENZALORE_PAINTING_TEXTURE;
-        if (client.player == null || client.world == null) return;
-        ClientWorld world = client.world;
-        MatrixStack stack = context.matrixStack();
+        HierarchicalModel contents = new TrenzalorePaintingModel(TrenzalorePaintingModel.getTexturedModelData().bakeRoot());
+        ResourceLocation frameTex = TrenzalorePaintingEntityRenderer.TRENZALORE_FRAME_TEXTURE;
+        ResourceLocation contentsTex = TrenzalorePaintingEntityRenderer.TRENZALORE_PAINTING_TEXTURE;
+        if (client.player == null || client.level == null) return;
+        ClientLevel world = client.level;
+        PoseStack stack = context.matrixStack();
         for (BOTIPaintingEntity painting : BOTI.TRENZALORE_PAINTING_QUEUE) {
             if (painting == null) continue;
-            Vec3d pos = painting.getPos();
-            stack.push();
-            stack.translate(pos.getX() - context.camera().getPos().getX(),
-                    pos.getY() - context.camera().getPos().getY(), pos.getZ() - context.camera().getPos().getZ());
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(painting.getBodyYaw()));
+            Vec3 pos = painting.position();
+            stack.pushPose();
+            stack.translate(pos.x() - context.camera().getPosition().x(),
+                    pos.y() - context.camera().getPosition().y(), pos.z() - context.camera().getPosition().z());
+            stack.mulPose(Axis.XP.rotationDegrees(180f));
+            stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
-            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().createModel());
-            BlockPos blockPos = BlockPos.ofFloored(painting.getClientCameraPosVec(client.getTickDelta()));
+            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getFrameTime()));
             PaintingBOTI.renderBOTIPainting(stack, frame,
-                    LightmapTextureManager.pack(world.getLightLevel(LightType.BLOCK, blockPos),
-                            world.getLightLevel(LightType.SKY, blockPos)), contents, frameTex, contentsTex);
-            stack.pop();
+                    LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
+                            world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
+            stack.popPose();
         }
         BOTI.TRENZALORE_PAINTING_QUEUE.clear();
     }
@@ -640,22 +638,22 @@ public class AITModClient implements ClientModInitializer {
     public void riftBOTI(WorldRenderContext context) {
         if (skipPaintingBOTI()) return;
 
-        if (client.player == null || client.world == null) return;
-        ClientWorld world = client.world;
-        MatrixStack stack = context.matrixStack();
+        if (client.player == null || client.level == null) return;
+        ClientLevel world = client.level;
+        PoseStack stack = context.matrixStack();
         for (RiftEntity rift : BOTI.RIFT_RENDERING_QUEUE) {
             if (rift == null) continue;
-            Vec3d pos = rift.getPos();
-            stack.push();
-            stack.translate(pos.getX() - context.camera().getPos().getX(),
-                    pos.getY() - context.camera().getPos().getY(), pos.getZ() - context.camera().getPos().getZ());
+            Vec3 pos = rift.position();
+            stack.pushPose();
+            stack.translate(pos.x() - context.camera().getPosition().x(),
+                    pos.y() - context.camera().getPosition().y(), pos.z() - context.camera().getPosition().z());
             stack.translate(0, 1.5f, 0);
-            stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rift.getYaw()));
-            stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rift.getPitch()));
-            RiftModel riftModel = new RiftModel(RiftModel.getTexturedModelData().createModel());
-            BlockPos blockPos = BlockPos.ofFloored(rift.getClientCameraPosVec(client.getTickDelta()));
-            RiftBOTI.renderRiftBoti(stack, riftModel, LightmapTextureManager.pack(world.getLightLevel(LightType.BLOCK, blockPos), world.getLightLevel(LightType.SKY, blockPos)));
-            stack.pop();
+            stack.mulPose(Axis.YP.rotationDegrees(rift.getYRot()));
+            stack.mulPose(Axis.XP.rotationDegrees(rift.getXRot()));
+            RiftModel riftModel = new RiftModel(RiftModel.getTexturedModelData().bakeRoot());
+            BlockPos blockPos = BlockPos.containing(rift.getLightProbePosition(client.getFrameTime()));
+            RiftBOTI.renderRiftBoti(stack, riftModel, LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos), world.getBrightness(LightLayer.SKY, blockPos)));
+            stack.popPose();
         }
         BOTI.RIFT_RENDERING_QUEUE.clear();
     }

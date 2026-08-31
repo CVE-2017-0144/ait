@@ -1,37 +1,34 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.AITBlocks;
 
 public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     public static final double MAX_FUEL = 5000;
 
-    public ChargedZeitonCrystalItem(Settings settings) {
+    public ChargedZeitonCrystalItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ItemStack getDefaultStack() {
+    public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        NbtCompound nbt = stack.getOrCreateNbt();
+        CompoundTag nbt = stack.getOrCreateTag();
 
         nbt.putDouble(FUEL_KEY, getMaxFuel(stack));
 
@@ -39,9 +36,9 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public void onCraft(ItemStack stack, World world, PlayerEntity player) {
-        super.onCraft(stack, world, player);
-        NbtCompound nbt = stack.getOrCreateNbt();
+    public void onCraftedBy(ItemStack stack, Level world, Player player) {
+        super.onCraftedBy(stack, world, player);
+        CompoundTag nbt = stack.getOrCreateTag();
         nbt.putDouble(FUEL_KEY, 0);
     }
 
@@ -51,47 +48,47 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         int currentFuel = (int) Math.round(this.getCurrentFuel(stack));
-        Formatting fuelColor = currentFuel > (MAX_FUEL / 4) ? Formatting.GREEN : Formatting.RED;
+        ChatFormatting fuelColor = currentFuel > (MAX_FUEL / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;
 
         tooltip.add(
-                Text.translatable("message.ait.artron_units", currentFuel)
-                        .formatted(fuelColor)
-                        .append(Text.literal(" / ").formatted(Formatting.GRAY))
-                        .append(Text.literal(String.valueOf(MAX_FUEL)).formatted(Formatting.GRAY))
+                Component.translatable("message.ait.artron_units", currentFuel)
+                        .withStyle(fuelColor)
+                        .append(Component.literal(" / ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(MAX_FUEL)).withStyle(ChatFormatting.GRAY))
         );
 
-        super.appendTooltip(stack, world, tooltip, context);
+        super.appendHoverText(stack, world, tooltip, context);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        BlockState state = context.getWorld().getBlockState(context.getBlockPos());
-        PlayerEntity player = context.getPlayer();
+    public InteractionResult useOn(UseOnContext context) {
+        BlockState state = context.getLevel().getBlockState(context.getClickedPos());
+        Player player = context.getPlayer();
 
-        if (player == null) return ActionResult.PASS; // This may mess with some automation (like Create) but I don't care - Loqor
+        if (player == null) return InteractionResult.PASS; // This may mess with some automation (like Create) but I don't care - Loqor
 
-        if (state.isOf(AITBlocks.ZEITON_COBBLE)) {
-            context.getWorld().setBlockState(context.getBlockPos(), AITBlocks.COMPACT_ZEITON.getDefaultState());
-            context.getStack().decrement(1);
-            return ActionResult.SUCCESS;
+        if (state.is(AITBlocks.ZEITON_COBBLE)) {
+            context.getLevel().setBlockAndUpdate(context.getClickedPos(), AITBlocks.COMPACT_ZEITON.defaultBlockState());
+            context.getItemInHand().shrink(1);
+            return InteractionResult.SUCCESS;
         }
 
-        if (state.isOf(Blocks.LODESTONE)) {
-            ItemStack stack = context.getStack();
+        if (state.is(Blocks.LODESTONE)) {
+            ItemStack stack = context.getItemInHand();
             if (!this.hasMaxFuel(stack)) {
-                player.sendMessage(Text.translatable("ait.charged_zeiton_crystal.not_max_fuel").append(
-                        Text.of(" " + this.getCurrentFuel(stack) + "/" + this.getMaxFuel(stack))), true);
-                return ActionResult.PASS;
+                player.displayClientMessage(Component.translatable("ait.charged_zeiton_crystal.not_max_fuel").append(
+                        Component.nullToEmpty(" " + this.getCurrentFuel(stack) + "/" + this.getMaxFuel(stack))), true);
+                return InteractionResult.PASS;
             }
             Block block = AITBlocks.UNTEMPERED_SCHISM;
-            context.getWorld().setBlockState(context.getBlockPos(), block.getDefaultState());
-            AITBlocks.UNTEMPERED_SCHISM.onPlaced(player.getWorld(), context.getBlockPos(), block.getDefaultState(), player, stack);
-            if (!player.isCreative()) context.getStack().decrement(1);
-            return ActionResult.SUCCESS;
+            context.getLevel().setBlockAndUpdate(context.getClickedPos(), block.defaultBlockState());
+            AITBlocks.UNTEMPERED_SCHISM.setPlacedBy(player.level(), context.getClickedPos(), block.defaultBlockState(), player, stack);
+            if (!player.isCreative()) context.getItemInHand().shrink(1);
+            return InteractionResult.SUCCESS;
         }
 
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 }

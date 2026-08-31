@@ -5,18 +5,17 @@ import dev.amble.ait.core.tardis.handler.LandingPadHandler;
 import dev.amble.ait.core.tardis.handler.ServerAlarmHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.data.properties.Value;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.PressableTextWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.PlainTextButton;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -25,7 +24,7 @@ import dev.amble.ait.core.tardis.handler.permissions.PermissionHandler;
 import dev.amble.ait.data.Loyalty;
 
 public class TardisSecurityScreen extends ConsoleScreen {
-    private static final Identifier TEXTURE = new Identifier(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/security_menu.png");
 
     int bgHeight = 138;
@@ -33,15 +32,15 @@ public class TardisSecurityScreen extends ConsoleScreen {
     int left, top;
     int choicesCount = 0;
     private final Screen parent;
-    private TextFieldWidget landingCodeInput;
+    private EditBox landingCodeInput;
 
     public TardisSecurityScreen(ClientTardis tardis, BlockPos console, Screen parent) {
-        super(Text.translatable("screen.ait.security.title"), tardis, console);
+        super(Component.translatable("screen.ait.security.title"), tardis, console);
         this.parent = parent;
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -56,36 +55,36 @@ public class TardisSecurityScreen extends ConsoleScreen {
 
     @Override
     public boolean canCloseWithKey() {
-        return !this.landingCodeInput.isActive();
+        return !this.landingCodeInput.canConsumeInput();
     }
 
     private void createButtons() {
         choicesCount = 0;
 
-        createTextButton(Text.translatable("screen.ait.interiorsettings.back"),
+        createTextButton(Component.translatable("screen.ait.interiorsettings.back"),
                 (button -> backToExteriorChangeScreen()));
-        createTextButton(Text.translatable("screen.ait.security.leave_behind"), (button -> toggleLeaveBehind()));
-        createTextButton(Text.translatable("screen.ait.security.hostile_alarms"), (button -> toggleHostileAlarms()));
-        createTextButton(Text.translatable("screen.ait.security.minimum_loyalty"), (button -> changeMinimumLoyalty()));
-        createTextButton(Text.translatable("screen.ait.security.receive_distress_calls"), (button -> receiveDistressCalls()));
+        createTextButton(Component.translatable("screen.ait.security.leave_behind"), (button -> toggleLeaveBehind()));
+        createTextButton(Component.translatable("screen.ait.security.hostile_alarms"), (button -> toggleHostileAlarms()));
+        createTextButton(Component.translatable("screen.ait.security.minimum_loyalty"), (button -> changeMinimumLoyalty()));
+        createTextButton(Component.translatable("screen.ait.security.receive_distress_calls"), (button -> receiveDistressCalls()));
 
-        this.landingCodeInput = new TextFieldWidget(this.textRenderer, (int) (left + (bgWidth * 0.06f)), this.top + 85, 120, this.textRenderer.fontHeight + 4,
-                Text.translatable("message.ait.landing_code"));
-        this.addButton(new PressableTextWidget((width / 2 + 40), (height / 2 + 18),
-                this.textRenderer.getWidth("✓"), 20, Text.literal("✓").formatted(Formatting.BOLD), button -> {
+        this.landingCodeInput = new EditBox(this.font, (int) (left + (bgWidth * 0.06f)), this.top + 85, 120, this.font.lineHeight + 4,
+                Component.translatable("message.ait.landing_code"));
+        this.addButton(new PlainTextButton((width / 2 + 40), (height / 2 + 18),
+                this.font.width("✓"), 20, Component.literal("✓").withStyle(ChatFormatting.BOLD), button -> {
             updateLandingCode();
-        }, this.textRenderer));
+        }, this.font));
 
         this.landingCodeInput.setMaxLength(50);
-        this.landingCodeInput.setDrawsBackground(true);
+        this.landingCodeInput.setBordered(true);
         this.landingCodeInput.setVisible(true);
 
         if(this.tardis().landingPad().code().get().isBlank())
-            this.landingCodeInput.setPlaceholder(Text.translatable("message.ait.enter_landing_code"));
+            this.landingCodeInput.setHint(Component.translatable("message.ait.enter_landing_code"));
         else
-            this.landingCodeInput.setText(this.tardis().landingPad().code().get());
+            this.landingCodeInput.setValue(this.tardis().landingPad().code().get());
 
-        this.addSelectableChild(this.landingCodeInput);
+        this.addWidget(this.landingCodeInput);
     }
 
     private void receiveDistressCalls() {
@@ -116,77 +115,77 @@ public class TardisSecurityScreen extends ConsoleScreen {
     }
 
     private void updateLandingCode() {
-        String input = this.landingCodeInput.getText();
+        String input = this.landingCodeInput.getValue();
 
         this.tardis().landingPad().code().set(input);
-        SwitcherManager.sync(this.tardis(), buf -> buf.writeString(input), LandingPadHandler.LANDING_CODE);
+        SwitcherManager.sync(this.tardis(), buf -> buf.writeUtf(input), LandingPadHandler.LANDING_CODE);
     }
 
-    private <T extends ClickableWidget> void addButton(T button) {
-        this.addDrawableChild(button);
+    private <T extends AbstractWidget> void addButton(T button) {
+        this.addRenderableWidget(button);
         button.active = true; // this whole method is unnecessary bc it defaults to true ( ?? )
     }
 
     // this might be useful, so remember this exists and use it later on
-    private void createTextButton(Text text, ButtonWidget.PressAction onPress) {
-        this.addButton(new PressableTextWidget((int) (left + (bgWidth * 0.06f)),
-                (int) (top + (bgHeight * (0.1f * (choicesCount + 1)))), this.textRenderer.getWidth(text), 10, text,
-                onPress, this.textRenderer));
+    private void createTextButton(Component text, Button.OnPress onPress) {
+        this.addButton(new PlainTextButton((int) (left + (bgWidth * 0.06f)),
+                (int) (top + (bgHeight * (0.1f * (choicesCount + 1)))), this.font.width(text), 10, text,
+                onPress, this.font));
 
         choicesCount++;
     }
 
     public void backToExteriorChangeScreen() {
-        MinecraftClient.getInstance().setScreen(this.parent);
+        Minecraft.getInstance().setScreen(this.parent);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.drawBackground(context);
 
         ClientTardis tardis = this.tardis();
 
-        Text onText = Text.translatable("screen.ait.monitor.on");
-        Text offText = Text.translatable("screen.ait.monitor.off");
+        Component onText = Component.translatable("screen.ait.monitor.on");
+        Component offText = Component.translatable("screen.ait.monitor.off");
 
 
-        context.drawText(this.textRenderer,
-                Text.empty().append(": ").append(tardis.travel().leaveBehind().get() ? onText : offText),
+        context.drawString(this.font,
+                Component.empty().append(": ").append(tardis.travel().leaveBehind().get() ? onText : offText),
                 (int) (left + (bgWidth * 0.46f)), (int) (top + (bgHeight * (0.1f * 2))), 0xffA500, false);
 
 
-        context.drawText(this.textRenderer,
-                Text.empty().append(": ").append(tardis.alarm().hostilePresence().get() ? onText : offText),
+        context.drawString(this.font,
+                Component.empty().append(": ").append(tardis.alarm().hostilePresence().get() ? onText : offText),
                 (int) (left + (bgWidth * 0.48f)), (int) (top + (bgHeight * (0.1f * 3))), 0xffA500, false);
 
 
-        context.drawText(this.textRenderer,
-                Text.literal(": ").append(getMinimumLoyalty(tardis).text()),
+        context.drawString(this.font,
+                Component.literal(": ").append(getMinimumLoyalty(tardis).text()),
                 (int) (left + (bgWidth * 0.51f)), (int) (top + (bgHeight * (0.1f * 4))), 0xffA500, false);
 
 
-        context.drawText(this.textRenderer,
-                Text.translatable("message.ait.date_created"),
+        context.drawString(this.font,
+                Component.translatable("message.ait.date_created"),
                 (int) (left + (bgWidth * 0.06f)),
                 (int) (top + (bgHeight * (0.1f * 7.5))), 0xadcaf7, false);
 
 
-        context.drawText(this.textRenderer,
-                Text.literal(tardis.stats().getCreationString()),
+        context.drawString(this.font,
+                Component.literal(tardis.stats().getCreationString()),
                 (int) (left + (bgWidth * 0.06f)),
                 (int) (top + (bgHeight * (0.1f * 8.5))), 0xadcaf7, false);
 
 
-        context.drawText(this.textRenderer,
-                Text.empty().append(": ").append(this.tardis().<StatsHandler>handler(TardisComponent.Id.STATS).receiveCalls().get() ? onText : offText),
+        context.drawString(this.font,
+                Component.empty().append(": ").append(this.tardis().<StatsHandler>handler(TardisComponent.Id.STATS).receiveCalls().get() ? onText : offText),
                 (int) (left + (bgWidth * 0.7f)), (int) (top + (bgHeight * (0.1f * 5))), 0xffA500, false);
 
         this.landingCodeInput.render(context, mouseX, mouseY, delta);
-        this.landingCodeInput.setEditableColor(this.landingCodeInput.isSelected() || !this.landingCodeInput.getText().isBlank() ? 0xffffff: 0x545454);
+        this.landingCodeInput.setTextColor(this.landingCodeInput.isHoveredOrFocused() || !this.landingCodeInput.getValue().isBlank() ? 0xffffff: 0x545454);
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void drawBackground(DrawContext context) {
-        context.drawTexture(TEXTURE, left, top, 0, 0, bgWidth, bgHeight);
+    private void drawBackground(GuiGraphics context) {
+        context.blit(TEXTURE, left, top, 0, 0, bgWidth, bgHeight);
     }
 }

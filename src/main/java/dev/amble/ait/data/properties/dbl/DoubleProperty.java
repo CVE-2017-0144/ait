@@ -1,17 +1,15 @@
 package dev.amble.ait.data.properties.dbl;
 
 import java.util.function.Function;
-
-import net.minecraft.network.PacketByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.PropertyType;
 
 public class DoubleProperty extends Property<Double> {
 
-    public static final PropertyType<Double> TYPE = new PropertyType<>(Double.class, PacketByteBuf::writeDouble,
-            PacketByteBuf::readDouble);
+    public static final PropertyType<Double> TYPE = new PropertyType<>(Double.class, FriendlyByteBuf::writeDouble,
+            FriendlyByteBuf::readDouble);
 
     public DoubleProperty(String name) {
         this(name, 0);

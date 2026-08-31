@@ -3,24 +3,22 @@ package dev.amble.ait.registry.impl;
 import java.util.List;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.random.Random;
-
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.handler.mood.MoodDictatedEvent;
 import dev.amble.ait.core.tardis.handler.mood.TardisMood;
 import dev.amble.ait.core.util.WorldUtil;
 
 public class MoodEventPoolRegistry {
-    public static final SimpleRegistry<MoodDictatedEvent> REGISTRY = FabricRegistryBuilder
-            .createSimple(RegistryKey.<MoodDictatedEvent>ofRegistry(AITMod.id("mood_event_pool")))
+    public static final MappedRegistry<MoodDictatedEvent> REGISTRY = FabricRegistryBuilder
+            .createSimple(ResourceKey.<MoodDictatedEvent>createRegistryKey(AITMod.id("mood_event_pool")))
             .buildAndRegister();
 
-    private static final Random random = Random.create();
+    private static final RandomSource random = RandomSource.create();
 
     public static MoodDictatedEvent register(MoodDictatedEvent schema) {
         return Registry.register(REGISTRY, schema.id(), schema);
@@ -79,12 +77,12 @@ public class MoodEventPoolRegistry {
         //The ones i commented out do not work
 
         CHANGE_DIM = register(MoodDictatedEvent.Builder.create(AITMod.id("change_dim"), tardis -> {
-            List<ServerWorld> listOfDims = WorldUtil.getTravelWorlds();
+            List<ServerLevel> listOfDims = WorldUtil.getTravelWorlds();
 
             if (listOfDims.isEmpty())
                 return;
 
-            ServerWorld randomWorld = listOfDims.get(random.nextInt(listOfDims.size()));
+            ServerLevel randomWorld = listOfDims.get(random.nextInt(listOfDims.size()));
 
             tardis.travel().forceDestination(cached -> cached.world(randomWorld));
         }, 1, TardisMood.Alignment.NEGATIVE));
@@ -150,14 +148,14 @@ public class MoodEventPoolRegistry {
 
         ADD_LOYALTY = register(
                 MoodDictatedEvent.Builder.create(AITMod.id("add_loyalty"),
-                        tardis -> tardis.world().getPlayers()
+                        tardis -> tardis.world().players()
                                 .forEach(player -> tardis.loyalty().get(player).add(7)),
                         1, TardisMood.Alignment.POSITIVE));
 
         RANDOM_XP_GRANT = register(MoodDictatedEvent.Builder.create(AITMod.id("random_xp_grant"),
-                tardis -> tardis.world().getPlayers()
+                tardis -> tardis.world().players()
                         .forEach(player -> player
-                                .addExperience((int) (player.getNextLevelExperience() + player.experienceProgress))),
+                                .giveExperiencePoints((int) (player.getXpNeededForNextLevel() + player.experienceProgress))),
                 1, TardisMood.Alignment.POSITIVE));
 
         // instant flight basically, expensive.

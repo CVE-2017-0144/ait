@@ -1,7 +1,7 @@
 package dev.amble.ait.core.commands;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -9,15 +9,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.amble.ait.core.commands.argument.TardisArgumentType;
@@ -25,10 +16,17 @@ import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelUtil;
 import dev.amble.ait.core.tardis.util.CommandUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 public class SummonTardisCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 literal(AITMod.MOD_ID)
                         .then(literal("summon")
@@ -41,7 +39,7 @@ public class SummonTardisCommand {
                                                         .executes(SummonTardisCommand::runCommandWithHomeAndMessage)
                                                 )
                                         )
-                                        .then(argument("pos", BlockPosArgumentType.blockPos())
+                                        .then(argument("pos", BlockPosArgument.blockPos())
                                                 .executes(SummonTardisCommand::runCommandWithPos)
                                                 .then(argument("showMessage", BoolArgumentType.bool())
                                                         .executes(SummonTardisCommand::runCommandWithPosAndMessage)
@@ -52,22 +50,22 @@ public class SummonTardisCommand {
         );
     }
 
-    private static int runCommand(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int runCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return summonTardis(context, null, true);  // Default to showing the message
     }
 
-    private static int runCommandWithPos(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    private static int runCommandWithPos(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
         return summonTardis(context, pos, true);
     }
 
-    private static int runCommandWithPosAndMessage(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    private static int runCommandWithPosAndMessage(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
         boolean showMessage = BoolArgumentType.getBool(context, "showMessage");
         return summonTardis(context, pos, showMessage);
     }
 
-    private static int runCommandWithHome(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int runCommandWithHome(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
 
         if (tardis == null)
@@ -77,7 +75,7 @@ public class SummonTardisCommand {
         return summonTardis(context, pos, true);
     }
 
-    private static int runCommandWithHomeAndMessage(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int runCommandWithHomeAndMessage(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
         boolean showMessage = BoolArgumentType.getBool(context, "showMessage");
 
@@ -88,25 +86,25 @@ public class SummonTardisCommand {
         return summonTardis(context, pos, showMessage);
     }
 
-    private static int summonTardis(CommandContext<ServerCommandSource> context, @Nullable BlockPos pos, boolean showMessage) throws CommandSyntaxException {
+    private static int summonTardis(CommandContext<CommandSourceStack> context, @Nullable BlockPos pos, boolean showMessage) throws CommandSyntaxException {
         Entity source = context.getSource().getEntity();
         ServerTardis tardis = TardisArgumentType.getTardis(context, "tardis");
         CachedDirectedGlobalPos globalPos;
 
         if (pos == null)
-            pos = source.getBlockPos();
+            pos = source.blockPosition();
 
         if (CommandUtil.hasArgument(context, "home")) {
             globalPos = tardis.stats().getHome();
         }else {
-            globalPos = CachedDirectedGlobalPos.create((ServerWorld) source.getWorld(), pos,
-                    (byte) RotationPropertyHelper.fromYaw(source.getBodyYaw()));
+            globalPos = CachedDirectedGlobalPos.create((ServerLevel) source.level(), pos,
+                    (byte) RotationSegment.convertToSegment(source.getVisualRotationYInDegrees()));
         }
 
         TravelUtil.travelTo(tardis, globalPos);
 
         if (showMessage) {
-            source.sendMessage(Text.translatableWithFallback("tardis.summon", "TARDIS [%s] is on the way!",
+            source.sendSystemMessage(Component.translatableWithFallback("tardis.summon", "TARDIS [%s] is on the way!",
                     tardis.getUuid().toString().substring(0, 7)));
         }
 

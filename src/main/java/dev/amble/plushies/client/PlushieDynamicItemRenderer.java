@@ -1,51 +1,51 @@
 package dev.amble.plushies.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
 import dev.amble.plushies.MarketablePlushieBlock;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 
 public class PlushieDynamicItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
 
     @Override
-    public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
         if (stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof MarketablePlushieBlock plushieBlock) {
             BedrockEntityModel<?> model = plushieBlock.model == null ? plushieBlock.model = refreshModel(plushieBlock) : plushieBlock.model;
 
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(0.5D, 0.0D, 0.5D);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180F));
+            matrices.mulPose(Axis.XP.rotationDegrees(180F));
 
-            model.render(
+            model.renderToBuffer(
                     matrices,
-                    vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(plushieBlock.getTexture())),
+                    vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(plushieBlock.getTexture())),
                     light,
                     overlay,
                     1.0f, 1.0f, 1.0f, 1.0f
             );
 
-            Identifier emission = plushieBlock.getEmissionTexture();
+            ResourceLocation emission = plushieBlock.getEmissionTexture();
             if (emission != null) {
-                model.render(
+                model.renderToBuffer(
                         matrices,
-                        vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(emission)),
-                        LightmapTextureManager.MAX_LIGHT_COORDINATE,
+                        vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)),
+                        LightTexture.FULL_BRIGHT,
                         overlay,
                         1.0f, 1.0f, 1.0f, 1.0f
                 );
             }
 
-            matrices.pop();
+            matrices.popPose();
         }
     }
 

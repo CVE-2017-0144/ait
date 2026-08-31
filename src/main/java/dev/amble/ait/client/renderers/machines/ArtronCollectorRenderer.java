@@ -2,21 +2,19 @@ package dev.amble.ait.client.renderers.machines;
 
 import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
 
 public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> implements BlockEntityRenderer<T> {
@@ -26,25 +24,25 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
 
     protected BedrockEntityModel<?> model;
 
-    public ArtronCollectorRenderer(BlockEntityRendererFactory.Context ctx) {
+    public ArtronCollectorRenderer(BlockEntityRendererProvider.Context ctx) {
     }
 
     @Override
-    public void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        if (entity.getWorld() == null) return;
+    public void render(T entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        if (entity.getLevel() == null) return;
 
         if (this.model == null) {
             this.refreshModel(entity);
         }
 
-        BlockState blockState = entity.getCachedState();
-        float f = blockState.get(HorizontalFacingBlock.FACING).asRotation();
+        BlockState blockState = entity.getBlockState();
+        float f = blockState.getValue(HorizontalDirectionalBlock.FACING).toYRot();
 
-        matrices.push();
+        matrices.pushPose();
 
         matrices.translate(0.5D, 0, 0.5D);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180F));
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(f));
+        matrices.mulPose(Axis.XP.rotationDegrees(180F));
+        matrices.mulPose(Axis.YN.rotationDegrees(f));
 
         ModelPart batteryLevels = this.model.getPart().getChild("main").getChild("Meter");
 
@@ -55,51 +53,51 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
             batteryLevels.getChild("Light_4").visible = entity.getCurrentFuel() >= 1500;
         }
 
-        this.model.render(
+        this.model.renderToBuffer(
                 matrices,
-                vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(entity.getTexture())),
+                vertexConsumers.getBuffer(RenderType.entityTranslucent(entity.getTexture())),
                 light,
                 overlay,
                 1.0f, 1.0f, 1.0f, 1.0f
         );
 
-        Identifier emission = entity.getEmissionTexture();
+        ResourceLocation emission = entity.getEmissionTexture();
 
         if (emission == null) {
             emission = entity.getTexture();
         }
 
-        Identifier animatedTexture = getAnimatedTexture(entity);
+        ResourceLocation animatedTexture = getAnimatedTexture(entity);
 
         if (animatedTexture == null) {
             animatedTexture = entity.getTexture();
         }
 
-        VertexConsumer consumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(emission));
+        VertexConsumer consumer = vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission));
 
         float alpha = 1f;
 
         if (entity.getCurrentFuel() > 0) {
-            VertexConsumer emissive = vertexConsumers.getBuffer(RenderLayer.getEyes(animatedTexture));
+            VertexConsumer emissive = vertexConsumers.getBuffer(RenderType.eyes(animatedTexture));
 
-            long worldTime = entity.getWorld().getTime();
+            long worldTime = entity.getLevel().getGameTime();
             float t = (worldTime + tickDelta) / TICKS_PER_FRAME;
             int frame = Math.floorMod((int) Math.floor(t), FRAME_COUNT);
             int nextFrame = (frame + 1) % FRAME_COUNT;
-            alpha = t - MathHelper.floor(t);
+            alpha = t - Mth.floor(t);
 
             consumer = new FrameOffsetVertexConsumer(emissive, nextFrame, FRAME_COUNT);
         }
 
-        this.model.render(
+        this.model.renderToBuffer(
                 matrices,
                 consumer,
-                LightmapTextureManager.MAX_LIGHT_COORDINATE,
+                LightTexture.FULL_BRIGHT,
                 overlay,
                 1.0f, 1.0f, 1.0f, alpha
         );
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     protected BedrockEntityModel<?> refreshModel(T entity) {
@@ -111,7 +109,7 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
                 new IllegalStateException("BedrockModel " + ref.id() + " not found for block entity " + entity)));
     }
 
-    protected Identifier getAnimatedTexture(T entity) {
+    protected ResourceLocation getAnimatedTexture(T entity) {
         return entity.getTexture().withPath(s -> s.replace(".png", "_anim.png"));
     }
 
@@ -119,8 +117,8 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
             implements VertexConsumer {
 
         @Override
-        public VertexConsumer texture(float u, float v) {
-            this.delegate.texture(u, (v + this.frame) / this.frameCount);
+        public VertexConsumer uv(float u, float v) {
+            this.delegate.uv(u, (v + this.frame) / this.frameCount);
             return this;
         }
 
@@ -137,14 +135,14 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
         }
 
         @Override
-        public VertexConsumer overlay(int u, int v) {
-            this.delegate.overlay(u, v);
+        public VertexConsumer overlayCoords(int u, int v) {
+            this.delegate.overlayCoords(u, v);
             return this;
         }
 
         @Override
-        public VertexConsumer light(int u, int v) {
-            this.delegate.light(u, v);
+        public VertexConsumer uv2(int u, int v) {
+            this.delegate.uv2(u, v);
             return this;
         }
 
@@ -155,18 +153,18 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
         }
 
         @Override
-        public void next() {
-            this.delegate.next();
+        public void endVertex() {
+            this.delegate.endVertex();
         }
 
         @Override
-        public void fixedColor(int red, int green, int blue, int alpha) {
-            this.delegate.fixedColor(red, green, blue, alpha);
+        public void defaultColor(int red, int green, int blue, int alpha) {
+            this.delegate.defaultColor(red, green, blue, alpha);
         }
 
         @Override
-        public void unfixColor() {
-            this.delegate.unfixColor();
+        public void unsetDefaultColor() {
+            this.delegate.unsetDefaultColor();
         }
     }
 }

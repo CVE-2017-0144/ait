@@ -2,24 +2,21 @@ package dev.amble.ait.data.schema.sonic;
 
 import java.util.Optional;
 import java.util.function.Consumer;
-
+import net.minecraft.resources.ResourceLocation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.schema.BasicSchema;
 import dev.amble.lib.register.unlockable.Unlockable;
 
 public abstract class SonicSchema extends BasicSchema implements Unlockable {
 
-    private final Identifier id;
+    private final ResourceLocation id;
     private final Models models;
     private final Rendering rendering;
     private final Loyalty loyalty;
 
-    protected SonicSchema(Identifier id, Models models, Rendering rendering, Optional<Loyalty> loyalty) {
+    protected SonicSchema(ResourceLocation id, Models models, Rendering rendering, Optional<Loyalty> loyalty) {
         super("sonic");
 
         this.id = id;
@@ -28,12 +25,12 @@ public abstract class SonicSchema extends BasicSchema implements Unlockable {
         this.loyalty = loyalty.orElse(null);
     }
 
-    protected SonicSchema(Identifier id, Models models, Rendering rendering) {
+    protected SonicSchema(ResourceLocation id, Models models, Rendering rendering) {
         this(id, models, rendering, Optional.empty());
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -66,18 +63,18 @@ public abstract class SonicSchema extends BasicSchema implements Unlockable {
         return o instanceof SonicSchema that && id.equals(that.id);
     }
 
-    public record Models(Identifier inactive, Identifier interaction, Identifier overload, Identifier scanning,
-            Identifier tardis) {
+    public record Models(ResourceLocation inactive, ResourceLocation interaction, ResourceLocation overload, ResourceLocation scanning,
+            ResourceLocation tardis) {
         public static final Codec<Models> CODEC = RecordCodecBuilder
                 .create(instance -> instance
-                        .group(Identifier.CODEC.fieldOf("inactive").forGetter(Models::inactive),
-                                Identifier.CODEC.fieldOf("interaction").forGetter(Models::interaction),
-                                Identifier.CODEC.fieldOf("overload").forGetter(Models::overload),
-                                Identifier.CODEC.fieldOf("scanning").forGetter(Models::scanning),
-                                Identifier.CODEC.fieldOf("tardis").forGetter(Models::tardis))
+                        .group(ResourceLocation.CODEC.fieldOf("inactive").forGetter(Models::inactive),
+                                ResourceLocation.CODEC.fieldOf("interaction").forGetter(Models::interaction),
+                                ResourceLocation.CODEC.fieldOf("overload").forGetter(Models::overload),
+                                ResourceLocation.CODEC.fieldOf("scanning").forGetter(Models::scanning),
+                                ResourceLocation.CODEC.fieldOf("tardis").forGetter(Models::tardis))
                         .apply(instance, Models::new));
 
-        public void load(Consumer<Identifier> consumer) {
+        public void load(Consumer<ResourceLocation> consumer) {
             consumer.accept(inactive);
             consumer.accept(interaction);
             consumer.accept(overload);

@@ -2,28 +2,25 @@ package dev.amble.ait.core.blockentities;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeableItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITItems;
@@ -57,92 +54,92 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
             stacks.add(data.toStack());
         }
 
-        StackUtil.scatter(this.world, this.pos, stacks);
+        StackUtil.scatter(this.level, this.worldPosition, stacks);
     }
 
-    public ActionResult onUse(World world, BlockState state, PlayerEntity player, Hand hand, int slot) {
+    public InteractionResult onUse(Level world, BlockState state, Player player, InteractionHand hand, int slot) {
         if (!this.isLinked())
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
-        ItemStack stack = player.getStackInHand(hand);
+        ItemStack stack = player.getItemInHand(hand);
 
-        if (world.isClient())
-            return ActionResult.SUCCESS;
+        if (world.isClientSide())
+            return InteractionResult.SUCCESS;
 
         if (stack.getItem() instanceof WaypointItem)
             return this.insert(state, stack, slot);
 
-        if (player.isSneaking())
+        if (player.isShiftKeyDown())
             return this.take(state, player, slot);
 
         return this.select(state, slot);
     }
 
-    private ActionResult take(BlockState state, PlayerEntity player, int slot) {
+    private InteractionResult take(BlockState state, Player player, int slot) {
         if (this.selected != slot)
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
         WaypointData waypoint = this.waypoints[slot];
 
         if (waypoint == null)
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
         this.waypoints[slot] = null;
         this.sync(state);
 
-        player.giveItemStack(waypoint.toStack());
-        return ActionResult.SUCCESS;
+        player.addItem(waypoint.toStack());
+        return InteractionResult.SUCCESS;
     }
 
-    private ActionResult insert(BlockState state, ItemStack stack, int slot) {
+    private InteractionResult insert(BlockState state, ItemStack stack, int slot) {
         WaypointData inserted = WaypointData.fromStack(stack);
 
         if (inserted == null || this.waypoints[slot] != null)
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
-        stack.decrement(1);
+        stack.shrink(1);
 
         this.waypoints[slot] = inserted;
         this.sync(state);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    private ActionResult activate(int slot) {
+    private InteractionResult activate(int slot) {
         if (!this.isLinked())
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
         WaypointData data = this.waypoints[slot];
 
         if (data == null)
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
 
         this.tardis().get().travel().forceDestination(data.pos);
 
-        this.world.playSound(null, this.getPos(), AITSounds.WAYPOINT_ACTIVATE, SoundCategory.BLOCKS);
-        return ActionResult.SUCCESS;
+        this.level.playSound(null, this.getBlockPos(), AITSounds.WAYPOINT_ACTIVATE, SoundSource.BLOCKS);
+        return InteractionResult.SUCCESS;
     }
 
-    private ActionResult select(BlockState state, int slot) {
+    private InteractionResult select(BlockState state, int slot) {
         if (this.selected == slot && this.isLinked())
             return this.activate(slot);
 
         this.selected = slot;
         this.sync(state);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     protected void sync(BlockState state) {
-        this.markDirty();
-        world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
+        this.setChanged();
+        level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
-        NbtList waypoints = nbt.getList("waypoints", NbtElement.COMPOUND_TYPE);
+        ListTag waypoints = nbt.getList("waypoints", Tag.TAG_COMPOUND);
 
         for (int i = 0; i < this.waypoints.length; i++) {
             this.waypoints[i] = WaypointData.fromNbt(waypoints.getCompound(i));
@@ -152,14 +149,14 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
-        NbtList waypoints = new NbtList();
+        ListTag waypoints = new ListTag();
 
         for (int i = 0; i < this.waypoints.length; i++) {
             WaypointData data = this.waypoints[i];
-            NbtCompound compound = new NbtCompound();
+            CompoundTag compound = new CompoundTag();
 
             if (data != null)
                 data.toNbt(compound);
@@ -172,8 +169,8 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Nullable @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public DoubleBlockHalf getHalf() {
@@ -195,10 +192,10 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
         }
 
         public static WaypointData fromStack(ItemStack stack) {
-            if (!stack.getOrCreateNbt().contains(WaypointItem.POS_KEY))
+            if (!stack.getOrCreateTag().contains(WaypointItem.POS_KEY))
                 return null;
 
-            int color = ((DyeableItem) AITItems.WAYPOINT_CARTRIDGE).getColor(stack);
+            int color = ((DyeableLeatherItem) AITItems.WAYPOINT_CARTRIDGE).getColor(stack);
             Waypoint waypoint = Waypoint.fromStack(stack);
 
             return new WaypointData(color, waypoint);
@@ -208,15 +205,15 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
             ItemStack result = new ItemStack(AITItems.WAYPOINT_CARTRIDGE);
 
             WaypointItem.setPos(result, this.pos);
-            result.setCustomName(Text.literal(this.name));
+            result.setHoverName(Component.literal(this.name));
 
-            if (this.color != WaypointItem.DEFAULT_COLOR)
-                ((DyeableItem) AITItems.WAYPOINT_CARTRIDGE).setColor(result, this.color);
+            if (this.color != WaypointItem.DEFAULT_LEATHER_COLOR)
+                ((DyeableLeatherItem) AITItems.WAYPOINT_CARTRIDGE).setColor(result, this.color);
 
             return result;
         }
 
-        public void toNbt(NbtCompound nbt) {
+        public void toNbt(CompoundTag nbt) {
             nbt.putInt("color", this.color);
             nbt.putString("name", this.name);
 
@@ -224,7 +221,7 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
                 nbt.put("pos", this.pos.toNbt());
         }
 
-        public static WaypointData fromNbt(NbtCompound nbt) {
+        public static WaypointData fromNbt(CompoundTag nbt) {
             if (nbt.isEmpty())
                 return null;
 

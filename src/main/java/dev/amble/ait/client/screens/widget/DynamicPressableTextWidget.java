@@ -4,30 +4,29 @@ import java.util.function.Function;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class DynamicPressableTextWidget extends ButtonWidget {
-    private final TextRenderer textRenderer;
-    private final Function<DynamicPressableTextWidget, Text> text;
+public class DynamicPressableTextWidget extends Button {
+    private final Font textRenderer;
+    private final Function<DynamicPressableTextWidget, Component> text;
 
     private boolean leftClick = true;
 
-    private Text cached;
-    private Text hoverText;
+    private Component cached;
+    private Component hoverText;
 
     public DynamicPressableTextWidget(int x, int y, int width, int height,
-            Function<DynamicPressableTextWidget, Text> text, ButtonWidget.PressAction onPress,
-            TextRenderer textRenderer) {
-        super(x, y, width, height, Text.empty(), onPress, DEFAULT_NARRATION_SUPPLIER);
+            Function<DynamicPressableTextWidget, Component> text, Button.OnPress onPress,
+            Font textRenderer) {
+        super(x, y, width, height, Component.empty(), onPress, DEFAULT_NARRATION);
 
         this.textRenderer = textRenderer;
         this.text = text;
@@ -45,16 +44,16 @@ public class DynamicPressableTextWidget extends ButtonWidget {
 
         this.leftClick = button == 0;
 
-        this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+        this.playDownSound(Minecraft.getInstance().getSoundManager());
         this.onClick(mouseX, mouseY);
         return true;
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        Text text = this.isSelected() ? this.hoverText : this.cached;
-        context.drawTextWithShadow(this.textRenderer, text, this.getX(), this.getY(),
-                0xFFFFFF | MathHelper.ceil(this.alpha * 255.0f) << 24);
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        Component text = this.isHoveredOrFocused() ? this.hoverText : this.cached;
+        context.drawString(this.textRenderer, text, this.getX(), this.getY(),
+                0xFFFFFF | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
     public boolean isLeftClick() {
@@ -63,6 +62,6 @@ public class DynamicPressableTextWidget extends ButtonWidget {
 
     public void refresh() {
         this.cached = this.text.apply(this);
-        this.hoverText = Texts.setStyleIfAbsent(this.cached.copy(), Style.EMPTY.withUnderline(true));
+        this.hoverText = ComponentUtils.mergeStyles(this.cached.copy(), Style.EMPTY.withUnderlined(true));
     }
 }

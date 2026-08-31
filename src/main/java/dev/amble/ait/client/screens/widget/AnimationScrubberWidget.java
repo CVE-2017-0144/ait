@@ -4,23 +4,22 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class AnimationScrubberWidget extends ClickableWidget {
+public class AnimationScrubberWidget extends AbstractWidget {
 
     private final Consumer<Float> onScrub;
     private float progress;
     private boolean dragging;
 
     public AnimationScrubberWidget(int x, int y, int width, int height, Consumer<Float> onScrub) {
-        super(x, y, width, height, Text.translatable("screen.ait.widget.timeline"));
+        super(x, y, width, height, Component.translatable("screen.ait.widget.timeline"));
         this.onScrub = onScrub;
     }
 
@@ -29,7 +28,7 @@ public class AnimationScrubberWidget extends ClickableWidget {
     }
 
     public void setProgress(float progress) {
-        this.progress = MathHelper.clamp(progress, 0f, 1f);
+        this.progress = Mth.clamp(progress, 0f, 1f);
     }
 
     public boolean isDragging() {
@@ -38,7 +37,7 @@ public class AnimationScrubberWidget extends ClickableWidget {
 
     private void updateFromMouse(double mouseX) {
         float p = (float) ((mouseX - this.getX()) / Math.max(1, this.getWidth() - 1));
-        this.progress = MathHelper.clamp(p, 0f, 1f);
+        this.progress = Mth.clamp(p, 0f, 1f);
 
         if (this.onScrub != null)
             this.onScrub.accept(this.progress);
@@ -65,7 +64,7 @@ public class AnimationScrubberWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.visible)
             return;
 
@@ -88,7 +87,7 @@ public class AnimationScrubberWidget extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        this.appendDefaultNarrations(builder);
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+        this.defaultButtonNarrationText(builder);
     }
 }

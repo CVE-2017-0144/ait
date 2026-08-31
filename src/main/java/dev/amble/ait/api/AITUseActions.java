@@ -1,8 +1,8 @@
 package dev.amble.ait.api;
 
-import net.minecraft.util.UseAction;
+import net.minecraft.world.item.UseAnim;
 
 public interface AITUseActions {
-    UseAction SONIC = ((AITUseActions) (Object) UseAction.NONE).ait$sonic();
-    UseAction ait$sonic();
+    UseAnim SONIC = ((AITUseActions) (Object) UseAnim.NONE).ait$sonic();
+    UseAnim ait$sonic();
 }

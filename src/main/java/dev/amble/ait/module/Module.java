@@ -5,18 +5,16 @@ import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.datagen.datagen_providers.AITBlockTagProvider;
 import dev.amble.ait.datagen.datagen_providers.AITItemTagProvider;
@@ -36,19 +34,19 @@ public abstract class Module implements Identifiable {
     @Environment(EnvType.CLIENT)
     public abstract void initClient();
 
-    protected Item register(Item item, Identifier id) {
-        Registry.register(Registries.ITEM, id, item);
+    protected Item register(Item item, ResourceLocation id) {
+        Registry.register(BuiltInRegistries.ITEM, id, item);
         return item;
     }
-    protected SoundEvent register(SoundEvent sound, Identifier id) {
-        Registry.register(Registries.SOUND_EVENT, id, sound);
+    protected SoundEvent register(SoundEvent sound, ResourceLocation id) {
+        Registry.register(BuiltInRegistries.SOUND_EVENT, id, sound);
         return sound;
     }
     protected SoundEvent registerSound(String name) {
-        return register(SoundEvent.of(AITMod.id(name)), AITMod.id(name));
+        return register(SoundEvent.createVariableRangeEvent(AITMod.id(name)), AITMod.id(name));
     }
-    protected <T extends BlockEntity> BlockEntityType<T> register(BlockEntityType<T> type, Identifier id) {
-        Registry.register(Registries.BLOCK_ENTITY_TYPE, id, type);
+    protected <T extends BlockEntity> BlockEntityType<T> register(BlockEntityType<T> type, ResourceLocation id) {
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, type);
         return type;
     }
 
@@ -76,7 +74,7 @@ public abstract class Module implements Identifiable {
         if (group == null) {
             group = builder.build();
 
-            Registry.register(Registries.ITEM_GROUP, group.id(), group);
+            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, group.id(), group);
         }
 
         return group;
@@ -102,9 +100,9 @@ public abstract class Module implements Identifiable {
         void blockTags(AITBlockTagProvider provider);
         void itemTags(AITItemTagProvider provider);
 
-        void generateItemModels(AmbleModelProvider provider, ItemModelGenerator generator);
+        void generateItemModels(AmbleModelProvider provider, ItemModelGenerators generator);
 
-        void models(AmbleModelProvider provider, BlockStateModelGenerator generator);
+        void models(AmbleModelProvider provider, BlockModelGenerators generator);
 
         void advancements(Consumer<Advancement> consumer);
     }

@@ -4,30 +4,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3f;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.DustColorTransitionParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -56,7 +53,7 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements BlockEntityTicker<ConsoleBlockEntity>, ArtronHolderItem {
 
     private ItemStack sonicScrewdriver = ItemStack.EMPTY;
-    private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(54, ItemStack.EMPTY);
+    private NonNullList<ItemStack> inventory = NonNullList.withSize(54, ItemStack.EMPTY);
 
     public final List<ConsoleControlEntity> controlEntities = new ArrayList<>();
     public final Map<Control, Control.ControlState> controlStateMap = new HashMap<>();
@@ -75,7 +72,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
     @Override
     public void onLinked() {
-        if (this.getWorld() == null || !TardisServerWorld.isTardisDimension(this.getWorld())) return;
+        if (this.getLevel() == null || !TardisServerWorld.isTardisDimension(this.getLevel())) return;
         if (this.tardis().isEmpty())
             return;
 
@@ -84,23 +81,23 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         if (tardis instanceof ClientTardis)
             return;
 
-        tardis.getDesktop().getConsolePos().add(this.pos);
+        tardis.getDesktop().getConsolePos().add(this.worldPosition);
         tardis.asServer().markDirty(tardis.getDesktop());
         this.markNeedsControl();
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
 
         nbt.putString("type", this.getTypeSchema().id().toString());
         nbt.putString("variant", this.getVariant().id().toString());
-        Inventories.writeNbt(nbt, this.inventory);
+        ContainerHelper.saveAllItems(nbt, this.inventory);
         if (this.sonicScrewdriver != null) {
-            nbt.put("sonic_screwdriver", this.sonicScrewdriver.writeNbt(new NbtCompound()));
+            nbt.put("sonic_screwdriver", this.sonicScrewdriver.save(new CompoundTag()));
         }
 
-        NbtCompound controlNbt = new NbtCompound();
+        CompoundTag controlNbt = new CompoundTag();
 
         this.controlStateMap.forEach((control, state) -> {
             controlNbt.put(control.id().toString(), state.writeNbt());
@@ -118,12 +115,12 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
             } else {
                 this.controlStateMap.remove(control);
             }
-            this.markDirty();
+            this.setChanged();
             return;
         }
 
         this.getOrCreateState(control).setDamage(durability);
-        this.markDirty();
+        this.setChanged();
     }
 
     public void updateStickiness(Control control, boolean sticky) {
@@ -138,46 +135,46 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
             if (state.damage() >= ConsoleControlEntity.MAX_DURABILITY) {
                 this.controlStateMap.remove(control);
             }
-            this.markDirty();
+            this.setChanged();
             return;
         }
 
         this.getOrCreateState(control).setSticky(true);
-        this.markDirty();
+        this.setChanged();
     }
 
     @Override
-    protected Text getContainerName() {
+    protected Component getContainerName() {
         return tardis().isPresent()
-                ? Text.literal(tardis().get().stats().getName())
-                : Text.translatable("ait.console.inventory");
+                ? Component.literal(tardis().get().stats().getName())
+                : Component.translatable("ait.console.inventory");
     }
 
     @Override
-    protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
-        return GenericContainerScreenHandler.createGeneric9x6(syncId, playerInventory, this);
+    protected AbstractContainerMenu createScreenHandler(int syncId, Inventory playerInventory) {
+        return ChestMenu.sixRows(syncId, playerInventory, this);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
 
-        this.setType(ConsoleRegistry.getInstance().get(Identifier.tryParse(nbt.getString("type"))));
+        this.setType(ConsoleRegistry.getInstance().get(ResourceLocation.tryParse(nbt.getString("type"))));
 
-        this.setVariant(ConsoleVariantRegistry.getInstance().get(Identifier.tryParse(nbt.getString("variant"))));
+        this.setVariant(ConsoleVariantRegistry.getInstance().get(ResourceLocation.tryParse(nbt.getString("variant"))));
 
-        this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory);
+        this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(nbt, this.inventory);
         if (nbt.contains("sonic_screwdriver")) {
-            this.sonicScrewdriver = ItemStack.fromNbt(nbt.getCompound("sonic_screwdriver"));
+            this.sonicScrewdriver = ItemStack.of(nbt.getCompound("sonic_screwdriver"));
         }
 
-        if (!nbt.contains("ControlStates", NbtCompound.COMPOUND_TYPE)) return;
+        if (!nbt.contains("ControlStates", CompoundTag.TAG_COMPOUND)) return;
 
-        NbtCompound controlStatesNbt = nbt.getCompound("ControlStates");
+        CompoundTag controlStatesNbt = nbt.getCompound("ControlStates");
 
-        for (String key : controlStatesNbt.getKeys()) {
-            Identifier id = Identifier.tryParse(key);
+        for (String key : controlStatesNbt.getAllKeys()) {
+            ResourceLocation id = ResourceLocation.tryParse(key);
 
             if (id == null) continue;
 
@@ -185,9 +182,9 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
             if (control == null) continue;
 
-            if (!controlStatesNbt.contains(id.toString(), NbtCompound.COMPOUND_TYPE)) return;
+            if (!controlStatesNbt.contains(id.toString(), CompoundTag.TAG_COMPOUND)) return;
 
-            NbtCompound compound1 = controlStatesNbt.getCompound(id.toString());
+            CompoundTag compound1 = controlStatesNbt.getCompound(id.toString());
             Control.ControlState existingState = controlStateMap.get(control);
 
             if (existingState != null) {
@@ -199,12 +196,12 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        if (world.getRegistryKey().equals(World.OVERWORLD)) {
-            return super.toInitialChunkDataNbt();
+    public CompoundTag getUpdateTag() {
+        if (level.dimension().equals(Level.OVERWORLD)) {
+            return super.getUpdateTag();
         }
         this.markNeedsControl();
-        return super.toInitialChunkDataNbt();
+        return super.getUpdateTag();
     }
 
     public ConsoleTypeSchema getTypeSchema() {
@@ -216,12 +213,12 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
     public void setType(ConsoleTypeSchema schema) {
         this.type = schema;
-        this.markDirty();
+        this.setChanged();
     }
 
     public void setVariant(ConsoleVariantSchema schema) {
         this.variant = schema;
-        this.markDirty();
+        this.setChanged();
     }
 
     public ConsoleVariantSchema getVariant() {
@@ -235,25 +232,25 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         return age;
     }
 
-    public void useOn(World world, boolean sneaking, PlayerEntity player) {
-        if (world.isClient())
+    public void useOn(Level world, boolean sneaking, Player player) {
+        if (world.isClientSide())
             return;
 
         if (this.tardis().isEmpty())
             return;
 
-        ItemStack itemStack = player.getMainHandStack();
+        ItemStack itemStack = player.getMainHandItem();
         if (itemStack.getItem() == AITBlocks.ZEITON_CLUSTER.asItem()) {
             this.tardis().get().addFuel(15);
 
             if (!player.isCreative())
-                itemStack.decrement(1);
+                itemStack.shrink(1);
 
             return;
         }
 
         if (itemStack.getItem() instanceof ChargedZeitonCrystalItem) {
-            NbtCompound nbt = itemStack.getOrCreateNbt();
+            CompoundTag nbt = itemStack.getOrCreateTag();
 
             if (!nbt.contains(ChargedZeitonCrystalItem.FUEL_KEY))
                 return;
@@ -264,9 +261,9 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public void markRemoved() {
+    public void setRemoved() {
         this.killControls();
-        super.markRemoved();
+        super.setRemoved();
     }
 
     public void onBroken() {
@@ -277,7 +274,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         Tardis tardis = this.tardis().get();
         TardisDesktop desktop = tardis.getDesktop();
 
-        desktop.getConsolePos().remove(this.pos);
+        desktop.getConsolePos().remove(this.worldPosition);
         tardis.asServer().markDirty(desktop);
     }
 
@@ -291,16 +288,16 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
         controlEntities.forEach(Entity::discard);
         controlEntities.clear();
-        this.markDirty();
+        this.setChanged();
     }
 
     public void spawnControls() {
-        BlockPos current = this.getPos();
+        BlockPos current = this.getBlockPos();
 
-        if (!(this.world instanceof ServerWorld serverWorld))
+        if (!(this.level instanceof ServerLevel serverWorld))
             return;
 
-        if (!TardisServerWorld.isTardisDimension((ServerWorld) this.getWorld()))
+        if (!TardisServerWorld.isTardisDimension((ServerLevel) this.getLevel()))
             return;
 
         this.killControls();
@@ -308,22 +305,22 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         ControlTypes[] controls = consoleType.getControlTypes();
 
         for (ControlTypes control : controls) {
-            ConsoleControlEntity controlEntity = ConsoleControlEntity.create(this.world, this.tardis().get());
+            ConsoleControlEntity controlEntity = ConsoleControlEntity.create(this.level, this.tardis().get());
 
-            Vector3f position = current.toCenterPos().toVector3f().add(control.getOffset().x(), control.getOffset().y(),
+            Vector3f position = current.getCenter().toVector3f().add(control.getOffset().x(), control.getOffset().y(),
                     control.getOffset().z());
-            controlEntity.setPosition(position.x(), position.y(), position.z());
-            controlEntity.setYaw(0.0f);
-            controlEntity.setPitch(0.0f);
+            controlEntity.setPos(position.x(), position.y(), position.z());
+            controlEntity.setYRot(0.0f);
+            controlEntity.setXRot(0.0f);
 
             Control controlKey = control.getControl();
             Control.ControlState state = controlKey == null ? null : this.controlStateMap.get(controlKey);
             float durability = state == null ? ConsoleControlEntity.MAX_DURABILITY : state.damage();
             boolean sticky = state != null && state.sticky();
 
-            controlEntity.setControlData(consoleType, control, this.getPos(), durability, sticky);
+            controlEntity.setControlData(consoleType, control, this.getBlockPos(), durability, sticky);
 
-            serverWorld.spawnEntity(controlEntity);
+            serverWorld.addFreshEntity(controlEntity);
             this.controlEntities.add(controlEntity);
         }
 
@@ -335,7 +332,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public void tick(World world, BlockPos pos, BlockState state, ConsoleBlockEntity blockEntity) {
+    public void tick(Level world, BlockPos pos, BlockState state, ConsoleBlockEntity blockEntity) {
         if (!TardisServerWorld.isTardisDimension(world)) {
             return;
         }
@@ -343,15 +340,15 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         if (this.needsControls)
             this.spawnControls();
 
-        if (!(world instanceof ServerWorld serverWorld)) {
+        if (!(world instanceof ServerLevel serverWorld)) {
             this.age++;
 
-            ANIM_STATE.startIfNotRunning(this.age);
+            ANIM_STATE.startIfStopped(this.age);
             return;
         }
 
-        if (!TardisServerWorld.isTardisDimension((ServerWorld) this.getWorld()))
-            this.markRemoved();
+        if (!TardisServerWorld.isTardisDimension((ServerLevel) this.getLevel()))
+            this.setRemoved();
 
         if (!this.isLinked())
             return;
@@ -377,7 +374,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
             }
         }
 
-        world.updateNeighborsAlways(pos, state.getBlock());
+        world.updateNeighborsAt(pos, state.getBlock());
 
         ServerTardis tardis = (ServerTardis) this.tardis().get();
         boolean isRiftChunk = RiftChunkManager.isRiftChunk(tardis.travel().position());
@@ -388,29 +385,29 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
                 .count() > 5;
 
         if (tardis.travel().isCrashing() || moreThanAFew) {
-            serverWorld.spawnParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5f, pos.getY() + 1.25,
+            serverWorld.sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5f, pos.getY() + 1.25,
                     pos.getZ() + 0.5f, 5, 0, 0, 0, 0.025f);
 
-            serverWorld.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX() + 0.5f, pos.getY() + 1.85,
+            serverWorld.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX() + 0.5f, pos.getY() + 1.85,
                     pos.getZ() + 0.5f, 2, 0.2f, 0.5f, 0.2f, 0.01f);
 
-            serverWorld.spawnParticles(
-                    new DustColorTransitionParticleEffect(new Vector3f(0.75f, 0.75f, 0.75f),
+            serverWorld.sendParticles(
+                    new DustColorTransitionOptions(new Vector3f(0.75f, 0.75f, 0.75f),
                             new Vector3f(0.1f, 0.1f, 0.1f), 1),
                     pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 1, 0, 0, 0, 0.01f);
         }
 
         if (tardis.crash().isToxic() || tardis.crash().isUnstable()) {
-            serverWorld.spawnParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5f, pos.getY() + 1.25,
+            serverWorld.sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5f, pos.getY() + 1.25,
                     pos.getZ() + 0.5f, 5, 0, 0, 0, 0.025f);
 
-            serverWorld.spawnParticles(ParticleTypes.CLOUD, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 1,
+            serverWorld.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 1,
                     0, 0.05f, 0, 0.025f);
         }
 
         if (tardis.crash().isToxic()) {
-            serverWorld.spawnParticles(
-                    new DustColorTransitionParticleEffect(new Vector3f(0.75f, 0.85f, 0.75f),
+            serverWorld.sendParticles(
+                    new DustColorTransitionOptions(new Vector3f(0.75f, 0.85f, 0.75f),
                             new Vector3f(0.15f, 0.25f, 0.15f), 1),
                     pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 1,
                     AITMod.RANDOM.nextBoolean() ? 0.5f : -0.5f, 3f,
@@ -418,12 +415,12 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         }
 
         if (tardis.isRefueling() && tardis.getFuel() < FuelHandler.TARDIS_MAX_FUEL) {
-            serverWorld.spawnParticles((isRiftChunk) ? ParticleTypes.FIREWORK : ParticleTypes.END_ROD,
+            serverWorld.sendParticles((isRiftChunk) ? ParticleTypes.FIREWORK : ParticleTypes.END_ROD,
                     pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 1, 0, 0, 0,
                     (isRiftChunk) ? 0.05f : 0.025f);
         }
 
-        if (ServerLifecycleHooks.get().getTicks() % 10 != 0)
+        if (ServerLifecycleHooks.get().getTickCount() % 10 != 0)
             return;
 
         if (sonicScrewdriver != null) {
@@ -471,7 +468,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public int size() {
+    public int getContainerSize() {
         return this.getInventory().size();
     }
 
@@ -485,51 +482,51 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public ItemStack getStack(int slot) {
+    public ItemStack getItem(int slot) {
         return this.inventory.get(slot);
     }
 
-    public DefaultedList<ItemStack> getInventory() {
+    public NonNullList<ItemStack> getInventory() {
         return this.inventory;
     }
 
     @Override
-    public ItemStack removeStack(int slot, int amount) {
-        return Inventories.splitStack(this.getInventory(), slot, amount);
+    public ItemStack removeItem(int slot, int amount) {
+        return ContainerHelper.removeItem(this.getInventory(), slot, amount);
     }
 
     @Override
-    public ItemStack removeStack(int slot) {
+    public ItemStack removeItemNoUpdate(int slot) {
         return this.getInventory().remove(slot);
     }
 
     @Override
-    public void setStack(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         this.getInventory().set(slot, stack);
-        if (stack.getCount() > this.getMaxCountPerStack()) {
-            stack.setCount(this.getMaxCountPerStack());
+        if (stack.getCount() > this.getMaxStackSize()) {
+            stack.setCount(this.getMaxStackSize());
         }
     }
 
     @Override
-    public boolean canTransferTo(Inventory hopperInventory, int slot, ItemStack stack) {
+    public boolean canTakeItem(Container hopperInventory, int slot, ItemStack stack) {
         return false;
     }
 
     @Override
-    public boolean canPlayerUse(PlayerEntity player) {
-        return Inventory.canPlayerUse(this, player) && !this.isEmpty();
+    public boolean stillValid(Player player) {
+        return Container.stillValidBlockEntity(this, player) && !this.isEmpty();
     }
 
     @Override
-    public void clear() {
+    public void clearContent() {
         this.getInventory().clear();
     }
 
     public void setSonicScrewdriver(ItemStack stack) {
         this.sonicScrewdriver = stack;
         this.sync();
-        this.markDirty();
+        this.setChanged();
     }
 
     public ItemStack getSonicScrewdriver() {
@@ -557,8 +554,8 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
     @Override
     public void sync() {
-        this.markDirty();
-        if (this.world != null && !this.world.isClient)
-            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), net.minecraft.block.Block.NOTIFY_ALL);
+        this.setChanged();
+        if (this.level != null && !this.level.isClientSide)
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
     }
 }

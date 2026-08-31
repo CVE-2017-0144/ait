@@ -5,25 +5,29 @@ import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.*;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import dev.amble.ait.api.ConsumableBlock;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITSounds;
@@ -34,8 +38,8 @@ import dev.amble.ait.core.engine.link.block.HorizontalFluidLinkBlock;
 
 public class PowerConverterBlock extends HorizontalFluidLinkBlock implements ConsumableBlock {
 
-    public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-    protected static final VoxelShape Y_SHAPE = Block.createCuboidShape(
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    protected static final VoxelShape Y_SHAPE = Block.box(
             4.0,
             0.0,
             2.5,
@@ -45,88 +49,88 @@ public class PowerConverterBlock extends HorizontalFluidLinkBlock implements Con
     );
 
 
-    public PowerConverterBlock(Settings settings) {
+    public PowerConverterBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Override
-    public boolean isShapeFullCube(BlockState state, BlockView world, BlockPos pos) {
+    public boolean isCollisionShapeFullBlock(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        ItemStack stack = player.getStackInHand(hand);
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemStack stack = player.getItemInHand(hand);
 
         if (world.getBlockEntity(pos) instanceof FluidLinkBlockEntity be) {
-            if (world.isClient()) return ActionResult.SUCCESS;
-            if (!(be.isPowered())) return ActionResult.FAIL;
-            if (!stack.isIn(AITTags.Items.IS_TARDIS_FUEL) && !stack.getItem().isFood()) return ActionResult.FAIL;
+            if (world.isClientSide()) return InteractionResult.SUCCESS;
+            if (!(be.isPowered())) return InteractionResult.FAIL;
+            if (!stack.is(AITTags.Items.IS_TARDIS_FUEL) && !stack.getItem().isEdible()) return InteractionResult.FAIL;
 
-            if (!player.isSneaking()) {
+            if (!player.isShiftKeyDown()) {
                 be.source().addLevel(175);
-                stack.decrement(1);
+                stack.shrink(1);
             } else {
                 int count = stack.getCount();
 
                 be.source().addLevel(175 * count);
-                stack.decrement(count);
+                stack.shrink(count);
             }
 
-            if (stack.getItem().isFood()) {
-                TardisCriterions.FEED_POWER_CONVERTER.trigger((ServerPlayerEntity) player);
+            if (stack.getItem().isEdible()) {
+                TardisCriterions.FEED_POWER_CONVERTER.trigger((ServerPlayer) player);
             }
 
-            world.playSound(null, pos, AITSounds.POWER_CONVERT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound(null, pos, AITSounds.POWER_CONVERT, SoundSource.BLOCKS, 1.0F, 1.0F);
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.use(state, world, pos, player, hand, hit);
     }
 
     @Override
-    public boolean canAcceptItem(World world, BlockPos pos, ItemStack stack, Direction from) {
-        return stack.isIn(AITTags.Items.IS_TARDIS_FUEL);
+    public boolean canAcceptItem(Level world, BlockPos pos, ItemStack stack, Direction from) {
+        return stack.is(AITTags.Items.IS_TARDIS_FUEL);
     }
 
     @Override
-    public ItemStack insertItem(World world, BlockPos pos, ItemStack stack, Direction from, boolean simulate) {
+    public ItemStack insertItem(Level world, BlockPos pos, ItemStack stack, Direction from, boolean simulate) {
         if (!(world.getBlockEntity(pos) instanceof FluidLinkBlockEntity be)) return stack;
 
         if (!be.isPowered()) return stack;
 
-        if (!simulate && !world.isClient) {
+        if (!simulate && !world.isClientSide) {
             if (be.source() == null) return stack;
 
             be.source().addLevel(175);
-            world.playSound(null, pos, AITSounds.POWER_CONVERT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound(null, pos, AITSounds.POWER_CONVERT, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
 
         ItemStack leftover = stack.copy();
-        leftover.decrement(1);
+        leftover.shrink(1);
 
         return leftover.isEmpty() ? ItemStack.EMPTY : leftover;
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BlockEntity(pos, state);
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     public static class BlockEntity extends FluidLinkBlockEntity {
@@ -136,12 +140,12 @@ public class PowerConverterBlock extends HorizontalFluidLinkBlock implements Con
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        super.appendTooltip(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, world, tooltip, options);
 
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            tooltip.add(Text.translatable("tooltip.ait.power_converter").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+            tooltip.add(Component.translatable("tooltip.ait.power_converter").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         });
     }
 }

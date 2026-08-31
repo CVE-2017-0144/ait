@@ -1,7 +1,7 @@
 package dev.amble.ait.module.gun.core.item;
 
 public class StaserRifleItem extends BaseGunItem {
-    public StaserRifleItem(Settings settings) {
+    public StaserRifleItem(Properties settings) {
         super(settings);
     }
 

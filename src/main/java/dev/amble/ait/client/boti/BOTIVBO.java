@@ -4,60 +4,63 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.render.*;
-
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import dev.amble.ait.mixin.client.rendering.VertexBufferWrapper;
 
 public class BOTIVBO {
-    public static final VertexFormat format = VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL;
-    public final Map<RenderLayer, BufferBuilder> bufferBuilders = RenderLayer.getBlockLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new BufferBuilder(renderLayer.getExpectedBufferSize())));
-    public final Map<RenderLayer, VertexBuffer> vbo = RenderLayer.getBlockLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
+    public static final VertexFormat format = DefaultVertexFormat.BLOCK;
+    public final Map<RenderType, BufferBuilder> bufferBuilders = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new BufferBuilder(renderLayer.bufferSize())));
+    public final Map<RenderType, VertexBuffer> vbo = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
 
     public BOTIVBO() {
         this.init();
     }
-    public VertexBuffer get(RenderLayer layer) {
+    public VertexBuffer get(RenderType layer) {
         return this.vbo.get(layer);
     }
 
-    public VertexBuffer getVBO(RenderLayer layer) {
-        return this.vbo.getOrDefault(layer, this.vbo.get(RenderLayer.getSolid()));
+    public VertexBuffer getVBO(RenderType layer) {
+        return this.vbo.getOrDefault(layer, this.vbo.get(RenderType.solid()));
     }
 
-    public BufferBuilder getBufferBuilder(RenderLayer layer) {
+    public BufferBuilder getBufferBuilder(RenderType layer) {
         return this.bufferBuilders.get(layer);
     }
 
     public void init() {
-        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-            this.bufferBuilders.put(layer, new BufferBuilder(layer.getExpectedBufferSize()));
+        for (RenderType layer : RenderType.chunkBufferLayers()) {
+            this.bufferBuilders.put(layer, new BufferBuilder(layer.bufferSize()));
             this.vbo.put(layer, new VertexBuffer(VertexBuffer.Usage.STATIC));
         }
     }
 
-    public void begin(RenderLayer layer) {
+    public void begin(RenderType layer) {
         this.getVBO(layer).bind();
     }
 
-    public void reset(RenderLayer layer) {
+    public void reset(RenderType layer) {
         this.bufferBuilders.get(layer).clear();
-        this.bufferBuilders.get(layer).reset();
+        this.bufferBuilders.get(layer).discard();
     }
 
-    public void upload(RenderLayer layer) {
+    public void upload(RenderType layer) {
         BufferBuilder bufferBuilder = this.getBufferBuilder(layer);
-        if (bufferBuilder.isBuilding()) {
+        if (bufferBuilder.building()) {
             bufferBuilder.end();
             return;
         }
-        BufferBuilder.BuiltBuffer builtBuffer = bufferBuilder.end();
+        BufferBuilder.RenderedBuffer builtBuffer = bufferBuilder.end();
         this.getVBO(layer).upload(builtBuffer);
     }
 
-    public void unbind(RenderLayer layer) {
-        this.getBufferBuilder(layer).reset();
+    public void unbind(RenderType layer) {
+        this.getBufferBuilder(layer).discard();
         this.getBufferBuilder(layer).clear();
         VertexBuffer.unbind();
     }
@@ -68,14 +71,14 @@ public class BOTIVBO {
                 return; // Skip drawing if there's no index type
             }*/
             this.begin(layer);
-            format.setupState();
-            layer.startDrawing();
-            ((VertexBufferWrapper) this.getVBO(layer)).setDrawMode(layer.getDrawMode());
+            format.setupBufferState();
+            layer.setupRenderState();
+            ((VertexBufferWrapper) this.getVBO(layer)).setMode(layer.mode());
             ((VertexBufferWrapper) this.getVBO(layer)).setIndexType(VertexFormat.IndexType.SHORT);
-            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
             this.getVBO(layer).draw();
-            layer.endDrawing();
-            format.clearState();
+            layer.clearRenderState();
+            format.clearBufferState();
             VertexBuffer.unbind();
         });
     }

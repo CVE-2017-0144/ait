@@ -2,9 +2,7 @@ package dev.amble.ait.registry.impl;
 
 import java.util.Collection;
 import java.util.Optional;
-
-import net.minecraft.item.ItemStack;
-
+import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.util.StackUtil;
 import dev.amble.ait.data.datapack.DatapackMachineRecipe;
@@ -39,7 +37,7 @@ public class MachineRecipeRegistry extends SimpleDatapackRegistry<MachineRecipeS
 
     public Optional<MachineRecipeSchema> findMatching(ItemStack result) {
         for (MachineRecipeSchema schema : REGISTRY.values()) {
-            if (ItemStack.areItemsEqual(schema.output(), result))
+            if (ItemStack.isSameItem(schema.output(), result))
                 return Optional.of(schema.copy());
         }
 

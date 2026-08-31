@@ -1,17 +1,15 @@
 package dev.amble.ait.data.schema.door.impl;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.phys.Vec3;
 
 public class PipeDoorVariant extends DoorSchema {
-    public static final Identifier REFERENCE = AITMod.id("door/pipe");
+    public static final ResourceLocation REFERENCE = AITMod.id("door/pipe");
 
     public PipeDoorVariant() {
         super(REFERENCE);
@@ -24,16 +22,16 @@ public class PipeDoorVariant extends DoorSchema {
 
     @Override
     public SoundEvent openSound() {
-        return SoundEvents.BLOCK_NOTE_BLOCK_BIT.value();
+        return SoundEvents.NOTE_BLOCK_BIT.value();
     }
 
     @Override
     public SoundEvent closeSound() {
-        return SoundEvents.BLOCK_NOTE_BLOCK_BIT.value();
+        return SoundEvents.NOTE_BLOCK_BIT.value();
     }
 
     @Override
-    public @Nullable Vec3d getPortalPosition() {
-        return new Vec3d(0, 0.1, -0.4);
+    public @Nullable Vec3 getPortalPosition() {
+        return new Vec3(0, 0.1, -0.4);
     }
 }

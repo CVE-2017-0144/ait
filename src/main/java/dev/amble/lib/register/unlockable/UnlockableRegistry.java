@@ -5,11 +5,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
+import net.minecraft.resources.ResourceLocation;
 import com.mojang.serialization.Codec;
-
-import net.minecraft.util.Identifier;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.data.Loyalty;
@@ -18,8 +15,8 @@ import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public abstract class UnlockableRegistry<T extends Unlockable> extends SimpleDatapackRegistry<T> {
 
-    protected UnlockableRegistry(Function<InputStream, T> deserializer, Codec<T> codec, Identifier packet,
-                                 Identifier name, boolean sync) {
+    protected UnlockableRegistry(Function<InputStream, T> deserializer, Codec<T> codec, ResourceLocation packet,
+                                 ResourceLocation name, boolean sync) {
         super(deserializer, codec, packet, name, sync);
     }
 

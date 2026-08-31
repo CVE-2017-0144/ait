@@ -7,12 +7,10 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.item.blueprint.BlueprintItem;
@@ -41,7 +39,7 @@ public class FabricatorRecipeCategory implements IRecipeCategory<BlueprintSchema
     }
 
     @Override
-    public @NotNull Text getTitle() {
+    public @NotNull Component getTitle() {
         return AITBlocks.FABRICATOR.getName();
     }
 
@@ -66,7 +64,7 @@ public class FabricatorRecipeCategory implements IRecipeCategory<BlueprintSchema
                             new BlueprintInputItemStackRenderer(input.minimum(), input.maximum())
                     )
                     .setPosition( 57 + 26 * (i % 3),
-                            5 + 26 * MathHelper.floor((float) i / 3))
+                            5 + 26 * Mth.floor((float) i / 3))
                     .setOutputSlotBackground();
         }
         builder.addOutputSlot().addItemStack(blueprint.output())

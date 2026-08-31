@@ -2,18 +2,18 @@ package dev.amble.lib.mixin;
 
 import dev.amble.lib.animation.AnimatedEntity;
 import dev.amble.lib.skin.PlayerSkinTexturable;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.UUID;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements AnimatedEntity, PlayerSkinTexturable {
-	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
 		super(entityType, world);
 	}
 
@@ -25,7 +25,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Animated
 	}
 
 	@Override
-	public UUID getUuid() {
-		return super.getUuid();
+	public UUID getUUID() {
+		return super.getUUID();
 	}
 }

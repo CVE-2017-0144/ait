@@ -3,10 +3,8 @@ package dev.amble.ait.registry.impl.door;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DatapackDoor;
 import dev.amble.ait.data.schema.door.DoorSchema;
@@ -64,16 +62,16 @@ public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
     }
 
     @Override
-    public void syncToClient(ServerPlayerEntity player) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        PacketByteBuf secondary = PacketByteBufs.create();
+    public void syncToClient(ServerPlayer player) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf secondary = PacketByteBufs.create();
 
         int counter = 0;
         for (DoorSchema schema : this.toList()) {
             if (!(schema instanceof DatapackDoor type)) continue;
 
             counter++;
-            secondary.encodeAsJson(DatapackDoor.CODEC, type);
+            secondary.writeJsonWithCodec(DatapackDoor.CODEC, type);
         }
 
         buf.writeInt(counter);
@@ -83,8 +81,8 @@ public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
     }
 
     @Override
-    public void readFromServer(PacketByteBuf buf) {
-        PacketByteBuf copy = PacketByteBufs.copy(buf);
+    public void readFromServer(FriendlyByteBuf buf) {
+        FriendlyByteBuf copy = PacketByteBufs.copy(buf);
 
         for (DoorSchema schema : this.toList()) {
             if (!(schema instanceof DatapackDoor type)) continue;
@@ -95,7 +93,7 @@ public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {
-            DatapackDoor type = buf.decodeAsJson(DatapackDoor.CODEC);
+            DatapackDoor type = buf.readJsonWithCodec(DatapackDoor.CODEC);
             this.register(type);
         }
 

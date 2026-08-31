@@ -4,9 +4,8 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.task.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Util;
-
+import net.minecraft.Util;
+import net.minecraft.server.level.ServerLevel;
 import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -17,12 +16,12 @@ import java.util.function.Consumer;
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class Scheduler {
 
-    private static final ExecutorService service = Util.getMainWorkerExecutor();
+    private static final ExecutorService service = Util.backgroundExecutor();
 
     protected final Deque<Task<?>> endServerTickTasks = new ConcurrentLinkedDeque<>();
     protected final Deque<Task<?>> startServerTickTasks = new ConcurrentLinkedDeque<>();
-    protected final IdentityHashMap<ServerWorld, Deque<Task<?>>> startWorldTickTasks = new IdentityHashMap<>();
-    protected final IdentityHashMap<ServerWorld, Deque<Task<?>>> endWorldTickTasks = new IdentityHashMap<>();
+    protected final IdentityHashMap<ServerLevel, Deque<Task<?>>> startWorldTickTasks = new IdentityHashMap<>();
+    protected final IdentityHashMap<ServerLevel, Deque<Task<?>>> endWorldTickTasks = new IdentityHashMap<>();
 
     private static Scheduler self;
 
@@ -40,7 +39,7 @@ public class Scheduler {
         });
     }
 
-    private static void tickMap(ServerWorld world, Map<ServerWorld, Deque<Task<?>>> taskMap) {
+    private static void tickMap(ServerLevel world, Map<ServerLevel, Deque<Task<?>>> taskMap) {
         Deque<Task<?>> tasks = taskMap.get(world);
 
         if (tasks == null)
@@ -49,7 +48,7 @@ public class Scheduler {
         tasks.removeIf(Task::tick);
     }
 
-    protected static Deque<Task<?>> getDeque(ServerWorld world, Map<ServerWorld, Deque<Task<?>>> taskMap) {
+    protected static Deque<Task<?>> getDeque(ServerLevel world, Map<ServerLevel, Deque<Task<?>>> taskMap) {
         return taskMap.computeIfAbsent(world, w -> new ConcurrentLinkedDeque<>());
     }
 

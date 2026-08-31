@@ -2,8 +2,8 @@ package dev.amble.lib.client.bedrock;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.AnimationState;
 
 /**
  * An animation state that allows targeting a specific progress (0-1) and smoothly
@@ -105,7 +105,7 @@ public class TargetedAnimationState extends AnimationState {
 	 * @param target The target progress (0-1), will be clamped
 	 */
 	public void setTargetProgress(float target) {
-		this.targetProgress = MathHelper.clamp(target, 0f, 1f);
+		this.targetProgress = Mth.clamp(target, 0f, 1f);
 		if (!this.running && this.currentProgress != this.targetProgress) {
 			this.running = true;
 			this.lastUpdateTime = System.currentTimeMillis();
@@ -127,7 +127,7 @@ public class TargetedAnimationState extends AnimationState {
 	 * @param progress The progress to set (0-1), will be clamped
 	 */
 	public void setCurrentProgress(float progress) {
-		this.currentProgress = MathHelper.clamp(progress, 0f, 1f);
+		this.currentProgress = Mth.clamp(progress, 0f, 1f);
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class TargetedAnimationState extends AnimationState {
 	 *
 	 * @return true if currently animating
 	 */
-	public boolean isRunning() {
+	public boolean isStarted() {
 		return running;
 	}
 

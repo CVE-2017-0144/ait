@@ -1,8 +1,5 @@
 package dev.amble.ait.client.sounds.rain;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.sounds.LoopingSound;
 import dev.amble.ait.client.sounds.PositionedLoopingSound;
@@ -12,6 +9,8 @@ import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.handler.ExteriorEnvironmentHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 
 public class ClientThunderSoundHandler extends SoundHandler {
 
@@ -28,7 +27,7 @@ public class ClientThunderSoundHandler extends SoundHandler {
         if (tardis == null || tardis.getDesktop().getDoorPos().getPos() == null)
             return null;
 
-        return new PositionedLoopingSound(AITSounds.THUNDER, SoundCategory.WEATHER,
+        return new PositionedLoopingSound(AITSounds.THUNDER, SoundSource.WEATHER,
                 tardis.getDesktop().getDoorPos().getPos(), 0.3f);
     }
 
@@ -55,7 +54,7 @@ public class ClientThunderSoundHandler extends SoundHandler {
         return tardis != null && tardis.door().isOpen();
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
 
         if (this.sounds == null)

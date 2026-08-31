@@ -1,25 +1,6 @@
 package dev.amble.ait.core.item;
 
 import org.joml.Vector3f;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolMaterials;
-import net.minecraft.particle.DustColorTransitionParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
@@ -28,57 +9,74 @@ import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.tardis.util.TardisUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class HammerItem extends SwordItem {
 
-    public HammerItem(int attackDamage, float attackSpeed, Settings settings) {
-        super(ToolMaterials.IRON, attackDamage, attackSpeed, settings);
+    public HammerItem(int attackDamage, float attackSpeed, Properties settings) {
+        super(Tiers.IRON, attackDamage, attackSpeed, settings);
     }
 
-    public float getMiningSpeedMultiplier(ItemStack stack, BlockState state) {
-        if (state.isOf(Blocks.IRON_BLOCK)) {
+    public float getDestroySpeed(ItemStack stack, BlockState state) {
+        if (state.is(Blocks.IRON_BLOCK)) {
             return 15.0F;
         } else {
-            return state.isIn(BlockTags.SWORD_EFFICIENT) ? 1.5F : 1.0F;
+            return state.is(BlockTags.SWORD_EFFICIENT) ? 1.5F : 1.0F;
         }
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        BlockPos pos = context.getBlockPos();
-        PlayerEntity player = context.getPlayer();
-        ItemStack stack = context.getStack();
+    public InteractionResult useOn(UseOnContext context) {
+        BlockPos pos = context.getClickedPos();
+        Player player = context.getPlayer();
+        ItemStack stack = context.getItemInHand();
 
-        if (!(context.getWorld() instanceof ServerWorld world))
-            return ActionResult.SUCCESS;
+        if (!(context.getLevel() instanceof ServerLevel world))
+            return InteractionResult.SUCCESS;
 
         if (world.getBlockState(pos).getBlock() instanceof PeanutBlock peanut)
-            peanut.explode(context.getWorld(), pos);
+            peanut.explode(context.getLevel(), pos);
 
         if (!(world.getBlockEntity(pos) instanceof ConsoleBlockEntity consoleBlockEntity))
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
         if (player == null || !consoleBlockEntity.isLinked())
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
         Tardis tardis = consoleBlockEntity.tardis().get();
 
         TravelHandler travel = tardis.travel();
 
-        if (player.getItemCooldownManager().isCoolingDown(stack.getItem()))
-            return ActionResult.PASS;
+        if (player.getCooldowns().isOnCooldown(stack.getItem()))
+            return InteractionResult.PASS;
 
         if (!(tardis.travel().getState() == TravelHandlerBase.State.FLIGHT)) {
 
-            if (!player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+            if (!player.getCooldowns().isOnCooldown(stack.getItem())) {
 
                 int hammerUses = travel.getHammerUses();
-                world.playSound(null, consoleBlockEntity.getPos(), AITSounds.HAMMER_HIT, SoundCategory.BLOCKS,
+                world.playSound(null, consoleBlockEntity.getBlockPos(), AITSounds.HAMMER_HIT, SoundSource.BLOCKS,
                         1f, 1.0f);
-                tardis.loyalty().subLevel((ServerPlayerEntity) player, 10); // safe cast since its on server already
+                tardis.loyalty().subLevel((ServerPlayer) player, 10); // safe cast since its on server already
 
                 if (hammerUses > 3) {
-                    world.playSoundFromEntity(null, player, AITSounds.HAMMER_STRIKE, SoundCategory.PLAYERS, 0.5f, 0.2f);
+                    world.playSound(null, player, AITSounds.HAMMER_STRIKE, SoundSource.PLAYERS, 0.5f, 0.2f);
 
                     tardis.door().closeDoors();
                     tardis.door().setLocked(true);
@@ -88,23 +86,23 @@ public class HammerItem extends SwordItem {
                     travel.dematerialize();
                     tardis.alarm().isEnabled();
 
-                    world.spawnParticles(ParticleTypes.SMALL_FLAME, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
+                    world.sendParticles(ParticleTypes.SMALL_FLAME, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
                             5 * hammerUses, 0, 0, 0, 0.1f * hammerUses);
 
-                    world.spawnParticles(ParticleTypes.EXPLOSION, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
+                    world.sendParticles(ParticleTypes.EXPLOSION, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
                             5 * hammerUses, 0, 0, 0, 0.1f * hammerUses);
 
-                    world.spawnParticles(
-                            new DustColorTransitionParticleEffect(new Vector3f(0.75f, 0.75f, 0.75f), new Vector3f(0.1f, 0.1f, 0.1f),
+                    world.sendParticles(
+                            new DustColorTransitionOptions(new Vector3f(0.75f, 0.75f, 0.75f), new Vector3f(0.1f, 0.1f, 0.1f),
                                     1),
                             pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 5 * hammerUses, 0, 0, 0, 0.1f * hammerUses);
 
-                    world.createExplosion(null, world.getDamageSources().outOfWorld(), TardisUtil.EXPLOSION_BEHAVIOR, pos.toCenterPos(), 5, TardisUtil.doCreateFire(world),
-                            World.ExplosionSourceType.MOB);
+                    world.explode(null, world.damageSources().fellOutOfWorld(), TardisUtil.EXPLOSION_BEHAVIOR, pos.getCenter(), 5, TardisUtil.doCreateFire(world),
+                            Level.ExplosionInteraction.MOB);
 
-                    tardis.loyalty().subLevel((ServerPlayerEntity) player, 50); // safe cast since its on server already
-                    player.getItemCooldownManager().set(stack.getItem(), 10 * 20);
-                    return ActionResult.SUCCESS;
+                    tardis.loyalty().subLevel((ServerPlayer) player, 50); // safe cast since its on server already
+                    player.getCooldowns().addCooldown(stack.getItem(), 10 * 20);
+                    return InteractionResult.SUCCESS;
                 }
             }
         }
@@ -125,39 +123,39 @@ public class HammerItem extends SwordItem {
             fuelCost += (150 * travel.speed() * hammerUses) / 7.0;
         }
 
-        if (!world.isClient() && fuel + fuelCost > maxFuel) {
+        if (!world.isClientSide() && fuel + fuelCost > maxFuel) {
             travel.crash();
 
             tardis.fuel().setCurrentFuel(0.0);
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         travel.setFlightTicks(Math.min(currentFlightTicks + bonus, targetTicks));
         tardis.fuel().setCurrentFuel(fuel - fuelCost);
         travel.useHammer();
 
-        if (!world.isClient() && shouldCrashTardis(hammerUses)) {
+        if (!world.isClientSide() && shouldCrashTardis(hammerUses)) {
             travel.crash();
         } else {
-            world.playSound(null, consoleBlockEntity.getPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
+            world.playSound(null, consoleBlockEntity.getBlockPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
                     0.25f * hammerUses, 1.0f);
         }
 
-        if (world.isClient())
-            return ActionResult.PASS;
+        if (world.isClientSide())
+            return InteractionResult.PASS;
 
-        world.spawnParticles(ParticleTypes.SMALL_FLAME, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
+        world.sendParticles(ParticleTypes.SMALL_FLAME, pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f,
                 5 * hammerUses, 0, 0, 0, 0.1f * hammerUses);
 
-        world.spawnParticles(
-                new DustColorTransitionParticleEffect(new Vector3f(0.75f, 0.75f, 0.75f), new Vector3f(0.1f, 0.1f, 0.1f),
+        world.sendParticles(
+                new DustColorTransitionOptions(new Vector3f(0.75f, 0.75f, 0.75f), new Vector3f(0.1f, 0.1f, 0.1f),
                         1),
                 pos.getX() + 0.5f, pos.getY() + 1.25, pos.getZ() + 0.5f, 5 * hammerUses, 0, 0, 0, 0.1f * hammerUses);
 
-        world.playSound(null, consoleBlockEntity.getPos(), SoundEvents.ENTITY_GLOW_ITEM_FRAME_BREAK,
-                SoundCategory.BLOCKS, 0.25f * hammerUses, 1.0f);
+        world.playSound(null, consoleBlockEntity.getBlockPos(), SoundEvents.GLOW_ITEM_FRAME_BREAK,
+                SoundSource.BLOCKS, 0.25f * hammerUses, 1.0f);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     public boolean shouldCrashTardis(int annoyance) {
@@ -173,7 +171,7 @@ public class HammerItem extends SwordItem {
     }
 
     @Override
-    public boolean isSuitableFor(BlockState state) {
-        return state.isOf(Blocks.IRON_BLOCK);
+    public boolean isCorrectToolForDrops(BlockState state) {
+        return state.is(Blocks.IRON_BLOCK);
     }
 }

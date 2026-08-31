@@ -1,15 +1,14 @@
 package dev.amble.ait.module.planet.core.space.planet;
 
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.world.World;
 
 /**
  * @apiNote Do NOT use this interface unless you know what you're doing.
  * This interface is made for **caching** the planet instance.
  * Use a proper method to check if the world is actually a planet or not.
- * @see PlanetRegistry#get(World)
+ * @see PlanetRegistry#get(Level)
  */
 @ApiStatus.Internal
 public interface PlanetWorld {

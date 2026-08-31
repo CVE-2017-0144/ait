@@ -2,7 +2,7 @@ package dev.amble.ait.core.item.link;
 
 public class MercurialLinkItem extends FluidLinkItem {
 
-    public MercurialLinkItem(Type type, Settings settings) {
+    public MercurialLinkItem(Type type, Properties settings) {
         super(type, settings);
     }
 

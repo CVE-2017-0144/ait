@@ -2,84 +2,81 @@ package dev.amble.ait.core.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-
 import dev.amble.ait.core.blockentities.PottedSonicScrewdriverBlockEntity;
 import dev.amble.ait.core.item.SonicItem;
 
-public class PottedSonicScrewdriverBlock extends BlockWithEntity {
+public class PottedSonicScrewdriverBlock extends BaseEntityBlock {
     public static final int MAX_SONICS = 6;
-    protected static final VoxelShape SHAPE = Block.createCuboidShape(5, 0, 5, 11, 6, 11);
+    protected static final VoxelShape SHAPE = Block.box(5, 0, 5, 11, 6, 11);
 
-    public PottedSonicScrewdriverBlock(Settings settings) {
+    public PottedSonicScrewdriverBlock(Properties settings) {
         super(settings);
     }
 
     @Nullable @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new PottedSonicScrewdriverBlockEntity(pos, state);
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
         return SHAPE;
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (player.getStackInHand(hand).getItem() instanceof SonicItem)
-            return ActionResult.PASS;
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.getItemInHand(hand).getItem() instanceof SonicItem)
+            return InteractionResult.PASS;
 
-        if (!world.isClient && world.getBlockEntity(pos) instanceof PottedSonicScrewdriverBlockEntity pot) {
+        if (!world.isClientSide && world.getBlockEntity(pos) instanceof PottedSonicScrewdriverBlockEntity pot) {
             ItemStack sonic = pot.removeLast();
 
             if (!sonic.isEmpty()) {
-                if (!player.giveItemStack(sonic))
-                    player.dropItem(sonic, false);
+                if (!player.addItem(sonic))
+                    player.drop(sonic, false);
             }
 
             if (pot.count() == 0)
-                world.setBlockState(pos, Blocks.FLOWER_POT.getDefaultState(), Block.NOTIFY_ALL);
+                world.setBlock(pos, Blocks.FLOWER_POT.defaultBlockState(), Block.UPDATE_ALL);
 
-            world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+            world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
         }
 
-        return ActionResult.success(world.isClient);
+        return InteractionResult.sidedSuccess(world.isClientSide);
     }
 
     @Override
-    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         List<ItemStack> drops = new ArrayList<>();
         drops.add(new ItemStack(Items.FLOWER_POT));
 
-        if (builder.getOptional(LootContextParameters.BLOCK_ENTITY) instanceof PottedSonicScrewdriverBlockEntity pot) {
+        if (builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof PottedSonicScrewdriverBlockEntity pot) {
             for (ItemStack sonic : pot.getSonics())
                 drops.add(sonic.copy());
         }

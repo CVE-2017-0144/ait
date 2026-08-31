@@ -5,10 +5,8 @@ import java.lang.reflect.Type;
 import com.google.gson.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.client.models.AnimatedModel;
 import dev.amble.ait.data.schema.door.impl.CapsuleDoorVariant;
 import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
@@ -17,15 +15,15 @@ import dev.amble.lib.api.Identifiable;
 
 @Environment(EnvType.CLIENT)
 public abstract class ClientDoorSchema implements Identifiable {
-    private final Identifier parent;
-    private final Identifier id;
+    private final ResourceLocation parent;
+    private final ResourceLocation id;
 
-    protected ClientDoorSchema(Identifier parent, Identifier id) {
+    protected ClientDoorSchema(ResourceLocation parent, ResourceLocation id) {
         this.parent = parent;
         this.id = id;
     }
 
-    protected ClientDoorSchema(Identifier parent) {
+    protected ClientDoorSchema(ResourceLocation parent) {
         this.id = parent;
         this.parent = parent;
     }
@@ -47,7 +45,7 @@ public abstract class ClientDoorSchema implements Identifiable {
     }
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return id;
     }
 
@@ -64,11 +62,11 @@ public abstract class ClientDoorSchema implements Identifiable {
         @Override
         public ClientDoorSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            Identifier id;
+            ResourceLocation id;
 
             try {
-                id = new Identifier(json.getAsJsonPrimitive().getAsString());
-            } catch (InvalidIdentifierException e) {
+                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+            } catch (ResourceLocationException e) {
                 id = CapsuleDoorVariant.REFERENCE;
             }
 

@@ -3,49 +3,54 @@ package dev.amble.ait.module.planet.client.renderers;
 import static dev.amble.ait.client.util.SkyboxUtil.LOOKUP;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 
 public class SpaceSkyRenderer {
     private static final int FACES_COUNT = 6;
-    private final Identifier[] faces = new Identifier[6];
+    private final ResourceLocation[] faces = new ResourceLocation[6];
 
-    public SpaceSkyRenderer(Identifier faces) {
+    public SpaceSkyRenderer(ResourceLocation faces) {
         for (int i = 0; i < 6; ++i) {
             this.faces[i] = faces.withPath(faces.getPath() + "_" + i + ".png");
         }
     }
 
-    public void draw(Tessellator tessellator, BufferBuilder bufferBuilder, MatrixStack matrixStack) {
+    public void draw(Tesselator tessellator, BufferBuilder bufferBuilder, PoseStack matrixStack) {
         RenderSystem.enableBlend();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
         RenderSystem.disableDepthTest();
 
         for (int k = 0; k < 6; ++k) {
-            matrixStack.push();
+            matrixStack.pushPose();
             Quaternionf rot = LOOKUP[k];
 
             if (rot != null) {
-                matrixStack.multiply(rot);
+                matrixStack.mulPose(rot);
             }
 
-            Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+            Matrix4f matrix4f = matrixStack.last().pose();
 
             RenderSystem.setShaderTexture(0, this.faces[k]);
-            bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             int l = 255;
-            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, -100.0f).texture(0.0f, 0.0f).color(255, 255, 255, l).next();
-            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, 100.0f).texture(0.0f, 1.0f).color(255, 255, 255, l).next();
-            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, 100.0f).texture(1.0f, 1.0f).color(255, 255, 255, l).next();
-            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, -100.0f).texture(1.0f, 0.0f).color(255, 255, 255, l).next();
-            tessellator.draw();
-            matrixStack.pop();
+            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, -100.0f).uv(0.0f, 0.0f).color(255, 255, 255, l).endVertex();
+            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, 100.0f).uv(0.0f, 1.0f).color(255, 255, 255, l).endVertex();
+            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, 100.0f).uv(1.0f, 1.0f).color(255, 255, 255, l).endVertex();
+            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, -100.0f).uv(1.0f, 0.0f).color(255, 255, 255, l).endVertex();
+            tessellator.end();
+            matrixStack.popPose();
         }
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();

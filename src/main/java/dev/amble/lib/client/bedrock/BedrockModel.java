@@ -17,7 +17,15 @@ import dev.amble.lib.api.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.*;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +41,21 @@ public class BedrockModel implements Identifiable {
 	public String version;
 	@SerializedName("minecraft:geometry")
 	public List<Geometry> geometry;
-	private transient Identifier id;
+	private transient ResourceLocation id;
 	private final transient List<PerFaceCube> deferredPerFaceCubes = new ArrayList<>();
 
-	public static BedrockModel from(JsonObject json, Identifier id) {
+	public static BedrockModel from(JsonObject json, ResourceLocation id) {
 		Gson gson = BedrockAnimation.GSON;
 		BedrockModel model = gson.fromJson(json, BedrockModel.class);
 		model.id = id;
 		return model;
 	}
 
-	public TexturedModelData create() {
+	public LayerDefinition create() {
 		deferredPerFaceCubes.clear();
 
-		ModelData modelData = new ModelData();
-		Map<String, ModelPartData> parts = new HashMap<>();
+		MeshDefinition modelData = new MeshDefinition();
+		Map<String, PartDefinition> parts = new HashMap<>();
 		Map<String, Bone> bones = new HashMap<>();
 
 		try {
@@ -72,14 +80,14 @@ public class BedrockModel implements Identifiable {
 
 			for (Bone bone : geometryBones) {
 				bones.put(bone.name, bone);
-				ModelPartData parentPart = (bone.parent != null) ? parts.get(bone.parent) : modelData.getRoot();
+				PartDefinition parentPart = (bone.parent != null) ? parts.get(bone.parent) : modelData.getRoot();
 
 				List<Float> boneRotation = bone.rotation;
-				ModelTransform modelTransform;
+				PartPose modelTransform;
 				if (bone.parent == null) {
-					modelTransform = ModelTransform.pivot(0F, 0F, 0F);
+					modelTransform = PartPose.offset(0F, 0F, 0F);
 				} else if (boneRotation != null) {
-					modelTransform = ModelTransform.of(
+					modelTransform = PartPose.offsetAndRotation(
 							-(bones.get(bone.parent).pivot.get(0) - bone.pivot.get(0)),
 							bones.get(bone.parent).pivot.get(1) - bone.pivot.get(1),
 							-(bones.get(bone.parent).pivot.get(2) - bone.pivot.get(2)),
@@ -88,22 +96,22 @@ public class BedrockModel implements Identifiable {
 							(float) Math.toRadians(boneRotation.get(2))
 					);
 				} else {
-					modelTransform = ModelTransform.pivot(
+					modelTransform = PartPose.offset(
 							-(bones.get(bone.parent).pivot.get(0) - bone.pivot.get(0)),
 							bones.get(bone.parent).pivot.get(1) - bone.pivot.get(1),
 							-(bones.get(bone.parent).pivot.get(2) - bone.pivot.get(2))
 					);
 				}
 
-				ModelPartBuilder modelPart = ModelPartBuilder.create();
-				List<ModelPartBuilder> subParts = new ArrayList<>();
-				List<ModelTransform> modelTransforms = new ArrayList<>();
+				CubeListBuilder modelPart = CubeListBuilder.create();
+				List<CubeListBuilder> subParts = new ArrayList<>();
+				List<PartPose> modelTransforms = new ArrayList<>();
 
 				List<Cube> boneCubes = bone.cubes;
 				if (boneCubes != null) {
 					for (Cube cube : boneCubes) {
 						boolean hasCubeRotation = cube.rotation != null;
-						ModelPartBuilder subPart = hasCubeRotation ? ModelPartBuilder.create() : modelPart;
+						CubeListBuilder subPart = hasCubeRotation ? CubeListBuilder.create() : modelPart;
 						List<Float> pivot = (cube.pivot != null) ? cube.pivot : bone.pivot;
 
 						String targetPartName = bone.name;
@@ -120,12 +128,12 @@ public class BedrockModel implements Identifiable {
 								int uvX = cube.uv.box().get(0);
 								int uvY = cube.uv.box().get(1);
 
-								subPart.uv(uvX, uvY);
-								if (cube.mirror) subPart.mirrored();
+								subPart.texOffs(uvX, uvY);
+								if (cube.mirror) subPart.mirror();
 
-								subPart.cuboid(oX, oY, oZ, sX, sY, sZ, new Dilation(cube.inflate));
+								subPart.addBox(oX, oY, oZ, sX, sY, sZ, new CubeDeformation(cube.inflate));
 
-								if (cube.mirror) subPart.mirrored(false);
+								if (cube.mirror) subPart.mirror(false);
 							} else {
 								List<Float> cubePivot = cube.pivot != null ? cube.pivot : bone.pivot;
 								List<Float> cubeRot = cube.rotation != null ? cube.rotation : List.of(0F, 0F, 0F);
@@ -146,7 +154,7 @@ public class BedrockModel implements Identifiable {
 						}
 
 						if (hasCubeRotation) {
-							modelTransforms.add(ModelTransform.of(
+							modelTransforms.add(PartPose.offsetAndRotation(
 									-(bone.pivot.get(0) - cube.pivot.get(0)),
 									bone.pivot.get(1) - cube.pivot.get(1),
 									-(bone.pivot.get(2) - cube.pivot.get(2)),
@@ -159,11 +167,11 @@ public class BedrockModel implements Identifiable {
 					}
 				}
 
-				parts.put(bone.name, parentPart.addChild(bone.name, modelPart, modelTransform));
+				parts.put(bone.name, parentPart.addOrReplaceChild(bone.name, modelPart, modelTransform));
 
 				int counter = 0;
 				for (int index = 0; index < subParts.size(); index++) {
-					parts.get(bone.name).addChild(
+					parts.get(bone.name).addOrReplaceChild(
 							bone.name + (counter++),
 							subParts.get(index),
 							modelTransforms.get(index)
@@ -171,7 +179,7 @@ public class BedrockModel implements Identifiable {
 				}
 			}
 
-			return TexturedModelData.of(
+			return LayerDefinition.create(
 					modelData,
 					geometry.description.textureWidth,
 					geometry.description.textureHeight
@@ -197,7 +205,7 @@ public class BedrockModel implements Identifiable {
 	}
 
 	@Override
-	public Identifier id() {
+	public ResourceLocation id() {
 		if (this.id == null) {
 			throw new IllegalStateException("Model identifier is not set.");
 		}

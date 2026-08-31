@@ -4,9 +4,7 @@ import dev.amble.ait.client.sounds.alarm.ClientAlarmHandler;
 import dev.amble.ait.client.sounds.flight.ClientFlightMusicHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import net.minecraft.client.MinecraftClient;
-
+import net.minecraft.client.Minecraft;
 import dev.amble.ait.client.sounds.console.ClientConsoleAmbientSoundsHandler;
 import dev.amble.ait.client.sounds.drifting.ClientTwoThousandSoundHandler;
 import dev.amble.ait.client.sounds.engine.ClientEngineLoopSoundHandler;
@@ -149,7 +147,7 @@ public class ClientSoundManager {
         return flightMusic;
     }
 
-    public static void tick(MinecraftClient client) {
+    public static void tick(Minecraft client) {
         if (getAlarm() != null)
             getAlarm().tick(client);
 

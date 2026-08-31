@@ -2,17 +2,14 @@ package dev.amble.ait.core.tardis.handler.travel;
 
 import java.util.Optional;
 import java.util.Random;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import dev.drtheo.queue.api.ActionQueue;
-
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITSounds;
@@ -65,7 +62,7 @@ public sealed interface CrashableTardisTravel permits TravelHandler {
         if (tardis.sequence().hasActiveSequence())
             tardis.sequence().setActiveSequence(null, true);
 
-        ServerWorld world = tardis.asServer().world();
+        ServerLevel world = tardis.asServer().world();
 
         tardis.getDesktop().getConsolePos().forEach(console -> {
             startCrashEffects(tardis, console);
@@ -73,18 +70,18 @@ public sealed interface CrashableTardisTravel permits TravelHandler {
 
         Random random = AITMod.RANDOM;
 
-        for (ServerPlayerEntity player : world.getPlayers()) {
+        for (ServerPlayer player : world.players()) {
             float xVel = random.nextFloat(-2f, 3f);
             float yVel = random.nextFloat(-1f, 2f);
             float zVel = random.nextFloat(-2f, 3f);
 
-            player.setVelocity(xVel * power, yVel * power, zVel * power);
-            player.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 40 * power, 1, true, false, false));
-            player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 40 * power, 1, true, false, false));
-            player.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, 40 * power, 2, true, false, false));
+            player.setDeltaMovement(xVel * power, yVel * power, zVel * power);
+            player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40 * power, 1, true, false, false));
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40 * power, 1, true, false, false));
+            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40 * power, 2, true, false, false));
 
             int damage = (int) Math.round(0.5 * power);
-            player.damage(world.getDamageSources().generic(), damage);
+            player.hurt(world.damageSources().generic(), damage);
         }
 
         tardis.door().setLocked(true);
@@ -107,14 +104,14 @@ public sealed interface CrashableTardisTravel permits TravelHandler {
 
         // play new arpalarm music - its stereo so it shouldn't matter where it's played from
         if (random.nextInt(0, 15) == 2){
-            tardis.asServer().world().playSound(null, 0, 0, 0, AITSounds.ARPALARM, SoundCategory.MASTER, 100000f, 1f);
+            tardis.asServer().world().playSound(null, 0, 0, 0, AITSounds.ARPALARM, SoundSource.MASTER, 100000f, 1f);
         }
 
         TardisEvents.CRASH.invoker().onCrash(tardis);
     }
 
     default void startCrashEffects(Tardis tardis, BlockPos console) {
-        ServerWorld world = tardis.asServer().world();
-        TardisDesktop.playSoundAtConsole(world, console, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 3f, 1f);
+        ServerLevel world = tardis.asServer().world();
+        TardisDesktop.playSoundAtConsole(world, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 3f, 1f);
     }
 }

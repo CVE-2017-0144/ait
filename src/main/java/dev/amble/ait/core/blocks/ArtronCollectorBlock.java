@@ -3,62 +3,65 @@ package dev.amble.ait.core.blocks;
 import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 
 import java.util.List;
-
-import net.minecraft.block.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
 import dev.amble.ait.core.engine.link.block.HorizontalFluidLinkBlock;
 
 @SuppressWarnings("deprecation")
-public class ArtronCollectorBlock extends HorizontalFluidLinkBlock implements BlockEntityProvider {
+public class ArtronCollectorBlock extends HorizontalFluidLinkBlock implements EntityBlock {
 
-    protected static final VoxelShape Y_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 32.0, 16.0);
+    protected static final VoxelShape Y_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 32.0, 16.0);
 
-    public ArtronCollectorBlock(Settings settings) {
+    public ArtronCollectorBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return Y_SHAPE;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
-    public boolean hasSidedTransparency(BlockState state) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
         return true;
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull World world, @NotNull BlockState state,
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level world, @NotNull BlockState state,
             @NotNull BlockEntityType<T> type) {
         return (world1, blockPos, blockState, ticker) -> {
             if (ticker instanceof ArtronCollectorBlockEntity collector) {
@@ -68,31 +71,31 @@ public class ArtronCollectorBlock extends HorizontalFluidLinkBlock implements Bl
     }
 
     @Override
-    public boolean isShapeFullCube(BlockState state, BlockView world, BlockPos pos) {
+    public boolean isCollisionShapeFullBlock(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
 
     @Nullable @Override
-    public FluidLinkBlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public FluidLinkBlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ArtronCollectorBlockEntity(pos, state);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
             BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ArtronCollectorBlockEntity artronCollectorBlockEntity)
-            artronCollectorBlockEntity.useOn(world, player.isSneaking(), player);
+            artronCollectorBlockEntity.useOn(world, player.isShiftKeyDown(), player);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        super.appendTooltip(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, world, tooltip, options);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            tooltip.add(Text.translatable("block.ait.artron_collector_block.tooltip.use").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+            tooltip.add(Component.translatable("block.ait.artron_collector_block.tooltip.use").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         });
     }
 }

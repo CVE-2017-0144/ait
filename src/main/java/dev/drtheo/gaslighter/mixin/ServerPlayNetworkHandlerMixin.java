@@ -2,6 +2,18 @@ package dev.drtheo.gaslighter.mixin;
 
 import dev.drtheo.gaslighter.api.FakeBlockEvents;
 import dev.drtheo.gaslighter.api.Twitter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,44 +21,31 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
-@Mixin(value = ServerPlayNetworkHandler.class, priority = 1001)
+@Mixin(value = ServerGamePacketListenerImpl.class, priority = 1001)
 public abstract class ServerPlayNetworkHandlerMixin {
 
-    @Shadow public ServerPlayerEntity player;
+    @Shadow public ServerPlayer player;
 
-    @Redirect(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;interactBlock(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
-    public ActionResult onPlayerInteractBlock(ServerPlayerInteractionManager instance, ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult) {
-        ServerWorld serverWorld = this.player.getServerWorld();
+    @Redirect(method = "handleUseItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;useItemOn(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"))
+    public InteractionResult onPlayerInteractBlock(ServerPlayerGameMode instance, ServerPlayer player, Level world, ItemStack stack, InteractionHand hand, BlockHitResult hitResult) {
+        ServerLevel serverWorld = this.player.serverLevel();
         BlockPos blockPos = hitResult.getBlockPos();
 
         if (serverWorld instanceof Twitter twitter && twitter.ait$isFake(blockPos)) {
             FakeBlockEvents.Action action = FakeBlockEvents.INTERACT.invoker().check(player, hand, hitResult.getBlockPos());
 
             if (action.shouldRemove())
-                return ActionResult.PASS;
+                return InteractionResult.PASS;
         }
 
-        return instance.interactBlock(player, world, stack, hand, hitResult);
+        return instance.useItemOn(player, world, stack, hand, hitResult);
     }
 
-    @Inject(method = "onPlayerInteractBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"), cancellable = true)
-    public void onPlayerInteractBlock(PlayerInteractBlockC2SPacket packet, CallbackInfo ci) {
-        ServerWorld serverWorld = this.player.getServerWorld();
+    @Inject(method = "handleUseItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"), cancellable = true)
+    public void onPlayerInteractBlock(ServerboundUseItemOnPacket packet, CallbackInfo ci) {
+        ServerLevel serverWorld = this.player.serverLevel();
 
-        BlockHitResult blockHitResult = packet.getBlockHitResult();
+        BlockHitResult blockHitResult = packet.getHitResult();
         BlockPos blockPos = blockHitResult.getBlockPos();
 
         BlockState state = serverWorld.getBlockState(blockPos);

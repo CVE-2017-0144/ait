@@ -2,13 +2,13 @@ package dev.amble.lib.platform.lifecycle;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class ServerConnectionEvents {
-
-    private ServerConnectionEvents() {}
+public class ServerConnectionEvents {
 
     public interface Join {
         void onPlayReady(ServerPlayer player, MinecraftServer server);
@@ -33,13 +33,13 @@ public final class ServerConnectionEvents {
             });
 
     static {
-        bootstrap();
-    }
-
-    private static void bootstrap() {
-        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN
-                .register((handler, sender, server) -> JOIN.invoker().onPlayReady(handler.getPlayer(), server));
-        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT
-                .register((handler, server) -> DISCONNECT.invoker().onPlayDisconnect(handler.getPlayer(), server));
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, event -> {
+            if (event.getEntity() instanceof ServerPlayer player)
+                JOIN.invoker().onPlayReady(player, player.getServer());
+        });
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, event -> {
+            if (event.getEntity() instanceof ServerPlayer player)
+                DISCONNECT.invoker().onPlayDisconnect(player, player.getServer());
+        });
     }
 }

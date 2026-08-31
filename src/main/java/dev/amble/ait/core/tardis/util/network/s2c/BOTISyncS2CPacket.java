@@ -1,12 +1,12 @@
 package dev.amble.ait.core.tardis.util.network.s2c;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.BOTICache;
 import dev.amble.ait.core.net.AitNetworking;
@@ -36,7 +36,7 @@ public final class BOTISyncS2CPacket {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void init() {
         AitNetworking.registerClientReceiver(ID, (client, handler, buf, responseSender) -> {
             BlockPos exteriorPos = buf.readBlockPos();

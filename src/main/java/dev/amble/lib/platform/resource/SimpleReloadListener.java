@@ -1,14 +1,9 @@
 package dev.amble.lib.platform.resource;
 
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
-public interface SimpleReloadListener extends SimpleSynchronousResourceReloadListener {
+public interface SimpleReloadListener extends ResourceManagerReloadListener {
 
     ResourceLocation getReloadId();
-
-    @Override
-    default ResourceLocation getFabricId() {
-        return this.getReloadId();
-    }
 }

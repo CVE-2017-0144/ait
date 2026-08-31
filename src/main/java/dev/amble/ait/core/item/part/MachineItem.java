@@ -1,7 +1,7 @@
 package dev.amble.ait.core.item.part;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,7 +43,7 @@ public class MachineItem extends Item {
         return true;
     }
 
-    @Environment(value = EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void disassemble(ItemStack machine) {
         RegistryFriendlyByteBuf data = AitNetworking.buf();
         ItemStack.STREAM_CODEC.encode(data, machine.copyWithCount(1));
@@ -52,7 +52,7 @@ public class MachineItem extends Item {
         machine.shrink(1);
     }
 
-    @Environment(value = EnvType.SERVER)
+    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void disassemble(ServerPlayer player, ItemStack machine, MachineRecipeSchema recipe) {
         machine.shrink(1);
 

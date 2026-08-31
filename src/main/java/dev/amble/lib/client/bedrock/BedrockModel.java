@@ -14,8 +14,8 @@ import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import dev.amble.lib.api.Identifiable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.*;
 import net.minecraft.client.model.geom.builders.*;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Type;
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BedrockModel implements Identifiable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BedrockModel.class);
 

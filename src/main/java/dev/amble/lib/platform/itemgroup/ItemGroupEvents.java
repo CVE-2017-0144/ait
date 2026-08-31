@@ -7,7 +7,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
+import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
@@ -33,35 +36,46 @@ public final class ItemGroupEvents {
             });
 
     static {
-        net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.MODIFY_ENTRIES_ALL
-                .register((tab, entries) -> MODIFY_ENTRIES_ALL.invoker().modify(tab, wrap(entries)));
+        IEventBus modBus = Platform.modBus();
+
+        if (modBus != null)
+            modBus.addListener(BuildCreativeModeTabContentsEvent.class, event -> {
+                ItemGroupEntries entries = wrap(event);
+
+                Event<Modify> forTab = EVENTS.get(event.getTabKey());
+
+                if (forTab != null)
+                    forTab.invoker().modify(entries);
+
+                MODIFY_ENTRIES_ALL.invoker().modify(event.getTab(), entries);
+            });
     }
 
     public static Event<Modify> modifyEntriesEvent(ResourceKey<CreativeModeTab> tab) {
-        return EVENTS.computeIfAbsent(tab, key -> {
-            Event<Modify> event = EventFactory.createArrayBacked(Modify.class, callbacks -> entries -> {
-                for (Modify callback : callbacks) {
-                    callback.modify(entries);
-                }
-            });
-
-            net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.modifyEntriesEvent(key)
-                    .register(entries -> event.invoker().modify(wrap(entries)));
-
-            return event;
-        });
+        return EVENTS.computeIfAbsent(tab, key -> EventFactory.createArrayBacked(Modify.class,
+                callbacks -> entries -> {
+                    for (Modify callback : callbacks) {
+                        callback.modify(entries);
+                    }
+                }));
     }
 
-    private static ItemGroupEntries wrap(net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries entries) {
+    private static ItemGroupEntries wrap(BuildCreativeModeTabContentsEvent event) {
         return new ItemGroupEntries() {
             @Override
             public void accept(ItemStack stack, CreativeModeTab.TabVisibility visibility) {
-                entries.accept(stack, visibility);
+                event.accept(stack, visibility);
             }
 
             @Override
             public void addAfter(ItemLike after, ItemLike... items) {
-                entries.addAfter(after, items);
+                ItemStack anchor = new ItemStack(after);
+
+                for (ItemLike item : items) {
+                    ItemStack stack = new ItemStack(item);
+                    event.insertAfter(anchor, stack, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    anchor = stack;
+                }
             }
         };
     }

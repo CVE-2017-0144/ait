@@ -17,8 +17,8 @@ import dev.amble.lib.AmbleKit;
 import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.Registry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BedrockAnimationRegistry implements SimpleReloadListener, Registry {
 	private static final BedrockAnimationRegistry INSTANCE = new BedrockAnimationRegistry();
 

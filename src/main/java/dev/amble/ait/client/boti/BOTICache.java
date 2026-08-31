@@ -1,5 +1,7 @@
 package dev.amble.ait.client.boti;
 
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,15 +10,13 @@ import java.util.UUID;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 
 import dev.amble.ait.core.tardis.util.network.BOTISnapshot;
 import dev.amble.ait.core.tardis.util.network.c2s.BOTIChunkRequestC2SPacket;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class BOTICache {
 
     private static final long REFRESH_MILLIS = 30_000;

@@ -1,7 +1,7 @@
 package dev.amble.ait.compat.portal;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.Packet;
@@ -91,7 +91,7 @@ public class PortalsHandler extends KeyedTardisComponent {
         PortalVisualizerUtil.init();
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void clientInit() {
         // TODO: make it so doors don't render twice.
         //  > maybe we should just cancel door rendering when there's BOTI present?

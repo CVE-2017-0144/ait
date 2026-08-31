@@ -487,9 +487,8 @@ public class HandlesResponseRegistry {
     }
 
 
-    private static boolean onChatMessage(PlayerChatMessage signedMessage, ServerPlayer player, ChatType.Bound parameters) {
+    private static boolean onChatMessage(String message, ServerPlayer player) {
         ItemStack stack;
-        String message = signedMessage.signedContent();
 
         boolean bl = message.toLowerCase().startsWith("handles");
         if (player.level().isClientSide()) return true;

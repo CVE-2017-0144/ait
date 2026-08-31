@@ -3,8 +3,8 @@ package dev.amble.ait.module.gun.core.item;
 import java.util.List;
 import java.util.function.Predicate;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -96,7 +96,7 @@ public class BaseGunItem extends ProjectileWeaponItem {
         return stack;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void shootGun(boolean shoot, boolean isAds) {
         RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBoolean(shoot);
@@ -104,7 +104,7 @@ public class BaseGunItem extends ProjectileWeaponItem {
         AitNetworking.send(BaseGunItem.SHOOT, buf);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void tryShoot(Level world, Entity entity, boolean selected) {
         if (world.isClientSide() && entity instanceof Player player) {
             if (selected) {

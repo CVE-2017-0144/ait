@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 import dev.amble.ait.client.overlays.*;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -97,6 +96,7 @@ import dev.amble.ait.registry.impl.console.ConsoleRegistry;
 import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
 import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
+import dev.amble.lib.platform.ClientModEntrypoint;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.amble.lib.platform.clientlifecycle.ClientInputEvents;
 import dev.amble.lib.platform.command.Commands;
@@ -107,8 +107,8 @@ import dev.amble.lib.platform.render.WorldRenderEvents;
 import dev.amble.lib.platform.resource.BuiltinPacks;
 import dev.amble.lib.register.AmbleRegistries;
 
-@Environment(value = EnvType.CLIENT)
-public class AITModClient implements ClientModInitializer {
+@OnlyIn(Dist.CLIENT)
+public class AITModClient implements ClientModEntrypoint {
 
     public static AITClientConfig CONFIG;
     private final Minecraft client = Minecraft.getInstance();

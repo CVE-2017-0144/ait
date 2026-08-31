@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -18,12 +16,14 @@ import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.recipes.*;
 import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
-public class AITRecipeProvider extends FabricRecipeProvider {
+public class AITRecipeProvider extends RecipeProvider {
     public List<ShapelessRecipeBuilder> shapelessRecipes = new ArrayList<>();
     public List<ShapedRecipeBuilder> shapedRecipes = new ArrayList<>();
     public HashMap<SmithingTransformRecipeBuilder, ResourceLocation> smithingTransformRecipes = new HashMap<>();
@@ -35,7 +35,7 @@ public class AITRecipeProvider extends FabricRecipeProvider {
     public record BlastFurnaceRecipeEntry(SimpleCookingRecipeBuilder builder, ResourceLocation id) {}
 
 
-    public AITRecipeProvider(FabricDataOutput output,
+    public AITRecipeProvider(PlatformDataOutput output,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }

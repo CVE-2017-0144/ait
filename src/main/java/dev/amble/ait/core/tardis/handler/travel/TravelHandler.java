@@ -11,8 +11,8 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import dev.drtheo.scheduler.api.task.Task;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -151,7 +151,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
         if (Platform.isClient()) initializeClient();
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void initializeClient() {
         AitNetworking.registerClientReceiver(TravelHandler.CANCEL_DEMAT_SOUND, (client, handler, buf,
                                                                                        responseSender) -> {

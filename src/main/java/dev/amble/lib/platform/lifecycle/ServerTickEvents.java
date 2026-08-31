@@ -2,13 +2,14 @@ package dev.amble.lib.platform.lifecycle;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class ServerTickEvents {
-
-    private ServerTickEvents() {}
+public class ServerTickEvents {
 
     public interface Tick {
         void onTick(MinecraftServer server);
@@ -47,17 +48,18 @@ public final class ServerTickEvents {
             });
 
     static {
-        bootstrap();
-    }
+        NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class,
+                event -> START_SERVER_TICK.invoker().onTick(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class,
+                event -> END_SERVER_TICK.invoker().onTick(event.getServer()));
 
-    private static void bootstrap() {
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.START_SERVER_TICK
-                .register(server -> START_SERVER_TICK.invoker().onTick(server));
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK
-                .register(server -> END_SERVER_TICK.invoker().onTick(server));
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.START_WORLD_TICK
-                .register(world -> START_WORLD_TICK.invoker().onTick(world));
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_WORLD_TICK
-                .register(world -> END_WORLD_TICK.invoker().onTick(world));
+        NeoForge.EVENT_BUS.addListener(LevelTickEvent.Pre.class, event -> {
+            if (event.getLevel() instanceof ServerLevel world)
+                START_WORLD_TICK.invoker().onTick(world);
+        });
+        NeoForge.EVENT_BUS.addListener(LevelTickEvent.Post.class, event -> {
+            if (event.getLevel() instanceof ServerLevel world)
+                END_WORLD_TICK.invoker().onTick(world);
+        });
     }
 }

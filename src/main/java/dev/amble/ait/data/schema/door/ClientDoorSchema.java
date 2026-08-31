@@ -3,8 +3,8 @@ package dev.amble.ait.data.schema.door;
 import java.lang.reflect.Type;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.client.models.AnimatedModel;
@@ -13,7 +13,7 @@ import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
 import dev.amble.ait.registry.impl.door.DoorRegistry;
 import dev.amble.lib.api.Identifiable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class ClientDoorSchema implements Identifiable {
     private final ResourceLocation parent;
     private final ResourceLocation id;

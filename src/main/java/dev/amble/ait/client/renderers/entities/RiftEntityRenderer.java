@@ -1,8 +1,8 @@
 package dev.amble.ait.client.renderers.entities;
 
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -20,7 +20,7 @@ import dev.amble.ait.core.entities.RiftEntity;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class RiftEntityRenderer extends EntityRenderer<RiftEntity> {
 
     public static final ResourceLocation RIFT_TEXTURE = AITMod.id("textures/entity/rift/rift.png");

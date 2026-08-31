@@ -9,8 +9,8 @@ import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
 import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.util.ServerLifecycleHooks;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -55,7 +55,7 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	private static void initClient() {
 		ClientEvents.DISCONNECT.register((client) -> {
 			getInstance().clear();

@@ -2,7 +2,6 @@ package dev.amble.ait.mixin.client.rendering;
 
 import java.util.Map;
 
-import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -23,7 +22,7 @@ public abstract class BakedModelManagerMixin implements BakedModelEditor {
 
     @Override
     public BakedModel ait$getModel(ResourceLocation identifier) {
-        return ((FabricBakedModelManager) this).getModel(identifier);
+        return this.getModel(ModelResourceLocation.inventory(identifier));
     }
 
     @Override

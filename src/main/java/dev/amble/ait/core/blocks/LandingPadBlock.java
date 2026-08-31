@@ -1,7 +1,7 @@
 package dev.amble.ait.core.blocks;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -70,7 +70,7 @@ public class LandingPadBlock extends Block {
         return InteractionResult.CONSUME;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void openScreen(BlockPos pos) {
         Minecraft.getInstance().setScreen(new LandingPadScreen(pos));
     }

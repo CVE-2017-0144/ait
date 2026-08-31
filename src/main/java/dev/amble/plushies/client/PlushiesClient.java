@@ -1,13 +1,13 @@
 package dev.amble.plushies.client;
 
+import dev.amble.lib.platform.ClientModEntrypoint;
 import dev.amble.lib.platform.render.ClientRegistries;
 import dev.amble.plushies.PlushieBlockEntities;
 import dev.amble.plushies.PlushieBlocks;
-import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.world.level.block.Block;
 
-public class PlushiesClient implements ClientModInitializer {
+public class PlushiesClient implements ClientModEntrypoint {
 
     @Override
     public void onInitializeClient() {

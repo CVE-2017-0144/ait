@@ -4,8 +4,8 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -47,7 +47,7 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
     private final ResourceLocation id;
     private final Loyalty loyalty;
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private ClientConsoleVariantSchema cachedSchema;
 
     protected ConsoleVariantSchema(ResourceLocation parent, ResourceLocation id, Optional<Loyalty> loyalty) {
@@ -93,7 +93,7 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
         return ConsoleRegistry.getInstance().get(this.parentId());
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ClientConsoleVariantSchema getClient() {
         if (this.cachedSchema == null)
             this.cachedSchema = ClientConsoleVariantRegistry.withParent(this);

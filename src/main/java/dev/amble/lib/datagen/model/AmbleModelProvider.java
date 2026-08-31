@@ -2,8 +2,6 @@ package dev.amble.lib.datagen.model;
 
 import java.util.*;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.*;
 import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.*;
@@ -20,16 +18,18 @@ import dev.amble.lib.AmbleKit;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.container.impl.ItemContainer;
 import dev.amble.lib.datagen.util.AutomaticModel;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
+import dev.amble.lib.platform.datagen.PlatformModelProvider;
 import dev.amble.lib.util.ReflectionUtil;
 
-public class AmbleModelProvider extends FabricModelProvider {
+public class AmbleModelProvider extends PlatformModelProvider {
 
-    protected final FabricDataOutput output;
+    protected final PlatformDataOutput output;
 
     protected List<Class<? extends BlockContainer>> blockClass = new ArrayList<>();
     protected Queue<Class<? extends ItemContainer>> itemClass = new LinkedList<>();
 
-    public AmbleModelProvider(FabricDataOutput output) {
+    public AmbleModelProvider(PlatformDataOutput output) {
         super(output);
 
         this.output = output;
@@ -106,6 +106,6 @@ public class AmbleModelProvider extends FabricModelProvider {
     }
 
     public boolean doesTextureExist(ResourceLocation texture) {
-        return this.output.getModContainer().findPath("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
+        return this.output.findResource("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
     }
 }

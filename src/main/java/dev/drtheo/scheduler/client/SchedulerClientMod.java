@@ -1,9 +1,9 @@
 package dev.drtheo.scheduler.client;
 
+import dev.amble.lib.platform.ClientModEntrypoint;
 import dev.drtheo.scheduler.api.client.ClientScheduler;
-import net.fabricmc.api.ClientModInitializer;
 
-public class SchedulerClientMod implements ClientModInitializer {
+public class SchedulerClientMod implements ClientModEntrypoint {
 
     @Override
     public void onInitializeClient() {

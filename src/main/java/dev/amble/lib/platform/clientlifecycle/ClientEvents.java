@@ -1,15 +1,22 @@
 package dev.amble.lib.platform.clientlifecycle;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 
+import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class ClientEvents {
 
     private ClientEvents() {}
@@ -81,20 +88,27 @@ public final class ClientEvents {
     }
 
     private static void bootstrap() {
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK
-                .register(client -> END_CLIENT_TICK.invoker().onTick(client));
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED
-                .register(client -> CLIENT_STARTED.invoker().onClientStarted(client));
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD
-                .register((world, chunk) -> CHUNK_LOAD.invoker().onChunk(world, chunk));
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD
-                .register((world, chunk) -> CHUNK_UNLOAD.invoker().onChunk(world, chunk));
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class,
+                event -> END_CLIENT_TICK.invoker().onTick(Minecraft.getInstance()));
+        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingIn.class,
+                event -> JOIN.invoker().onPlayReady(Minecraft.getInstance()));
+        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingOut.class,
+                event -> DISCONNECT.invoker().onPlayDisconnect(Minecraft.getInstance()));
 
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN
-                .register((handler, sender, client) -> JOIN.invoker().onPlayReady(client));
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT
-                .register((handler, client) -> DISCONNECT.invoker().onPlayDisconnect(client));
-        net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents.DISCONNECT
-                .register((handler, client) -> DISCONNECT.invoker().onPlayDisconnect(client));
+        NeoForge.EVENT_BUS.addListener(ChunkEvent.Load.class, event -> {
+            if (event.getLevel() instanceof ClientLevel world && event.getChunk() instanceof LevelChunk chunk)
+                CHUNK_LOAD.invoker().onChunk(world, chunk);
+        });
+        NeoForge.EVENT_BUS.addListener(ChunkEvent.Unload.class, event -> {
+            if (event.getLevel() instanceof ClientLevel world && event.getChunk() instanceof LevelChunk chunk)
+                CHUNK_UNLOAD.invoker().onChunk(world, chunk);
+        });
+
+        IEventBus modBus = Platform.modBus();
+
+        if (modBus != null)
+            modBus.addListener(FMLClientSetupEvent.class,
+                    event -> event.enqueueWork(() -> CLIENT_STARTED.invoker()
+                            .onClientStarted(Minecraft.getInstance())));
     }
 }

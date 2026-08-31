@@ -2,9 +2,9 @@ package dev.amble.plushies;
 
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.container.RegistryContainer;
-import net.fabricmc.api.ModInitializer;
+import dev.amble.lib.platform.ModEntrypoint;
 
-public class Plushies implements ModInitializer {
+public class Plushies implements ModEntrypoint {
 
     @Override
     public void onInitialize() {

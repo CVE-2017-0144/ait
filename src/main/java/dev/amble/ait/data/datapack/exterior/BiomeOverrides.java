@@ -6,8 +6,8 @@ import java.util.function.Function;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -32,7 +32,7 @@ public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, ResourceL
         return this.lookup.get(type);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void validate() {
         ResourceManager manager = Minecraft.getInstance().getResourceManager();
 

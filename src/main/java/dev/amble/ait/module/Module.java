@@ -3,8 +3,8 @@ package dev.amble.ait.module;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.Registry;
@@ -32,7 +32,7 @@ public abstract class Module implements Identifiable {
 
     public abstract void init();
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public abstract void initClient();
 
     protected Item register(Item item, ResourceLocation id) {

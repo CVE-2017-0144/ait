@@ -10,8 +10,8 @@ public class AItemGroup extends CreativeModeTab {
 
     private final ResourceLocation id;
 
-    protected AItemGroup(ResourceLocation id, Row row, int column, Type type, Component displayName, Supplier<ItemStack> iconSupplier, DisplayItemsGenerator entryCollector) {
-        super(row, column, type, displayName, iconSupplier, entryCollector);
+    protected AItemGroup(ResourceLocation id, CreativeModeTab.Builder builder) {
+        super(builder);
 
         this.id = id;
     }
@@ -20,8 +20,8 @@ public class AItemGroup extends CreativeModeTab {
         return id;
     }
 
-    public static dev.amble.lib.itemgroup.AItemGroup.Builder builder(ResourceLocation id) {
-        return new dev.amble.lib.itemgroup.AItemGroup.Builder(id);
+    public static AItemGroup.Builder builder(ResourceLocation id) {
+        return new AItemGroup.Builder(id);
     }
 
     public static class Builder {
@@ -43,42 +43,42 @@ public class AItemGroup extends CreativeModeTab {
             this.id = id;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder displayName(Component displayName) {
+        public AItemGroup.Builder displayName(Component displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder icon(Supplier<ItemStack> iconSupplier) {
+        public AItemGroup.Builder icon(Supplier<ItemStack> iconSupplier) {
             this.iconSupplier = iconSupplier;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder entries(DisplayItemsGenerator entryCollector) {
+        public AItemGroup.Builder entries(DisplayItemsGenerator entryCollector) {
             this.entryCollector = entryCollector;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder special() {
+        public AItemGroup.Builder special() {
             this.special = true;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder noRenderedName() {
+        public AItemGroup.Builder noRenderedName() {
             this.renderName = false;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder noScrollbar() {
+        public AItemGroup.Builder noScrollbar() {
             this.scrollbar = false;
             return this;
         }
 
-        protected dev.amble.lib.itemgroup.AItemGroup.Builder type(Type type) {
+        protected AItemGroup.Builder type(Type type) {
             this.type = type;
             return this;
         }
 
-        public dev.amble.lib.itemgroup.AItemGroup.Builder texture(String texture) {
+        public AItemGroup.Builder texture(String texture) {
             this.texture = texture;
             return this;
         }
@@ -91,13 +91,22 @@ public class AItemGroup extends CreativeModeTab {
             if (this.displayName == null)
                 this.displayName = Component.translatable("itemGroup." + id.getNamespace() + "." + id.getPath());
 
-            AItemGroup itemGroup = new AItemGroup(this.id, null, -1, this.type, this.displayName, this.iconSupplier, this.entryCollector);
+            CreativeModeTab.Builder builder = new CreativeModeTab.Builder(Row.TOP, -1)
+                    .title(this.displayName)
+                    .icon(this.iconSupplier)
+                    .displayItems(this.entryCollector)
+                    .backgroundTexture(CreativeModeTab.createTextureLocation(this.texture));
 
-            itemGroup.alignedRight = this.special;
-            itemGroup.showTitle = this.renderName;
-            itemGroup.canScroll = this.scrollbar;
-            itemGroup.backgroundTexture = CreativeModeTab.createTextureLocation(this.texture);
-            return itemGroup;
+            if (this.special)
+                builder.alignedRight();
+
+            if (!this.renderName)
+                builder.hideTitle();
+
+            if (!this.scrollbar)
+                builder.noScrollBar();
+
+            return new AItemGroup(this.id, builder);
         }
     }
 }

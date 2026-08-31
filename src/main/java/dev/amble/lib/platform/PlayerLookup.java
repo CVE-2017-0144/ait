@@ -1,21 +1,21 @@
 package dev.amble.lib.platform;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
-public final class PlayerLookup {
-
-    private PlayerLookup() {}
+public class PlayerLookup {
 
     public static Collection<ServerPlayer> tracking(ServerLevel world, ChunkPos pos) {
-        return net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(world, pos);
+        List<ServerPlayer> players = world.getChunkSource().chunkMap.getPlayers(pos, false);
+        return players == null ? List.of() : players;
     }
 
     public static Collection<ServerPlayer> tracking(ServerLevel world, BlockPos pos) {
-        return net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(world, pos);
+        return tracking(world, new ChunkPos(pos));
     }
 }

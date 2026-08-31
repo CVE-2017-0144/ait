@@ -6,8 +6,8 @@ import dev.amble.lib.blockentity.ABlockEntity;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
 import lombok.Getter;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.AnimationState;
@@ -31,7 +31,7 @@ public class GiftBoxBlockEntity extends ABlockEntity implements AnimatedBlockEnt
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public int getAge() {
         Minecraft client = Minecraft.getInstance();
         return client.player != null ? client.player.tickCount : 0;

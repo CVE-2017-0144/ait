@@ -6,17 +6,17 @@ import dev.amble.lib.animation.AnimationTracker;
 import dev.amble.lib.command.PlayAnimationCommand;
 import dev.amble.lib.command.SetSkinCommand;
 import dev.amble.lib.skin.SkinTracker;
-import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import dev.amble.lib.api.AmbleKitInitializer;
 import dev.amble.lib.platform.Entrypoints;
+import dev.amble.lib.platform.ModEntrypoint;
 import dev.amble.lib.platform.command.Commands;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
-public class AmbleKit implements ModInitializer {
+public class AmbleKit implements ModEntrypoint {
     public static final String MOD_ID = "amblekit";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 

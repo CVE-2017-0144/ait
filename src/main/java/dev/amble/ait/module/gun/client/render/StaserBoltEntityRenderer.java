@@ -1,7 +1,7 @@
 package dev.amble.ait.module.gun.client.render;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -14,7 +14,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.entities.projectiles.StaserBoltEntityModel;
 import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
 
-@Environment(value=EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class StaserBoltEntityRenderer
         extends EntityRenderer<StaserBoltEntity> {
 

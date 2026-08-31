@@ -4,8 +4,8 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +46,7 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
 
     public static final double DEFAULT_SEAT_FORWARD_TRANSLATION = 0.5;
     public static final Vec3 DEFAULT_SEAT_POS = new Vec3(0.5, 1, 0.5);
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private ClientExteriorVariantSchema cachedSchema;
 
     protected ExteriorVariantSchema(ResourceLocation category, ResourceLocation id, Optional<Loyalty> loyalty) {
@@ -97,7 +97,7 @@ public abstract class ExteriorVariantSchema extends BasicSchema implements Unloc
         return CategoryRegistry.getInstance().get(this.categoryId());
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ClientExteriorVariantSchema getClient() {
         if (this.cachedSchema == null)
             this.cachedSchema = ClientExteriorVariantRegistry.withParent(this);

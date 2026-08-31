@@ -2,8 +2,8 @@ package dev.amble.ait.client.renderers.entities;
 
 
 import dev.amble.ait.client.AITModClient;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -13,7 +13,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.BOTI;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
 
-@Environment(value=EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class TrenzalorePaintingEntityRenderer
         extends EntityRenderer<BOTIPaintingEntity> {
     public static final ResourceLocation TRENZALORE_PAINTING_TEXTURE = AITMod.id("textures/painting/trenzalore/trenzalore.png");

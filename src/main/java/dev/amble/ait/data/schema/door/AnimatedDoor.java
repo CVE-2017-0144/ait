@@ -2,8 +2,8 @@ package dev.amble.ait.data.schema.door;
 
 import java.util.Optional;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.phys.Vec3;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -30,7 +30,7 @@ public interface AnimatedDoor extends AnimatedFeature {
         return Vec3.ZERO;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     default void runAnimations(ModelPart root, PoseStack matrices, float tickDelta, ClientTardis tardis) {
         DoorHandler doors = tardis.door();
 

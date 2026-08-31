@@ -3,8 +3,8 @@ package dev.amble.ait.data.schema.console;
 import java.lang.reflect.Type;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -14,7 +14,7 @@ import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.console.variant.ConsoleVariantRegistry;
 import dev.amble.lib.api.Identifiable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class ClientConsoleVariantSchema implements Identifiable {
 
     private final ResourceLocation parent;
@@ -52,7 +52,7 @@ public abstract class ClientConsoleVariantSchema implements Identifiable {
 
     public abstract ResourceLocation emission();
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public abstract ConsoleModel model();
 
     public ConsoleModel getCachedModel() {

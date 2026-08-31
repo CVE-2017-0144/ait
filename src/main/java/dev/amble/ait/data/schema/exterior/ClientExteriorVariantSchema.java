@@ -3,8 +3,8 @@ package dev.amble.ait.data.schema.exterior;
 import java.lang.reflect.Type;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -17,7 +17,7 @@ import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.api.Identifiable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class ClientExteriorVariantSchema implements Identifiable {
 
     private final ResourceLocation parent;

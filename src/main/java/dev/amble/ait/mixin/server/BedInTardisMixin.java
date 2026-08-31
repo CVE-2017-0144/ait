@@ -1,7 +1,7 @@
 package dev.amble.ait.mixin.server;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -29,7 +29,7 @@ public class BedInTardisMixin {
         if (world.isClientSide()) { this.onClientSleep(player); }
     }
 
-    @Unique @Environment(EnvType.CLIENT)
+    @Unique @OnlyIn(Dist.CLIENT)
     private void onClientSleep(Player player) {
         Tardis tardis = ClientTardisUtil.getCurrentTardis();
         if (tardis == null) return;

@@ -1,7 +1,7 @@
 package dev.amble.lib.client.bedrock;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AnimationState;
 
@@ -148,7 +148,7 @@ public class TargetedAnimationState extends AnimationState {
 		this.animationLengthMs = Math.max(1L, lengthMs);
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void setAnimationLength(BedrockAnimation animation) {
 		setAnimationLength((long) (animation.animationLength * 1000L));
 	}

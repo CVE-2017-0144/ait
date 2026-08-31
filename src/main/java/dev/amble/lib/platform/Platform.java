@@ -2,19 +2,31 @@ package dev.amble.lib.platform;
 
 import java.util.Optional;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 public final class Platform {
 
     private Platform() {}
 
+    private static IEventBus modBus;
+
+    public static void setModBus(IEventBus bus) {
+        modBus = bus;
+    }
+
+    public static IEventBus modBus() {
+        return modBus;
+    }
+
     public static boolean isModLoaded(String modId) {
-        return FabricLoader.getInstance().isModLoaded(modId);
+        return ModList.get() != null && ModList.get().isLoaded(modId);
     }
 
     public static boolean isClient() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+        return FMLEnvironment.dist == Dist.CLIENT;
     }
 
     public static boolean isServer() {
@@ -22,12 +34,12 @@ public final class Platform {
     }
 
     public static Optional<String> modName(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId)
-                .map(container -> container.getMetadata().getName());
+        return ModList.get().getModContainerById(modId)
+                .map(container -> container.getModInfo().getDisplayName());
     }
 
     public static Optional<String> modVersion(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId)
-                .map(container -> container.getMetadata().getVersion().getFriendlyString());
+        return ModList.get().getModContainerById(modId)
+                .map(container -> container.getModInfo().getVersion().toString());
     }
 }

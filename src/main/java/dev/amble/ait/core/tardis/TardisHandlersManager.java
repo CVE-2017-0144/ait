@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.google.gson.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
@@ -74,7 +74,7 @@ public class TardisHandlersManager extends TardisComponent implements TardisTick
         });
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void tick(Minecraft client) {
         this.forEach(component -> {

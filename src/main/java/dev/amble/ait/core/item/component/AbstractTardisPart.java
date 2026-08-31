@@ -1,7 +1,7 @@
 package dev.amble.ait.core.item.component;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -128,7 +128,7 @@ public class AbstractTardisPart extends Item {
         return slots;
     }
 
-    @Environment(value = EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void disassemble(ItemStack machine) {
         RegistryFriendlyByteBuf data = AitNetworking.buf();
         ItemStack.STREAM_CODEC.encode(data, StackUtil.take(machine));
@@ -136,7 +136,7 @@ public class AbstractTardisPart extends Item {
         AitNetworking.send(DISASSEMBLE, data);
     }
 
-    @Environment(value = EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void unattach(ItemStack machine, AbstractLinkItem.Type link) {
         RegistryFriendlyByteBuf data = AitNetworking.buf();
         ItemStack.STREAM_CODEC.encode(data, machine);
@@ -145,7 +145,7 @@ public class AbstractTardisPart extends Item {
         AitNetworking.send(UNATTACH, data);
     }
 
-    @Environment(value = EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void attach(ItemStack machine, AbstractLinkItem link) {
         RegistryFriendlyByteBuf data = AitNetworking.buf();
         ItemStack.STREAM_CODEC.encode(data, machine);
@@ -154,7 +154,7 @@ public class AbstractTardisPart extends Item {
         AitNetworking.send(ATTACH, data);
     }
 
-    @Environment(value = EnvType.SERVER)
+    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void disassemble(ServerPlayer player, ItemStack machine, MachineRecipeSchema recipe) {
         machine.shrink(1);
 
@@ -163,7 +163,7 @@ public class AbstractTardisPart extends Item {
         }
     }
 
-    @Environment(value = EnvType.SERVER)
+    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void unattach(ServerPlayer player, ItemStack machine, AbstractLinkItem.Type type) {
         AbstractTardisPart.remove(machine, type);
     }

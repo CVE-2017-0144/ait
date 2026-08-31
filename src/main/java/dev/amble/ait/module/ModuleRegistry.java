@@ -1,7 +1,7 @@
 package dev.amble.ait.module;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.module.decoration.DecorationModule;
@@ -24,7 +24,7 @@ public class ModuleRegistry extends DatapackRegistry<Module> {
         iterator().forEachRemaining(Module::init);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void onClientInit() {
         super.onClientInit();

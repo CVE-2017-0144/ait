@@ -1,7 +1,7 @@
 package dev.amble.ait.client.sounds;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 
 // Referencing how music which loops is done but in our own way
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class LoopingSound extends AbstractTickableSoundInstance {
     public LoopingSound(SoundEvent soundEvent, SoundSource soundCategory) {
         super(soundEvent, soundCategory, RandomSource.create());

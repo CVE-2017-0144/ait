@@ -2,8 +2,8 @@ package dev.amble.ait.core.util;
 
 import java.util.*;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -180,7 +180,7 @@ public class WorldUtil {
         return TRAVEL_WORLDS;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("DataFlowIssue")
     public static String getName(Minecraft client) {
         if (client.isLocalServer())
@@ -198,7 +198,7 @@ public class WorldUtil {
         return translated;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static Component hackWorldText(Component existing) {
         if (ClientTardisUtil.getCurrentTardis() != null &&
                 !ClientTardisUtil.getCurrentTardis().flight().isFlying() && ClientTardisUtil.getCurrentTardis().travel().inFlight()) {

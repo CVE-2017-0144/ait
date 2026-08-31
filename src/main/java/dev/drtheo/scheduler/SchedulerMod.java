@@ -1,9 +1,9 @@
 package dev.drtheo.scheduler;
 
+import dev.amble.lib.platform.ModEntrypoint;
 import dev.drtheo.scheduler.api.common.Scheduler;
-import net.fabricmc.api.ModInitializer;
 
-public class SchedulerMod implements ModInitializer {
+public class SchedulerMod implements ModEntrypoint {
 
     @Override
     public void onInitialize() {

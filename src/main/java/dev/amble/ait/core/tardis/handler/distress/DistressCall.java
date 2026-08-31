@@ -2,8 +2,8 @@ package dev.amble.ait.core.tardis.handler.distress;
 
 import java.util.UUID;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -322,7 +322,7 @@ public record DistressCall(Sender sender, String message, int lifetime, int crea
             return this.findClientPlayer();
         }
 
-        @Environment(EnvType.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         private Player findClientPlayer() {
             return Minecraft.getInstance().level.getPlayerByUUID(this.getUuid());
         }

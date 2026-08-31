@@ -3,8 +3,8 @@ package dev.amble.ait.compat.portal;
 import java.util.Optional;
 import java.util.WeakHashMap;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,7 +50,7 @@ public class PortalVisualizerUtil {
         });
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void clientInit() {
         GuiPortalScreen.clientInit();
     }
@@ -84,7 +84,7 @@ public class PortalVisualizerUtil {
         AitNetworking.send(player, OPEN_VISUALIZER, buf);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static class GuiPortalScreen extends Screen {
 
         private static final ResourceLocation TEXTURE = AITMod.id("textures/gui/tardis/monitor/visualizer_menu.png");

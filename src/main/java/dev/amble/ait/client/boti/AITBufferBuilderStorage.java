@@ -2,8 +2,8 @@ package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 import java.util.SequencedMap;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class AITBufferBuilderStorage extends RenderBuffers {
 
     private static final int BOTI_BUFFER_SIZE = 786432;

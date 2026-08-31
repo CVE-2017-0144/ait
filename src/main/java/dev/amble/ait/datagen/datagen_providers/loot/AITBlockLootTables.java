@@ -1,6 +1,5 @@
 package dev.amble.ait.datagen.datagen_providers.loot;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -17,11 +16,12 @@ import dev.amble.ait.core.AITTags;
 import dev.amble.ait.module.ModuleRegistry;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
 import dev.amble.lib.datagen.loot.AmbleBlockLootTable;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import java.util.concurrent.CompletableFuture;
 
 public class AITBlockLootTables extends AmbleBlockLootTable {
 
-    public AITBlockLootTables(FabricDataOutput output,
+    public AITBlockLootTables(PlatformDataOutput output,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }

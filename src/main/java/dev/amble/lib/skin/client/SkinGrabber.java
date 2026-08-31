@@ -18,8 +18,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Pair;
 import dev.amble.lib.skin.ConcurrentQueueMap;
 import dev.amble.lib.skin.SkinConstants;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -31,7 +31,7 @@ import dev.amble.lib.AmbleKit;
 /**
  * Some of this code is referenced from jeryn's regeneration mod, love u craig
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SkinGrabber {
     public static final SkinGrabber INSTANCE = new SkinGrabber();
 	public static final String DEFAULT_DIR = "./" + AmbleKit.MOD_ID + "/";

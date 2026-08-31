@@ -23,8 +23,8 @@ import dev.amble.lib.animation.client.WorldPosition;
 import dev.amble.lib.duck.ModelPartDuck;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -44,7 +44,7 @@ import static net.minecraft.util.Mth.catmullrom;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BedrockAnimation {
 	public static final Gson GSON = new GsonBuilder()
 			.registerTypeAdapter(BedrockModel.LocatorBone.class, new BedrockModel.LocatorBone.Adapter())
@@ -159,7 +159,7 @@ public class BedrockAnimation {
 		return bone;
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void apply(ModelPart root, double runningSeconds) {
 		this.resetBones(root, this.overrideBones);
 
@@ -296,7 +296,7 @@ public class BedrockAnimation {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void apply(ModelPart root, AnimationState state, float progress, float speedMultiplier, @Nullable EffectProvider source) {
 		double previous = getRunningSeconds(state);
 		double seconds = getRunningSeconds(state, progress, speedMultiplier);
@@ -306,7 +306,7 @@ public class BedrockAnimation {
 		});
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void apply(ModelPart root, TargetedAnimationState state, @Nullable EffectProvider provider) {
 		// IMPORTANT: Set animation length BEFORE calculating time values
 		state.setAnimationLength(this);

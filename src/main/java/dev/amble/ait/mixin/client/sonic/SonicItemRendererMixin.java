@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +45,7 @@ public class SonicItemRendererMixin {
 
     @Unique private BakedModel getOrMissing(ResourceLocation id) {
         BakedModel model = this.itemModelShaper.getModelManager().getModel(
-                id
+                ModelResourceLocation.inventory(id)
         );
 
         if (model == null)

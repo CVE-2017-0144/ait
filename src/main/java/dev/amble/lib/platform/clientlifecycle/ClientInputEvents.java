@@ -1,17 +1,17 @@
 package dev.amble.lib.platform.clientlifecycle;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-@Environment(EnvType.CLIENT)
-public final class ClientInputEvents {
-
-    private ClientInputEvents() {}
+@OnlyIn(Dist.CLIENT)
+public class ClientInputEvents {
 
     public interface PreAttack {
         boolean onClientPlayerPreAttack(Minecraft client, LocalPlayer player, int clickCount);
@@ -28,8 +28,19 @@ public final class ClientInputEvents {
             });
 
     static {
-        net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT
-                .register((client, player, clickCount) -> PRE_ATTACK.invoker()
-                        .onClientPlayerPreAttack(client, player, clickCount));
+        NeoForge.EVENT_BUS.addListener(InputEvent.InteractionKeyMappingTriggered.class, e -> {
+            if (!e.isAttack())
+                return;
+
+            Minecraft client = Minecraft.getInstance();
+
+            if (client.player == null)
+                return;
+
+            if (PRE_ATTACK.invoker().onClientPlayerPreAttack(client, client.player, 0)) {
+                e.setSwingHand(false);
+                e.setCanceled(true);
+            }
+        });
     }
 }

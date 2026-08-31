@@ -6,19 +6,19 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.Block;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.datagen.util.NoBlockDrop;
+import dev.amble.lib.platform.datagen.PlatformBlockLootProvider;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import dev.amble.lib.util.ReflectionUtil;
 
 
-public class AmbleBlockLootTable extends FabricBlockLootTableProvider {
+public class AmbleBlockLootTable extends PlatformBlockLootProvider {
     protected Queue<Class<? extends BlockContainer>> blockClass;
 
-    public AmbleBlockLootTable(FabricDataOutput dataOutput,
+    public AmbleBlockLootTable(PlatformDataOutput dataOutput,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(dataOutput, registriesFuture);
 

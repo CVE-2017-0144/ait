@@ -1,15 +1,15 @@
 package dev.amble.ait.client.config;
 
-import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import com.terraformersmc.modmenu.api.ModMenuApi;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-@Environment(EnvType.CLIENT)
-public class AITModMenu implements ModMenuApi {
+@OnlyIn(Dist.CLIENT)
+public class AITModMenu {
 
-    @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return AITConfigScreen::create;
+    public static void register(ModContainer container) {
+        container.registerExtensionPoint(IConfigScreenFactory.class,
+                (mod, parent) -> AITConfigScreen.create(parent));
     }
 }

@@ -3,13 +3,13 @@ package dev.amble.ait.api;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ClientWorldEvents {
     public static final Event<ChangeWorld> CHANGE_WORLD = EventFactory.createArrayBacked(ChangeWorld.class,
             callbacks -> (client, world) -> {

@@ -2,6 +2,8 @@ package dev.amble.ait.datagen;
 
 import static dev.amble.ait.core.AITItems.isUnlockedOnThisDay;
 import static net.minecraft.data.recipes.RecipeProvider.*;
+import static net.minecraft.data.recipes.RecipeProvider.getHasName;
+import static net.minecraft.data.recipes.RecipeProvider.has;
 
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
@@ -23,9 +25,8 @@ import dev.amble.ait.module.planet.core.world.PlanetPlacedFeatures;
 import dev.amble.lib.datagen.lang.AmbleLanguageProvider;
 import dev.amble.lib.datagen.lang.LanguageType;
 import dev.amble.lib.datagen.sound.AmbleSoundProvider;
-import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import dev.amble.lib.platform.datagen.PlatformDataGenerator;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -39,11 +40,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 
-public class AITModDataGenerator implements DataGeneratorEntrypoint {
+public class AITModDataGenerator implements PlatformDataGenerator.Entrypoint {
 
     @Override
-    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-        FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+    public void onInitializeDataGenerator(PlatformDataGenerator fabricDataGenerator) {
+        PlatformDataGenerator.Pack pack = fabricDataGenerator.createPack();
         generateLanguages(pack);
         generateItemTags(pack);
         generateBlockTags(pack);
@@ -59,29 +60,24 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         generateWorldFeatures(pack);
     }
 
-    public void generateLoot(FabricDataGenerator.Pack pack) {
+    public void generateLoot(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITBlockLootTables::new);
     }
 
-    public void generatePoi(FabricDataGenerator.Pack pack) {
+    public void generatePoi(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITPoiTagProvider::new);
     }
 
-    private void generateAdvancements(FabricDataGenerator.Pack pack) {
+    private void generateAdvancements(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITAchievementProvider::new);
     }
 
-    private void generateWorldFeatures(FabricDataGenerator.Pack pack) {
+    private void generateWorldFeatures(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITWorldGeneratorProvider::new);
     }
 
-    @Override
-    public void buildRegistry(RegistrySetBuilder registryBuilder) {
-        registryBuilder.add(Registries.CONFIGURED_FEATURE, PlanetConfiguredFeatures::bootstrap);
-        registryBuilder.add(Registries.PLACED_FEATURE, PlanetPlacedFeatures::boostrap);
-    }
 
-    public void generateRecipes(FabricDataGenerator.Pack pack) {
+    public void generateRecipes(PlatformDataGenerator.Pack pack) {
         pack.addProvider((((output, registriesFuture) -> {
             AITRecipeProvider provider = new AITRecipeProvider(output, registriesFuture);
 
@@ -684,31 +680,31 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
                 AITMod.id("classic_goat_horn_smithing"));*/
     }
 
-    public void generateSoundData(FabricDataGenerator.Pack pack) {
+    public void generateSoundData(PlatformDataGenerator.Pack pack) {
         pack.addProvider((((output, registriesFuture) -> new AmbleSoundProvider(output))));
     }
 
-    public void generateItemTags(FabricDataGenerator.Pack pack) {
+    public void generateItemTags(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITItemTagProvider::new);
     }
 
-    public void generateBlockTags(FabricDataGenerator.Pack pack) {
+    public void generateBlockTags(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITBlockTagProvider::new);
     }
 
-    public void generateGameEventTags(FabricDataGenerator.Pack pack) {
+    public void generateGameEventTags(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITGameEventTagProvider::new);
     }
 
-    public void generatePaintingTags(FabricDataGenerator.Pack pack) {
+    public void generatePaintingTags(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITPaintingVariantTagProvider::new);
     }
 
-    public void generateEntityTypeTags(FabricDataGenerator.Pack pack) {
+    public void generateEntityTypeTags(PlatformDataGenerator.Pack pack) {
         pack.addProvider(AITEntityTypeTagProvider::new);
     }
 
-    public void generateBlockModels(FabricDataGenerator.Pack pack) {
+    public void generateBlockModels(PlatformDataGenerator.Pack pack) {
         pack.addProvider(((output, registriesFuture) -> {
             AITModelProvider provider = new AITModelProvider(output);
             provider.registerDirectionalBlock(AITBlocks.CONSOLE);
@@ -719,7 +715,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         }));
     }
 
-    public void generateLanguages(FabricDataGenerator.Pack pack) {
+    public void generateLanguages(PlatformDataGenerator.Pack pack) {
         generate_EN_US_Language(pack); // en_us (English US)
         generate_EN_UK_Language(pack); // en_uk (English UK)
         generate_FR_CA_Language(pack); // fr_ca (French Canadian)
@@ -753,7 +749,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      * @return The AmbleLanguageProvider.
      */
 
-    public AmbleLanguageProvider addEnglishTranslations(FabricDataOutput output,
+    public AmbleLanguageProvider addEnglishTranslations(PlatformDataOutput output,
                                                           CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
@@ -1793,7 +1789,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      * @param languageType     The language type.
      * @return The AmbleLanguageProvider.
      */
-    public AmbleLanguageProvider addFrenchTranslations(FabricDataOutput output,
+    public AmbleLanguageProvider addFrenchTranslations(PlatformDataOutput output,
                                                      CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
@@ -1911,7 +1907,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      * @param languageType     The language type.
      * @return The AmbleLanguageProvider.
      */
-    public AmbleLanguageProvider addSpanishTranslations(FabricDataOutput output,
+    public AmbleLanguageProvider addSpanishTranslations(PlatformDataOutput output,
                                                       CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
@@ -2976,7 +2972,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         return provider;
     }
 
-    public AmbleLanguageProvider addGermanTranslations(FabricDataOutput output,
+    public AmbleLanguageProvider addGermanTranslations(PlatformDataOutput output,
                                                      CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
@@ -3092,7 +3088,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         return provider;
     }
 
-    public AmbleLanguageProvider addPortugueseTranslations(FabricDataOutput output,
+    public AmbleLanguageProvider addPortugueseTranslations(PlatformDataOutput output,
                                                          CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
         AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
         provider.addTranslation("tardis.message.control.telepathic.home_updated", "Local de origem da TARDIS alterado.");
@@ -3102,126 +3098,126 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         return provider;
     }
 
-    public void generate_DE_AT_Language(FabricDataGenerator.Pack pack) {
+    public void generate_DE_AT_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addGermanTranslations(output, registriesFuture, LanguageType.DE_AT))); // de_at
         // (German
         // Austria)
     }
 
-    public void generate_DE_CH_Language(FabricDataGenerator.Pack pack) {
+    public void generate_DE_CH_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addGermanTranslations(output, registriesFuture, LanguageType.DE_CH))); // de_ch
         // (German
         // Switzerland)
     }
 
-    public void generate_DE_DE_Language(FabricDataGenerator.Pack pack) {
+    public void generate_DE_DE_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addGermanTranslations(output, registriesFuture, LanguageType.DE_DE))); // de_de
         // (German
         // Germany)
     }
 
-    public void generate_NDS_DE_Language(FabricDataGenerator.Pack pack) {
+    public void generate_NDS_DE_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addGermanTranslations(output, registriesFuture, LanguageType.NDS_DE))); // nds_de
         // (Nordic
         // German)
     }
 
-    public void generate_EN_US_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_US_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_US))); // en_us
         // (English
         // US)
     }
 
-    public void generate_EN_UK_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_UK_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_UK))); // en_uk
         // (English
         // UK)
     }
 
-    public void generate_FR_CA_Language(FabricDataGenerator.Pack pack) {
+    public void generate_FR_CA_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addFrenchTranslations(output, registriesFuture, LanguageType.FR_CA)))); // fr_ca
         // (French
         // Canadian)
     }
 
-    public void generate_FR_FR_Language(FabricDataGenerator.Pack pack) {
+    public void generate_FR_FR_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addFrenchTranslations(output, registriesFuture, LanguageType.FR_FR)))); // fr_fr
         // (French
         // France)
     }
 
-    public void generate_ES_AR_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_AR_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_AR)))); // es_ar
         // (Spanish
         // Argentina)
     }
 
-    public void generate_ES_CL_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_CL_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_CL)))); // es_cl
         // (Spanish
         // Chile)
     }
 
-    public void generate_ES_EC_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_EC_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_EC)))); // es_ec
         // (Spanish
         // Ecuador)
     }
 
-    public void generate_ES_ES_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_ES_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_ES)))); // es_es
         // (Spanish
         // Spain)
     }
 
-    public void generate_ES_MX_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_MX_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_MX)))); // es_mx
         // (Spanish
         // Mexico)
     }
 
-    public void generate_ES_UY_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_UY_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_UY)))); // es_uy
         // (Spanish
         // Uruguay)
     }
 
-    public void generate_ES_VE_Language(FabricDataGenerator.Pack pack) {
+    public void generate_ES_VE_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 (((output, registriesFuture) -> addSpanishTranslations(output, registriesFuture, LanguageType.ES_VE)))); // es_ve
         // (Spanish
         // Venezuela)
     }
 
-    public void generate_EN_AU_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_AU_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_AU))); // en_au
         // (English
         // Australia)
     }
 
-    public void generate_EN_CA_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_CA_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_CA))); // en_ca
         // (English
         // Canada)
     }
 
-    public void generate_EN_GB_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_GB_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_GB))); // en_gb
         // (English
@@ -3229,7 +3225,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         // Britain)
     }
 
-    public void generate_EN_NZ_Language(FabricDataGenerator.Pack pack) {
+    public void generate_EN_NZ_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(
                 ((output, registriesFuture) -> addEnglishTranslations(output, registriesFuture, LanguageType.EN_NZ))); // en_nz
         // (English
@@ -3237,18 +3233,18 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
         // Zealand)
     }
 
-    public void generate_PT_BR_Language(FabricDataGenerator.Pack pack) {
+    public void generate_PT_BR_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(((output, registriesFuture) -> addPortugueseTranslations(output, registriesFuture,
                 LanguageType.PT_BR))); // pt_br (Portuguese Brazil)
     }
 
-    public void generate_RU_RU_Language(FabricDataGenerator.Pack pack) {
+    public void generate_RU_RU_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.RU_RU, registriesFuture))); // ru_ru
         // (Russian
         // Russia)
     }
 
-    public void generate_UK_UA_Language(FabricDataGenerator.Pack pack) {
+    public void generate_UK_UA_Language(PlatformDataGenerator.Pack pack) {
         pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.UK_UA, registriesFuture))); // uk_ua
         // (Ukrainian
         // Ukraine)

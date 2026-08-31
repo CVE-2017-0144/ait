@@ -1,11 +1,11 @@
 package dev.amble.ait.core.tardis.util.network.c2s;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.net.AitNetworking;
@@ -53,7 +53,7 @@ public final class BOTIChunkRequestC2SPacket {
         TardisEvents.DOOR_MOVE.register((tardis, newPos, oldPos) -> BOTISyncS2CPacket.invalidate(tardis));
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void send(UUID tardis, BlockPos exteriorPos) {
         RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(tardis);

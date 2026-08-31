@@ -1,7 +1,8 @@
 package dev.amble.ait.client.models.consoles;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.*;
@@ -17,7 +18,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.amble.ait.core.entities.ConsoleControlEntity;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ControlModel extends HierarchicalModel<ConsoleControlEntity> {
     private final ModelPart root;
 

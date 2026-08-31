@@ -3,15 +3,15 @@ package dev.drtheo.scheduler.api.client;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.task.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.Util;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ClientScheduler {
 
     private static final ExecutorService service = Util.backgroundExecutor();

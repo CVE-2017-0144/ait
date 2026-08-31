@@ -1,9 +1,9 @@
 package dev.amble.ait.client.boti;
 
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.material.FluidState;
 
 import dev.amble.ait.core.tardis.util.network.BOTISnapshot;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public record BOTISnapshotView(BOTISnapshot snapshot) implements BlockAndTintGetter {
 
     private static final int GRASS = 0x79C05A;

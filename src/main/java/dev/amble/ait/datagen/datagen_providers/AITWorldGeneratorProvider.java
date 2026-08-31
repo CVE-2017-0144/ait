@@ -1,21 +1,26 @@
 package dev.amble.ait.datagen.datagen_providers;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.module.planet.core.world.PlanetConfiguredFeatures;
+import dev.amble.ait.module.planet.core.world.PlanetPlacedFeatures;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 
-public class AITWorldGeneratorProvider extends FabricDynamicRegistryProvider {
-    public AITWorldGeneratorProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
-        super(output, registriesFuture);
-    }
+public class AITWorldGeneratorProvider extends DatapackBuiltinEntriesProvider {
 
-    @Override
-    protected void configure(HolderLookup.Provider registries, Entries entries) {
-        entries.addAll(registries.lookupOrThrow(Registries.CONFIGURED_FEATURE));
-        entries.addAll(registries.lookupOrThrow(Registries.PLACED_FEATURE));
+    private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
+            .add(Registries.CONFIGURED_FEATURE, PlanetConfiguredFeatures::bootstrap)
+            .add(Registries.PLACED_FEATURE, PlanetPlacedFeatures::boostrap);
+
+    public AITWorldGeneratorProvider(PlatformDataOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture, BUILDER, Set.of(AITMod.MOD_ID));
     }
 
     @Override

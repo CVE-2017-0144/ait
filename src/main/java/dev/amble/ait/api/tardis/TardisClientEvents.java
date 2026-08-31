@@ -1,14 +1,14 @@
 package dev.amble.ait.api.tardis;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import dev.amble.ait.client.screens.interior.InteriorSettingsScreen;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class TardisClientEvents {
 
     public static final Event<SettingsSetup> SETTINGS_SETUP = EventFactory.createArrayBacked(SettingsSetup.class,

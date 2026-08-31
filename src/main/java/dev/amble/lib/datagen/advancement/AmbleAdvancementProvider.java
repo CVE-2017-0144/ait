@@ -1,7 +1,7 @@
 package dev.amble.lib.datagen.advancement;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
+import dev.amble.lib.platform.datagen.PlatformAdvancementProvider;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
@@ -17,13 +17,17 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class AmbleAdvancementProvider extends FabricAdvancementProvider {
+public class AmbleAdvancementProvider extends PlatformAdvancementProvider {
+
+    private final PlatformDataOutput output;
 
     private final List<Builder> builders = new ArrayList<>();
 
-    public AmbleAdvancementProvider(FabricDataOutput output,
+    public AmbleAdvancementProvider(PlatformDataOutput output,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
+
+        this.output = output;
     }
 
     public Builder create(AdvancementHolder parent, String name) {

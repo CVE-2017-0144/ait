@@ -54,7 +54,7 @@ public class OvergrownHandler extends KeyedTardisComponent implements TardisTick
         this.soundCooldown = 0;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Identifier getOvergrownTexture() {
         ClientExteriorVariantSchema variant = tardis.getExterior().getVariant().getClient();
         Identifier baseTexture = variant.texture();

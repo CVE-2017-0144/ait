@@ -3,8 +3,8 @@ package dev.amble.ait.core.tardis.animation.v2;
 import java.util.UUID;
 
 import dev.drtheo.queue.api.ActionQueue;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Math;
 import org.joml.Vector3f;
 import net.minecraft.client.Minecraft;
@@ -108,7 +108,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
         this.current.tick(server);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void tick(Minecraft client) {
         this.isServer = false;
@@ -221,7 +221,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
         return getCloakAlpha(tardis);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private float getCloakAlpha(Tardis tardis) {
         LocalPlayer player = Minecraft.getInstance().player;
 
@@ -260,7 +260,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
         return getHandbrakeAlpha(tardis);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private float getHandbrakeAlpha(Tardis tardis) {
         // sobbing
         FlightSoundPlayer sfx = ClientSoundManager.getFlight().getFlightLoop(tardis.asClient());

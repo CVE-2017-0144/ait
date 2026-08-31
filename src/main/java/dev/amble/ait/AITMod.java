@@ -8,8 +8,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import dev.drtheo.multidim.MultiDim;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -86,6 +84,7 @@ import dev.amble.ait.registry.impl.door.DoorRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.platform.Entrypoints;
+import dev.amble.lib.platform.ModEntrypoint;
 import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.command.Commands;
 import dev.amble.lib.platform.interaction.PlayerInteractionEvents;
@@ -93,10 +92,11 @@ import dev.amble.lib.platform.loot.LootEvents;
 import dev.amble.lib.platform.registry.PlatformGameRules;
 import dev.amble.lib.platform.registry.PlatformRegistries;
 import dev.amble.lib.platform.worldgen.BiomeModifications;
+import dev.amble.lib.platform.worldgen.BiomeSelectors;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
 
-public class AITMod implements ModInitializer {
+public class AITMod implements ModEntrypoint {
 
     public static final String MOD_ID = "ait";
     public static final Logger LOGGER = LoggerFactory.getLogger("ait");
@@ -404,10 +404,10 @@ public class AITMod implements ModInitializer {
 
     public void entityAttributeRegister() {
         PlatformRegistries.attributes(AITEntityTypes.RIFT_ENTITY,
-                RiftEntity.createMobAttributes());
+                RiftEntity::createMobAttributes);
 
         PlatformRegistries.attributes(AITEntityTypes.FLIGHT_TARDIS_TYPE,
-                FlightTardisEntity.createDummyAttributes());
+                FlightTardisEntity::createDummyAttributes);
     }
 
     public static final ResourceLocation OPEN_SCREEN = AITMod.id("open_screen");

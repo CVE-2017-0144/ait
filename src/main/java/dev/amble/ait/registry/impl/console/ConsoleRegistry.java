@@ -1,7 +1,7 @@
 package dev.amble.ait.registry.impl.console;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
@@ -61,7 +61,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
 
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void onClientInit() {
         AitNetworking.registerClientReceiver(AITMod.id("sync_console_type"),
                 (client, handler, buf, responseSender) -> this.readFromServer(buf));

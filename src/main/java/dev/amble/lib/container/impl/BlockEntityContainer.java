@@ -6,8 +6,8 @@ import dev.amble.lib.animation.AnimatedInstance;
 import dev.amble.lib.animation.client.BedrockBlockEntityRenderer;
 import dev.amble.lib.animation.HasBedrockModel;
 import dev.amble.lib.util.RegistrationUtil;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +28,7 @@ public interface BlockEntityContainer extends RegistryContainer<BlockEntityType<
 	    registerRenderer((BlockEntityType<? extends AnimatedBlockEntity>) value);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void registerRenderer(BlockEntityType<? extends AnimatedBlockEntity> type) {
         ClientRegistries.blockEntityRenderer(type, BedrockBlockEntityRenderer::new);
     }

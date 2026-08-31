@@ -9,8 +9,8 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.AITMod;
@@ -40,7 +40,7 @@ public record VortexReference(ResourceLocation id, ResourceLocation texture, Str
         return Component.translatableWithFallback(this.id().toLanguageKey("vortex"), this.name());
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public VortexRender toRender() {
         return VortexRender.getInstance(this);
     }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.*;
 import net.minecraft.data.models.blockstates.*;
@@ -29,7 +28,7 @@ import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.module.ModuleRegistry;
 import dev.amble.lib.datagen.model.AmbleModelProvider;
-
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
 public class AITModelProvider extends AmbleModelProvider {
     private final List<Block> directionalBlocksToRegister = new ArrayList<>();
@@ -37,7 +36,7 @@ public class AITModelProvider extends AmbleModelProvider {
     private final List<Tuple<Block, Block>> coralFanBlocksToRegister = new ArrayList<>();
     private final List<Block> pillarBlocksToRegister = new ArrayList<>();
 
-    public AITModelProvider(FabricDataOutput output) {
+    public AITModelProvider(PlatformDataOutput output) {
         super(output);
     }
 
@@ -142,6 +141,6 @@ public class AITModelProvider extends AmbleModelProvider {
     }
 
     public boolean doesTextureExist(ResourceLocation texture) {
-        return this.output.getModContainer().findPath("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
+        return this.output.findResource("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
     }
 }

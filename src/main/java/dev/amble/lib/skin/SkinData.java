@@ -1,8 +1,8 @@
 package dev.amble.lib.skin;
 
 import dev.amble.lib.skin.client.SkinGrabber;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,7 +63,7 @@ public record SkinData(String key, @Nullable String url, @Nullable ResourceLocat
 		return new SkinData(key, url, localTexture, slim);
 	}
 
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public ResourceLocation get() {
 		if (localTexture != null) return localTexture;
 

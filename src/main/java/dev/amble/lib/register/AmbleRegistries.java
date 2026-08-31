@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.KitEvents;
@@ -31,7 +31,7 @@ public class AmbleRegistries {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private static void registerClientStart() {
         ClientEvents.CLIENT_STARTED.register(client -> {
             AmbleRegistries.getInstance().subscribe(InitType.CLIENT);

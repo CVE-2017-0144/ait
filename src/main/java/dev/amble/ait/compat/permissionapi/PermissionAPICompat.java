@@ -1,11 +1,9 @@
 package dev.amble.ait.compat.permissionapi;
 
-import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.fabricmc.api.ModInitializer;
+import dev.amble.lib.platform.ModEntrypoint;
 import net.minecraft.commands.CommandSourceStack;
-import dev.amble.ait.compat.DependencyChecker;
 
-public class PermissionAPICompat implements ModInitializer {
+public class PermissionAPICompat implements ModEntrypoint {
 
     private static PermissionCheck CHECKER = (ctx, permission, level) -> ctx.hasPermission(level);
 
@@ -16,7 +14,11 @@ public class PermissionAPICompat implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        if (DependencyChecker.hasPermissionApi()) CHECKER = Permissions::check;
+        // neoforge perms need pre-registered nodes, op level until setChecker
+    }
+
+    public static void setChecker(PermissionCheck checker) {
+        CHECKER = checker;
     }
 
     // Public static method to use the permission check lambda

@@ -12,8 +12,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -71,7 +71,7 @@ import dev.amble.ait.data.schema.exterior.category.PoliceBoxCategory;
 import dev.amble.ait.registry.impl.CategoryRegistry;
 import dev.amble.ait.registry.impl.DesktopRegistry;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class InteriorSettingsScreen extends ConsoleScreen {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/interior_settings.png");

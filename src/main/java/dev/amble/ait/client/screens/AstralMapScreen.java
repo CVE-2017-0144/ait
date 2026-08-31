@@ -2,8 +2,8 @@ package dev.amble.ait.client.screens;
 
 import java.util.*;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,7 +24,7 @@ import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.platform.Platform;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class AstralMapScreen extends Screen {
 
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,

@@ -1,7 +1,7 @@
 package dev.amble.ait.client.renderers.entities;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -34,7 +34,7 @@ import dev.amble.ait.core.entities.ConsoleControlEntity;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> {
 
     private static final ResourceLocation TEXTURE = AITMod.id("textures/entity/control/sequenced.png");

@@ -1,7 +1,7 @@
 package dev.amble.ait.client.renderers.wearables;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -19,7 +19,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.wearables.SantaHatModel;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SantaHatFeatureRenderer<T extends LivingEntity, M extends PlayerModel<T>>
         extends
             RenderLayer<T, M> {

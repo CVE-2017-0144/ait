@@ -2,8 +2,8 @@ package dev.amble.ait.core.tardis.handler.travel;
 
 import java.util.UUID;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         if (Platform.isClient()) initClient();
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void initClient() {
         AitNetworking.registerClientReceiver(AnimationHolder.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
             State state = buf.readEnum(State.class);
@@ -91,7 +91,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void tick(Minecraft client) {
         super.tick(client);

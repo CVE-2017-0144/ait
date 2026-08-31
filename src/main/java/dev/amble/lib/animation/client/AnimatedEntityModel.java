@@ -6,15 +6,15 @@ import dev.amble.lib.animation.AnimationTracker;
 import dev.amble.lib.client.bedrock.BedrockAnimation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 import lombok.extern.slf4j.Slf4j;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface AnimatedEntityModel {
 	/**
 	 * @return the root modelpart of the renderer

@@ -1,7 +1,7 @@
 package dev.amble.ait.api.tardis;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
@@ -14,6 +14,6 @@ import dev.amble.ait.core.tardis.Tardis;
 public interface TardisTickable {
     default void tick(MinecraftServer server) { }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     default void tick(Minecraft client) { }
 }

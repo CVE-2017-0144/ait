@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
@@ -15,6 +14,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.sounds.SoundEvent;
 import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import dev.amble.lib.util.StringCursor;
 
 /**
@@ -22,15 +22,15 @@ import dev.amble.lib.util.StringCursor;
  */
 public class AmbleSoundProvider implements DataProvider {
 
-    protected final FabricDataOutput dataOutput;
+    protected final PlatformDataOutput dataOutput;
     private final Map<String, Set<SoundEventWrapper>> sounds = new HashMap<>();
     private final boolean extractVariants;
 
-    public AmbleSoundProvider(FabricDataOutput dataOutput) {
+    public AmbleSoundProvider(PlatformDataOutput dataOutput) {
         this(dataOutput, true);
     }
 
-    public AmbleSoundProvider(FabricDataOutput dataOutput, boolean extractVariants) {
+    public AmbleSoundProvider(PlatformDataOutput dataOutput, boolean extractVariants) {
         this.dataOutput = dataOutput;
         this.extractVariants = extractVariants;
     }

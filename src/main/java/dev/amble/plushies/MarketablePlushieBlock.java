@@ -9,8 +9,8 @@ import dev.amble.lib.block.behavior.base.BlockWithEntityBehavior;
 import dev.amble.lib.blockentity.ABlockEntity;
 import dev.amble.lib.client.bedrock.BedrockEntityModel;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
@@ -57,7 +57,7 @@ public class MarketablePlushieBlock extends AWaterloggableBlock implements Entit
 
     private final BedrockModelReference modelRef;
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public BedrockEntityModel<?> model;
 
     public MarketablePlushieBlock(ABlockSettings settings, String modelId) {

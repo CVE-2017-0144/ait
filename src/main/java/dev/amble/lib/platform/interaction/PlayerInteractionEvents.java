@@ -7,13 +7,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class PlayerInteractionEvents {
-
-    private PlayerInteractionEvents() {}
+public class PlayerInteractionEvents {
 
     public interface UseBlock {
         InteractionResult interact(Player player, Level world, InteractionHand hand, BlockHitResult hit);
@@ -27,10 +27,10 @@ public final class PlayerInteractionEvents {
     public static final Event<UseBlock> USE_BLOCK = EventFactory.createArrayBacked(UseBlock.class,
             callbacks -> (player, world, hand, hit) -> {
                 for (UseBlock callback : callbacks) {
-                    InteractionResult result = callback.interact(player, world, hand, hit);
+                    InteractionResult r = callback.interact(player, world, hand, hit);
 
-                    if (result != InteractionResult.PASS)
-                        return result;
+                    if (r != InteractionResult.PASS)
+                        return r;
                 }
 
                 return InteractionResult.PASS;
@@ -39,20 +39,34 @@ public final class PlayerInteractionEvents {
     public static final Event<AttackBlock> ATTACK_BLOCK = EventFactory.createArrayBacked(AttackBlock.class,
             callbacks -> (player, world, hand, pos, direction) -> {
                 for (AttackBlock callback : callbacks) {
-                    InteractionResult result = callback.attack(player, world, hand, pos, direction);
+                    InteractionResult r = callback.attack(player, world, hand, pos, direction);
 
-                    if (result != InteractionResult.PASS)
-                        return result;
+                    if (r != InteractionResult.PASS)
+                        return r;
                 }
 
                 return InteractionResult.PASS;
             });
 
     static {
-        net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT
-                .register((player, world, hand, hit) -> USE_BLOCK.invoker().interact(player, world, hand, hit));
-        net.fabricmc.fabric.api.event.player.AttackBlockCallback.EVENT
-                .register((player, world, hand, pos, direction) -> ATTACK_BLOCK.invoker()
-                        .attack(player, world, hand, pos, direction));
+        NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.RightClickBlock.class, e -> {
+            InteractionResult r = USE_BLOCK.invoker().interact(e.getEntity(), e.getLevel(),
+                    e.getHand(), e.getHitVec());
+
+            if (r == InteractionResult.PASS)
+                return;
+
+            e.setCancellationResult(r);
+            e.setCanceled(true);
+        });
+
+        NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.LeftClickBlock.class, e -> {
+            InteractionResult r = ATTACK_BLOCK.invoker().attack(e.getEntity(), e.getLevel(),
+                    e.getHand(), e.getPos(), e.getFace());
+
+            // LeftClickBlock has no cancellation result
+            if (r != InteractionResult.PASS)
+                e.setCanceled(true);
+        });
     }
 }

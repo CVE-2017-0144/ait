@@ -1,19 +1,18 @@
 package dev.amble.lib.platform.lifecycle;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarted;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarting;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStopped;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStopping;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SyncDataPackContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class ServerLifecycleEvents {
-
-    private ServerLifecycleEvents() {}
+public class ServerLifecycleEvents {
 
     public interface Starting {
         void onServerStarting(MinecraftServer server);
@@ -71,21 +70,25 @@ public final class ServerLifecycleEvents {
             });
 
     static {
-        bootstrap();
-    }
+        NeoForge.EVENT_BUS.addListener(ServerStartingEvent.class,
+                event -> SERVER_STARTING.invoker().onServerStarting(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(ServerStartedEvent.class,
+                event -> SERVER_STARTED.invoker().onServerStarted(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(ServerStoppingEvent.class,
+                event -> SERVER_STOPPING.invoker().onServerStopping(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class,
+                event -> SERVER_STOPPED.invoker().onServerStopped(event.getServer()));
 
-    private static void bootstrap() {
-        ServerStarting starting = server -> SERVER_STARTING.invoker().onServerStarting(server);
-        ServerStarted started = server -> SERVER_STARTED.invoker().onServerStarted(server);
-        ServerStopping stopping = server -> SERVER_STOPPING.invoker().onServerStopping(server);
-        ServerStopped stopped = server -> SERVER_STOPPED.invoker().onServerStopped(server);
-        SyncDataPackContents sync = (player, joined) -> SYNC_DATA_PACK_CONTENTS.invoker()
-                .onSyncDataPackContents(player, joined);
+        NeoForge.EVENT_BUS.addListener(OnDatapackSyncEvent.class, event -> {
+            ServerPlayer player = event.getPlayer();
 
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(starting);
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(started);
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(stopping);
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(stopped);
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(sync);
+            if (player != null) {
+                SYNC_DATA_PACK_CONTENTS.invoker().onSyncDataPackContents(player, true);
+                return;
+            }
+
+            event.getPlayerList().getPlayers()
+                    .forEach(each -> SYNC_DATA_PACK_CONTENTS.invoker().onSyncDataPackContents(each, false));
+        });
     }
 }

@@ -5,8 +5,8 @@ import static net.minecraft.data.recipes.RecipeProvider.*;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
@@ -72,7 +72,7 @@ public class PlanetModule extends Module {
         return AItemGroup.builder(id()).icon(() -> new ItemStack(PlanetItems.SPACESUIT_HELMET));
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void initClient() {
         HudRenderEvents.HUD.register(new SpaceSuitOverlay());
@@ -835,18 +835,18 @@ public class PlanetModule extends Module {
             @Override
             public void blockTags(AITBlockTagProvider provider) {
                 // Martian Blocks
-                provider.getOrCreateTagBuilder(BlockTags.WALLS)
+                provider.tag(BlockTags.WALLS)
                         .add(PlanetBlocks.MARTIAN_BRICK_WALL).add(PlanetBlocks.MARTIAN_COBBLESTONE_WALL).add(PlanetBlocks.MARTIAN_SANDSTONE_WALL).add(PlanetBlocks.MARTIAN_STONE_WALL).add(PlanetBlocks.MOSSY_MARTIAN_COBBLESTONE_WALL).add(PlanetBlocks.MARTIAN_BRICK_WALL).add(PlanetBlocks.MARTIAN_SANDSTONE_BRICK_WALL);
 
                 // Anorthosite Blocks
-                provider.getOrCreateTagBuilder(BlockTags.WALLS)
+                provider.tag(BlockTags.WALLS)
                         .add(PlanetBlocks.ANORTHOSITE_BRICK_WALL).add(PlanetBlocks.ANORTHOSITE_WALL).add(PlanetBlocks.MOON_SANDSTONE_BRICK_WALL).add(PlanetBlocks.MOON_SANDSTONE_WALL);
 
             }
 
             @Override
             public void itemTags(AITItemTagProvider provider) {
-                provider.getOrCreateTagBuilder(ItemTags.TRIMMABLE_ARMOR).add(PlanetItems.SPACESUIT_BOOTS).add(PlanetItems.SPACESUIT_LEGGINGS).add(PlanetItems.SPACESUIT_CHESTPLATE).add(PlanetItems.SPACESUIT_HELMET);
+                provider.tag(ItemTags.TRIMMABLE_ARMOR).add(PlanetItems.SPACESUIT_BOOTS).add(PlanetItems.SPACESUIT_LEGGINGS).add(PlanetItems.SPACESUIT_CHESTPLATE).add(PlanetItems.SPACESUIT_HELMET);
             }
 
 

@@ -2,8 +2,8 @@ package dev.amble.ait.client.sounds;
 
 import dev.amble.ait.client.sounds.alarm.ClientAlarmHandler;
 import dev.amble.ait.client.sounds.flight.ClientFlightMusicHandler;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import dev.amble.ait.client.sounds.console.ClientConsoleAmbientSoundsHandler;
 import dev.amble.ait.client.sounds.drifting.ClientTwoThousandSoundHandler;
@@ -23,7 +23,7 @@ import dev.amble.ait.client.sounds.vortex.ClientVortexSoundsHandler;
  * A class for playing + managing our custom sounds on the client, right now
  * TODO - refactor SoundHandler etc
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ClientSoundManager {
     private static ClientHumHandler hum;
     private static ClientAlarmHandler alarm;

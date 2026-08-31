@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -32,7 +32,7 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ClientTardisUtil {
 
     public static final int MAX_POWER_DELTA_TICKS = 3 * 20;

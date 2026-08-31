@@ -1,7 +1,7 @@
 package dev.amble.ait.module.planet.client.renderers.wearables;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -23,7 +23,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.module.planet.client.models.wearables.SpacesuitModel;
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityModel<T> & ArmedModel>
         extends
             RenderLayer<T, M> {

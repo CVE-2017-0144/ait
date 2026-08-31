@@ -6,8 +6,8 @@ import dev.amble.lib.AmbleKit;
 import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.datapack.DatapackRegistry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +18,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> implements SimpleReloadListener {
 	private static final BedrockModelRegistry INSTANCE = new BedrockModelRegistry();
 

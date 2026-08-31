@@ -2,8 +2,8 @@ package dev.amble.ait.data.schema.exterior.variant.addon;
 
 import java.util.function.BiFunction;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -48,15 +48,15 @@ public class AddonExterior extends ExteriorVariantSchema {
     protected final String modid;
     protected final String name;
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private ClientExterior client;
     private Door door;
     private float portalWidth = -1f;
     private float portalHeight = -1f;
     @Nullable private Vec3 portalTranslations;
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private Vector3f sonicItemTranslations;
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private boolean hasTransparentDoors;
     private Vec3 seatTranslations;
 
@@ -95,7 +95,7 @@ public class AddonExterior extends ExteriorVariantSchema {
 
         return copy;
     }
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AddonExterior copyClient(AddonExterior source, boolean register) {
         if (source.client != null) {
             this.setClient(new ClientExterior(this, source.client.model, source.client.sonicItemTranslations,
@@ -116,7 +116,7 @@ public class AddonExterior extends ExteriorVariantSchema {
         return this;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AddonExterior setClient(ClientExterior client) {
         this.client = client;
 
@@ -134,28 +134,28 @@ public class AddonExterior extends ExteriorVariantSchema {
         return this.toDoor();
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AddonExterior setModel(SimpleExteriorModel model) {
         this.client = new ClientExterior(this, model);
 
         return this;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AddonExterior setHasTransparentDoors(boolean hasTransparentDoors) {
         this.hasTransparentDoors = hasTransparentDoors;
 
         return this;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public AddonExterior setSonicItemTranslations(Vector3f translations) {
         this.sonicItemTranslations = translations;
 
         return this;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public ClientExterior toClient() {
         if (this.client == null) {
             String message = "Client not created for exterior " + this.id() + ". Did you forget to call setModel?";
@@ -233,7 +233,7 @@ public class AddonExterior extends ExteriorVariantSchema {
         return this.door;
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static class ClientExterior extends ClientExteriorVariantSchema {
         protected final AddonExterior server;
         private boolean hasEmission;
@@ -312,7 +312,7 @@ public class AddonExterior extends ExteriorVariantSchema {
 
         @Nullable private Vec3 portalTranslations;
 
-        @Environment(EnvType.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         private ClientDoor client;
 
         public Door(AddonExterior exterior, boolean isDouble, SoundEvent open, SoundEvent close) {
@@ -376,14 +376,14 @@ public class AddonExterior extends ExteriorVariantSchema {
             return this.doorParent;
         }
 
-        @Environment(EnvType.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         public Door setModel(DoorModel model) {
             this.client = new ClientDoor(this, model);
 
             return this;
         }
 
-        @Environment(EnvType.CLIENT)
+        @OnlyIn(Dist.CLIENT)
         public ClientDoor toClient() {
             if (this.client == null) {
                 throw new NotImplementedException("Client not created for door " + this.id() + ". Dont forget to call Door#setModel!");
@@ -393,7 +393,7 @@ public class AddonExterior extends ExteriorVariantSchema {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static class ClientDoor extends ClientDoorSchema {
         protected final Door clientDoor;
         private final DoorModel model;

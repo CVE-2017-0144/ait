@@ -14,8 +14,8 @@ package dev.amble.lib.client.bedrock;
 import com.google.gson.*;
 import dev.amble.lib.animation.client.AnimationMetadata;
 import dev.amble.lib.util.JsonUtil;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.objecthunter.exp4j.Expression;
@@ -25,7 +25,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BedrockAnimationAdapter implements JsonDeserializer<BedrockAnimation> {
 
 	public static final BedrockAnimationAdapter INSTANCE = new BedrockAnimationAdapter();

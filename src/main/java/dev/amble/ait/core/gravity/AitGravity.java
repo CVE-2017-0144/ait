@@ -1,24 +1,22 @@
 package dev.amble.ait.core.gravity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.entities.ConsoleControlEntity;
 import dev.amble.ait.core.net.AitNetworking;
 
-public final class AitGravity {
+public class AitGravity {
 
     public static final ResourceLocation SYNC = AITMod.id("sync_entity_gravity");
     private static final int RANGE = 128;
-
-    private AitGravity() {}
 
     public interface Holder {
         Direction ait$gravity();
@@ -56,7 +54,7 @@ public final class AitGravity {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static void clientInit() {
         AitNetworking.registerClientReceiver(SYNC, (client, h, buf, rs) -> {
             int id = buf.readVarInt();

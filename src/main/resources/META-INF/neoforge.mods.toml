@@ -1,0 +1,98 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "LGPL-3.0"
+issueTrackerURL = "https://github.com/amblelabs/ait/issues"
+
+[[mods]]
+modId = "ait"
+version = "${version}"
+displayName = "Adventures In Time"
+logoFile = "assets/ait/icon.png"
+displayURL = "https://amblelabs.github.io"
+authors = """
+Amble Labs:
+Developers:
+ - Loqor
+ - DrTheo
+ - Duzo
+ - Maketendo
+ - AddieDaBaddie
+ - Saturn
+ - nanowu
+
+Artists:
+ - WazzakiWanzz
+ - Ember
+ - Ember808
+ - Tright
+ - b2bmrww2
+ - panda_red (classic_account)
+ - Ouroboros
+ - Maggie
+ - Monsterwaill
+ - Westankrang
+ - Dian
+
+Music:
+ - RatZoomie
+ - lucien"""
+credits = """
+Contributors:
+ - vmbbi (Max)
+ - Echo
+ - Tryzo (Ben)
+ - nitrogenez
+ - DocArcane (Designed the original steam console)
+ - Bug1312
+ - Jayson
+ - Creativious
+ - TARDIS SFX for some TARDIS Sounds
+ - Pastelb96 (translations)
+ - Codiak
+ - Small Moss (translations)
+ - bastalation
+ - Hailrake"""
+description = """
+Adventures In Time - Apparatus Vivi. Living machine. TARDIS from Doctor Who. Whatever you call it, it grows with you. It learns with you, and flies the way you fly. Sure, you might be the pilot, but despite that, it does with that what it may."""
+
+[[mixins]]
+config = "queue.mixins.json"
+
+[[mixins]]
+config = "multidim.mixins.json"
+
+[[mixins]]
+config = "amblekit.mixins.json"
+
+[[mixins]]
+config = "ait.mixins.json"
+
+[[mixins]]
+config = "gaslighter.mixins.json"
+
+[[mixins]]
+config = "planet.mixins.json"
+
+[[mixins]]
+config = "gun.mixins.json"
+
+[[dependencies.ait]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ait]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ait]]
+modId = "yet_another_config_lib_v3"
+type = "required"
+versionRange = "[3.8,)"
+ordering = "AFTER"
+side = "BOTH"

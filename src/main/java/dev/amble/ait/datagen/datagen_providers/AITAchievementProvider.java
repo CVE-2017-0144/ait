@@ -3,8 +3,6 @@ package dev.amble.ait.datagen.datagen_providers;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRewards;
@@ -19,9 +17,11 @@ import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.advancement.TardisCriterions;
 import dev.amble.ait.module.ModuleRegistry;
+import dev.amble.lib.platform.datagen.PlatformAdvancementProvider;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
-public class AITAchievementProvider extends FabricAdvancementProvider {
-    public AITAchievementProvider(FabricDataOutput output,
+public class AITAchievementProvider extends PlatformAdvancementProvider {
+    public AITAchievementProvider(PlatformDataOutput output,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }

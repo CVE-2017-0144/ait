@@ -1,7 +1,7 @@
 package dev.amble.ait.client.renderers.wearables;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -23,7 +23,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.wearables.RespiratorModel;
 import dev.amble.ait.core.AITItems;
 
-@Environment(value = EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class RespiratorFeatureRenderer<T extends LivingEntity, M extends EntityModel<T> & ArmedModel>
         extends
             RenderLayer<T, M> {

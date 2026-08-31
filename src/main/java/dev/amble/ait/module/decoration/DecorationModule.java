@@ -3,8 +3,8 @@ package dev.amble.ait.module.decoration;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -46,7 +46,7 @@ public class DecorationModule extends Module {
 
 
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void initClient() {
     }

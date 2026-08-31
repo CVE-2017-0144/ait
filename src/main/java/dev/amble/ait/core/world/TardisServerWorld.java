@@ -10,8 +10,8 @@ import dev.drtheo.multidim.MultiDim;
 import dev.drtheo.multidim.MultiDimMod;
 import dev.drtheo.multidim.api.MultiDimServerWorld;
 import dev.drtheo.multidim.api.WorldBlueprint;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -200,7 +200,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
         return UUID.fromString(key.location().getPath());
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static boolean isTardisDimension(ClientLevel world) {
         return isTardisDimension(world.dimension());
     }

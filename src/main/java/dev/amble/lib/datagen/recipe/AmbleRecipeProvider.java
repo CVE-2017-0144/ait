@@ -1,7 +1,6 @@
 package dev.amble.lib.datagen.recipe;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -12,6 +11,7 @@ import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.recipes.*;
 import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class AmbleRecipeProvider extends FabricRecipeProvider {
+public class AmbleRecipeProvider extends RecipeProvider {
+
+    private final PlatformDataOutput output;
 
     private final List<ShapelessRecipeBuilder> shapelessRecipes = new ArrayList<>();
     private final List<ShapedRecipeBuilder> shapedRecipes = new ArrayList<>();
@@ -31,9 +33,11 @@ public class AmbleRecipeProvider extends FabricRecipeProvider {
     private final HashMap<SingleItemRecipeBuilder, ResourceLocation> stonecutting = new HashMap<>();
     private final List<SimpleCookingRecipeBuilder> blasting = new ArrayList<>();
 
-    public AmbleRecipeProvider(FabricDataOutput output,
+    public AmbleRecipeProvider(PlatformDataOutput output,
             CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
+
+        this.output = output;
     }
 
     @Override

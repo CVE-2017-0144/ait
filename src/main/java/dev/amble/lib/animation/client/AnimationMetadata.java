@@ -6,8 +6,8 @@ import dev.amble.lib.client.bedrock.BedrockAnimation;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 import lombok.Getter;
 import lombok.With;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  * @param fpsCamera Whether the animation should have FPS camera controls. Default: true
  * @param excess Any excess metadata not used by AmbleKit.
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public record AnimationMetadata(@With boolean movement, @With Perspective perspective, @With boolean fpsCamera, @With boolean hideHandItems, @With boolean hideHud, @With boolean fpsCameraCopiesHead, @With boolean cumulative, @With
                                 JsonObject excess) {
 	public static final AnimationMetadata DEFAULT = new AnimationMetadata(true, null, true, true, false, false, false, new JsonObject());

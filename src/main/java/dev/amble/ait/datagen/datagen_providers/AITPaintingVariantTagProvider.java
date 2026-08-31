@@ -2,30 +2,22 @@ package dev.amble.ait.datagen.datagen_providers;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import dev.amble.ait.core.AITPaintings;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
-public class AITPaintingVariantTagProvider extends FabricTagProvider<PaintingVariant> {
-    /**
-     * Constructs a new {@link FabricTagProvider} with the default computed path.
-     *
-     * <p>Common implementations of this class are provided.
-     *
-     * @param output           the {@link FabricDataOutput} instance
-     * @param registriesFuture the backing registry for the tag type
-     */
-    public AITPaintingVariantTagProvider(FabricDataOutput output,
+public class AITPaintingVariantTagProvider extends TagsProvider<PaintingVariant> {
+    public AITPaintingVariantTagProvider(PlatformDataOutput output,
                                          CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, Registries.PAINTING_VARIANT, registriesFuture);
     }
 
     @Override
     protected void addTags(HolderLookup.Provider arg) {
-        this.getOrCreateTagBuilder(PaintingVariantTags.PLACEABLE).add(AITPaintings.CRAB_THROWER).add(AITPaintings.PEANUT);
+        this.tag(PaintingVariantTags.PLACEABLE).add(AITPaintings.CRAB_THROWER).add(AITPaintings.PEANUT);
     }
 }

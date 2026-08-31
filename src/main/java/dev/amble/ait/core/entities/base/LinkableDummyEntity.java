@@ -55,7 +55,7 @@ public class LinkableDummyEntity extends DummyEntity implements AbstractLinkable
     @Override
     public void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        AbstractLinkableEntity.super.initDataTracker();
+        AbstractLinkableEntity.super.initDataTracker(builder);
     }
 
     @Override

@@ -51,7 +51,7 @@ public record BlueprintSchema(ResourceLocation id, Component text, InputList inp
     public static BlueprintSchema fromJson(JsonObject json) {
         AtomicReference<BlueprintSchema> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(planet -> created.set(planet.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(planet -> created.set(planet.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack blueprint: {}", err);
         });

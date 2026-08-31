@@ -38,7 +38,7 @@ public class DatapackSonic extends SonicSchema {
     public static SonicSchema fromJson(JsonObject json) {
         AtomicReference<SonicSchema> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(sonic -> created.set(sonic.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(sonic -> created.set(sonic.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack sonic: {}", err);
         });

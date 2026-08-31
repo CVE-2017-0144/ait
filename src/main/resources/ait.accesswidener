@@ -5,3 +5,6 @@ accessible field net/minecraft/world/item/CreativeModeTab backgroundSuffix Ljava
 accessible field net/minecraft/world/item/CreativeModeTab canScroll Z
 accessible field net/minecraft/world/item/CreativeModeTab showTitle Z
 accessible field net/minecraft/world/item/CreativeModeTab alignedRight Z
+
+accessible method net/minecraft/world/level/block/state/BlockBehaviour$Properties <init> ()V
+accessible method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V

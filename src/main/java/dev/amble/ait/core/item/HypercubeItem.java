@@ -3,6 +3,7 @@ package dev.amble.ait.core.item;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +26,7 @@ public class HypercubeItem extends Item {
     private static final String DISTRESS_CALL_KEY = "DistressCall";
 
     public HypercubeItem(Properties settings) {
-        super(settings.defaultDurability(100));
+        super(settings.durability(100));
     }
 
     @Override
@@ -46,7 +47,7 @@ public class HypercubeItem extends Item {
 
         DistressCall call = getCall(held, serverWorld.getServer().getTickCount());
         if (call == null) {
-            call = DistressCall.create(user, held.hasCustomHoverName() ? held.getHoverName().getString() : "SOS", true);
+            call = DistressCall.create(user, held.has(DataComponents.CUSTOM_NAME) ? held.getHoverName().getString() : "SOS", true);
             setCall(held, call);
         }
 
@@ -78,8 +79,6 @@ public class HypercubeItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         super.appendHoverText(stack, tooltipContext, tooltip, context);
 
-        if (world == null) return;
-
         DistressCall call = getCall(stack, 0);
         if (call == null) return;
 
@@ -100,7 +99,7 @@ public class HypercubeItem extends Item {
     public static void setCall(ItemStack stack, DistressCall call) {
         ItemNbt.get(stack).put(DISTRESS_CALL_KEY, call.toNbt());
 
-        stack.resetHoverName();
+        stack.remove(DataComponents.CUSTOM_NAME);
     }
 
     public static ItemStack create(DistressCall call) {

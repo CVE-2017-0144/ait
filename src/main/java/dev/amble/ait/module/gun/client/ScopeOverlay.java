@@ -1,6 +1,7 @@
 package dev.amble.ait.module.gun.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -16,7 +17,7 @@ public class ScopeOverlay implements HudRenderCallback {
     private float spyglassScale;
 
     @Override
-    public void onHudRender(GuiGraphics drawContext, float v) {
+    public void onHudRender(GuiGraphics drawContext, DeltaTracker v) {
         this.scaledWidth = drawContext.guiWidth();
         this.scaledHeight = drawContext.guiHeight();
 
@@ -26,7 +27,7 @@ public class ScopeOverlay implements HudRenderCallback {
 
         if(mc.player.getMainHandItem().getItem() instanceof StaserRifleItem && mc.options.getCameraType().isFirstPerson()) {
             if (mc.options.keyUse.isDown()) {
-                float f = Minecraft.getInstance().getDeltaFrameTime();
+                float f = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
                 this.spyglassScale = Mth.lerp(0.5f * f, this.spyglassScale, 1.125f);
                 this.renderSpyglassOverlay(drawContext, this.spyglassScale);
             }

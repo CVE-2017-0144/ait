@@ -183,7 +183,7 @@ public class SequenceHandler extends KeyedTardisComponent implements TardisTicka
     }
 
     public static void missedControlEffects(ServerLevel world, BlockPos pos) {
-        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 3f, 1f);
+        TardisDesktop.playSoundAtConsole(world, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3f, 1f);
         Vec3 vec3d = Vec3.atBottomCenterOf(pos).add(0.0, 1.2f, 0.0);
 
         world.sendParticles(ParticleTypes.SMALL_FLAME, vec3d.x(), vec3d.y(), vec3d.z(), 20, 0.4F, 1F, 0.4F,

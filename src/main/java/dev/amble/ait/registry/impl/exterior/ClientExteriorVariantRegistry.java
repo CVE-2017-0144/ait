@@ -2,7 +2,7 @@ package dev.amble.ait.registry.impl.exterior;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -91,7 +91,7 @@ public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteri
     public void syncToClient(ServerPlayer player) { }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         for (ExteriorVariantSchema schema : ExteriorVariantRegistry.getInstance().toList()) {
             if (!(schema instanceof DatapackExterior variant)) continue;
 

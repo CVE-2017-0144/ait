@@ -1,5 +1,6 @@
 package dev.amble.ait.module.planet.core.block;
 
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.module.planet.core.blockentities.OxygenatorBlockEntity;
@@ -13,6 +14,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class OxygenatorBlock extends BaseEntityBlock {
+    @Override
+    public MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(OxygenatorBlock::new);
+    }
+
     public OxygenatorBlock(Properties settings) {
         super(settings);
     }

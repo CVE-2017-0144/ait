@@ -96,7 +96,7 @@ public class DatapackExterior extends ExteriorVariantSchema implements AnimatedD
     public static DatapackExterior fromJson(JsonObject json) {
         AtomicReference<DatapackExterior> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> created.set(var.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> created.set(var.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack exterior variant: {}", err);
         });

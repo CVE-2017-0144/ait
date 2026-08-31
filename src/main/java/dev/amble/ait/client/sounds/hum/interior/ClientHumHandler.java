@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -84,7 +84,7 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     public void setServersHum(ClientTardis tardis, Hum hum) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(tardis.getUuid());
         buf.writeResourceLocation(hum.id());
 

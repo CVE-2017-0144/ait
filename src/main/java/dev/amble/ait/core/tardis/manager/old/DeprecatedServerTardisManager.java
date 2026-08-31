@@ -16,7 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -89,7 +89,7 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         if (tardis == null)
             return;
 
-        FriendlyByteBuf data = AitNetworking.buf();
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
         data.writeUUID(tardis.getUuid());
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -98,13 +98,13 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
     }
 
     protected void sendTardisRemoval(ServerPlayer player, ServerTardis tardis) {
-        FriendlyByteBuf data = AitNetworking.buf();
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
         data.writeUUID(tardis.getUuid());
 
         this.sendTardisRemoval(player, data);
     }
 
-    protected void sendTardisRemoval(ServerPlayer player, FriendlyByteBuf data) {
+    protected void sendTardisRemoval(ServerPlayer player, RegistryFriendlyByteBuf data) {
         AitNetworking.send(player, REMOVE, data);
     }
 
@@ -239,6 +239,6 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
     @FunctionalInterface
     public interface Receiver {
         void receive(ServerTardis tardis, MinecraftServer server, ServerPlayer player,
-                ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender);
+                ServerGamePacketListenerImpl handler, RegistryFriendlyByteBuf buf, PacketSender responseSender);
     }
 }

@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -156,7 +155,7 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             //handlesModel.setAngles(matrices, ModelTransformationMode.GROUND, false);
             handlesModel.handles.getChild("stalk").xRot = 45f;
             handlesModel.handles.getChild("stalk").getChild("head").xRot = -0.25f;
-            handlesModel.render(null, Minecraft.getInstance().player, stack, matrices, FastColor.ARGB32.colorFromFloat(0, vertexConsumers, light, overlay));
+            handlesModel.render(null, Minecraft.getInstance().player, stack, matrices, vertexConsumers, light, overlay, 0);
             matrices.popPose();
         } else {
             matrices.pushPose();

@@ -2,6 +2,7 @@ package dev.drtheo.multidim.api;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.drtheo.multidim.impl.AbstractChunkGenerator;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +40,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class VoidChunkGenerator extends AbstractChunkGenerator {
 
-    public static final Codec<VoidChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<VoidChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Biome.CODEC.stable().fieldOf("biome").forGetter(g -> g.biome)
     ).apply(instance, instance.stable(VoidChunkGenerator::new)));
 
@@ -61,7 +62,7 @@ public class VoidChunkGenerator extends AbstractChunkGenerator {
     }
 
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
@@ -69,7 +70,7 @@ public class VoidChunkGenerator extends AbstractChunkGenerator {
     public void createReferences(WorldGenLevel world, StructureManager accessor, ChunkAccess chunk) { }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState noiseConfig, StructureManager structureAccessor, ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState noiseConfig, StructureManager structureAccessor, ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 

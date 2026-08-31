@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.phys.Vec3;
@@ -53,7 +53,7 @@ public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSch
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(REGISTRY.size());
 
         for (ConsoleVariantSchema schema : REGISTRY.values()) {
@@ -77,8 +77,8 @@ public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSch
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
-        FriendlyByteBuf copy = PacketByteBufs.copy(buf);
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
+        RegistryFriendlyByteBuf copy = new RegistryFriendlyByteBuf(buf.copy(), buf.registryAccess());
         ClientConsoleVariantRegistry.getInstance().readFromServer(copy);
 
         REGISTRY.clear();

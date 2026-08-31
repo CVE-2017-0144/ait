@@ -70,9 +70,9 @@ public class DatapackAnimation extends TardisAnimation {
     public static DatapackAnimation fromJson(JsonObject json) {
         AtomicReference<DatapackAnimation> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> {
             created.set((DatapackAnimation) var.getFirst());
-        }).ifRight(err -> {
+        }).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack animation: {}", err);
         });

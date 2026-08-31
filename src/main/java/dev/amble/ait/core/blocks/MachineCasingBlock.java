@@ -21,12 +21,12 @@ public class MachineCasingBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         if (world.isClientSide())
             return InteractionResult.SUCCESS;
 
-        ItemStack stack = player.getItemInHand(hand);
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
         if (world.getBlockEntity(pos) instanceof MachineCasingBlockEntity casing)
             casing.onUse(world, stack, player);
@@ -35,11 +35,11 @@ public class MachineCasingBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         if (world.getBlockEntity(pos) instanceof MachineCasingBlockEntity casing)
             casing.onBreak(world);
 
-        super.playerWillDestroy(world, pos, state, player);
+        return super.playerWillDestroy(world, pos, state, player);
     }
 
     @Nullable @Override

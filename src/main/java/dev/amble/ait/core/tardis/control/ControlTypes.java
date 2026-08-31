@@ -25,8 +25,8 @@ import net.minecraft.world.entity.EntityDimensions;
 public class ControlTypes {
     public static final Codec<ControlTypes> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(c -> c.getControl().id()),
-            Codec.FLOAT.fieldOf("width").forGetter(c -> c.getScale().width),
-            Codec.FLOAT.fieldOf("height").forGetter(c -> c.getScale().height),
+            Codec.FLOAT.fieldOf("width").forGetter(c -> c.getScale().width()),
+            Codec.FLOAT.fieldOf("height").forGetter(c -> c.getScale().height()),
             MoreCodec.VECTOR3F.fieldOf("offset").forGetter(ControlTypes::getOffset)
     ).apply(instance, ControlTypes::new));
 

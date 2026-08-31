@@ -6,7 +6,7 @@ import java.util.Random;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
@@ -74,8 +74,8 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = AitNetworking.buf();
-        FriendlyByteBuf secondary = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf secondary = AitNetworking.buf();
 
         int counter = 0;
         for (ExteriorVariantSchema schema : this.toList()) {
@@ -92,8 +92,8 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
-        FriendlyByteBuf copy = PacketByteBufs.copy(buf);
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
+        RegistryFriendlyByteBuf copy = new RegistryFriendlyByteBuf(buf.copy(), buf.registryAccess());
 
         for (ExteriorVariantSchema schema : this.toList()) {
             if (!(schema instanceof DatapackExterior type)) continue;

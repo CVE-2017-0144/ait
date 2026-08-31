@@ -44,7 +44,7 @@ public class AITItems extends ItemContainer {
 
     @NoEnglish
     public static final Item MUG = new DrinkItem(new AItemSettings().stacksTo(1));
-    public static final FoodProperties ZEITON_DUST_FOOD = new FoodProperties.Builder().nutrition(4).saturationMod(0.3f)
+    public static final FoodProperties ZEITON_DUST_FOOD = new FoodProperties.Builder().nutrition(4).saturationModifier(0.3f)
             .effect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 1000, 3), 1.0F)
             .effect(new MobEffectInstance(AITStatusEffects.ZEITON_HIGH, 500, 1), 1.0F)
             .effect(new MobEffectInstance(MobEffects.WITHER, 500, 1), 0.5F)
@@ -64,7 +64,7 @@ public class AITItems extends ItemContainer {
     // Functional Items
     @NoEnglish
     public static final Item REMOTE_ITEM = new RemoteItem(
-            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).fireResistant().defaultDurability(300));
+            new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1).fireResistant().durability(300));
     @NoEnglish
     public static final Item ARTRON_COLLECTOR = new ArtronCollectorItem(
             new AItemSettings().group(AITItemGroups.MAIN).stacksTo(1));

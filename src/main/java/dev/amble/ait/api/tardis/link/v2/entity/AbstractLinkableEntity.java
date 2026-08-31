@@ -50,8 +50,8 @@ public interface AbstractLinkableEntity extends Linkable {
         return result;
     }
 
-    default void initDataTracker() {
-        this.getEntityData().define(this.getTracked(), Optional.empty());
+    default void initDataTracker(SynchedEntityData.Builder builder) {
+        builder.define(this.getTracked(), Optional.empty());
     }
 
     default void onTrackedDataSet(EntityDataAccessor<?> data) {

@@ -10,6 +10,7 @@ import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.client.util.DyeColorUtil;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
@@ -151,8 +152,8 @@ public class TardisExteriorBOTI extends BOTI {
                 int p = n % o;
                 int q = (n + 1) % o;
                 float r = ((float) (client.player.tickCount % m)) / m;
-                float[] fs = Sheep.getColorArray(DyeColor.byId(p));
-                float[] gs = Sheep.getColorArray(DyeColor.byId(q));
+                float[] fs = DyeColorUtil.rgb(DyeColor.byId(p));
+                float[] gs = DyeColorUtil.rgb(DyeColor.byId(q));
                 s = fs[0] * (1f - r) + gs[0] * r;
                 t = fs[1] * (1f - r) + gs[1] * r;
                 u = fs[2] * (1f - r) + gs[2] * r;

@@ -39,7 +39,7 @@ public record LockedDimension(ResourceLocation dimension, ItemStack stack) imple
     public static LockedDimension fromJson(JsonObject json) {
         AtomicReference<LockedDimension> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(planet -> created.set(planet.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(planet -> created.set(planet.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack locked dim: {}", err);
         });

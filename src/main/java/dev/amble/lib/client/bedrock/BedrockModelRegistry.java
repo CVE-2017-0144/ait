@@ -8,7 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -65,7 +65,7 @@ public class BedrockModelRegistry extends DatapackRegistry<BedrockModel> impleme
 	}
 
 	@Override
-	public void readFromServer(FriendlyByteBuf buf) {
+	public void readFromServer(RegistryFriendlyByteBuf buf) {
 		throw new UnsupportedOperationException("Client-side only registry");
 	}
 

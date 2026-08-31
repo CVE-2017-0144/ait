@@ -20,8 +20,8 @@ public class InteriorRendering {
 , false);
 
         // Upload vertices to VBOs
-        solidVbo.upload(buffer.end());
-        translucentVbo.upload(buffer.end());
+        solidVbo.upload(buffer.buildOrThrow());
+        translucentVbo.upload(buffer.buildOrThrow());
 
         // Render the buffers
         RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);

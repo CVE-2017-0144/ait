@@ -21,6 +21,7 @@ import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Instrument;
@@ -100,7 +101,7 @@ public class TardisGoatHorn extends LinkableItem {
         }
     }
 
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         Optional<? extends Holder<Instrument>> optional = this.getInstrument(stack);
         return optional.map((instrument) -> instrument.value().useDuration()).orElse(0);
     }

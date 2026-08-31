@@ -72,8 +72,8 @@ public class Property<T> {
     public static final PropertyType.Nullable<DirectedGlobalPos> DIRECTED_GLOBAL_POS = new PropertyType.Nullable<>(DirectedGlobalPos.class,
             (buf, pos) -> pos.write(buf), DirectedGlobalPos::read);
 
-    public static final PropertyType.Nullable<BlockPos> BLOCK_POS = new PropertyType.Nullable<>(BlockPos.class, FriendlyByteBuf::writeBlockPos,
-            FriendlyByteBuf::readBlockPos);
+    public static final PropertyType.Nullable<BlockPos> BLOCK_POS = new PropertyType.Nullable<>(BlockPos.class, (buf, pos) -> buf.writeBlockPos(pos),
+            buf -> buf.readBlockPos());
 
     public static final PropertyType.Nullable<CachedDirectedGlobalPos> CDIRECTED_GLOBAL_POS = new PropertyType.Nullable<>(
             CachedDirectedGlobalPos.class, (buf, pos) -> pos.write(buf), CachedDirectedGlobalPos::read);
@@ -117,6 +117,6 @@ public class Property<T> {
         return result;
     });
 
-    public static final PropertyType.Nullable<ItemStack> ITEM_STACK = new PropertyType.Nullable<>(ItemStack.class, FriendlyByteBuf::writeItem,
-            FriendlyByteBuf::readItem);
+    public static final PropertyType.Nullable<ItemStack> ITEM_STACK = new PropertyType.Nullable<>(ItemStack.class, (buf, stack) -> ItemStack.STREAM_CODEC.encode(buf, stack),
+            ItemStack.STREAM_CODEC::decode);
 }

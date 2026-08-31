@@ -4,7 +4,9 @@ import java.util.Locale;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -68,7 +70,6 @@ public class SonicRendering {
         Camera camera = client.gameRenderer.getMainCamera();
         PoseStack matrices = new PoseStack();
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
         Matrix4f positionMatrix = matrices.last().pose();
 
         profiler.popPush("transform");
@@ -86,27 +87,30 @@ public class SonicRendering {
 
         profiler.popPush("vertexes");
 
-        if (!buffer.building()) buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-        buffer.addVertex(positionMatrix, 0, 0, 0).setColor(1f, 1f, 1f, 1f).setUv(0f, 0f);
-        buffer.addVertex(positionMatrix, 0, -1, 0).setColor(1f, 1f, 1f, 1f).setUv(0f, 1f);
-        buffer.addVertex(positionMatrix, 1, -1, 0).setColor(1f, 1f, 1f, 1f).setUv(1f, 1f);
-        buffer.addVertex(positionMatrix, 1, 0, 0).setColor(1f, 1f, 1f, 1f).setUv(1f, 0f);
+        buffer.addVertex(positionMatrix, 0, 0, 0).setUv(0f, 0f).setColor(1f, 1f, 1f, 1f);
+        buffer.addVertex(positionMatrix, 0, -1, 0).setUv(0f, 1f).setColor(1f, 1f, 1f, 1f);
+        buffer.addVertex(positionMatrix, 1, -1, 0).setUv(1f, 1f).setColor(1f, 1f, 1f, 1f);
+        buffer.addVertex(positionMatrix, 1, 0, 0).setUv(1f, 0f).setColor(1f, 1f, 1f, 1f);
 
         boolean shouldRender = !texture.equals(previous);
+        MeshData mesh = buffer.buildOrThrow();
 
         if (shouldRender) {
             profiler.popPush("draw");
-            RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.setShaderTexture(0, texture);
             RenderSystem.disableCull();
             RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
-            Tesselator.getInstance().end();
+            BufferUploader.drawWithShader(mesh);
 
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
             RenderSystem.enableCull();
+        } else {
+            mesh.close();
         }
 
         profiler.pop();

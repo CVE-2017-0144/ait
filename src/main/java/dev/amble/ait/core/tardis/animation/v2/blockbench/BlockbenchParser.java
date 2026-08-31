@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -61,8 +61,8 @@ public class BlockbenchParser implements
         });
     }
 
-    private FriendlyByteBuf toBuf() {
-        FriendlyByteBuf buf = AitNetworking.buf();
+    private RegistryFriendlyByteBuf toBuf() {
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeInt(this.tardisAnimationsRaw.size());
         for (Map.Entry<String, List<JsonObject>> entry : this.tardisAnimationsRaw.entrySet()) {
@@ -86,14 +86,14 @@ public class BlockbenchParser implements
     private void sync() {
         if (ServerLifecycleHooks.get() == null) return;
 
-        FriendlyByteBuf buf = toBuf();
+        RegistryFriendlyByteBuf buf = toBuf();
 
         for (ServerPlayer player : ServerLifecycleHooks.get().getPlayerList().getPlayers()) {
             AitNetworking.send(player, SYNC, buf);
         }
     }
 
-    private void receive(FriendlyByteBuf buf) {
+    private void receive(RegistryFriendlyByteBuf buf) {
         this.tardisAnimationsRaw.clear();
         this.tardisAnimations.clear();
 

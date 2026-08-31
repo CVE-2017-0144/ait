@@ -250,7 +250,6 @@ public abstract class SkyboxMixin {
         float h = (float) vec3d.z;
 
         FogRenderer.levelFogColor();
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(f, g, h, 1.0f);
@@ -282,7 +281,7 @@ public abstract class SkyboxMixin {
             float l = fs[2];
 
             Matrix4f matrix4f = matrices.last().pose();
-            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
             bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
 
             for (int n = 0; n <= 16; n++) {
@@ -294,7 +293,7 @@ public abstract class SkyboxMixin {
                         .setColor(fs[0], fs[1], fs[2], 0.0f);
             }
 
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             matrices.popPose();
         }
 
@@ -314,13 +313,13 @@ public abstract class SkyboxMixin {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, SUN_LOCATION);
 
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.addVertex(matrix4f2, -k, 100.0f, -k).setUv(0.0f, 0.0f);
         bufferBuilder.addVertex(matrix4f2, k, 100.0f, -k).setUv(1.0f, 0.0f);
         bufferBuilder.addVertex(matrix4f2, k, 100.0f, k).setUv(1.0f, 1.0f);
         bufferBuilder.addVertex(matrix4f2, -k, 100.0f, k).setUv(0.0f, 1.0f);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         k = 20.0f;
 
         RenderSystem.setShaderTexture(0, MOON_LOCATION);
@@ -333,13 +332,13 @@ public abstract class SkyboxMixin {
         p = (float) (s + 1) / 4.0f;
         q = (float) (m + 1) / 2.0f;
 
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.addVertex(matrix4f2, -k, -100.0f, k).setUv(p, q);
         bufferBuilder.addVertex(matrix4f2, k, -100.0f, k).setUv(t, q);
         bufferBuilder.addVertex(matrix4f2, k, -100.0f, -k).setUv(t, o);
         bufferBuilder.addVertex(matrix4f2, -k, -100.0f, -k).setUv(p, o);
 
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         float u = level.getStarBrightness(tickDelta) * i;
 
         if (u > 0.0f) {
@@ -388,7 +387,6 @@ public abstract class SkyboxMixin {
         float i;
         fogCallback.run();
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
         Vec3 vec3d = level.getSkyColor(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), tickDelta);
         float f = (float)vec3d.x;
         float g = (float)vec3d.y;
@@ -411,7 +409,7 @@ public abstract class SkyboxMixin {
             k = fs[1];
             float l = fs[2];
             Matrix4f matrix4f = matrices.last().pose();
-            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
             bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
             int m = 16;
             for (int n = 0; n <= 16; ++n) {
@@ -420,7 +418,7 @@ public abstract class SkyboxMixin {
                 q = Mth.cos(o);
                 bufferBuilder.addVertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).setColor(fs[0], fs[1], fs[2], 0.0f);
             }
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             matrices.popPose();
         }
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

@@ -66,7 +66,7 @@ public class ItemRendererMixin {
         riftScannerModel.setAngles(matrices, renderMode, leftHanded);
 
         ClientLevel clientWorld = world instanceof ClientLevel ? (ClientLevel) world : null;
-        riftScannerModel.render(clientWorld, entity, stack, matrices, FastColor.ARGB32.colorFromFloat(seed, vertexConsumers, light, overlay));
+        riftScannerModel.render(clientWorld, entity, stack, matrices, vertexConsumers, light, overlay, seed);
 
         matrices.popPose();
         ci.cancel();

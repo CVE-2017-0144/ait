@@ -2,6 +2,7 @@ package dev.amble.ait.core.item;
 
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -95,7 +96,7 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
         setPos(stack, pos.getPos());
 
         if (pos.hasName())
-            stack.setHoverName(Component.literal(pos.name()));
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(pos.name()));
 
         return stack;
     }

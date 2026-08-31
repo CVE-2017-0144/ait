@@ -3,25 +3,30 @@ package dev.amble.lib.datagen.advancement;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class AmbleAdvancementProvider extends FabricAdvancementProvider {
 
     private final List<Builder> builders = new ArrayList<>();
 
-    public AmbleAdvancementProvider(FabricDataOutput output) {
-        super(output);
+    public AmbleAdvancementProvider(FabricDataOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
-    public Builder create(Advancement parent, String name) {
+    public Builder create(AdvancementHolder parent, String name) {
         Builder result = new Builder(parent, name);
         builders.add(result);
         return result;
@@ -31,7 +36,7 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
         return create(null, name);
     }
 
-    public Builder task(Advancement parent, String name) {
+    public Builder task(AdvancementHolder parent, String name) {
         return create(parent, name);
     }
 
@@ -39,16 +44,17 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
         return create(name);
     }
 
-    public Builder challenge(Advancement parent, String name) {
+    public Builder challenge(AdvancementHolder parent, String name) {
         return create(parent, name).frame(AdvancementType.CHALLENGE);
     }
 
-    public Builder goal(Advancement parent, String name) {
+    public Builder goal(AdvancementHolder parent, String name) {
         return create(parent, name).frame(AdvancementType.GOAL);
     }
 
     @Override
-    public void generateAdvancement(Consumer<Advancement> consumer) {
+    public void generateAdvancement(HolderLookup.Provider registries,
+            Consumer<AdvancementHolder> consumer) {
         for (Builder builder : builders) {
             consumer.accept(builder.build());
         }
@@ -67,12 +73,12 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
 
         private final String name;
 
-        public Builder(Advancement parent, String name) {
+        public Builder(AdvancementHolder parent, String name) {
             this.builder = Advancement.Builder.advancement().parent(parent);
             this.name = name;
         }
 
-        public Builder condition(String name, CriterionTriggerInstance conditions) {
+        public Builder condition(String name, Criterion<?> conditions) {
             this.builder.addCriterion(name, conditions);
             return this;
         }
@@ -111,7 +117,7 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
             return this;
         }
 
-        public Advancement build() {
+        public AdvancementHolder build() {
             String modId = AmbleAdvancementProvider.this.output.getModId();
 
             return builder

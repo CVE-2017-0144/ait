@@ -17,7 +17,7 @@ import dev.amble.lib.client.bedrock.BedrockModel;
 import dev.amble.lib.client.bedrock.BedrockModelRegistry;
 import dev.amble.lib.register.datapack.DatapackRegistry;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FastColor;
 
@@ -106,7 +106,7 @@ public class ClientDoorRegistry extends DatapackRegistry<ClientDoorSchema> {
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         for (DoorSchema schema : DoorRegistry.getInstance().toList()) {
             if (!(schema instanceof DatapackDoor variant)) continue;
 

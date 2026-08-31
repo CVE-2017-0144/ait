@@ -2,6 +2,7 @@ package dev.amble.ait.client.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -101,16 +102,15 @@ public class VortexRender {
 
         Minecraft.getInstance().getTextureManager().bindForSetup(layer);
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
 
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
         for (int i = 0; i < 32; ++i) {
             this.renderSection(buffer, i,(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount) / (120 / this.speed), (float) Math.sin(i * Math.PI / 32),
-                    (float) Math.sin((i + 1) * Math.PI / 32), matrixStack.last().normal(), matrixStack.last().pose());
+                    (float) Math.sin((i + 1) * Math.PI / 32), matrixStack.last(), matrixStack.last().pose());
         }
 
-        tessellator.end();
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
         matrixStack.popPose();
 
         RenderSystem.disableBlend();
@@ -118,7 +118,7 @@ public class VortexRender {
     }
 
     public void renderSection(VertexConsumer builder, int zOffset, float textureDistanceOffset, float startScale,
-            float endScale, Matrix3f matrix3f, Matrix4f matrix4f) {
+            float endScale, PoseStack.Pose pose, Matrix4f matrix4f) {
         float panel = 1/6f;
         float sqrt = (float) Math.sqrt(3) / 2.0f;
         int vOffset = (zOffset * panel + textureDistanceOffset > 1.0) ? zOffset - 6 : zOffset;
@@ -131,97 +131,97 @@ public class VortexRender {
 
         float uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, 0f, -startScale + distortion, -zOffset, uPanelOffset, vPanelOffset);
+        addVertex(builder, pose, matrix4f, 0f, -startScale + distortion, -zOffset, uPanelOffset, vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, 0f, -endScale + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, 0f, -endScale + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * -sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1,
+        addVertex(builder, pose, matrix4f, endScale * -sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1,
                 uPanelOffset + panel, vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * -sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, startScale * -sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset + panel,
                 vPanelOffset);
 
         uOffset = 1;
 
         uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, startScale * -sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset,
+        addVertex(builder, pose, matrix4f, startScale * -sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset,
                 vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * -sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, endScale * -sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * -sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1,
+        addVertex(builder, pose, matrix4f, endScale * -sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1,
                 uPanelOffset + panel, vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * -sqrt, startScale / 2f + distortion, -zOffset, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, startScale * -sqrt, startScale / 2f + distortion, -zOffset, uPanelOffset + panel,
                 vPanelOffset);
 
         uOffset = 2;
 
         uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, 0f, endScale + distortionPlusOne, -zOffset - 1, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, 0f, endScale + distortionPlusOne, -zOffset - 1, uPanelOffset + panel,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, 0f, startScale + distortion, -zOffset, uPanelOffset + panel, vPanelOffset);
+        addVertex(builder, pose, matrix4f, 0f, startScale + distortion, -zOffset, uPanelOffset + panel, vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * -sqrt, startScale / 2f + distortion, -zOffset, uPanelOffset,
+        addVertex(builder, pose, matrix4f, startScale * -sqrt, startScale / 2f + distortion, -zOffset, uPanelOffset,
                 vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * -sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, endScale * -sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
 
         uOffset = 3;
 
         uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, 0f, startScale + distortion, -zOffset, uPanelOffset, vPanelOffset);
+        addVertex(builder, pose, matrix4f, 0f, startScale + distortion, -zOffset, uPanelOffset, vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, 0f, endScale + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, 0f, endScale + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * sqrt, (endScale / 2f + distortionPlusOne), -zOffset - 1,
+        addVertex(builder, pose, matrix4f, endScale * sqrt, (endScale / 2f + distortionPlusOne), -zOffset - 1,
                 uPanelOffset + panel, vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * sqrt, (startScale / 2f + distortion), -zOffset, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, startScale * sqrt, (startScale / 2f + distortion), -zOffset, uPanelOffset + panel,
                 vPanelOffset);
 
         uOffset = 4;
 
         uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, startScale * sqrt, (startScale / 2f + distortion), -zOffset, uPanelOffset,
+        addVertex(builder, pose, matrix4f, startScale * sqrt, (startScale / 2f + distortion), -zOffset, uPanelOffset,
                 vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, endScale * sqrt, endScale / 2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1,
+        addVertex(builder, pose, matrix4f, endScale * sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1,
                 uPanelOffset + panel, vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, startScale * sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset + panel,
                 vPanelOffset);
 
         uOffset = 5;
 
         uPanelOffset = uOffset * panel;
 
-        addVertex(builder, matrix3f, matrix4f, 0f, -endScale + distortionPlusOne, -zOffset - 1, uPanelOffset + panel,
+        addVertex(builder, pose, matrix4f, 0f, -endScale + distortionPlusOne, -zOffset - 1, uPanelOffset + panel,
                 vOffset * panel + panelDistanceOffset);
 
-        addVertex(builder, matrix3f, matrix4f, 0f, -startScale + distortion, -zOffset, uPanelOffset + panel, vPanelOffset);
+        addVertex(builder, pose, matrix4f, 0f, -startScale + distortion, -zOffset, uPanelOffset + panel, vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, startScale * sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset,
+        addVertex(builder, pose, matrix4f, startScale * sqrt, startScale / -2f + distortion, -zOffset, uPanelOffset,
                 vPanelOffset);
 
-        addVertex(builder, matrix3f, matrix4f, endScale * sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
+        addVertex(builder, pose, matrix4f, endScale * sqrt, endScale / -2f + distortionPlusOne, -zOffset - 1, uPanelOffset,
                 vOffset * panel + panelDistanceOffset);
     }
 
-    private void addVertex(VertexConsumer builder, Matrix3f normalMatrix, Matrix4f matrix, float x, float y, float z, float u, float v) {
-        builder.addVertex(matrix, x, y, z).setColor(1, 1, 1, 1f).setUv(u, v).setLight(0xF000F0).setNormal(normalMatrix,0, 0.0f, 0);
+    private void addVertex(VertexConsumer builder, PoseStack.Pose pose, Matrix4f matrix, float x, float y, float z, float u, float v) {
+        builder.addVertex(matrix, x, y, z).setColor(1, 1, 1, 1f).setUv(u, v).setLight(0xF000F0).setNormal(pose, 0, 0.0f, 0);
     }
 
     private float computeDistortionFactor(float time, int t) {

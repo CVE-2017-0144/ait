@@ -28,7 +28,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -36,6 +36,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.Nameable;
@@ -170,7 +171,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         if (this.console == null)
             return;
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(this.tardis().getUuid());
         buf.writeBlockPos(this.console);
 
@@ -528,9 +529,9 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         RenderSystem.setProjectionMatrix(
                 new Matrix4f().perspective((float) Math.toRadians(70.0), 1f, 0.05f, 4000f), VertexSorting.DISTANCE_TO_ORIGIN);
 
-        PoseStack modelView = RenderSystem.getModelViewStack();
-        modelView.pushPose();
-        modelView.setIdentity();
+        Matrix4fStack modelView = RenderSystem.getModelViewStack();
+        modelView.pushMatrix();
+        modelView.identity();
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.disableDepthTest();
@@ -544,7 +545,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         vortexStack.translate(0, 0, 500);
         ref.toRender().render(vortexStack);
 
-        modelView.popPose();
+        modelView.popMatrix();
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.setProjectionMatrix(prevProjection, prevSorter);
@@ -780,7 +781,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         if (this.selectedDesktop == null)
             return;
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(tardis().getUuid());
         buf.writeResourceLocation(this.selectedDesktop.id());
 

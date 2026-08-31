@@ -210,7 +210,7 @@ public class CoralPlantBlock extends HorizontalDirectionalBlock implements Entit
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state) {
         return AITBlocks.CORAL_PLANT.asItem().getDefaultInstance();
     }
 

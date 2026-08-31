@@ -108,7 +108,7 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
         if (this.isLinked())
             this.mark();
 
-        return saveWithoutMetadata();
+        return saveWithoutMetadata(registries);
     }
 
     protected void sync() {

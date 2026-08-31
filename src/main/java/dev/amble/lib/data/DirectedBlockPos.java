@@ -6,7 +6,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
@@ -113,12 +113,12 @@ public class DirectedBlockPos {
         return this.pos + " " + this.rotation;
     }
 
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeBlockPos(this.getPos());
         buf.writeByte(this.rotation);
     }
 
-    public static DirectedBlockPos read(FriendlyByteBuf buf) {
+    public static DirectedBlockPos read(RegistryFriendlyByteBuf buf) {
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();
 

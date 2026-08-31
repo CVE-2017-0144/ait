@@ -130,7 +130,6 @@ public class AstralMapScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        this.searchBox.tick();
     }
 
     @Override
@@ -163,9 +162,7 @@ public class AstralMapScreen extends Screen {
         private boolean shouldHover;
 
         public AstralMapListWidget(int width, int height, int top, int bottom, int elementHeight) {
-            super(AstralMapScreen.this.minecraft, width, height, top, bottom, elementHeight);
-            this.setRenderTopAndBottom(false);
-            this.setRenderBackground(false);
+            super(AstralMapScreen.this.minecraft, width, height, top, elementHeight);
 
             this.refreshEntries();
             this.replaceEntries(this.entries);
@@ -238,7 +235,7 @@ public class AstralMapScreen extends Screen {
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
             // Adjust for scrollbar width
-            this.x0 = this.getMaxScroll() > 0 ? -5 : 0;
+            this.setX(this.getMaxScroll() > 0 ? -5 : 0);
 
             if (this.lastMouseX == 0 && this.lastMouseY == 0) {
                 this.lastMouseX = mouseX;

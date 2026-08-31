@@ -5,6 +5,7 @@ import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -38,7 +39,7 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
 
     public boolean onUse(ServerPlayer player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (stack.getItem() == Items.NAME_TAG && stack.hasCustomHoverName()) {
+        if (stack.getItem() == Items.NAME_TAG && stack.has(DataComponents.CUSTOM_NAME)) {
             this.setPlaqueText(stack.getHoverName());
             if (!player.isCreative()) {
                 stack.shrink(1);
@@ -51,14 +52,14 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
     @Override
     public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.saveAdditional(nbt, registries);
-        nbt.putString("CustomPlaqueText", Component.Serializer.toJson(this.customPlaqueText));
+        nbt.putString("CustomPlaqueText", Component.Serializer.toJson(this.customPlaqueText, registries));
     }
 
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.loadAdditional(nbt, registries);
         if (nbt.contains("CustomPlaqueText", Tag.TAG_STRING)) {
-            this.customPlaqueText = readPlaqueText(nbt.getString("CustomPlaqueText"));
+            this.customPlaqueText = readPlaqueText(nbt.getString("CustomPlaqueText"), registries);
         }
         if (this.customPlaqueText == null || this.customPlaqueText.getString().isEmpty()) {
             this.customPlaqueText = Component.translatable("block.ait.plaque.default_text");
@@ -67,7 +68,7 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata();
+        return saveWithoutMetadata(registries);
     }
 
     @Override
@@ -75,9 +76,9 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    private static Component readPlaqueText(String plaqueText) {
+    private static Component readPlaqueText(String plaqueText, HolderLookup.Provider registries) {
         try {
-            Component text = Component.Serializer.fromJson(plaqueText);
+            Component text = Component.Serializer.fromJson(plaqueText, registries);
             if (text != null)
                 return text;
         } catch (JsonParseException ignored) {

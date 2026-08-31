@@ -36,9 +36,9 @@ public class DatapackMachineRecipe extends MachineRecipeSchema {
     public static MachineRecipeSchema fromJson(JsonObject json) {
         AtomicReference<MachineRecipeSchema> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(recipe -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(recipe -> {
             created.set(recipe.getFirst());
-        }).ifRight(err -> {
+        }).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack machine recipe: " + err);
         });

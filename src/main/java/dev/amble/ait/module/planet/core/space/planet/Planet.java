@@ -60,7 +60,7 @@ public record Planet(ResourceLocation dimension, float gravity, boolean hasOxyge
     public static Planet fromJson(JsonObject json) {
         AtomicReference<Planet> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(planet -> created.set(planet.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(planet -> created.set(planet.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack planet: {}", err);
         });

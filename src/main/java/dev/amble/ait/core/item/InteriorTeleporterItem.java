@@ -24,7 +24,7 @@ public class InteriorTeleporterItem extends LinkableItem { // todo - new model +
     private static final ParticleOptions PARTICLE_FAIL = ParticleTypes.ELECTRIC_SPARK;
 
     public InteriorTeleporterItem(Properties settings) {
-        super(settings.stacksTo(1).defaultDurability(16), true);
+        super(settings.stacksTo(1).durability(16), true);
     }
 
     @Override

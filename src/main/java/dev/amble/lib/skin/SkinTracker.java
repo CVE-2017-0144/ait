@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -84,8 +84,8 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		return Optional.ofNullable(this.get(id));
 	}
 
-	private FriendlyByteBuf toBuf(UUID id, SkinData data) {
-		FriendlyByteBuf buf = AitNetworking.buf();
+	private RegistryFriendlyByteBuf toBuf(UUID id, SkinData data) {
+		RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(1);
 
@@ -95,12 +95,12 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		return buf;
 	}
 
-	private FriendlyByteBuf toBuf() {
+	private RegistryFriendlyByteBuf toBuf() {
 		return toBuf(this);
 	}
 
-	private FriendlyByteBuf toBuf(Map<UUID, SkinData> map) {
-		FriendlyByteBuf buf = AitNetworking.buf();
+	private RegistryFriendlyByteBuf toBuf(Map<UUID, SkinData> map) {
+		RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(map.size());
 
@@ -113,15 +113,15 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 		return buf;
 	}
 
-	private void sync(FriendlyByteBuf buf) {
+	private void sync(RegistryFriendlyByteBuf buf) {
 		ServerLifecycleHooks.get().getPlayerList().getPlayers().forEach((p) -> this.sync(buf, p));
 	}
 
-	private void sync(FriendlyByteBuf buf, ServerPlayer player) {
+	private void sync(RegistryFriendlyByteBuf buf, ServerPlayer player) {
 		AitNetworking.send(player, SYNC_KEY, buf);
 	}
 
-	private void receive(FriendlyByteBuf buf) {
+	private void receive(RegistryFriendlyByteBuf buf) {
 		int count = buf.readInt();
 		for (int i = 0; i < count; i++) {
 			UUID id = buf.readUUID();

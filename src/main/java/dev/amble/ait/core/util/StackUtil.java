@@ -5,11 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Position;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Containers;
@@ -78,17 +79,14 @@ public class StackUtil {
         scatter(world, pos.getCenter(), stacks);
     }
 
-    public static CompoundTag writeUnordered(CompoundTag nbt, Collection<ItemStack> stacks) {
+    public static CompoundTag writeUnordered(HolderLookup.Provider registries, CompoundTag nbt, Collection<ItemStack> stacks) {
         ListTag nbtList = new ListTag();
 
         for (ItemStack stack : stacks) {
             if (stack == null || stack.isEmpty())
                 continue;
 
-            CompoundTag nbtCompound = new CompoundTag();
-
-            stack.save(nbtCompound);
-            nbtList.add(nbtCompound);
+            nbtList.add(stack.save(registries));
         }
 
         if (!nbtList.isEmpty())
@@ -97,7 +95,7 @@ public class StackUtil {
         return nbt;
     }
 
-    public static CompoundTag write(CompoundTag nbt, List<ItemStack> stacks) {
+    public static CompoundTag write(HolderLookup.Provider registries, CompoundTag nbt, List<ItemStack> stacks) {
         ListTag nbtList = new ListTag();
 
         for (int i = 0; i < stacks.size(); i++) {
@@ -109,10 +107,8 @@ public class StackUtil {
             if (stack.isEmpty())
                 continue;
 
-            CompoundTag nbtCompound = new CompoundTag();
+            CompoundTag nbtCompound = (CompoundTag) stack.save(registries);
             nbtCompound.putByte("Slot", (byte) i);
-
-            stack.save(nbtCompound);
             nbtList.add(nbtCompound);
         }
 
@@ -122,7 +118,7 @@ public class StackUtil {
         return nbt;
     }
 
-    public static CompoundTag write(CompoundTag nbt, ItemStack... stacks) {
+    public static CompoundTag write(HolderLookup.Provider registries, CompoundTag nbt, ItemStack... stacks) {
         ListTag nbtList = new ListTag();
 
         for (int i = 0; i < stacks.length; i++) {
@@ -134,10 +130,8 @@ public class StackUtil {
             if (stack.isEmpty())
                 continue;
 
-            CompoundTag nbtCompound = new CompoundTag();
+            CompoundTag nbtCompound = (CompoundTag) stack.save(registries);
             nbtCompound.putByte("Slot", (byte) i);
-
-            stack.save(nbtCompound);
             nbtList.add(nbtCompound);
         }
 
@@ -147,7 +141,7 @@ public class StackUtil {
         return nbt;
     }
 
-    public static void read(CompoundTag nbt, List<ItemStack> stacks) {
+    public static void read(HolderLookup.Provider registries, CompoundTag nbt, List<ItemStack> stacks) {
         ListTag nbtList = nbt.getList("Items", 10);
 
         for (int i = 0; i < nbtList.size(); i++) {
@@ -155,12 +149,12 @@ public class StackUtil {
             int j = nbtCompound.getByte("Slot") & 255;
 
             if (j < stacks.size()) {
-                stacks.set(j, ItemStack.of(nbtCompound));
+                stacks.set(j, ItemStack.parseOptional(registries, nbtCompound));
             }
         }
     }
 
-    public static ItemStack[] read(CompoundTag nbt) {
+    public static ItemStack[] read(HolderLookup.Provider registries, CompoundTag nbt) {
         ListTag nbtList = nbt.getList("Items", 10);
         ItemStack[] stacks = new ItemStack[nbtList.size()];
 
@@ -169,18 +163,18 @@ public class StackUtil {
             int j = nbtCompound.getByte("Slot") & 255;
 
             if (j < stacks.length) {
-                stacks[j] = ItemStack.of(nbtCompound);
+                stacks[j] = ItemStack.parseOptional(registries, nbtCompound);
             }
         }
 
         return stacks;
     }
 
-    public static void readUnordered(CompoundTag nbt, Collection<ItemStack> stacks) {
+    public static void readUnordered(HolderLookup.Provider registries, CompoundTag nbt, Collection<ItemStack> stacks) {
         ListTag nbtList = nbt.getList("Items", 10);
 
         for (int i = 0; i < nbtList.size(); i++) {
-            stacks.add(ItemStack.of(nbtList.getCompound(i)));
+            stacks.add(ItemStack.parseOptional(registries, nbtList.getCompound(i)));
         }
     }
 
@@ -218,12 +212,12 @@ public class StackUtil {
         return new ItemStack(Items.AIR);
     }
 
-    public static void writeItem(FriendlyByteBuf buf, Item item) {
-        buf.writeId(BuiltInRegistries.ITEM, item);
+    public static void writeItem(RegistryFriendlyByteBuf buf, Item item) {
+        buf.writeVarInt(BuiltInRegistries.ITEM.getId(item));
     }
 
-    public static Item readItem(FriendlyByteBuf buf) {
-        return buf.readById(BuiltInRegistries.ITEM);
+    public static Item readItem(RegistryFriendlyByteBuf buf) {
+        return BuiltInRegistries.ITEM.byId(buf.readVarInt());
     }
 
     public static ItemStack orAir(ItemStack stack) {

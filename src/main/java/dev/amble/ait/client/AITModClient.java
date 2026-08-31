@@ -272,7 +272,8 @@ public class AITModClient implements ClientModInitializer {
         ClientTardisUtil.init();
 
         WorldRenderEvents.END.register((context) -> SonicRendering.getInstance().renderWorld(context));
-        HudRenderCallback.EVENT.register((context, delta) -> SonicRendering.getInstance().renderGui(context, delta));
+        HudRenderCallback.EVENT.register((context, delta) -> SonicRendering.getInstance()
+                .renderGui(context, delta.getGameTimeDeltaPartialTick(true)));
 
         SonicModelLoader.init();
 
@@ -570,7 +571,7 @@ public class AITModClient implements ClientModInitializer {
                 int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
                 TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack, context.consumers(),
                         AITMod.id("textures/environment/tardis_sky.png"), model,
-                        BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickDelta());
+                        BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickCounter().getGameTimeDeltaPartialTick(true));
             }
 
             stack.popPose();

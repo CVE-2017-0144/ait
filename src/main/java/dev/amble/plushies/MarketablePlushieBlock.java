@@ -101,11 +101,11 @@ public class MarketablePlushieBlock extends AWaterloggableBlock implements Entit
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.getBlockEntity(pos) instanceof MarketablePlushieBlockEntity be)
-            return be.onUse(state, world, pos, player, hand, hit);
+            return be.onUse(state, world, pos, player, InteractionHand.MAIN_HAND, hit);
 
-        return super.use(state, world, pos, player, hand, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override

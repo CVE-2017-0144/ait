@@ -37,10 +37,11 @@ public class BedrockEntityRenderer<T extends LivingEntity & AnimatedEntity> exte
 	}
 
 	@Override
-	protected void renderNameTag(T entity, Component text, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
+	protected void renderNameTag(T entity, Component text, PoseStack matrices,
+            MultiBufferSource vertexConsumers, int light, float partialTick) {
 		matrices.pushPose();
 		matrices.translate(0, 1.5D, 0);
-		super.renderNameTag(entity, text, matrices, vertexConsumers, light);
+		super.renderNameTag(entity, text, matrices, vertexConsumers, light, partialTick);
 		matrices.popPose();
 	}
 

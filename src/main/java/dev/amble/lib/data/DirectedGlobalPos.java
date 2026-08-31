@@ -8,7 +8,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -122,13 +122,13 @@ public class DirectedGlobalPos {
         return this.dimension + " " + this.pos + " " + this.rotation;
     }
 
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeResourceKey(this.dimension);
         buf.writeBlockPos(this.pos);
         buf.writeByte(this.rotation);
     }
 
-    public static DirectedGlobalPos read(FriendlyByteBuf buf) {
+    public static DirectedGlobalPos read(RegistryFriendlyByteBuf buf) {
         ResourceKey<Level> registryKey = buf.readResourceKey(Registries.DIMENSION);
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();
@@ -137,7 +137,8 @@ public class DirectedGlobalPos {
     }
 
     public CompoundTag toNbt() {
-        CompoundTag compound = NbtUtils.writeBlockPos(this.pos);
+        CompoundTag compound = new CompoundTag();
+        compound.put("Pos", NbtUtils.writeBlockPos(this.pos));
         compound.putString("dimension", this.dimension.location().toString());
         compound.putByte("rotation", this.rotation);
 
@@ -145,7 +146,7 @@ public class DirectedGlobalPos {
     }
 
     public static DirectedGlobalPos fromNbt(CompoundTag compound) {
-        BlockPos pos = NbtUtils.readBlockPos(compound);
+        BlockPos pos = NbtUtils.readBlockPos(compound, "Pos").orElseThrow();
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
                 ResourceLocation.parse(compound.getString("dimension")));
 

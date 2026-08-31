@@ -14,6 +14,6 @@ public class ItemStackSerializer implements JsonSerializer<ItemStack>, JsonDeser
 
     @Override
     public JsonElement serialize(ItemStack src, Type typeOfSrc, JsonSerializationContext context) {
-        return context.serialize(src.save(new CompoundTag()));
+        return context.serialize(src.save(registries));
     }
 }

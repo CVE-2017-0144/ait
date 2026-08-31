@@ -32,7 +32,7 @@ public class DatapackDesktop extends TardisDesktopSchema {
     public static TardisDesktopSchema fromJson(JsonObject json) {
         AtomicReference<TardisDesktopSchema> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(desktop -> created.set(desktop.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(desktop -> created.set(desktop.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack desktop: {}", err);
         });

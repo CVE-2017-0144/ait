@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -79,18 +80,18 @@ public abstract class PlayerEntityRendererMixin
     }
 
     @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
-    public void ait$render(AbstractClientPlayer abstractClientPlayerEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, CallbackInfo ci) {
+    public void ait$render(AbstractClientPlayer abstractClientPlayerEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, float partialTick, CallbackInfo ci) {
         if (abstractClientPlayerEntity.getVehicle() instanceof FlightTardisEntity) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At("HEAD"), cancellable = true)
-    public void ait$psychicPaperNaming(AbstractClientPlayer abstractClientPlayerEntity, Component text, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, CallbackInfo ci) {
+    @Inject(method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IF)V", at = @At("HEAD"), cancellable = true)
+    public void ait$psychicPaperNaming(AbstractClientPlayer abstractClientPlayerEntity, Component text, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, float partialTick, CallbackInfo ci) {
         List<ItemStack> papers = getItemInInventory(abstractClientPlayerEntity);
 
-        if (!papers.isEmpty() && papers.get(0).hasCustomHoverName()) {
-            super.renderNameTag(abstractClientPlayerEntity, papers.get(0).getHoverName(), matrixStack, vertexConsumerProvider, i);
+        if (!papers.isEmpty() && papers.get(0).has(DataComponents.CUSTOM_NAME)) {
+            super.renderNameTag(abstractClientPlayerEntity, papers.get(0).getHoverName(), matrixStack, vertexConsumerProvider, i, partialTick);
             ci.cancel();
         }
     }

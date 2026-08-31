@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -74,12 +73,9 @@ public class EnvironmentProjectorBlock extends HorizontalDirectionalBlock implem
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
                               BlockHitResult hit) {
         if (world.isClientSide())
-            return InteractionResult.PASS;
-
-        if (hand != InteractionHand.MAIN_HAND)
             return InteractionResult.PASS;
 
         if(player.isShiftKeyDown()) {

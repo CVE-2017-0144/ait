@@ -68,14 +68,13 @@ public class RiftEntityRenderer extends EntityRenderer<RiftEntity> {
     private static void renderCircleQuad(PoseStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, float size) {
         PoseStack.Pose entry = matrixStack.last();
         Matrix4f positionMatrix = entry.pose();
-        Matrix3f normalMatrix = entry.normal();
 
         float half = size / 2.0f;
 
-        vertexConsumer.addVertex(positionMatrix, -half, -half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.5f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
-        vertexConsumer.addVertex(positionMatrix, half, -half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
-        vertexConsumer.addVertex(positionMatrix, half, half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.0f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
-        vertexConsumer.addVertex(positionMatrix, -half, half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.0f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, -half, -half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.5f).setOverlay(overlay).setLight(light).setNormal(entry, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, half, -half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(entry, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, half, half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.0f).setOverlay(overlay).setLight(light).setNormal(entry, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, -half, half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.0f).setOverlay(overlay).setLight(light).setNormal(entry, 0.0f, 0.0f, 1.0f);
     }
 
     @Override

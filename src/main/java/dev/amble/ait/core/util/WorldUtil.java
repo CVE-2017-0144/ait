@@ -318,6 +318,6 @@ public class WorldUtil {
         player.giveExperiencePoints(0);
 
         player.getActiveEffects().forEach(effect -> player.connection.send(
-                new ClientboundUpdateMobEffectPacket(player.getId(), effect)));
+                new ClientboundUpdateMobEffectPacket(player.getId(), effect, false)));
     }
 }

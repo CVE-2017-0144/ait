@@ -2,6 +2,7 @@ package dev.amble.ait.module.planet.core.item;
 
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +23,7 @@ public class SpacesuitItem extends RenderableArmorItem {
     public static final String OXYGEN_KEY = "oxygen";
     public static final double MAX_OXYGEN = 5.2D;
 
-    public SpacesuitItem(ArmorMaterial material, Type type, Properties settings, boolean hasCustomRendering) {
+    public SpacesuitItem(Holder<ArmorMaterial> material, Type type, Properties settings, boolean hasCustomRendering) {
         super(material, type, settings, hasCustomRendering);
     }
 

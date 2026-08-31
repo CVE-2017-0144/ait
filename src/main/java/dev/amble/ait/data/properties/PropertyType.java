@@ -4,14 +4,15 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public class PropertyType<T> {
 
     private final Class<?> clazz;
-    private final BiConsumer<FriendlyByteBuf, T> encoder;
-    private final Function<FriendlyByteBuf, T> decoder;
+    private final BiConsumer<RegistryFriendlyByteBuf, T> encoder;
+    private final Function<RegistryFriendlyByteBuf, T> decoder;
 
-    public PropertyType(Class<?> clazz, BiConsumer<FriendlyByteBuf, T> encoder, Function<FriendlyByteBuf, T> decoder) {
+    public PropertyType(Class<?> clazz, BiConsumer<RegistryFriendlyByteBuf, T> encoder, Function<RegistryFriendlyByteBuf, T> decoder) {
         this.clazz = clazz;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -25,11 +26,11 @@ public class PropertyType<T> {
         return Objects.equals(first, other);
     }
 
-    public void encode(FriendlyByteBuf buf, T value) {
+    public void encode(RegistryFriendlyByteBuf buf, T value) {
         this.encoder.accept(buf, value);
     }
 
-    public T decode(FriendlyByteBuf buf) {
+    public T decode(RegistryFriendlyByteBuf buf) {
         return this.decoder.apply(buf);
     }
 
@@ -43,7 +44,7 @@ public class PropertyType<T> {
 
     public static class Nullable<T> extends PropertyType<T> {
 
-        public Nullable(Class<?> clazz, BiConsumer<FriendlyByteBuf, T> encoder, Function<FriendlyByteBuf, T> decoder) {
+        public Nullable(Class<?> clazz, BiConsumer<RegistryFriendlyByteBuf, T> encoder, Function<RegistryFriendlyByteBuf, T> decoder) {
             super(clazz, encoder, decoder);
         }
 
@@ -53,13 +54,13 @@ public class PropertyType<T> {
         }
 
         @Override
-        public void encode(FriendlyByteBuf buf, T value) {
-            buf.writeNullable(value, super::encode);
+        public void encode(RegistryFriendlyByteBuf buf, T value) {
+            buf.writeNullable(value, (b, v) -> super.encode((RegistryFriendlyByteBuf) b, v));
         }
 
         @Override
-        public T decode(FriendlyByteBuf buf) {
-            return buf.readNullable(super::decode);
+        public T decode(RegistryFriendlyByteBuf buf) {
+            return buf.readNullable(b -> super.decode((RegistryFriendlyByteBuf) b));
         }
     }
 }

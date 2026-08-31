@@ -3,7 +3,7 @@ package dev.amble.ait.core.item.component;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.SlotAccess;
@@ -130,16 +130,16 @@ public class AbstractTardisPart extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void disassemble(ItemStack machine) {
-        FriendlyByteBuf data = AitNetworking.buf();
-        data.writeItem(StackUtil.take(machine));
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
+        ItemStack.STREAM_CODEC.encode(data, StackUtil.take(machine));
 
         AitNetworking.send(DISASSEMBLE, data);
     }
 
     @Environment(value = EnvType.CLIENT)
     public static void unattach(ItemStack machine, AbstractLinkItem.Type link) {
-        FriendlyByteBuf data = AitNetworking.buf();
-        data.writeItem(machine);
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
+        ItemStack.STREAM_CODEC.encode(data, machine);
         data.writeEnum(link);
 
         AitNetworking.send(UNATTACH, data);
@@ -147,9 +147,9 @@ public class AbstractTardisPart extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void attach(ItemStack machine, AbstractLinkItem link) {
-        FriendlyByteBuf data = AitNetworking.buf();
-        data.writeItem(machine);
-        StackUtil.writeItem(data, link);
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
+        ItemStack.STREAM_CODEC.encode(data, machine);
+        ItemStack.STREAM_CODEC.encode(data, link);
 
         AitNetworking.send(ATTACH, data);
     }

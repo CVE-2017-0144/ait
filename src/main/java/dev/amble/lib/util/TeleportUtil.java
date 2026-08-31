@@ -26,7 +26,7 @@ public class TeleportUtil {
     private static void teleportPlayer(ServerPlayer player, ServerLevel world, Vec3 pos, float yaw, float pitch) {
         player.teleportTo(world, pos.x, pos.y, pos.z, yaw, pitch);
         player.giveExperiencePoints(0);
-        player.getActiveEffects().forEach(effect -> player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect)));
+        player.getActiveEffects().forEach(effect -> player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect, false)));
         player.connection.send(new ClientboundSetEntityMotionPacket(player));
     }
     private static void teleportNonPlayer(LivingEntity entity, ServerLevel world, Vec3 pos, float yaw, float pitch) {

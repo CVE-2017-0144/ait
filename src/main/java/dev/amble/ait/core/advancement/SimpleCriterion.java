@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.ApiStatus;
 import dev.amble.ait.AITMod;
 import java.util.Optional;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
@@ -40,8 +41,8 @@ public class SimpleCriterion extends SimpleCriterionTrigger<SimpleCriterion.Cond
     /**
      * @return a newly created conditions object
      */
-    public Conditions conditions() {
-        return new Conditions(Optional.empty());
+    public Criterion<Conditions> conditions() {
+        return this.createCriterion(new Conditions(Optional.empty()));
     }
 
     public SimpleCriterion register() {

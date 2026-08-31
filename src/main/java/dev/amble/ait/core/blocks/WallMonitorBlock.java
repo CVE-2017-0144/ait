@@ -42,7 +42,7 @@ public class WallMonitorBlock extends HorizontalDirectionalBlock implements Enti
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof WallMonitorBlockEntity wallMonitorBlockEntity)

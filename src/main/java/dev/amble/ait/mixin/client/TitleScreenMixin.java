@@ -3,6 +3,7 @@ package dev.amble.ait.mixin.client;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,13 +32,13 @@ public abstract class TitleScreenMixin extends Screen {
 
     // This modifies the panorama in the background
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V", ordinal = 0))
-    private void something(PanoramaRenderer instance, float delta, float alpha) {
+    private void something(PanoramaRenderer instance, GuiGraphics graphics, int mouseX, int mouseY, float delta, float alpha) {
         boolean isConfigEnabled = AITModClient.CONFIG.customMenu;
 
         if (isConfigEnabled)
-            NEWPANO.render(delta, alpha);
+            NEWPANO.render(graphics, mouseX, mouseY, delta, alpha);
         else
-            instance.render(delta, alpha);
+            instance.render(graphics, mouseX, mouseY, delta, alpha);
     }
 
     @Redirect(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/Button;builder(Lnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/components/Button$OnPress;)Lnet/minecraft/client/gui/components/Button$Builder;", ordinal = 0))

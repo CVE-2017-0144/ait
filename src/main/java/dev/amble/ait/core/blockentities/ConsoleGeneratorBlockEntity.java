@@ -9,7 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -171,7 +171,7 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         if (!hasLevel() || level.isClientSide())
             return;
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeUtf(getConsoleSchema().id().toString());
         buf.writeBlockPos(getBlockPos());
@@ -185,7 +185,7 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         if (!hasLevel() || level.isClientSide())
             return;
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeUtf(getConsoleVariant().id().toString());
         buf.writeBlockPos(getBlockPos());

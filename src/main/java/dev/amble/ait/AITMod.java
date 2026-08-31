@@ -24,7 +24,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -280,7 +280,7 @@ public class AITMod implements ModInitializer {
 
         AitNetworking.registerServerReceiver(MachineItem.MACHINE_DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
-                    ItemStack machine = buf.readItem();
+                    ItemStack machine = ItemStack.STREAM_CODEC.decode(buf);
 
                     Optional<MachineRecipeSchema> schema = MachineRecipeRegistry.getInstance().findMatching(machine);
 
@@ -297,7 +297,7 @@ public class AITMod implements ModInitializer {
 
         AitNetworking.registerServerReceiver(AbstractTardisPart.DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
-                    ItemStack machine = buf.readItem();
+                    ItemStack machine = ItemStack.STREAM_CODEC.decode(buf);
 
                     Optional<MachineRecipeSchema> schema = MachineRecipeRegistry.getInstance().findMatching(machine);
 
@@ -353,10 +353,10 @@ public class AITMod implements ModInitializer {
             });
         });
 
-        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
+        LootTableEvents.MODIFY.register((id, tableBuilder, source, registries) -> {
             if (source.isBuiltin()
-                    && (id.equals(BuiltInLootTables.NETHER_BRIDGE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
-                    || id.equals(BuiltInLootTables.VILLAGE_ARMORER) || id.equals(BuiltInLootTables.RUINED_PORTAL))
+                    && (id == BuiltInLootTables.NETHER_BRIDGE || id == BuiltInLootTables.DESERT_PYRAMID
+                    || id == BuiltInLootTables.VILLAGE_ARMORER || id == BuiltInLootTables.RUINED_PORTAL)
                     || id.equals(BuiltInLootTables.END_CITY_TREASURE) || id.equals(BuiltInLootTables.SHIPWRECK_MAP)
                     || id.equals(BuiltInLootTables.ABANDONED_MINESHAFT) || id.equals(BuiltInLootTables.VILLAGE_CARTOGRAPHER)
                     || id.equals(BuiltInLootTables.VILLAGE_TOOLSMITH) || id.equals(BuiltInLootTables.SHIPWRECK_TREASURE)
@@ -364,7 +364,7 @@ public class AITMod implements ModInitializer {
                     || id.equals(BuiltInLootTables.BURIED_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY)
                     || id.equals(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY) || id.equals(BuiltInLootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY)
                     || id.equals(BuiltInLootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY) || id.equals(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE)
-                    || id.equals(BuiltInLootTables.FISHING_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
+                    || id.equals(BuiltInLootTables.FISHING_TREASURE) || id == BuiltInLootTables.DESERT_PYRAMID
                     || id.equals(BuiltInLootTables.SIMPLE_DUNGEON) || id.equals(BuiltInLootTables.STRONGHOLD_LIBRARY)) {
 
 
@@ -423,20 +423,20 @@ public class AITMod implements ModInitializer {
     public static final ResourceLocation PROJECTOR_ANGLES = ResourceLocation.fromNamespaceAndPath(MOD_ID, "projector_angles");
 
     public static void openScreen(ServerPlayer player, int id) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         AitNetworking.send(player, OPEN_SCREEN, buf);
     }
 
     public static void openScreen(ServerPlayer player, int id, UUID tardis) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeUUID(tardis);
         AitNetworking.send(player, OPEN_SCREEN_TARDIS, buf);
     }
 
     public static void openScreen(ServerPlayer player, int id, UUID tardis, BlockPos console) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeUUID(tardis);
         buf.writeBlockPos(console);
@@ -445,7 +445,7 @@ public class AITMod implements ModInitializer {
     }
 
     public static void openScreen(ServerPlayer player, int id, BlockPos console) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeBlockPos(console);
 
@@ -459,21 +459,21 @@ public class AITMod implements ModInitializer {
 
 
     public static void sendProjectorToggle(BlockPos pos, boolean enabled) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeBoolean(enabled);
         AitNetworking.send(TOGGLE_PROJECTOR, buf);
     }
 
     public static void sendProjectorSelection(BlockPos pos, ResourceLocation worldId) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeResourceLocation(worldId);
         AitNetworking.send(PROJECTOR_SELECTION, buf);
     }
 
     public static void sendProjectorAngles(BlockPos pos, float yaw, float pitch) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeFloat(yaw);
         buf.writeFloat(pitch);

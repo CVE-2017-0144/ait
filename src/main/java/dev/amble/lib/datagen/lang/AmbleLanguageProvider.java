@@ -2,9 +2,11 @@ package dev.amble.lib.datagen.lang;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -30,7 +32,7 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
     }
 
     @Override
-    public void generateTranslations(TranslationBuilder builder) {
+    public void generateTranslations(HolderLookup.Provider registries, TranslationBuilder builder) {
         for (String key : translations.keySet()) {
             builder.add(key, translations.get(key));
         }

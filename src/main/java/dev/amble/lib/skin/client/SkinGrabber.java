@@ -60,7 +60,7 @@ public class SkinGrabber {
         if (Minecraft.getInstance().player == null) {
             return MISSING;
         }
-        return DefaultPlayerSkin.getDefaultSkin(Minecraft.getInstance().player.getUUID());
+        return DefaultPlayerSkin.get(Minecraft.getInstance().player.getUUID());
     }
 
 	public static boolean isMissingTexture(ResourceLocation id) {

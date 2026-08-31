@@ -64,8 +64,8 @@ public class QueuedStructureTemplate {
 
         List<StructureTemplate.StructureBlockInfo> randomBlocks = placementData.getRandomPalette(this.blockInfoLists, pos).blocks();
 
-        List<BlockPos> flowingFluid = new ArrayList<>(placementData.shouldKeepLiquids() ? randomBlocks.size() : 0);
-        List<BlockPos> stillFluid = new ArrayList<>(placementData.shouldKeepLiquids() ? randomBlocks.size() : 0);
+        List<BlockPos> flowingFluid = new ArrayList<>(randomBlocks.size());
+        List<BlockPos> stillFluid = new ArrayList<>(randomBlocks.size());
 
         if (randomBlocks.isEmpty() && (placementData.isIgnoreEntities() || this.entities.isEmpty()) || this.size.getX() < 1 || this.size.getY() < 1 || this.size.getZ() < 1)
             return Optional.empty();
@@ -96,7 +96,7 @@ public class QueuedStructureTemplate {
             if (blockBox != null && !blockBox.isInside(blockPos))
                 return false;
 
-            FluidState fluidState = placementData.shouldKeepLiquids() ? world.getFluidState(blockPos) : null;
+            FluidState fluidState = world.getFluidState(blockPos);
             BlockState blockState = blockInfo.state().mirror(placementData.getMirror()).rotate(placementData.getRotation());
 
             if (blockInfo.nbt() != null)
@@ -157,7 +157,7 @@ public class QueuedStructureTemplate {
         if (blockEntity instanceof RandomizableContainerBlockEntity)
             nbt.putLong("LootTableSeed", random.nextLong());
 
-        blockEntity.load(nbt);
+        blockEntity.loadWithComponents(nbt, world.registryAccess());
     }
 
     private void update(ServerLevelAccessor world, StructurePlaceSettings placementData, List<Pair<BlockPos, CompoundTag>> nbtList, int x1, int y1, int z1, int x2, int y2, int z2, int flags) {

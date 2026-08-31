@@ -146,11 +146,11 @@ public class FlightTardisEntity extends LinkableLivingEntity implements PlayerRi
     }
 
     @Override
-    public void setOnGroundWithKnownMovement(boolean onGround, Vec3 movement) {
+    public void setOnGroundWithMovement(boolean onGround, Vec3 movement) {
         if (!this.onGround() && onGround)
             this.playThud();
 
-        super.setOnGroundWithKnownMovement(onGround, movement);
+        super.setOnGroundWithMovement(onGround, movement);
     }
 
     @Override
@@ -254,7 +254,7 @@ public class FlightTardisEntity extends LinkableLivingEntity implements PlayerRi
     }
 
     @Override
-    public double getPassengersRidingOffset() {
+    public double getPassengersRidingOffsetUnused() {
         return 0.5f;
     }
 

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -118,7 +119,7 @@ public class GunModule extends Module {
             }
 
             @Override
-            public void advancements(Consumer<Advancement> consumer) {
+            public void advancements(Consumer<AdvancementHolder> consumer) {
 
             }
         });

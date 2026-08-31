@@ -155,7 +155,7 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         return mode(stack).maxTime();
     }
 

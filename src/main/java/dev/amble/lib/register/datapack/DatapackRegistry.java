@@ -2,7 +2,7 @@ package dev.amble.lib.register.datapack;
 
 import java.util.*;
 import java.util.function.Supplier;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.lib.AmbleKit;
@@ -94,7 +94,7 @@ public abstract class DatapackRegistry<T extends Identifiable> implements Regist
 
     public abstract void syncToClient(ServerPlayer player);
 
-    public abstract void readFromServer(FriendlyByteBuf buf);
+    public abstract void readFromServer(RegistryFriendlyByteBuf buf);
 
     @Override
     public void onCommonInit() {

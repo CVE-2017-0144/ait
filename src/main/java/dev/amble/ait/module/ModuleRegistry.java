@@ -2,7 +2,7 @@ package dev.amble.ait.module;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.module.decoration.DecorationModule;
 import dev.amble.ait.module.gun.GunModule;
@@ -50,7 +50,7 @@ public class ModuleRegistry extends DatapackRegistry<Module> {
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
 
     }
 

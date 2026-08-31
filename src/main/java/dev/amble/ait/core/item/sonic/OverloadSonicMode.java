@@ -225,7 +225,7 @@ public class OverloadSonicMode extends SonicMode {
     }
 
     private void activateBlock(ServerLevel world, BlockPos pos, LivingEntity user, BlockState state, BlockHitResult hit) {
-        state.use(world, (Player) user, user.getUsedItemHand(), hit);
+        state.useWithoutItem(world, (Player) user, hit);
         playFx(world, pos);
     }
 

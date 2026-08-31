@@ -144,7 +144,7 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
         super.saveAdditional(nbt, registries);
 
         if (this.idSource != null) {
-            nbt.put("SourceStack", this.idSource.save(new CompoundTag()));
+            nbt.put("SourceStack", this.idSource.save(registries));
         }
     }
 
@@ -153,7 +153,7 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
         super.loadAdditional(nbt, registries);
 
         if (nbt.contains("SourceStack")) {
-            this.idSource = ItemStack.of(nbt.getCompound("SourceStack"));
+            this.idSource = ItemStack.parseOptional(registries, nbt.getCompound("SourceStack"));
         }
     }
 

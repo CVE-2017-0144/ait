@@ -156,7 +156,7 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
         super.saveAdditional(nbt, registries);
 
         if (blueprint != null)
-            nbt.put("Blueprint", blueprint.toNbt());
+            nbt.put("Blueprint", blueprint.toNbt(registries));
 
         nbt.putBoolean("HasBlueprint", this.hasBlueprint());
     }

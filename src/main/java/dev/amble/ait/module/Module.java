@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -104,6 +105,6 @@ public abstract class Module implements Identifiable {
 
         void models(AmbleModelProvider provider, BlockModelGenerators generator);
 
-        void advancements(Consumer<Advancement> consumer);
+        void advancements(Consumer<AdvancementHolder> consumer);
     }
 }

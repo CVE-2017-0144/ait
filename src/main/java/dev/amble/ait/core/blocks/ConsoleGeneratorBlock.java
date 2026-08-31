@@ -40,7 +40,7 @@ public class ConsoleGeneratorBlock extends FluidLinkBlock implements EntityBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
 
         if (world.getBlockEntity(pos) instanceof ConsoleGeneratorBlockEntity be)

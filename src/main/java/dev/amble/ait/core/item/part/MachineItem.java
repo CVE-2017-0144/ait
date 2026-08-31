@@ -2,7 +2,7 @@ package dev.amble.ait.core.item.part;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -45,8 +45,8 @@ public class MachineItem extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void disassemble(ItemStack machine) {
-        FriendlyByteBuf data = AitNetworking.buf();
-        data.writeItem(machine.copyWithCount(1));
+        RegistryFriendlyByteBuf data = AitNetworking.buf();
+        ItemStack.STREAM_CODEC.encode(data, machine.copyWithCount(1));
 
         AitNetworking.send(MACHINE_DISASSEMBLE, data);
         machine.shrink(1);

@@ -9,7 +9,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -90,8 +90,8 @@ public class AnimationTracker {
 		this.animations.clear();
 	}
 
-	private FriendlyByteBuf toBuf(Map<UUID, BedrockAnimationReference> map) {
-		FriendlyByteBuf buf = AitNetworking.buf();
+	private RegistryFriendlyByteBuf toBuf(Map<UUID, BedrockAnimationReference> map) {
+		RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(map.size());
 		for (Map.Entry<UUID, BedrockAnimationReference> entry : map.entrySet()) {
@@ -102,12 +102,12 @@ public class AnimationTracker {
 		return buf;
 	}
 
-	private FriendlyByteBuf toBuf() {
+	private RegistryFriendlyByteBuf toBuf() {
 		return toBuf(this.animations);
 	}
 
-	private FriendlyByteBuf toBuf(UUID id, BedrockAnimationReference animation) {
-		FriendlyByteBuf buf = AitNetworking.buf();
+	private RegistryFriendlyByteBuf toBuf(UUID id, BedrockAnimationReference animation) {
+		RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(1);
 		buf.writeUUID(id);
@@ -116,8 +116,8 @@ public class AnimationTracker {
 		return buf;
 	}
 
-	private FriendlyByteBuf toRemovalBuf(UUID id) {
-		FriendlyByteBuf buf = AitNetworking.buf();
+	private RegistryFriendlyByteBuf toRemovalBuf(UUID id) {
+		RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(-1);
 		buf.writeUUID(id);
@@ -125,7 +125,7 @@ public class AnimationTracker {
 		return buf;
 	}
 
-	private void receive(FriendlyByteBuf buf) {
+	private void receive(RegistryFriendlyByteBuf buf) {
 		int count = buf.readInt();
 
 		if (count == -1) {
@@ -151,11 +151,11 @@ public class AnimationTracker {
 		sync(toBuf(), target);
 	}
 
-	private void sync(FriendlyByteBuf buf) {
+	private void sync(RegistryFriendlyByteBuf buf) {
 		ServerLifecycleHooks.get().getPlayerList().getPlayers().forEach((p) -> this.sync(buf, p));
 	}
 
-	private void sync(FriendlyByteBuf buf, ServerPlayer player) {
+	private void sync(RegistryFriendlyByteBuf buf, ServerPlayer player) {
 		AitNetworking.send(player, SYNC_KEY, buf);
 	}
 }

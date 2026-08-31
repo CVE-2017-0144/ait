@@ -3,10 +3,12 @@ package dev.amble.ait.datagen.datagen_providers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -33,12 +35,13 @@ public class AITRecipeProvider extends FabricRecipeProvider {
     public record BlastFurnaceRecipeEntry(SimpleCookingRecipeBuilder builder, ResourceLocation id) {}
 
 
-    public AITRecipeProvider(FabricDataOutput output) {
-        super(output);
+    public AITRecipeProvider(FabricDataOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
-    public void buildRecipes(Consumer<RecipeOutput> exporter) {
+    public void buildRecipes(RecipeOutput exporter) {
         for (ShapelessRecipeBuilder shapelessRecipeJsonBuilder : shapelessRecipes) {
             shapelessRecipeJsonBuilder.save(exporter);
         }

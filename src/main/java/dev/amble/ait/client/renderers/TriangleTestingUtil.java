@@ -2,6 +2,7 @@ package dev.amble.ait.client.renderers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -30,9 +31,8 @@ public class TriangleTestingUtil {
 
         Matrix4f positionMatrix = matrixStack.last().pose();
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
 
-        buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         for (int i = 0; i < 6; ++i) {
             matrixStack.rotateAround(
                     Axis.YP.rotationDegrees(i * ((i > 1f && i < 3f) || i == 4 ? 120f : 60F)), 0, 0, 0);
@@ -45,7 +45,7 @@ public class TriangleTestingUtil {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.disableCull();
 
-        tessellator.end();
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         RenderSystem.enableCull();
     }

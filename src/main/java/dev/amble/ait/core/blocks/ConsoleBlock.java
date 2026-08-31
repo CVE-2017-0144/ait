@@ -77,15 +77,15 @@ public class ConsoleBlock extends HorizontalDirectionalBlock implements EntityBl
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
                               BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ConsoleBlockEntity consoleBlockEntity) {
             if (world.dimension().equals(Level.OVERWORLD)) return InteractionResult.FAIL;
             consoleBlockEntity.useOn(world, player.isShiftKeyDown(), player);
-            ItemStack itemStack = player.getItemInHand(hand);
+            ItemStack itemStack = player.getItemInHand(InteractionHand.MAIN_HAND);
             if (itemStack.getItem() instanceof HammerItem) {
-                itemStack.getItem().useOn(new UseOnContext(world, player, hand, itemStack, hit));
+                itemStack.getItem().useOn(new UseOnContext(world, player, InteractionHand.MAIN_HAND, itemStack, hit));
             }
         }
 

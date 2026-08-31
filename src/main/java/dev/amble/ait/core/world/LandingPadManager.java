@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -98,7 +98,7 @@ public class LandingPadManager {
             ServerLevel world = player.serverLevel();
             ChunkPos pos = player.chunkPosition();
 
-            FriendlyByteBuf buf = AitNetworking.buf();
+            RegistryFriendlyByteBuf buf = AitNetworking.buf();
             buf.writeEnum(action);
 
             if (action != Action.CLEAR)
@@ -119,7 +119,7 @@ public class LandingPadManager {
         }
 
         public static void syncTracked(Action action, ServerLevel world, ChunkPos pos) {
-            FriendlyByteBuf buf = AitNetworking.buf();
+            RegistryFriendlyByteBuf buf = AitNetworking.buf();
             buf.writeEnum(action);
 
             if (action != Action.CLEAR)

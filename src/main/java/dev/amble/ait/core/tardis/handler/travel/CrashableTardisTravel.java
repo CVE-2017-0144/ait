@@ -112,6 +112,6 @@ public sealed interface CrashableTardisTravel permits TravelHandler {
 
     default void startCrashEffects(Tardis tardis, BlockPos console) {
         ServerLevel world = tardis.asServer().world();
-        TardisDesktop.playSoundAtConsole(world, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 3f, 1f);
+        TardisDesktop.playSoundAtConsole(world, console, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3f, 1f);
     }
 }

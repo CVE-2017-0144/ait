@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -40,7 +41,7 @@ public class CobbledSnowballEntity extends ThrowableItemProjectile {
     }
 
     private ParticleOptions getParticleParameters() {
-        ItemStack itemStack = this.getItemRaw();
+        ItemStack itemStack = this.getItem();
         BlockState blockState = Blocks.COBBLESTONE.defaultBlockState();
         return itemStack.isEmpty() ? new BlockParticleOption(ParticleTypes.BLOCK, blockState) : new ItemParticleOption(ParticleTypes.ITEM, itemStack);
     }
@@ -78,8 +79,8 @@ public class CobbledSnowballEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
+        return new ClientboundAddEntityPacket(this, entity);
     }
 
 }

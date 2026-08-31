@@ -12,12 +12,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+
+import dev.amble.lib.util.ServerLifecycleHooks;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
@@ -27,7 +29,7 @@ public final class AitNetworking {
 
     private AitNetworking() {}
 
-    public record Payload(CustomPacketPayload.Type<Payload> type, FriendlyByteBuf data)
+    public record Payload(CustomPacketPayload.Type<Payload> type, RegistryFriendlyByteBuf data)
             implements CustomPacketPayload {
 
         @Override
@@ -42,10 +44,11 @@ public final class AitNetworking {
     private static StreamCodec<RegistryFriendlyByteBuf, Payload> codec(CustomPacketPayload.Type<Payload> type) {
         return CustomPacketPayload.codec(
                 (payload, out) -> {
-                    FriendlyByteBuf data = payload.data();
+                    RegistryFriendlyByteBuf data = payload.data();
                     out.writeBytes(data.slice(0, data.writerIndex()));
                 },
-                in -> new Payload(type, new FriendlyByteBuf(in.readBytes(in.readableBytes()))));
+                in -> new Payload(type,
+                        new RegistryFriendlyByteBuf(in.readBytes(in.readableBytes()), in.registryAccess())));
     }
 
     private static CustomPacketPayload.Type<Payload> c2s(ResourceLocation id) {
@@ -64,20 +67,32 @@ public final class AitNetworking {
         });
     }
 
-    public static FriendlyByteBuf buf() {
-        return new FriendlyByteBuf(Unpooled.buffer());
+    public static RegistryFriendlyByteBuf buf(RegistryAccess registries) {
+        return new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+    }
+
+    public static RegistryFriendlyByteBuf buf() {
+        MinecraftServer server = ServerLifecycleHooks.get();
+        return server != null ? buf(server.registryAccess()) : ClientRegistries.buf();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static final class ClientRegistries {
+        static RegistryFriendlyByteBuf buf() {
+            return AitNetworking.buf(Minecraft.getInstance().level.registryAccess());
+        }
     }
 
     @FunctionalInterface
     public interface ServerHandler {
         void receive(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler,
-                FriendlyByteBuf buf, PacketSender responseSender);
+                RegistryFriendlyByteBuf buf, PacketSender responseSender);
     }
 
     @FunctionalInterface
     @Environment(EnvType.CLIENT)
     public interface ClientHandler {
-        void receive(Minecraft client, ClientPacketListener handler, FriendlyByteBuf buf,
+        void receive(Minecraft client, ClientPacketListener handler, RegistryFriendlyByteBuf buf,
                 PacketSender responseSender);
     }
 
@@ -94,12 +109,12 @@ public final class AitNetworking {
                 context.responseSender()));
     }
 
-    public static void send(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
+    public static void send(ServerPlayer player, ResourceLocation id, RegistryFriendlyByteBuf buf) {
         ServerPlayNetworking.send(player, new Payload(s2c(id), buf));
     }
 
     @Environment(EnvType.CLIENT)
-    public static void send(ResourceLocation id, FriendlyByteBuf buf) {
+    public static void send(ResourceLocation id, RegistryFriendlyByteBuf buf) {
         ClientPlayNetworking.send(new Payload(c2s(id), buf));
     }
 }

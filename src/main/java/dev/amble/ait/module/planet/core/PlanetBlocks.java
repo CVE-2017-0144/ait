@@ -1,5 +1,6 @@
 package dev.amble.ait.module.planet.core;
 
+import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import net.minecraft.world.level.block.*;
@@ -8,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.InfestedBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
@@ -59,12 +61,12 @@ public class PlanetBlocks extends BlockContainer {
             MARTIAN_STONE.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.STONE));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block MARTIAN_STONE_BUTTON = new ButtonBlock(
-            BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BUTTON), BlockSetType.STONE, 10, false);
+    public static final Block MARTIAN_STONE_BUTTON = new ButtonBlock(BlockSetType.STONE, 10,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BUTTON));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block MARTIAN_STONE_PRESSURE_PLATE  = new PressurePlateBlock(
-            PressurePlateBlock.Sensitivity.EVERYTHING, BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_PRESSURE_PLATE),BlockSetType.STONE);
+    public static final Block MARTIAN_STONE_PRESSURE_PLATE  = new PressurePlateBlock(BlockSetType.STONE,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_PRESSURE_PLATE));
 
         // Ores
 
@@ -173,7 +175,7 @@ public class PlanetBlocks extends BlockContainer {
 
         // Sand
 
-    public static final Block MARTIAN_SAND = new FallingBlock(
+    public static final Block MARTIAN_SAND = new ColoredFallingBlock(new ColorRGBA(0xC2A184),
             BlockBehaviour.Properties.ofFullCopy(Blocks.SAND));
 
         // Martian Sandstone
@@ -363,7 +365,7 @@ public class PlanetBlocks extends BlockContainer {
 
         // Sand (Regolith)
 
-    public static final Block REGOLITH = new FallingBlock(
+    public static final Block REGOLITH = new ColoredFallingBlock(new ColorRGBA(0xC2A184),
             BlockBehaviour.Properties.ofFullCopy(Blocks.SAND));
 
         // Sandstone

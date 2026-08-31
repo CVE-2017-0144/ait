@@ -39,6 +39,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SculkShriekerBlock;
@@ -99,8 +100,8 @@ public class MatrixEnergizerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        ItemStack stack = player.getItemInHand(hand);
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
         if (world.isClientSide()) return InteractionResult.SUCCESS;
 
         if (hasPower(state)) return InteractionResult.FAIL;
@@ -254,7 +255,7 @@ public class MatrixEnergizerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state) {
         return AITBlocks.MATRIX_ENERGIZER.asItem().getDefaultInstance();
     }
 

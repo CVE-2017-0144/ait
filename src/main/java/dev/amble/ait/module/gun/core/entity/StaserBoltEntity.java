@@ -43,11 +43,18 @@ public class StaserBoltEntity extends AbstractArrow implements ISpaceImmune {
     }
 
     private StaserBoltEntity(Level world, double x, double y, double z) {
-        super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, x, y, z, world);
+        super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, x, y, z, world,
+                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), ItemStack.EMPTY);
     }
 
     private StaserBoltEntity(Level world, LivingEntity shooter) {
-        super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, shooter, world);
+        super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, shooter, world,
+                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), ItemStack.EMPTY);
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem() {
+        return new ItemStack(GunItems.STASER_BOLT_MAGAZINE);
     }
 
     // this exists because I forgot how to do the constructors so the registry doesn't scream at me - Loqor

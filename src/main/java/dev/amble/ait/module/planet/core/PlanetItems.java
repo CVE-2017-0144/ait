@@ -9,6 +9,7 @@ import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -40,17 +41,17 @@ public class PlanetItems extends ItemContainer {
             new AItemSettings().durability(240), true);
 
     // TOOLS
-    public static final Item MARTIAN_STONE_SWORD = new SwordItem(PlanetToolMaterial.MARTIAN_STONE, 3, -2.4f, new AItemSettings());
-    public static final Item MARTIAN_STONE_SHOVEL = new ShovelItem(PlanetToolMaterial.MARTIAN_STONE, 0, 0f, new AItemSettings());
-    public static final Item MARTIAN_STONE_PICKAXE = new PickaxeItem(PlanetToolMaterial.MARTIAN_STONE, 2, 2f, new AItemSettings());
-    public static final Item MARTIAN_STONE_AXE = new AxeItem(PlanetToolMaterial.MARTIAN_STONE, 3, 1f, new AItemSettings());
-    public static final Item MARTIAN_STONE_HOE = new HoeItem(PlanetToolMaterial.MARTIAN_STONE, 1, 2f, new AItemSettings());
+    public static final Item MARTIAN_STONE_SWORD = new SwordItem(PlanetToolMaterial.MARTIAN_STONE, new AItemSettings().attributes(SwordItem.createAttributes(PlanetToolMaterial.MARTIAN_STONE, 3, -2.4f)));
+    public static final Item MARTIAN_STONE_SHOVEL = new ShovelItem(PlanetToolMaterial.MARTIAN_STONE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.MARTIAN_STONE, 0, 0f)));
+    public static final Item MARTIAN_STONE_PICKAXE = new PickaxeItem(PlanetToolMaterial.MARTIAN_STONE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.MARTIAN_STONE, 2, 2f)));
+    public static final Item MARTIAN_STONE_AXE = new AxeItem(PlanetToolMaterial.MARTIAN_STONE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.MARTIAN_STONE, 3, 1f)));
+    public static final Item MARTIAN_STONE_HOE = new HoeItem(PlanetToolMaterial.MARTIAN_STONE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.MARTIAN_STONE, 1, 2f)));
 
-    public static final Item ANORTHOSITE_SWORD = new AnorthositeSwordItem(PlanetToolMaterial.ANORTHOSITE, 3, -2.4f, new AItemSettings());
-    public static final Item ANORTHOSITE_SHOVEL = new ShovelItem(PlanetToolMaterial.ANORTHOSITE, 0, 0f, new AItemSettings());
-    public static final Item ANORTHOSITE_PICKAXE = new PickaxeItem(PlanetToolMaterial.ANORTHOSITE, 2, 2f, new AItemSettings());
-    public static final Item ANORTHOSITE_AXE = new AxeItem(PlanetToolMaterial.ANORTHOSITE, 3, 1f, new AItemSettings());
-    public static final Item ANORTHOSITE_HOE = new HoeItem(PlanetToolMaterial.ANORTHOSITE, 1, 2f, new AItemSettings());
+    public static final Item ANORTHOSITE_SWORD = new AnorthositeSwordItem(PlanetToolMaterial.ANORTHOSITE, new AItemSettings().attributes(SwordItem.createAttributes(PlanetToolMaterial.ANORTHOSITE, 3, -2.4f)));
+    public static final Item ANORTHOSITE_SHOVEL = new ShovelItem(PlanetToolMaterial.ANORTHOSITE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.ANORTHOSITE, 0, 0f)));
+    public static final Item ANORTHOSITE_PICKAXE = new PickaxeItem(PlanetToolMaterial.ANORTHOSITE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.ANORTHOSITE, 2, 2f)));
+    public static final Item ANORTHOSITE_AXE = new AxeItem(PlanetToolMaterial.ANORTHOSITE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.ANORTHOSITE, 3, 1f)));
+    public static final Item ANORTHOSITE_HOE = new HoeItem(PlanetToolMaterial.ANORTHOSITE, new AItemSettings().attributes(DiggerItem.createAttributes(PlanetToolMaterial.ANORTHOSITE, 1, 2f)));
 
     public static final Item HANDLES = new HandlesItem(new AItemSettings().stacksTo(1)/*.group(PlanetModule.instance().getItemGroup())*/);
 

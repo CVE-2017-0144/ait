@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
@@ -94,7 +95,7 @@ public record DatapackPotion(ResourceLocation id, int duration, int amplifier, O
     public static DatapackPotion fromJson(JsonObject json) {
         AtomicReference<DatapackPotion> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> created.set(var.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> created.set(var.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack potion: {}", err);
         });
@@ -107,14 +108,14 @@ public record DatapackPotion(ResourceLocation id, int duration, int amplifier, O
         int i = 32147;
         if (this.getDuration() > 32147 && statusEffectInstance.getDuration() > 32147 || this.isAmbient() && statusEffectInstance.isAmbient()) {
             return ComparisonChain.start().compare(this.isAmbient(),
-                    statusEffectInstance.isAmbient()).compare(this.getEffectType().getColor(),
-                    statusEffectInstance.getEffect().getColor()).result();
+                    statusEffectInstance.isAmbient()).compare(this.getEffectType().value().getColor(),
+                    statusEffectInstance.getEffect().value().getColor()).result();
         }
         return ComparisonChain.start().compareFalseFirst(this.isAmbient(),
                 statusEffectInstance.isAmbient()).compareFalseFirst(this.isInfinite(),
                 statusEffectInstance.isInfiniteDuration()).compare(this.getDuration(),
-                statusEffectInstance.getDuration()).compare(this.getEffectType().getColor(),
-                statusEffectInstance.getEffect().getColor()).result();
+                statusEffectInstance.getDuration()).compare(this.getEffectType().value().getColor(),
+                statusEffectInstance.getEffect().value().getColor()).result();
     }
 
     public int getDuration() {
@@ -133,8 +134,8 @@ public record DatapackPotion(ResourceLocation id, int duration, int amplifier, O
         return this.ambient().orElse(false);
     }
 
-    public MobEffect getEffectType() {
-        return BuiltInRegistries.MOB_EFFECT.get(this.id());
+    public Holder<MobEffect> getEffectType() {
+        return BuiltInRegistries.MOB_EFFECT.getHolder(this.id()).orElse(null);
     }
 
     public static ResourceLocation getEffect(MobEffect statusEffect) {
@@ -142,7 +143,7 @@ public record DatapackPotion(ResourceLocation id, int duration, int amplifier, O
     }
 
     public MobEffectInstance getInstance() {
-        MobEffect effect1 = this.getEffectType();
+        Holder<MobEffect> effect1 = this.getEffectType();
         if (effect1 == null) return null;
         return new MobEffectInstance(effect1,
                 this.duration(), this.amplifier(), this.ambient().orElse(false),

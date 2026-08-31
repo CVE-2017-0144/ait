@@ -17,7 +17,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -450,7 +450,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
 
         this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.ABORT_FLIGHT, SoundSource.AMBIENT);
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(this.tardis().getUuid());
 
         NetworkUtil.getSubscribedPlayers(this.tardis.asServer()).forEach(player -> {

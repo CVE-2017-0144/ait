@@ -59,7 +59,7 @@ public class GiftBoxBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         Block[] blocks = PlushieBlocks.getAllMarketablePlushies();
         int randomBlock = world.getRandom().nextIntBetweenInclusive(0, blocks.length - 1);
         ItemStack stack = new ItemStack(blocks[randomBlock]);

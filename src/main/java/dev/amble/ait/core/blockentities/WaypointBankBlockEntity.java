@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -206,7 +207,7 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
             ItemStack result = new ItemStack(AITItems.WAYPOINT_CARTRIDGE);
 
             WaypointItem.setPos(result, this.pos);
-            result.setHoverName(Component.literal(this.name));
+            result.set(DataComponents.CUSTOM_NAME, Component.literal(this.name));
 
             if (this.color != WaypointItem.DEFAULT_LEATHER_COLOR)
                 WaypointItem.setColor(result, this.color);

@@ -57,7 +57,7 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
 
     @Override
     protected void renderNameTag(ConsoleControlEntity entity, Component text, PoseStack matrices,
-            MultiBufferSource vertexConsumers, int light) {
+            MultiBufferSource vertexConsumers, int light, float partialTick) {
         double d = this.entityRenderDispatcher.distanceToSqr(entity);
 
         if (d > 4096.0)
@@ -81,7 +81,7 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
 
         Font textRenderer = this.getFont();
         float h = (float) -textRenderer.width(label) / 2;
-        float f = entity.getNameTagOffsetY() - 0.3f;
+        float f = entity.getBbHeight() + 0.5f - 0.3f;
 
         matrices.pushPose();
         matrices.translate(0.0f, f, 0.0f);

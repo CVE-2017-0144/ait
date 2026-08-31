@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -49,7 +49,7 @@ public class ClientLandingManager {
         return this.regions.get(pos);
     }
 
-    public void receive(FriendlyByteBuf buf) {
+    public void receive(RegistryFriendlyByteBuf buf) {
         LandingPadManager.Network.Action action = buf.readEnum(LandingPadManager.Network.Action.class);
 
         if (action == LandingPadManager.Network.Action.CLEAR) {
@@ -81,7 +81,7 @@ public class ClientLandingManager {
         data.putString("World", world.location().toString());
         data.putLong("Chunk", chunk);
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeNbt(data);
 
         AitNetworking.send(LandingPadManager.Network.REQUEST, buf);

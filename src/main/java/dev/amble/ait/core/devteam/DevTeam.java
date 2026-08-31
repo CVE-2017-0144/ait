@@ -47,6 +47,6 @@ public class DevTeam {
     }
 
     public static boolean isDev() {
-        return isDev(Minecraft.getInstance().getUser().getGameProfile().getId());
+        return isDev(Minecraft.getInstance().getUser().getProfileId());
     }
 }

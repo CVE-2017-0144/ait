@@ -24,6 +24,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -164,7 +165,7 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state) {
         return AITItems.TARDIS_ITEM.getDefaultInstance();
     }
 
@@ -307,7 +308,7 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
                               BlockHitResult hit) {
         if (world.isClientSide())
             return InteractionResult.SUCCESS;
@@ -490,7 +491,7 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
     }
 
     @Override
-    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ExteriorBlockEntity exterior) {
             Entity seat = exterior.getSeatEntity(world);
@@ -498,7 +499,7 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
                 seat.remove(Entity.RemovalReason.DISCARDED);
             }
         }
-        super.playerWillDestroy(world, pos, state, player);
+        return super.playerWillDestroy(world, pos, state, player);
     }
 
 }

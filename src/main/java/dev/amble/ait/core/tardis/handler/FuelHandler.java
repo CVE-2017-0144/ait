@@ -64,7 +64,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
             }
 
             // if holding an axe then break open the door RAHHH
-            if (stack.getItem() instanceof AxeItem axeItem && axeItem.getAttackDamage()>=8 && stack.getItem() != Items.STONE_AXE) {
+            if (stack.getItem() instanceof AxeItem axeItem && axeItem.getTier().getAttackDamageBonus() >= 8 && stack.getItem() != Items.STONE_AXE) {
                 if (tardis.siege().isActive())
                     return DoorHandler.InteractionResult.CANCEL;
 

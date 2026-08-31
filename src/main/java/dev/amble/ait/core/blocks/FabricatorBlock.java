@@ -75,13 +75,13 @@ public class FabricatorBlock extends HorizontalDirectionalBlock implements Entit
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.getBlockEntity(pos) instanceof FabricatorBlockEntity be) {
             be.useOn(state, world, player.isShiftKeyDown(), player);
             return InteractionResult.SUCCESS;
         }
 
-        return super.use(state, world, pos, player, hand, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override

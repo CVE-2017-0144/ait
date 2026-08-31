@@ -2,6 +2,7 @@ package dev.amble.ait.core.drinks;
 
 import java.util.*;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +103,7 @@ public class DrinkUtil {
         int j = 0;
         for (MobEffectInstance statusEffectInstance : effects) {
             if (!statusEffectInstance.isVisible()) continue;
-            int k = statusEffectInstance.getEffect().getColor();
+            int k = statusEffectInstance.getEffect().value().getColor();
             int l = statusEffectInstance.getAmplifier() + 1;
             f += (float)(l * (k >> 16 & 0xFF)) / 255.0f;
             g += (float)(l * (k >> 8 & 0xFF)) / 255.0f;
@@ -125,8 +127,8 @@ public class DrinkUtil {
 
         List<MobEffectInstance> list = DrinkUtil.getDrinkEffects(drinkStack);
         for (MobEffectInstance statusEffectInstance : list) {
-            if (statusEffectInstance.getEffect().isInstantenous()) {
-                statusEffectInstance.getEffect().applyInstantenousEffect(null, null, user, statusEffectInstance.getAmplifier(), 1.0);
+            if (statusEffectInstance.getEffect().value().isInstantenous()) {
+                statusEffectInstance.getEffect().value().applyInstantenousEffect(null, null, user, statusEffectInstance.getAmplifier(), 1.0);
                 continue;
             }
             user.addEffect(new MobEffectInstance(statusEffectInstance));
@@ -164,7 +166,7 @@ public class DrinkUtil {
         CompoundTag nbtCompound = ItemNbt.get(stack);
         ListTag nbtList = nbtCompound.getList(CUSTOM_DRINK_EFFECTS_KEY, Tag.TAG_LIST);
         for (MobEffectInstance statusEffectInstance : effects) {
-            nbtList.add(statusEffectInstance.save(new CompoundTag()));
+            nbtList.add(statusEffectInstance.save());
         }
         nbtCompound.put(CUSTOM_DRINK_EFFECTS_KEY, nbtList);
         return stack;
@@ -175,43 +177,54 @@ public class DrinkUtil {
     }
 
     public static void buildTooltip(List<MobEffectInstance> statusEffects, List<Component> list, float durationMultiplier) {
-        ArrayList<Pair<Attribute, AttributeModifier>> list2 = Lists.newArrayList();
+        List<Pair<Holder<Attribute>, AttributeModifier>> modifiers = Lists.newArrayList();
+
         if (statusEffects.isEmpty()) {
             list.add(NONE_TEXT);
         } else {
-            for (MobEffectInstance statusEffectInstance : statusEffects) {
-                MutableComponent mutableText = statusEffectInstance.getDescriptionId() == null ? Component.empty() : Component.translatable(statusEffectInstance.getDescriptionId());
-                MobEffect statusEffect = statusEffectInstance.getEffect();
-                Map<Attribute, AttributeModifier> map = statusEffect.getAttributeModifiers();
-                if (!map.isEmpty()) {
-                    for (Map.Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
-                        AttributeModifier entityAttributeModifier = entry.getValue();
-                        AttributeModifier entityAttributeModifier2 = new AttributeModifier(entityAttributeModifier.getName(), statusEffect.getAttributeModifierValue(statusEffectInstance.getAmplifier(), entityAttributeModifier), entityAttributeModifier.getOperation());
-                        list2.add(new Pair<>(entry.getKey(), entityAttributeModifier2));
-                    }
-                }
-                if (statusEffectInstance.getAmplifier() > 0) {
-                    mutableText = Component.translatable("potion.withAmplifier", mutableText, Component.translatable("potion.potency." + statusEffectInstance.getAmplifier()));
-                }
-                if (!statusEffectInstance.endsWithin(20)) {
-                    mutableText = Component.translatable("potion.withDuration", mutableText, MobEffectUtil.formatDuration(statusEffectInstance, durationMultiplier));
-                }
-                list.add(mutableText.withStyle(statusEffect.getCategory().getTooltipFormatting()));
+            for (MobEffectInstance instance : statusEffects) {
+                MutableComponent text = Component.translatable(instance.getDescriptionId());
+                MobEffect effect = instance.getEffect().value();
+
+                effect.createModifiers(instance.getAmplifier(),
+                        (attribute, modifier) -> modifiers.add(new Pair<>(attribute, modifier)));
+
+                if (instance.getAmplifier() > 0)
+                    text = Component.translatable("potion.withAmplifier", text,
+                            Component.translatable("potion.potency." + instance.getAmplifier()));
+
+                if (!instance.endsWithin(20))
+                    text = Component.translatable("potion.withDuration", text,
+                            MobEffectUtil.formatDuration(instance, durationMultiplier, 20.0f));
+
+                list.add(text.withStyle(effect.getCategory().getTooltipFormatting()));
             }
         }
-        if (!list2.isEmpty()) {
-            list.add(CommonComponents.EMPTY);
-            list.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
-            for (Pair pair : list2) {
-                AttributeModifier entityAttributeModifier3 = (AttributeModifier)pair.getSecond();
-                double d = entityAttributeModifier3.getAmount();
-                double e = entityAttributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || entityAttributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? entityAttributeModifier3.getAmount() * 100.0 : entityAttributeModifier3.getAmount();
-                if (d > 0.0) {
-                    list.add(Component.translatable("attribute.modifier.plus." + entityAttributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
-                    continue;
-                }
-                if (!(d < 0.0)) continue;
-                list.add(Component.translatable("attribute.modifier.take." + entityAttributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
+
+        if (modifiers.isEmpty())
+            return;
+
+        list.add(CommonComponents.EMPTY);
+        list.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+
+        for (Pair<Holder<Attribute>, AttributeModifier> pair : modifiers) {
+            AttributeModifier modifier = pair.getSecond();
+            double amount = modifier.amount();
+            double shown = modifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+                    || modifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                            ? amount * 100.0
+                            : amount;
+
+            if (amount > 0.0) {
+                list.add(Component.translatable("attribute.modifier.plus." + modifier.operation().id(),
+                        ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(shown),
+                        Component.translatable(pair.getFirst().value().getDescriptionId()))
+                        .withStyle(ChatFormatting.BLUE));
+            } else if (amount < 0.0) {
+                list.add(Component.translatable("attribute.modifier.take." + modifier.operation().id(),
+                        ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-shown),
+                        Component.translatable(pair.getFirst().value().getDescriptionId()))
+                        .withStyle(ChatFormatting.RED));
             }
         }
     }

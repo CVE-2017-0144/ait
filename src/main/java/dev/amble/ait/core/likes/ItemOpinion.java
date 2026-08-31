@@ -70,7 +70,7 @@ public record ItemOpinion(ResourceLocation id, ItemStack stack, int cost, int lo
     public static ItemOpinion fromJson(JsonObject json) {
         AtomicReference<ItemOpinion> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> created.set(var.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> created.set(var.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack item opinion: {}", err);
         });

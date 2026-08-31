@@ -94,9 +94,9 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
 
         nbt.putString("type", this.getTypeSchema().id().toString());
         nbt.putString("variant", this.getVariant().id().toString());
-        ContainerHelper.saveAllItems(nbt, this.inventory);
+        ContainerHelper.saveAllItems(nbt, this.inventory, registries);
         if (this.sonicScrewdriver != null) {
-            nbt.put("sonic_screwdriver", this.sonicScrewdriver.save(new CompoundTag()));
+            nbt.put("sonic_screwdriver", this.sonicScrewdriver.save(registries));
         }
 
         CompoundTag controlNbt = new CompoundTag();
@@ -166,9 +166,9 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         this.setVariant(ConsoleVariantRegistry.getInstance().get(ResourceLocation.tryParse(nbt.getString("variant"))));
 
         this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(nbt, this.inventory);
+        ContainerHelper.loadAllItems(nbt, this.inventory, registries);
         if (nbt.contains("sonic_screwdriver")) {
-            this.sonicScrewdriver = ItemStack.of(nbt.getCompound("sonic_screwdriver"));
+            this.sonicScrewdriver = ItemStack.parseOptional(registries, nbt.getCompound("sonic_screwdriver"));
         }
 
         if (!nbt.contains("ControlStates", CompoundTag.TAG_COMPOUND)) return;

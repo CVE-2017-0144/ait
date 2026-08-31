@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -100,7 +101,7 @@ public class TelepathicControl extends Control {
         }
 
         if (type instanceof NameTagItem) {
-            if (!held.hasCustomHoverName())
+            if (!held.has(DataComponents.CUSTOM_NAME))
                 return Result.FAILURE;
 
             tardis.stats().setName(held.getHoverName().getString());
@@ -117,7 +118,7 @@ public class TelepathicControl extends Control {
 
             if (call == null) {
                 // create new call
-                call = DistressCall.create(tardis, held.hasCustomHoverName() ? held.getHoverName().getString() : "SOS", true);
+                call = DistressCall.create(tardis, held.has(DataComponents.CUSTOM_NAME) ? held.getHoverName().getString() : "SOS", true);
                 HypercubeItem.setCall(held, call);
             }
 
@@ -224,7 +225,7 @@ public class TelepathicControl extends Control {
                     5 * 10, 0, 0, 0, 0.1f * 10);
 
 
-            world.playSound(null, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0f, 1.0f);
+            world.playSound(null, console, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.0f, 1.0f);
             world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
             if (player != null) {
@@ -256,7 +257,7 @@ public class TelepathicControl extends Control {
                 world.sendParticles(ParticleTypes.EXPLOSION, console.getCenter().x() + 0.5f, console.getCenter().y() + 1.25, console.getCenter().z() + 0.5f,
                         5 * 10, 0, 0, 0, 0.1f * 10);
 
-                world.playSound(null, console, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0f, 1.0f);
+                world.playSound(null, console, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.0f, 1.0f);
                 world.playSound(null, console, AITSounds.SIEGE_ENABLE, SoundSource.BLOCKS, 1.0f, 1.0f);
             });
 

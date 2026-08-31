@@ -7,19 +7,22 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -44,6 +47,12 @@ public class BaseGunItem extends ProjectileWeaponItem {
     public static final Predicate<ItemStack> GUN_PROJECTILES = itemStack -> itemStack.is(GunItems.STASER_BOLT_MAGAZINE);
     public static final double MAX_AMMO = 64;
     public static final String AMMO_KEY = "ammo";
+
+    @Override
+    protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index, float velocity,
+            float inaccuracy, float angle, @Nullable LivingEntity target) {
+        projectile.shootFromRotation(shooter, shooter.getXRot(), shooter.getYRot() + angle, 0.0f, velocity, inaccuracy);
+    }
 
     public BaseGunItem(Properties settings) {
         super(settings);
@@ -89,7 +98,7 @@ public class BaseGunItem extends ProjectileWeaponItem {
 
     @Environment(EnvType.CLIENT)
     public static void shootGun(boolean shoot, boolean isAds) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBoolean(shoot);
         buf.writeBoolean(isAds);
         AitNetworking.send(BaseGunItem.SHOOT, buf);
@@ -175,16 +184,11 @@ public class BaseGunItem extends ProjectileWeaponItem {
         if (creative || simulated != 0.0f) {
             projectileEntity.pickup = AbstractArrow.Pickup.DISALLOWED;
         }
-        if (shooter instanceof CrossbowAttackMob crossbowUser) {
-            crossbowUser.shootCrossbowProjectile(crossbowUser.getTarget(), gun, projectileEntity, simulated);
-        } else {
-            Vec3 vec3d = shooter.getUpVector(1.0f);
-            Quaternionf quaternionf = new Quaternionf().setAngleAxis(simulated * ((float)Math.PI / 180), vec3d.x, vec3d.y, vec3d.z);
-            Vec3 vec3d2 = shooter.getViewVector(1.0f);
-            Vector3f vector3f = vec3d2.toVector3f().rotate(quaternionf);
-            projectileEntity.shoot(vector3f.x(), vector3f.y(), vector3f.z(), speed, divergence);
-        }
-        gun.hurtAndBreak(3, shooter, e -> e.broadcastBreakEvent(hand));
+        Vec3 up = shooter.getUpVector(1.0f);
+        Quaternionf spread = new Quaternionf().setAngleAxis(simulated * ((float) Math.PI / 180), up.x, up.y, up.z);
+        Vector3f aim = shooter.getViewVector(1.0f).toVector3f().rotate(spread);
+        projectileEntity.shoot(aim.x(), aim.y(), aim.z(), speed, divergence);
+        gun.hurtAndBreak(3, shooter, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
         projectileEntity.setPosRaw(shooter.getX(), shooter.getY() + 1.2f, shooter.getZ());
         world.addFreshEntity(projectileEntity);
         world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), AITSounds.STASER, SoundSource.PLAYERS, 0.25f, soundPitch);
@@ -197,8 +201,9 @@ public class BaseGunItem extends ProjectileWeaponItem {
             persistentProjectileEntity.setCritArrow(true);
         }
         persistentProjectileEntity.setSoundEvent(AITSounds.STASER);
-        persistentProjectileEntity.setShotFromCrossbow(true);
-        int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, gun);
+        int i = world.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+                .getHolder(Enchantments.PIERCING)
+                .map(piercing -> EnchantmentHelper.getItemEnchantmentLevel(piercing, gun)).orElse(0);
         if (i > 0) {
             persistentProjectileEntity.setPierceLevel((byte)i);
         }

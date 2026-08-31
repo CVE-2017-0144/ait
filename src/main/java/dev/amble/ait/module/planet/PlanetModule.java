@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.core.registries.Registries;
@@ -944,8 +945,8 @@ public class PlanetModule extends Module {
             }
 
             @Override
-            public void advancements(Consumer<Advancement> consumer) {
-                Advancement root = Advancement.Builder.advancement()
+            public void advancements(Consumer<AdvancementHolder> consumer) {
+                AdvancementHolder root = Advancement.Builder.advancement()
                         .display(
                                 PlanetItems.SPACESUIT_HELMET,
                                 Component.translatable("achievements.ait.title.planet_root"),
@@ -958,7 +959,7 @@ public class PlanetModule extends Module {
                         )
                         .addCriterion("enter_tardis", TardisCriterions.ENTER_TARDIS.conditions())
                         .save(consumer, AITMod.MOD_ID + "/planet_root");
-                Advancement landOnMars = Advancement.Builder.advancement()
+                AdvancementHolder landOnMars = Advancement.Builder.advancement()
                         .parent(root)
                         .display(
                                 PlanetBlocks.MARTIAN_STONE,
@@ -980,7 +981,7 @@ public class PlanetModule extends Module {
                                 )
                         )
                         .save(consumer, AITMod.MOD_ID + "/enter_mars");
-                Advancement landOnMoon = Advancement.Builder.advancement()
+                AdvancementHolder landOnMoon = Advancement.Builder.advancement()
                         .parent(root)
                         .display(
                                 PlanetBlocks.ANORTHOSITE,
@@ -1004,7 +1005,6 @@ public class PlanetModule extends Module {
                         .save(consumer, AITMod.MOD_ID + "/enter_moon");
 
                 // todo - idk how to do this
-                // Advancement findStructure = Advancement.Builder.create().parent(root).display(Blocks.REDSTONE_BLOCK, Text.translatable("advancements.ait.find_planet_structure.title"), Text.translatable("advancements.ait.find_planet_structure.description"), null, AdvancementFrame.CHALLENGE, true, true, true).criterion("planet_structure", TickCriterion.Conditions.createLocation(LocationPredicate.feature(RegistryKey.of(RegistryKeys.STRUCTURE, AITMod.id("cult_structures_overworld"))))).build(consumer, AITMod.MOD_ID + "/find_planet_structure");
             }
         });
     }

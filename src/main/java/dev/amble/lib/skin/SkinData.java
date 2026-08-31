@@ -3,7 +3,7 @@ package dev.amble.lib.skin;
 import dev.amble.lib.skin.client.SkinGrabber;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ public record SkinData(String key, @Nullable String url, @Nullable ResourceLocat
 		return CLEAR;
 	}
 
-	public static SkinData readBuf(FriendlyByteBuf buf) {
+	public static SkinData readBuf(RegistryFriendlyByteBuf buf) {
 		String key = buf.readUtf();
 		String url = buf.readBoolean() ? buf.readUtf() : null;
 		ResourceLocation localTexture = buf.readBoolean() ? buf.readResourceLocation() : null;
@@ -50,7 +50,7 @@ public record SkinData(String key, @Nullable String url, @Nullable ResourceLocat
 		return new SkinData(key, url, localTexture, slim);
 	}
 
-	public void writeBuf(FriendlyByteBuf buf) {
+	public void writeBuf(RegistryFriendlyByteBuf buf) {
 		buf.writeUtf(key);
 		buf.writeBoolean(url != null);
 		if (url != null) buf.writeUtf(url);

@@ -1,5 +1,6 @@
 package dev.amble.ait.core.blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,11 @@ public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
         return Y_SHAPE;
     }
 
+    @Override
+    public MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(FoodMachineBlock::new);
+    }
+
     public FoodMachineBlock(Properties settings) {
         super(BlockBehaviour.Properties.of()
                 .strength(3.0F, 6.0F)
@@ -73,11 +79,11 @@ public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         BlockEntity be = world.getBlockEntity(pos);
         if (!(be instanceof FoodMachineBlockEntity machine)) return InteractionResult.SUCCESS;
         if (!machine.isPoweredOn()) return InteractionResult.PASS;
-        ItemStack stack = player.getItemInHand(hand);
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
         // cycle through different modes
         if (player.isShiftKeyDown() && stack.isEmpty()) {

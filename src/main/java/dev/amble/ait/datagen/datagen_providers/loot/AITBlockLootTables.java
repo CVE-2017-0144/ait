@@ -32,7 +32,7 @@ public class AITBlockLootTables extends AmbleBlockLootTable {
         this.add(AITBlocks.ZEITON_CLUSTER,
                 (block) -> createSilkTouchDispatchTable(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
-                        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+                        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
                         .when(MatchTool
                                 .toolMatches(ItemPredicate.Builder.item().of(AITTags.Items.CLUSTER_MAX_HARVESTABLES)))
                         .otherwise(this.applyExplosionDecay(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)

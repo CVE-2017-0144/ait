@@ -4,6 +4,7 @@ import static dev.amble.ait.client.util.SkyboxUtil.LOOKUP;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -25,7 +26,7 @@ public class SpaceSkyRenderer {
         }
     }
 
-    public void draw(Tesselator tessellator, BufferBuilder bufferBuilder, PoseStack matrixStack) {
+    public void draw(Tesselator tessellator, PoseStack matrixStack) {
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.depthMask(false);
@@ -43,13 +44,13 @@ public class SpaceSkyRenderer {
             Matrix4f matrix4f = matrixStack.last().pose();
 
             RenderSystem.setShaderTexture(0, this.faces[k]);
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             int l = 255;
             bufferBuilder.addVertex(matrix4f,-100.0f, -100.0f, -100.0f).setUv(0.0f, 0.0f).setColor(255, 255, 255, l);
             bufferBuilder.addVertex(matrix4f,-100.0f, -100.0f, 100.0f).setUv(0.0f, 1.0f).setColor(255, 255, 255, l);
             bufferBuilder.addVertex(matrix4f,100.0f, -100.0f, 100.0f).setUv(1.0f, 1.0f).setColor(255, 255, 255, l);
             bufferBuilder.addVertex(matrix4f,100.0f, -100.0f, -100.0f).setUv(1.0f, 0.0f).setColor(255, 255, 255, l);
-            tessellator.end();
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             matrixStack.popPose();
         }
         RenderSystem.depthMask(true);

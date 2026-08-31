@@ -14,7 +14,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
@@ -67,7 +67,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> this.reset());
     }
 
-    private void remove(FriendlyByteBuf buf) {
+    private void remove(RegistryFriendlyByteBuf buf) {
         this.lookup.remove(buf.readUUID());
     }
 
@@ -111,11 +111,11 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
         }
     }
 
-    private void syncTardis(FriendlyByteBuf buf) {
+    private void syncTardis(RegistryFriendlyByteBuf buf) {
         this.syncTardis(buf.readUUID(), buf.readUtf());
     }
 
-    private void syncBulk(FriendlyByteBuf buf) {
+    private void syncBulk(RegistryFriendlyByteBuf buf) {
         int count = buf.readInt();
 
         for (int i = 0; i < count; i++) {
@@ -123,7 +123,7 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
         }
     }
 
-    private void syncDelta(FriendlyByteBuf buf) {
+    private void syncDelta(RegistryFriendlyByteBuf buf) {
         UUID id = buf.readUUID();
         int count = buf.readShort();
 

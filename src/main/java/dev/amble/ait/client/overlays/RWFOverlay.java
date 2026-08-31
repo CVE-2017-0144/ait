@@ -2,6 +2,7 @@ package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +18,7 @@ import dev.amble.ait.core.tardis.Tardis;
 public class RWFOverlay implements HudRenderCallback {
     private static final int ALPHA_GRAY = FastColor.ARGB32.color(125, 255, 255, 255);
     @Override
-    public void onHudRender(GuiGraphics drawContext, float tickDelta) {
+    public void onHudRender(GuiGraphics drawContext, DeltaTracker tickDelta) {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.player == null || mc.level == null)

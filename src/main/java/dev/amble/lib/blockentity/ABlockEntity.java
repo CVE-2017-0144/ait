@@ -46,7 +46,7 @@ public abstract class ABlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata();
+        return saveWithoutMetadata(registries);
     }
 
     public static <E extends BlockEntity> void tick(Level world, BlockPos blockPos, BlockState blockState, E e) {

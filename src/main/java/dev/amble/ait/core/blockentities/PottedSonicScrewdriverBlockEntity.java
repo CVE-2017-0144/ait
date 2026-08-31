@@ -65,7 +65,7 @@ public class PottedSonicScrewdriverBlockEntity extends BlockEntity {
 
         ListTag list = new ListTag();
         for (ItemStack stack : this.sonics)
-            list.add(stack.save(new CompoundTag()));
+            list.add(stack.save(registries));
 
         nbt.put("Sonics", list);
     }
@@ -77,7 +77,7 @@ public class PottedSonicScrewdriverBlockEntity extends BlockEntity {
         this.sonics.clear();
         ListTag list = nbt.getList("Sonics", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size() && this.sonics.size() < PottedSonicScrewdriverBlock.MAX_SONICS; i++) {
-            ItemStack stack = ItemStack.of(list.getCompound(i));
+            ItemStack stack = ItemStack.parseOptional(registries, list.getCompound(i));
             if (!stack.isEmpty())
                 this.sonics.add(stack.copyWithCount(1));
         }
@@ -85,7 +85,7 @@ public class PottedSonicScrewdriverBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return this.saveWithoutMetadata();
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override

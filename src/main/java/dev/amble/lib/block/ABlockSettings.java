@@ -215,10 +215,6 @@ public class ABlockSettings extends Properties {
         return (ABlockSettings) super.replaceable();
     }
 
-    @Override
-    public ABlockSettings lightLevel(int lightLevel) {
-        return (ABlockSettings) super.lightLevel(lightLevel);
-    }
 
 
 

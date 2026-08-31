@@ -55,9 +55,9 @@ public abstract class SubSystemBlock extends FluidLinkBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
                               BlockHitResult hit) {
-        ItemStack stack = player.getItemInHand(hand);
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
         if (stack.getItem() instanceof RepairToolItem)
             return InteractionResult.PASS;
 

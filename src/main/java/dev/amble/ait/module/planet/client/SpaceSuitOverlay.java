@@ -2,6 +2,7 @@ package dev.amble.ait.module.planet.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +19,7 @@ import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 public class SpaceSuitOverlay implements HudRenderCallback {
 
     @Override
-    public void onHudRender(GuiGraphics drawContext, float v) {
+    public void onHudRender(GuiGraphics drawContext, DeltaTracker v) {
         Minecraft mc = Minecraft.getInstance();
         PoseStack stack = drawContext.pose();
 

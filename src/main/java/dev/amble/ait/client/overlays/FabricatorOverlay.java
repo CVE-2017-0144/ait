@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +19,7 @@ import dev.amble.ait.core.blocks.FabricatorBlock;
 
 public class FabricatorOverlay implements HudRenderCallback {
     @Override
-    public void onHudRender(GuiGraphics drawContext, float v) {
+    public void onHudRender(GuiGraphics drawContext, DeltaTracker v) {
         Minecraft mc = Minecraft.getInstance();
         PoseStack stack = drawContext.pose();
 

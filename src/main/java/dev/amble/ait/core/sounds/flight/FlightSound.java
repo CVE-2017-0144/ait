@@ -62,7 +62,7 @@ public record FlightSound(ResourceLocation id, ResourceLocation soundId, int len
     public static FlightSound fromJson(JsonObject json) {
         AtomicReference<FlightSound> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> created.set(var.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> created.set(var.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack flight sfx: {}", err);
         });

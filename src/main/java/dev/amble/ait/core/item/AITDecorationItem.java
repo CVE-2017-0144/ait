@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -21,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
-import dev.amble.ait.core.util.ItemNbt;
 
 public class AITDecorationItem extends Item {
     private final EntityType<? extends HangingEntity> entityType;
@@ -30,8 +31,6 @@ public class AITDecorationItem extends Item {
         super(settings);
         this.entityType = type;
     }
-
-
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
@@ -60,9 +59,9 @@ public class AITDecorationItem extends Item {
 
             BOTIPaintingEntity paintingEntity = optional.get();
 
-            CompoundTag nbtData = ItemNbt.getNullable(itemStack);
-            if (nbtData != null) {
-                EntityType.updateCustomEntityTag(world, player, paintingEntity, nbtData);
+            CustomData entityTag = itemStack.get(DataComponents.ENTITY_DATA);
+            if (entityTag != null) {
+                EntityType.updateCustomEntityTag(world, player, paintingEntity, entityTag);
             }
 
             if (!world.isClientSide) {

@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -163,7 +164,7 @@ public class FallingTardisEntity extends LinkableDummyEntity implements ISpaceIm
         boolean isCrashing = travel.isCrashing();
 
         tardis.asServer().world().players().forEach(player -> {
-            SoundEvent sound = isCrashing ? SoundEvents.GENERIC_EXPLODE : AITSounds.LAND_CRASH;
+            SoundEvent sound = isCrashing ? SoundEvents.GENERIC_EXPLODE.value() : AITSounds.LAND_CRASH;
             float volume = isCrashing ? 1.0F : 3.0F;
 
             player.playSound(sound, volume, 1.0f);
@@ -254,8 +255,8 @@ public class FallingTardisEntity extends LinkableDummyEntity implements ISpaceIm
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this, Block.getId(this.getBlockState()));
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
+        return new ClientboundAddEntityPacket(this, entity, Block.getId(this.getBlockState()));
     }
 
     @Override

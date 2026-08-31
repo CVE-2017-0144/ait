@@ -11,6 +11,7 @@ import dev.amble.ait.client.models.doors.CapsuleDoorModel;
 import dev.amble.ait.client.models.doors.exclusive.DoomDoorModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.client.util.DyeColorUtil;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.blocks.DoorBlock;
@@ -117,8 +118,8 @@ public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRende
                 int p = n % o;
                 int q = (n + 1) % o;
                 float r = ((float)(Minecraft.getInstance().player.tickCount % m)) / m;
-                float[] fs = Sheep.getColorArray(DyeColor.byId(p));
-                float[] gs = Sheep.getColorArray(DyeColor.byId(q));
+                float[] fs = DyeColorUtil.rgb(DyeColor.byId(p));
+                float[] gs = DyeColorUtil.rgb(DyeColor.byId(q));
                 s = fs[0] * (1f - r) + gs[0] * r;
                 t = fs[1] * (1f - r) + gs[1] * r;
                 u = fs[2] * (1f - r) + gs[2] * r;

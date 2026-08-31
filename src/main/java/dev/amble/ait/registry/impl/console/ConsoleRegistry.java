@@ -3,7 +3,7 @@ package dev.amble.ait.registry.impl.console;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.net.AitNetworking;
@@ -26,8 +26,8 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = AitNetworking.buf();
-        FriendlyByteBuf secondary = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf secondary = AitNetworking.buf();
 
         int counter = 0;
         for (ConsoleTypeSchema schema : this.toList()) {
@@ -44,7 +44,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         for (ConsoleTypeSchema schema : this.toList()) {
             if (!(schema instanceof DatapackConsole.SimpleType type)) continue;
 

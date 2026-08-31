@@ -417,8 +417,8 @@ public class MonitorScreen extends ConsoleScreen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics context) {
-        super.renderBackground(context);
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(context, mouseX, mouseY, partialTick);
     }
 
     protected void drawInformationText(GuiGraphics context) {

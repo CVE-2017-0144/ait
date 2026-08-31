@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -70,13 +71,13 @@ public class PowerConverterBlock extends HorizontalFluidLinkBlock implements Con
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        ItemStack stack = player.getItemInHand(hand);
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
         if (world.getBlockEntity(pos) instanceof FluidLinkBlockEntity be) {
             if (world.isClientSide()) return InteractionResult.SUCCESS;
             if (!(be.isPowered())) return InteractionResult.FAIL;
-            if (!stack.is(AITTags.Items.IS_TARDIS_FUEL) && !stack.getItem().isEdible()) return InteractionResult.FAIL;
+            if (!stack.is(AITTags.Items.IS_TARDIS_FUEL) && !stack.has(DataComponents.FOOD)) return InteractionResult.FAIL;
 
             if (!player.isShiftKeyDown()) {
                 be.source().addLevel(175);
@@ -88,7 +89,7 @@ public class PowerConverterBlock extends HorizontalFluidLinkBlock implements Con
                 stack.shrink(count);
             }
 
-            if (stack.getItem().isEdible()) {
+            if (stack.has(DataComponents.FOOD)) {
                 TardisCriterions.FEED_POWER_CONVERTER.trigger((ServerPlayer) player);
             }
 
@@ -97,7 +98,7 @@ public class PowerConverterBlock extends HorizontalFluidLinkBlock implements Con
             return InteractionResult.SUCCESS;
         }
 
-        return super.use(state, world, pos, player, hand, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override

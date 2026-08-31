@@ -3,6 +3,7 @@ package dev.amble.ait.client.overlays;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.AxeItem;
@@ -16,7 +17,7 @@ import dev.amble.ait.core.tardis.Tardis;
 
 public class ExteriorAxeOverlay implements HudRenderCallback {
     @Override
-    public void onHudRender(GuiGraphics drawContext, float delta) {
+    public void onHudRender(GuiGraphics drawContext, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         PoseStack stack = drawContext.pose();
 

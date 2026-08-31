@@ -52,7 +52,7 @@ public record VortexReference(ResourceLocation id, ResourceLocation texture, Str
     public static VortexReference fromJson(JsonObject json) {
         AtomicReference<VortexReference> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(planet -> created.set(planet.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(planet -> created.set(planet.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack vortex: {}", err);
         });

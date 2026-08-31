@@ -2,6 +2,7 @@ package dev.amble.lib.datagen.recipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.Block;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class AmbleRecipeProvider extends FabricRecipeProvider {
@@ -29,12 +31,13 @@ public class AmbleRecipeProvider extends FabricRecipeProvider {
     private final HashMap<SingleItemRecipeBuilder, ResourceLocation> stonecutting = new HashMap<>();
     private final List<SimpleCookingRecipeBuilder> blasting = new ArrayList<>();
 
-    public AmbleRecipeProvider(FabricDataOutput output) {
-        super(output);
+    public AmbleRecipeProvider(FabricDataOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
-    public void buildRecipes(Consumer<RecipeOutput> exporter) {
+    public void buildRecipes(RecipeOutput exporter) {
         for (ShapelessRecipeBuilder shapelessRecipeJsonBuilder : shapelessRecipes) {
             shapelessRecipeJsonBuilder.save(exporter);
         }

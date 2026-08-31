@@ -5,6 +5,7 @@ import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -74,7 +75,7 @@ public abstract class AbstractCoordinateModifierItem extends Item {
         setPos(stack, pos.getPos());
 
         if (pos.hasName())
-            stack.setHoverName(Component.literal(pos.name()));
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(pos.name()));
 
         return stack;
     }

@@ -28,7 +28,7 @@ public class DatapackHum extends Hum {
     public static Hum fromJson(JsonObject json) {
         AtomicReference<Hum> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(hum -> created.set(hum.getFirst())).ifRight(err -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(hum -> created.set(hum.getFirst())).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack hum: {}", err);
         });

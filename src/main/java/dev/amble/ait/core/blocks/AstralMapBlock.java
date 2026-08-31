@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -12,6 +13,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -87,6 +89,11 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
         });
     }
 
+    @Override
+    public MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(AstralMapBlock::new);
+    }
+
     public AstralMapBlock(Properties settings) {
         super(settings);
         this.registerDefaultState(this.stateDefinition.any().setValue(ROTATION, 0));
@@ -98,7 +105,7 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
                               BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
@@ -192,7 +199,7 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
             structureIds = ids;
         }
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeCollection(structureIds, FriendlyByteBuf::writeResourceLocation);
         AitNetworking.send(target, OPEN_ASTRAL_MAP, buf);
     }

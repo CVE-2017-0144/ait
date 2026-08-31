@@ -16,6 +16,6 @@ public class AITGameEventTagProvider extends FabricTagProvider<GameEvent> {
 
     @Override
     protected void addTags(HolderLookup.Provider arg) {
-        this.getOrCreateTagBuilder(AITTags.GameEvents.MATRIX_CAN_LISTEN).add(GameEvent.SHRIEK);
+        this.getOrCreateTagBuilder(AITTags.GameEvents.MATRIX_CAN_LISTEN).add(GameEvent.SHRIEK.value());
     }
 }

@@ -77,7 +77,7 @@ public class RadioBlock extends HorizontalDirectionalBlock implements EntityBloc
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         if (world.isClientSide) {
             return InteractionResult.SUCCESS;

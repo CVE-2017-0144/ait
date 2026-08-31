@@ -21,6 +21,7 @@ import net.minecraft.util.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -47,7 +48,7 @@ public class RepairToolItem extends Item {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         return 72000;
     }
 
@@ -85,7 +86,7 @@ public class RepairToolItem extends Item {
                     if (durable.durability() < DurableSubSystem.MAX_DURABILITY) {
                         float val = world.getRandom().nextIntBetweenInclusive(2, 10) * DurableSubSystem.MAX_DURABILITY / 100f;
                         durable.addDurability(val);
-                        stack.hurtAndBreak(1, playerEntity, p -> p.broadcastBreakEvent(playerEntity.getUsedItemHand()));
+                        stack.hurtAndBreak(1, playerEntity, playerEntity.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 
                         world.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.5f, 1.5f);
 
@@ -102,7 +103,7 @@ public class RepairToolItem extends Item {
                 world.playSound(null, consoleControl.blockPosition(), SoundEvents.ANCIENT_DEBRIS_HIT, SoundSource.BLOCKS, 0.5f, 0.8f);
                 if (consoleControl.getDurability() < DurableSubSystem.MAX_DURABILITY) {
                     consoleControl.addDurability(world.getRandom().nextFloat());
-                    stack.hurtAndBreak(1, playerEntity, p -> p.broadcastBreakEvent(playerEntity.getUsedItemHand()));
+                    stack.hurtAndBreak(1, playerEntity, playerEntity.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 
                     world.playSound(null, consoleControl.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.5f, 1.5f);
 

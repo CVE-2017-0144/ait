@@ -7,11 +7,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.module.planet.core.util.ISpaceImmune;
@@ -53,13 +55,16 @@ public abstract class BOTIPaintingEntity extends HangingEntity implements ISpace
     }
 
     @Override
-    public int getWidth() {
-        return WIDTH;
-    }
+    protected AABB calculateBoundingBox(BlockPos pos, Direction direction) {
+        double half = 0.46875;
+        double x = pos.getX() + 0.5 - direction.getStepX() * half;
+        double y = pos.getY() + 0.5;
+        double z = pos.getZ() + 0.5 - direction.getStepZ() * half;
 
-    @Override
-    public int getHeight() {
-        return HEIGHT;
+        double w = (direction.getAxis() == Direction.Axis.Z ? WIDTH : 1.0) / 32.0;
+        double d = (direction.getAxis() == Direction.Axis.Z ? 1.0 : WIDTH) / 32.0;
+
+        return new AABB(x - w, y - HEIGHT / 32.0, z - d, x + w, y + HEIGHT / 32.0, z + d);
     }
 
     @Override
@@ -73,7 +78,7 @@ public abstract class BOTIPaintingEntity extends HangingEntity implements ISpace
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate) {
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
         this.setPos(x, y, z);
     }
 
@@ -83,7 +88,7 @@ public abstract class BOTIPaintingEntity extends HangingEntity implements ISpace
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
         return new ClientboundAddEntityPacket(this, this.direction.get3DDataValue(), this.getPos());
     }
 

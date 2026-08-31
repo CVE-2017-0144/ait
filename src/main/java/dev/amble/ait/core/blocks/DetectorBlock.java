@@ -1,5 +1,6 @@
 package dev.amble.ait.core.blocks;
 
+import com.mojang.serialization.MapCodec;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,11 @@ public class DetectorBlock extends FaceAttachedHorizontalDirectionalBlock implem
     protected static final VoxelShape CEILING_Z_AXIS_SHAPE = Block.box(5.0, 10.0, 4.0, 11.0, 16.0, 12.0);
     protected static final VoxelShape CEILING_X_AXIS_SHAPE = Block.box(4.0, 10.0, 5.0, 12.0, 16.0, 11.0);
 
+    @Override
+    public MapCodec<? extends FaceAttachedHorizontalDirectionalBlock> codec() {
+        return simpleCodec(DetectorBlock::new);
+    }
+
     public DetectorBlock(BlockBehaviour.Properties settings) {
         super(settings.emissiveRendering((state, world, pos) -> state.getValue(POWERED))
                 .lightLevel(value -> value.getValue(POWERED) ? 9 : 3));
@@ -79,10 +85,10 @@ public class DetectorBlock extends FaceAttachedHorizontalDirectionalBlock implem
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         if (!player.mayBuild())
-            return super.use(state, world, pos, player, hand, hit);
+            return super.useWithoutItem(state, world, pos, player, hit);
 
         if (world.isClientSide())
             return InteractionResult.SUCCESS;

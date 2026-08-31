@@ -26,7 +26,7 @@ import dev.amble.ait.data.schema.console.variant.toyota.client.ClientToyotaLegac
 import dev.amble.ait.data.schema.console.variant.toyota.client.ClientToyotaVariant;
 import dev.amble.lib.client.bedrock.BedrockModelRegistry;
 import dev.amble.lib.register.datapack.DatapackRegistry;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -84,7 +84,7 @@ public class ClientConsoleVariantRegistry extends DatapackRegistry<ClientConsole
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         int size = buf.readInt();
 
         for (int i = 0; i < size; i++) {

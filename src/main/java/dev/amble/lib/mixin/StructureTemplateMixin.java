@@ -15,6 +15,6 @@ public class StructureTemplateMixin {
     public void place(BlockEntity blockEntity, CompoundTag nbt) {
         if (blockEntity instanceof StructurePlaceableBlockEntity placeable) placeable.amble$onStructurePlaced(nbt);
 
-        blockEntity.load(nbt);
+        blockEntity.loadWithComponents(nbt, world.registryAccess());
     }
 }

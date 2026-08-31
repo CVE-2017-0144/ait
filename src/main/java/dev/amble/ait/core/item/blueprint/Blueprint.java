@@ -3,6 +3,7 @@ package dev.amble.ait.core.item.blueprint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -97,13 +98,13 @@ public class Blueprint {
         return inserted;
     }
 
-    public CompoundTag toNbt() {
+    public CompoundTag toNbt(HolderLookup.Provider registries) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString("id", source.id().toString());
 
         ListTag list = new ListTag();
         for (ItemStack stack : requirements) {
-            list.add(stack.save(new CompoundTag()));
+            list.add(stack.save(registries));
         }
         nbt.put("requirements", list);
 
@@ -112,7 +113,7 @@ public class Blueprint {
     protected CompoundTag fromNbt(CompoundTag nbt) {
         ListTag list = nbt.getList("requirements", 10);
         for (int i = 0; i < list.size(); i++) {
-            requirements.add(ItemStack.of(list.getCompound(i)));
+            requirements.add(ItemStack.parseOptional(registries, list.getCompound(i)));
         }
 
         return nbt;

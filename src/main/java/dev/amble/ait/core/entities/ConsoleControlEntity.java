@@ -151,10 +151,8 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
 
-        CompoundTag console = nbt.getCompound("console");
-
         if (nbt.contains("console")) {
-            this.setConsolePos(NbtUtils.readBlockPos(console));
+            this.setConsolePos(NbtUtils.readBlockPos(nbt, "console").orElseThrow());
         }
 
         if (nbt.contains("width") && nbt.contains("height")) {
@@ -262,7 +260,7 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
 
     @Override
     public EntityDimensions getDimensions(Pose pose) {
-        if (this.getEntityData().hasItem(WIDTH) && this.getEntityData().hasItem(HEIGHT))
+        if (true)
             return EntityDimensions.scalable(this.getControlWidth(), this.getControlHeight());
 
         return super.getDimensions(pose);
@@ -584,8 +582,8 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
         super.setCustomName(this.control.getName(this.tardis().get()));
 
         if (consoleType != null) {
-            this.setControlWidth(type.getScale().width);
-            this.setControlHeight(type.getScale().height);
+            this.setControlWidth(type.getScale().width());
+            this.setControlHeight(type.getScale().height());
             this.setOffset(type.getOffset());
             this.setDurability(durability);
             this.setSticky(sticky);
@@ -601,7 +599,7 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
 
             ControlTypes type = new ControlTypes(entity.getControl(), entity.getDimensions(Pose.STANDING), entity.getOffset());
             DataResult<JsonElement> dataResult = ControlTypes.CODEC.encodeStart(JsonOps.INSTANCE, type);
-            JsonElement typeData = Util.getOrThrow(dataResult, error -> new EncoderException("Failed to encode: " + error + " " + type));
+            JsonElement typeData = dataResult.getOrThrow(error -> new EncoderException("Failed to encode: " + error + " " + type));
 
             root.add(typeData);
         }

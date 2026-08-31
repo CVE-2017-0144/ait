@@ -29,9 +29,9 @@ public class DatapackCategory extends ExteriorCategorySchema {
     public static DatapackCategory fromJson(JsonObject json) {
         AtomicReference<DatapackCategory> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(var -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(var -> {
             created.set((DatapackCategory) var.getFirst());
-        }).ifRight(err -> {
+        }).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack category: " + err);
         });

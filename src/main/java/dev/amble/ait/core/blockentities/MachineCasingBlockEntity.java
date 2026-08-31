@@ -59,12 +59,12 @@ public class MachineCasingBlockEntity extends BlockEntity {
 
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-        StackUtil.writeUnordered(nbt, this.parts);
+        StackUtil.writeUnordered(registries, nbt, this.parts);
     }
 
     @Override
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-        StackUtil.readUnordered(nbt, this.parts);
+        StackUtil.readUnordered(registries, nbt, this.parts);
     }
 
     @Nullable @Override
@@ -74,6 +74,6 @@ public class MachineCasingBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata();
+        return saveWithoutMetadata(registries);
     }
 }

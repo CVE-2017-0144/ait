@@ -90,7 +90,7 @@ public class WaypointBankBlock extends HorizontalDirectionalBlock implements Ent
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
         Optional<Vec2> hitPos = getHitPos(hit, state.getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING));
 
@@ -104,7 +104,7 @@ public class WaypointBankBlock extends HorizontalDirectionalBlock implements Ent
             return InteractionResult.PASS;
 
         int slot = getSlotForHitPos(hitPos.get(), state.getValue(HALF));
-        return bank.onUse(world, state, player, hand, slot);
+        return bank.onUse(world, state, player, InteractionHand.MAIN_HAND, slot);
     }
 
     @Override
@@ -163,11 +163,11 @@ public class WaypointBankBlock extends HorizontalDirectionalBlock implements Ent
     }
 
     @Override
-    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         if (!world.isClientSide() && player.isCreative())
             WorldUtil.onBreakHalfInCreative(world, pos, state, player);
 
-        super.playerWillDestroy(world, pos, state, player);
+        return super.playerWillDestroy(world, pos, state, player);
     }
 
     @Override

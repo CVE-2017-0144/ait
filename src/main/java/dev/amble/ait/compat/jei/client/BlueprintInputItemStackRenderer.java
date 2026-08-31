@@ -11,6 +11,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
@@ -111,7 +112,7 @@ public class BlueprintInputItemStackRenderer implements IIngredientRenderer<Item
     public void getTooltip(ITooltipBuilder tooltip, ItemStack ingredient, TooltipFlag tooltipFlag) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
-        List<Component> components = ingredient.getTooltipLines(player, tooltipFlag);
+        List<Component> components = ingredient.getTooltipLines(Item.TooltipContext.EMPTY, player, tooltipFlag);
         tooltip.addAll(components);
     }
 

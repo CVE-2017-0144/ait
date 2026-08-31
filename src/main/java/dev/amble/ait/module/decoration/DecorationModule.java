@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.resources.ResourceLocation;
@@ -102,7 +103,7 @@ public class DecorationModule extends Module {
             }
 
             @Override
-            public void advancements(Consumer<Advancement> consumer) {
+            public void advancements(Consumer<AdvancementHolder> consumer) {
 
             }
         });

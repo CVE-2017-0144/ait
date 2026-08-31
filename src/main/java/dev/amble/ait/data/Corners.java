@@ -15,7 +15,7 @@ public class Corners {
     private final BlockPos second;
 
     public Corners(BlockPos first, BlockPos second) {
-        this.box = new AABB(first, second);
+        this.box = AABB.encapsulatingFullBlocks(first, second);
 
         this.first = first;
         this.second = second;
@@ -52,7 +52,8 @@ public class Corners {
     }
 
     public static Corners fromNbt(CompoundTag nbt) {
-        return new Corners(NbtUtils.readBlockPos(nbt.getCompound("first")), NbtUtils.readBlockPos(nbt.getCompound("second")));
+        return new Corners(NbtUtils.readBlockPos(nbt, "first").orElseThrow(),
+                NbtUtils.readBlockPos(nbt, "second").orElseThrow());
     }
 
     private static class Serializer implements JsonDeserializer<Corners> {

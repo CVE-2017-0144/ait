@@ -18,11 +18,9 @@ public class WorldListWidget extends AbstractSelectionList<WorldListWidget.World
     private WorldEntry entry;
 
     public WorldListWidget(Minecraft client, int width, int height, int top, int bottom, int itemHeight, int left, SelectionHandler onSelect) {
-        super(client, width, height, top, bottom, itemHeight);
+        super(client, width, height, top, itemHeight);
         this.select = onSelect;
-        this.setRenderBackground(false);
-        this.setRenderTopAndBottom(false);
-        this.setLeftPos(left);
+        this.setX(left);
     }
 
     public void addWorld(ResourceKey<Level> key, Component label) {
@@ -40,11 +38,11 @@ public class WorldListWidget extends AbstractSelectionList<WorldListWidget.World
 
     @Override
     protected int getScrollbarPosition() {
-        return this.x0 + this.width - 6;
+        return this.getX() + this.width - 6;
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput builder) {
+    public void updateWidgetNarration(NarrationElementOutput builder) {
         WorldEntry selected = this.getSelected();
         if (selected != null) {
             builder.add(NarratedElementType.TITLE, Component.translatable("message.ait.projector.world"));

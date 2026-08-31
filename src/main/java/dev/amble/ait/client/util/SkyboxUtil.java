@@ -97,7 +97,6 @@ public class SkyboxUtil extends LevelRenderer {
         RenderSystem.setShaderTexture(0, TARDIS_SKY);
 
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
 
         for (int i = 0; i < 6; i++) {
             matrices.pushPose();
@@ -109,7 +108,7 @@ public class SkyboxUtil extends LevelRenderer {
             }
 
             Matrix4f matrix4f = matrices.last().pose();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
             bufferBuilder.addVertex(matrix4f, -100.0f, -100.0f, -100.0f).setUv(0.0f, 0.0f).setColor(40, 40, 40, 255);
 
@@ -119,7 +118,7 @@ public class SkyboxUtil extends LevelRenderer {
 
             bufferBuilder.addVertex(matrix4f, 100.0f, -100.0f, -100.0f).setUv(16.0f, 0.0f).setColor(40, 40, 40, 255);
 
-            tessellator.end();
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             matrices.popPose();
         }
 
@@ -131,14 +130,13 @@ public class SkyboxUtil extends LevelRenderer {
     }
     public static void renderMoonSky(float tallDrinkOfWater, PoseStack matrices, Runnable fogCallback, VertexBuffer starsBuffer, ClientLevel world, float tickDelta, Matrix4f projectionMatrix) {
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
 
         matrices.pushPose();
         matrices.mulPose(Axis.ZP.rotationDegrees(-405f));
         matrices.mulPose(Axis.XP.rotationDegrees(world.getTimeOfDay(tickDelta) * 360.0f + 300f));
         matrices.scale(100, 100, 100);
 
-        drawSpace(tessellator, bufferBuilder, matrices);
+        drawSpace(tessellator, matrices);
 
         matrices.pushPose();
         matrices.mulPose(Axis.YP.rotationDegrees(90.0f));
@@ -189,7 +187,6 @@ public class SkyboxUtil extends LevelRenderer {
         float i;
         fogCallback.run();
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
         Vec3 vec3d = world.getSkyColor(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), tickDelta);
         float f = (float)vec3d.x;
         float g = (float)vec3d.y;
@@ -212,7 +209,7 @@ public class SkyboxUtil extends LevelRenderer {
             k = fs[1];
             float l = fs[2];
             Matrix4f matrix4f = matrices.last().pose();
-            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
             bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
             int m = 16;
             for (int n = 0; n <= 16; ++n) {
@@ -221,7 +218,7 @@ public class SkyboxUtil extends LevelRenderer {
                 q = Mth.cos(o);
                 bufferBuilder.addVertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).setColor(fs[0], fs[1], fs[2], 0.0f);
             }
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             matrices.popPose();
         }
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -235,7 +232,7 @@ public class SkyboxUtil extends LevelRenderer {
         else
             RenderSystem.setShaderColor(0.8f, 1.0f, 1.0f, 0.1f);
         SpaceSkyRenderer cubeMap = new SpaceSkyRenderer(AITMod.id("textures/environment/space_sky/panorama"));
-        cubeMap.draw(tessellator, bufferBuilder, matrices);
+        cubeMap.draw(tessellator, matrices);
         RenderSystem.setShaderColor(1, 1, 1, 1f);
 
         matrices.pushPose();
@@ -281,14 +278,13 @@ public class SkyboxUtil extends LevelRenderer {
         RenderSystem.enableBlend();
         RenderSystem.depthMask(false);
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
 
         matrices.pushPose();
         matrices.mulPose(Axis.ZP.rotationDegrees(-405f));
         matrices.mulPose(Axis.XP.rotationDegrees(300f));
         matrices.scale(100, 100, 100);
 
-        drawSpace(tessellator, bufferBuilder, matrices);
+        drawSpace(tessellator, matrices);
 
         RenderSystem.depthMask(false);
         RenderSystem.depthFunc(GL11.GL_ALWAYS);
@@ -367,10 +363,10 @@ public class SkyboxUtil extends LevelRenderer {
         matrices.popPose();
     }
 
-    private static void drawSpace(Tesselator tessellator, BufferBuilder bufferBuilder, PoseStack matrices) {
+    private static void drawSpace(Tesselator tessellator, PoseStack matrices) {
         RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1);
         SpaceSkyRenderer cubeMap = new SpaceSkyRenderer(AITMod.id("textures/environment/space_sky/panorama"));
-        cubeMap.draw(tessellator, bufferBuilder, matrices);
+        cubeMap.draw(tessellator, matrices);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1);
     }
 }

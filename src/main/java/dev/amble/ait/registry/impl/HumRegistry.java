@@ -2,7 +2,7 @@ package dev.amble.ait.registry.impl;
 
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
@@ -47,7 +47,7 @@ public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         super.readFromServer(buf);
 
         ClientSoundManager.getHum().onSynced();

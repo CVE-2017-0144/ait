@@ -11,7 +11,7 @@ import org.joml.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -312,7 +312,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
 
         ServerTardis tardis = this.tardis().get().asServer();
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeEnum(state);
         buf.writeResourceLocation(this.current.id());

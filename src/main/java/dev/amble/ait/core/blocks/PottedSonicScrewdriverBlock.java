@@ -1,5 +1,6 @@
 package dev.amble.ait.core.blocks;
 
+import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -30,6 +31,11 @@ public class PottedSonicScrewdriverBlock extends BaseEntityBlock {
     public static final int MAX_SONICS = 6;
     protected static final VoxelShape SHAPE = Block.box(5, 0, 5, 11, 6, 11);
 
+    @Override
+    public MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(PottedSonicScrewdriverBlock::new);
+    }
+
     public PottedSonicScrewdriverBlock(Properties settings) {
         super(settings);
     }
@@ -50,8 +56,8 @@ public class PottedSonicScrewdriverBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (player.getItemInHand(hand).getItem() instanceof SonicItem)
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof SonicItem)
             return InteractionResult.PASS;
 
         if (!world.isClientSide && world.getBlockEntity(pos) instanceof PottedSonicScrewdriverBlockEntity pot) {

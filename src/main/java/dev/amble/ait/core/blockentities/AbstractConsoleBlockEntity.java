@@ -36,7 +36,7 @@ public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEn
         super.loadAdditional(nbt, registries);
         this.lock = LockCode.fromTag(nbt);
         if (nbt.contains("CustomName", Tag.TAG_STRING)) {
-            this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"));
+            this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"), registries);
         }
     }
 
@@ -45,7 +45,7 @@ public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEn
         super.saveAdditional(nbt, registries);
         this.lock.addToTag(nbt);
         if (this.customName != null) {
-            nbt.putString("CustomName", Component.Serializer.toJson(this.customName));
+            nbt.putString("CustomName", Component.Serializer.toJson(this.customName, registries));
         }
     }
 

@@ -83,7 +83,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
     public void generateRecipes(FabricDataGenerator.Pack pack) {
         pack.addProvider((((output, registriesFuture) -> {
-            AITRecipeProvider provider = new AITRecipeProvider(output);
+            AITRecipeProvider provider = new AITRecipeProvider(output, registriesFuture);
 
             ModuleRegistry.instance().iterator().forEachRemaining(module -> module.getDataGenerator().ifPresent(dataGenerator -> {
                 dataGenerator.recipes(provider);

@@ -5,6 +5,7 @@ import com.mojang.serialization.Dynamic;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -119,8 +120,8 @@ public class MatrixEnergizerBlockEntity
         }
 
         @Override
-        public boolean canReceiveVibration(ServerLevel world, BlockPos pos, GameEvent event, @Nullable GameEvent.Context emitter) {
-            if (pos.equals(this.pos) && (event == GameEvent.BLOCK_DESTROY || event == GameEvent.BLOCK_PLACE)) {
+        public boolean canReceiveVibration(ServerLevel world, BlockPos pos, Holder<GameEvent> event, @Nullable GameEvent.Context emitter) {
+            if (pos.equals(this.pos) && (event.is(GameEvent.BLOCK_DESTROY) || event.is(GameEvent.BLOCK_PLACE))) {
                 return false;
             }
             return MatrixEnergizerBlock.isInactive(MatrixEnergizerBlockEntity.this.getBlockState());

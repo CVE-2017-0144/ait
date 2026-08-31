@@ -40,9 +40,9 @@ public class PlaqueBlock extends HorizontalDirectionalBlock implements EntityBlo
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (!world.isClientSide && world.getBlockEntity(pos) instanceof PlaqueBlockEntity plaque) {
-            if (plaque.onUse((ServerPlayer) player, hand)) {
+            if (plaque.onUse((ServerPlayer) player, InteractionHand.MAIN_HAND)) {
                 return InteractionResult.SUCCESS;
             }
         }

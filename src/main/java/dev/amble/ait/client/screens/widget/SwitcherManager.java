@@ -23,7 +23,7 @@ import dev.amble.ait.core.tardis.vortex.reference.VortexReference;
 import dev.amble.ait.core.tardis.vortex.reference.VortexReferenceRegistry;
 import dev.amble.ait.data.hum.Hum;
 import dev.amble.ait.registry.impl.HumRegistry;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 public class SwitcherManager<T extends Nameable, U> implements Nameable {
@@ -244,8 +244,8 @@ public class SwitcherManager<T extends Nameable, U> implements Nameable {
         }
     }
 
-    public static void sync(Tardis tardis, Consumer<FriendlyByteBuf> bufConsumer, ResourceLocation channel) {
-        FriendlyByteBuf bufs = AitNetworking.buf();
+    public static void sync(Tardis tardis, Consumer<RegistryFriendlyByteBuf> bufConsumer, ResourceLocation channel) {
+        RegistryFriendlyByteBuf bufs = AitNetworking.buf();
         bufs.writeUUID(tardis.getUuid());
         bufConsumer.accept(bufs);
         AitNetworking.send(channel, bufs);

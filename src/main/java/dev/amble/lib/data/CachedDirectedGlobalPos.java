@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -94,7 +94,7 @@ public class CachedDirectedGlobalPos extends DirectedGlobalPos {
     }
 
     public static CachedDirectedGlobalPos fromNbt(CompoundTag compound) {
-        BlockPos pos = NbtUtils.readBlockPos(compound);
+        BlockPos pos = NbtUtils.readBlockPos(compound, "Pos").orElseThrow();
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
                 ResourceLocation.parse(compound.getString("dimension")));
 
@@ -102,7 +102,7 @@ public class CachedDirectedGlobalPos extends DirectedGlobalPos {
         return createNew(null, dimension, pos, rotation);
     }
 
-    public static CachedDirectedGlobalPos read(FriendlyByteBuf buf) {
+    public static CachedDirectedGlobalPos read(RegistryFriendlyByteBuf buf) {
         ResourceKey<Level> registryKey = buf.readResourceKey(Registries.DIMENSION);
         BlockPos blockPos = buf.readBlockPos();
         byte rotation = buf.readByte();

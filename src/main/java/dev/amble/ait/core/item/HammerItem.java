@@ -137,7 +137,7 @@ public class HammerItem extends SwordItem {
         if (!world.isClientSide() && shouldCrashTardis(hammerUses)) {
             travel.crash();
         } else {
-            world.playSound(null, consoleBlockEntity.getBlockPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
+            world.playSound(null, consoleBlockEntity.getBlockPos(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS,
                     0.25f * hammerUses, 1.0f);
         }
 
@@ -171,7 +171,7 @@ public class HammerItem extends SwordItem {
     }
 
     @Override
-    public boolean isCorrectToolForDrops(BlockState state) {
+    public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
         return state.is(Blocks.IRON_BLOCK);
     }
 }

@@ -2,7 +2,7 @@ package dev.amble.ait.core.tardis.handler;
 
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
@@ -49,7 +49,7 @@ public class ServerHumHandler extends TardisComponent {
     }
 
     private void updateClientHum() {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeResourceLocation(this.current.sound().getLocation());
 
         for (ServerPlayer player : this.tardis.asServer().world().players()) {

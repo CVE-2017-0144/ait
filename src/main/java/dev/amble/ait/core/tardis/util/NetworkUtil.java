@@ -14,7 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +34,7 @@ import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class NetworkUtil {
 
-    public static <T> void send(ServerPlayer player, FriendlyByteBuf buf, ResourceLocation id, Codec<T> codec, T t) {
+    public static <T> void send(ServerPlayer player, RegistryFriendlyByteBuf buf, ResourceLocation id, Codec<T> codec, T t) {
         DataResult<Tag> result = codec.encodeStart(NbtOps.INSTANCE, t);
         Tag nbt = result.resultOrPartial(AITMod.LOGGER::error).orElseThrow();
 
@@ -42,20 +42,20 @@ public class NetworkUtil {
         send(player, id, buf);
     }
 
-    public static void send(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
+    public static void send(ServerPlayer player, ResourceLocation id, RegistryFriendlyByteBuf buf) {
         if (player == null)
             return;
 
         AitNetworking.send(player, id, buf);
     }
 
-    public static <T> T receive(Codec<T> codec, FriendlyByteBuf buf) {
+    public static <T> T receive(Codec<T> codec, RegistryFriendlyByteBuf buf) {
         return codec.decode(NbtOps.INSTANCE, buf.readNbt())
                 .resultOrPartial(AITMod.LOGGER::error)
                 .orElseThrow().getFirst();
     }
 
-    public static void sendToInterior(ServerTardis tardis, ResourceLocation id, FriendlyByteBuf buf) {
+    public static void sendToInterior(ServerTardis tardis, ResourceLocation id, RegistryFriendlyByteBuf buf) {
         if (!tardis.hasWorld()) return;
 
         for (ServerPlayer player : tardis.world().players()) {

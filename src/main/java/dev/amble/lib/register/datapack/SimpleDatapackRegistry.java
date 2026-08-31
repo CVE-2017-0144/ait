@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -60,7 +60,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
             return;
 
         AitNetworking.registerClientReceiver(this.packet, (client, handler, buf, responseSender) -> {
-            FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
+            RegistryFriendlyByteBuf copy = new RegistryFriendlyByteBuf(buf.copy(), buf.registryAccess());
             client.execute(() -> {
                 try {
                     // skip if we've since disconnected/reconnected so stale server data
@@ -108,7 +108,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
         if (!this.sync)
             return;
 
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(REGISTRY.size());
 
         for (T schema : REGISTRY.values()) {
@@ -119,7 +119,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
     }
 
     @Override
-    public void readFromServer(FriendlyByteBuf buf) {
+    public void readFromServer(RegistryFriendlyByteBuf buf) {
         if (!this.sync)
             return;
 

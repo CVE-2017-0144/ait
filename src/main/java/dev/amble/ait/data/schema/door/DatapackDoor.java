@@ -126,9 +126,9 @@ public class DatapackDoor extends DoorSchema implements AnimatedDoor {
     public static DatapackDoor fromJson(JsonObject json) {
         AtomicReference<DatapackDoor> created = new AtomicReference<>();
 
-        CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(recipe -> {
+        CODEC.decode(JsonOps.INSTANCE, json).ifSuccess(recipe -> {
             created.set(recipe.getFirst());
-        }).ifRight(err -> {
+        }).ifError(err -> {
             created.set(null);
             AITMod.LOGGER.error("Error decoding datapack door type: {}", err);
         });

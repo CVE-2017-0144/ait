@@ -1,8 +1,11 @@
 package dev.amble.ait.module.planet.core.item;
 
 import java.util.function.Supplier;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
 
 public enum PlanetToolMaterial implements Tier {
@@ -43,8 +46,10 @@ public enum PlanetToolMaterial implements Tier {
     }
 
     @Override
-    public int getLevel() {
-        return this.miningLevel;
+    public TagKey<Block> getIncorrectBlocksForDrops() {
+        return this.miningLevel >= 3 ? BlockTags.INCORRECT_FOR_DIAMOND_TOOL
+                : this.miningLevel == 2 ? BlockTags.INCORRECT_FOR_IRON_TOOL
+                        : BlockTags.INCORRECT_FOR_STONE_TOOL;
     }
 
     @Override

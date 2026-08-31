@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Sheep;
@@ -24,6 +24,7 @@ import dev.amble.ait.api.tardis.TardisClientEvents;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
+import dev.amble.ait.client.util.DyeColorUtil;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisExterior;
@@ -66,7 +67,7 @@ public class ClientTardisUtil {
     }
 
     public static void changeExteriorWithScreen(UUID uuid, ResourceLocation variant, boolean variantchange) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeBoolean(variantchange);
         buf.writeResourceLocation(variant);
@@ -78,7 +79,7 @@ public class ClientTardisUtil {
     }
 
     public static void changeSonicWithScreen(UUID uuid, SonicSchema schema, BlockPos consolePos) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeResourceLocation(schema.id());
         buf.writeBlockPos(consolePos);
@@ -90,7 +91,7 @@ public class ClientTardisUtil {
     }
 
     public static void snapToOpenDoors(UUID uuid) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
 
         AitNetworking.send(SNAP, buf);
@@ -101,7 +102,7 @@ public class ClientTardisUtil {
     }
 
     public static void flyingSpeedPacket(UUID uuid, String direction) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeUtf(direction);
 
@@ -113,7 +114,7 @@ public class ClientTardisUtil {
     }
 
     public static void toggleAntigravs(UUID uuid) {
-        FriendlyByteBuf buf = AitNetworking.buf();
+        RegistryFriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
 
         AitNetworking.send(TOGGLE_ANTIGRAVS, buf);
@@ -337,8 +338,8 @@ public class ClientTardisUtil {
         int p = n % o;
         int q = (n + 1) % o;
         float r = ((float)(player.tickCount % m)) / m;
-        float[] fs = Sheep.getColorArray(DyeColor.byId(p));
-        float[] gs = Sheep.getColorArray(DyeColor.byId(q));
+        float[] fs = DyeColorUtil.rgb(DyeColor.byId(p));
+        float[] gs = DyeColorUtil.rgb(DyeColor.byId(q));
 
         float s = fs[0] * (1f - r) + gs[0] * r;
         float t = fs[1] * (1f - r) + gs[1] * r;

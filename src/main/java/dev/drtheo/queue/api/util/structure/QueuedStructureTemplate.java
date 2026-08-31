@@ -118,7 +118,7 @@ public class QueuedStructureTemplate {
 
             // !
             if (blockInfo.nbt() != null && blockEntity != null)
-                this.readNbt(blockEntity, blockInfo.nbt(), random);
+                this.readNbt(world, blockEntity, blockInfo.nbt(), random);
 
             if (fluidState == null)
                 return false;
@@ -153,7 +153,7 @@ public class QueuedStructureTemplate {
                 }));
     }
 
-    protected void readNbt(BlockEntity blockEntity, CompoundTag nbt, RandomSource random) {
+    protected void readNbt(ServerLevelAccessor world, BlockEntity blockEntity, CompoundTag nbt, RandomSource random) {
         if (blockEntity instanceof RandomizableContainerBlockEntity)
             nbt.putLong("LootTableSeed", random.nextLong());
 
@@ -255,7 +255,7 @@ public class QueuedStructureTemplate {
                 if (initializeMobs && entity instanceof Mob mob)
                     mob.finalizeSpawn(world, world.getCurrentDifficultyAt(
                             BlockPos.containing(vec3d2)
-                    ), MobSpawnType.STRUCTURE, null, nbtCompound);
+                    ), MobSpawnType.STRUCTURE, null);
 
                 world.addFreshEntityWithPassengers(entity);
             });

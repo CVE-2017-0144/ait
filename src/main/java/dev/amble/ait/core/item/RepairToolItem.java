@@ -70,7 +70,7 @@ public class RepairToolItem extends Item {
         if (!(user instanceof Player playerEntity)) {
             return;
         }
-        if ((double)(f = RepairToolItem.getPullProgress(this.getUseDuration(stack) - remainingUseTicks)) < 0.1) {
+        if ((double)(f = RepairToolItem.getPullProgress(this.getUseDuration(stack, user) - remainingUseTicks)) < 0.1) {
             return;
         }
 

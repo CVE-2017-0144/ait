@@ -24,8 +24,9 @@ public class AmbleLanguageProvider extends FabricLanguageProvider {
     protected HashMap<String, String> translations = new HashMap<>();
     public LanguageType language;
 
-    public AmbleLanguageProvider(FabricDataOutput output, LanguageType language) {
-        super(output, language.name().toLowerCase());
+    public AmbleLanguageProvider(FabricDataOutput output, LanguageType language,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, language.name().toLowerCase(), registriesFuture);
         this.output = output;
         this.language = language;
         this.modid = output.getModId();

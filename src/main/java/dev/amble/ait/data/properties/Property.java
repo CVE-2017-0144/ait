@@ -96,7 +96,7 @@ public class Property<T> {
     public static final PropertyType.Nullable<String> STR = new PropertyType.Nullable<>(String.class, FriendlyByteBuf::writeUtf,
             FriendlyByteBuf::readUtf);
 
-    public static final PropertyType.Nullable<UUID> UUID = new PropertyType.Nullable<>(UUID.class, FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
+    public static final PropertyType.Nullable<UUID> UUID = new PropertyType.Nullable<>(UUID.class, (buf, value) -> buf.writeUUID(value), buf -> buf.readUUID());
 
     public static final PropertyType.Nullable<Double> DOUBLE = new PropertyType.Nullable<>(Double.class, FriendlyByteBuf::writeDouble,
             FriendlyByteBuf::readDouble);

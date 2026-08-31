@@ -26,8 +26,7 @@ public class WaypointBankBlockEntityRenderer<T extends WaypointBankBlockEntity> 
     private static final Font textRenderer = Minecraft.getInstance().font;
     private static final String SEPARATOR = "------------";
 
-    private static final ModelResourceLocation WAYPOINT = new ModelResourceLocation(AITMod.MOD_ID,
-            BuiltInRegistries.ITEM.getKey(AITItems.WAYPOINT_CARTRIDGE).getPath(), "inventory");
+    private static final ModelResourceLocation WAYPOINT = ModelResourceLocation.inventory(BuiltInRegistries.ITEM.getKey(AITItems.WAYPOINT_CARTRIDGE));
 
     public WaypointBankBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
     }

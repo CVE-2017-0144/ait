@@ -184,7 +184,7 @@ public class OverloadSonicMode extends SonicMode {
             forceRedstonePower(world, pos, state, 5 * 20);
         }
         else if (block instanceof LeverBlock lever) {
-            lever.pull(state, world, pos);
+            lever.pull(state, world, pos, null);
         }
         else if (block instanceof TransparentBlock || block instanceof IronBarsBlock) {
             breakBlock(world, pos, user, state, blockHit);

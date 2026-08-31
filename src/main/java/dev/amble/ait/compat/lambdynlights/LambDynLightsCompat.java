@@ -2,6 +2,7 @@ package dev.amble.ait.compat.lambdynlights;
 
 import dev.lambdaurora.lambdynlights.api.DynamicLightsContext;
 import dev.lambdaurora.lambdynlights.api.DynamicLightsInitializer;
+import dev.lambdaurora.lambdynlights.api.item.ItemLightSourceManager;
 import net.minecraft.world.entity.EntityType;
 
 public class LambDynLightsCompat implements DynamicLightsInitializer {
@@ -14,6 +15,5 @@ public class LambDynLightsCompat implements DynamicLightsInitializer {
     }
 
     @Override
-    @SuppressWarnings("removal")
-    public void onInitializeDynamicLights() { }
+    public void onInitializeDynamicLights(ItemLightSourceManager itemLightSourceManager) { }
 }

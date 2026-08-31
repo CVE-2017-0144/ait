@@ -1,5 +1,6 @@
 package dev.amble.ait.module.planet.core.effect;
 
+import dev.amble.ait.core.AITStatusEffects;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,7 +23,7 @@ public class LunarRegolithEffect extends MobEffect {
         entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, amplifier, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.HUNGER, 100, amplifier, false, false));
 
-        int lunarDuration = entity.getEffect(this).getDuration();
+        int lunarDuration = entity.getEffect(AITStatusEffects.LUNAR_SICKNESS).getDuration();
 
         int delayBeforeEffect = lunarDuration - 1000;
 
@@ -30,5 +31,7 @@ public class LunarRegolithEffect extends MobEffect {
             entity.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 6, false, false));
 
         }
+
+        return true;
     }
 }

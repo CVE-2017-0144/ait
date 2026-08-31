@@ -1,11 +1,16 @@
 package dev.amble.ait.core;
 
-
 import dev.amble.ait.AITMod;
-import dev.amble.lib.container.impl.PaintingContainer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 
-public class AITPaintings implements PaintingContainer {
-    public static final PaintingVariant CRAB_THROWER = new PaintingVariant(48, 32, AITMod.id("crab_thrower"));
-    public static final PaintingVariant PEANUT = new PaintingVariant(16, 16, AITMod.id("peanut"));
+public class AITPaintings {
+
+    public static final ResourceKey<PaintingVariant> CRAB_THROWER = of("crab_thrower");
+    public static final ResourceKey<PaintingVariant> PEANUT = of("peanut");
+
+    private static ResourceKey<PaintingVariant> of(String name) {
+        return ResourceKey.create(Registries.PAINTING_VARIANT, AITMod.id(name));
+    }
 }

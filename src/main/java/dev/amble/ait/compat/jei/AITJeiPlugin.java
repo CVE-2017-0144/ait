@@ -9,7 +9,9 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.jei.client.FabricatorRecipeCategory;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.item.blueprint.BlueprintItem;
 import dev.amble.ait.core.item.blueprint.BlueprintRegistry;
+import dev.amble.ait.core.item.blueprint.BlueprintSchema;
 
 @JeiPlugin
 public class AITJeiPlugin implements IModPlugin {
@@ -21,7 +23,11 @@ public class AITJeiPlugin implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
-        registration.useNbtForSubtypes(AITItems.BLUEPRINT);
+        registration.registerSubtypeInterpreter(AITItems.BLUEPRINT,
+                (stack, context) -> {
+                    BlueprintSchema schema = BlueprintItem.getSchema(stack);
+                    return schema == null ? "" : schema.id().toString();
+                });
     }
 
     @Override

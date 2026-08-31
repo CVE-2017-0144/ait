@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
@@ -207,7 +207,6 @@ public class AITMod implements ModInitializer {
         RegistryContainer.register(AITBlocks.class, MOD_ID);
         RegistryContainer.register(AITBlockEntityTypes.class, MOD_ID);
         RegistryContainer.register(AITEntityTypes.class, MOD_ID);
-        RegistryContainer.register(AITPaintings.class, MOD_ID);
         ModuleRegistry.instance().onCommonInit();
 
         BlueprintRegistry.BLUEPRINT_TYPE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE,

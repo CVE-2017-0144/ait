@@ -28,7 +28,7 @@ public abstract class StructureTemplateMixin {
     @Redirect(method = "fillFromWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;fillEntityList(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)V", ordinal = 0))
     private void ait$saveFromWorld(StructureTemplate instance, Level world, BlockPos firstCorner,
             BlockPos secondCorner) {
-        List<Entity> list = world.getEntitiesOfClass(Entity.class, new AABB(firstCorner, secondCorner),
+        List<Entity> list = world.getEntitiesOfClass(Entity.class, AABB.encapsulatingFullBlocks(firstCorner, secondCorner),
                 (entity) -> !(entity instanceof Player) && !(entity instanceof ConsoleControlEntity));
         this.entityInfoList.clear();
 

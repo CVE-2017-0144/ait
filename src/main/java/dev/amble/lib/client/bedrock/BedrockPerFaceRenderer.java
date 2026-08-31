@@ -47,7 +47,9 @@ public final class BedrockPerFaceRenderer {
 
             PoseStack.Pose entry = matrices.last();
             for (BedrockPerFaceQuad q : buildQuads(cube, textureWidth, textureHeight)) {
-                q.render(entry, vertices, light, overlay, color);
+                q.render(entry, vertices, light, overlay, FastColor.ARGB32.red(color) / 255f,
+                        FastColor.ARGB32.green(color) / 255f, FastColor.ARGB32.blue(color) / 255f,
+                        FastColor.ARGB32.alpha(color) / 255f);
             }
 
             matrices.popPose();

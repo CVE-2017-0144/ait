@@ -6,6 +6,7 @@ import dev.drtheo.multidim.impl.AbstractWorldGenListener;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -142,7 +143,7 @@ public class WorldBlueprint {
         }
 
         if (!typeRegistry.containsKey(typeKey))
-            return typeRegistry.register(typeKey, this.type, Lifecycle.stable());
+            return typeRegistry.register(typeKey, this.type, RegistrationInfo.BUILT_IN);
 
         return typeRegistry.getHolder(typeKey).orElse(null);
     }

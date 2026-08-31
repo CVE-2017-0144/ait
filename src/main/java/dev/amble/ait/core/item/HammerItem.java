@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class HammerItem extends SwordItem {
 
     public HammerItem(int attackDamage, float attackSpeed, Properties settings) {
-        super(Tiers.IRON, attackDamage, attackSpeed, settings);
+        super(Tiers.IRON, settings.attributes(SwordItem.createAttributes(Tiers.IRON, attackDamage, attackSpeed)));
     }
 
     public float getDestroySpeed(ItemStack stack, BlockState state) {

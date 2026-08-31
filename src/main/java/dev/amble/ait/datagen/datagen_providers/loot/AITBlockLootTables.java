@@ -2,6 +2,8 @@ package dev.amble.ait.datagen.datagen_providers.loot;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -15,11 +17,13 @@ import dev.amble.ait.core.AITTags;
 import dev.amble.ait.module.ModuleRegistry;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
 import dev.amble.lib.datagen.loot.AmbleBlockLootTable;
+import java.util.concurrent.CompletableFuture;
 
 public class AITBlockLootTables extends AmbleBlockLootTable {
 
-    public AITBlockLootTables(FabricDataOutput output) {
-        super(output);
+    public AITBlockLootTables(FabricDataOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
@@ -32,7 +36,8 @@ public class AITBlockLootTables extends AmbleBlockLootTable {
         this.add(AITBlocks.ZEITON_CLUSTER,
                 (block) -> createSilkTouchDispatchTable(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
-                        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+                        .apply(ApplyBonusCount.addOreBonusCount(this.registries.lookupOrThrow(Registries.ENCHANTMENT)
+                            .getOrThrow(Enchantments.FORTUNE)))
                         .when(MatchTool
                                 .toolMatches(ItemPredicate.Builder.item().of(AITTags.Items.CLUSTER_MAX_HARVESTABLES)))
                         .otherwise(this.applyExplosionDecay(block, LootItem.lootTableItem(AITItems.ZEITON_SHARD)

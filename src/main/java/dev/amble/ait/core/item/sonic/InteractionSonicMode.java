@@ -98,7 +98,7 @@ public class InteractionSonicMode extends SonicMode {
         }
 
         if (user instanceof Player player && block instanceof ButtonBlock button) {
-            button.useWithoutItem(state, world, pos, player, blockHit);
+            state.useWithoutItem(world, player, blockHit);
             return;
         }
     }

@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -254,8 +255,8 @@ public class FlightTardisEntity extends LinkableLivingEntity implements PlayerRi
     }
 
     @Override
-    public double getPassengersRidingOffsetUnused() {
-        return 0.5f;
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+        return new Vec3(0, 0.5, 0);
     }
 
     public float getRotation(float tickDelta) {

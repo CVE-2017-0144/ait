@@ -15,6 +15,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 
 public class SetDoorParticleCommand {
@@ -31,7 +32,7 @@ public class SetDoorParticleCommand {
         tardis.door().setDoorParticles(particle);
 
         source.sendSuccess(
-                () -> Component.translatableWithFallback("command.ait.door_particle.done", "Particle of [%s] set to [%s]", tardis.getUuid(), particle.writeToString()),
+                () -> Component.translatableWithFallback("command.ait.door_particle.done", "Particle of [%s] set to [%s]", tardis.getUuid(), BuiltInRegistries.PARTICLE_TYPE.getKey(particle.getType()).toString()),
                 true);
 
         return Command.SINGLE_SUCCESS;

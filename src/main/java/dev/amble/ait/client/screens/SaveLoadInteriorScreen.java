@@ -442,7 +442,7 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double amount) {
         zoom += (float) amount * 0.5f;
         zoom = Math.max(1.0f, Math.min(100.0f, zoom));
         return true;

@@ -755,7 +755,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
     public AmbleLanguageProvider addEnglishTranslations(FabricDataOutput output,
                                                           CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
-        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
+        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
         provider.translateBlocks(AITBlocks.class);
         provider.translateItems(AITItems.class);
@@ -1795,7 +1795,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      */
     public AmbleLanguageProvider addFrenchTranslations(FabricDataOutput output,
                                                      CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
-        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
+        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
         provider.addTranslation(AITItemGroups.MAIN, "Adventures In Time");
         provider.addTranslation(AITItems.TARDIS_ITEM, "TARDIS");
@@ -1913,7 +1913,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
      */
     public AmbleLanguageProvider addSpanishTranslations(FabricDataOutput output,
                                                       CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
-        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
+        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
         provider.addTranslation("achievement.ait.description.attack_eyebrows", "¡Es un ascensor!");
         provider.addTranslation("achievement.ait.description.bonding", "Alcanza la lealtad 'Piloto' por primera vez.");
@@ -2978,7 +2978,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
     public AmbleLanguageProvider addGermanTranslations(FabricDataOutput output,
                                                      CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
-        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
+        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
 
         provider.addTranslation(AITItemGroups.MAIN, "Abenteuer in der Zeit");
         provider.addTranslation(AITItems.TARDIS_ITEM, "TARDIS");
@@ -3094,7 +3094,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
 
     public AmbleLanguageProvider addPortugueseTranslations(FabricDataOutput output,
                                                          CompletableFuture<HolderLookup.Provider> registriesFuture, LanguageType languageType) {
-        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType);
+        AmbleLanguageProvider provider = new AmbleLanguageProvider(output, languageType, registriesFuture);
         provider.addTranslation("tardis.message.control.telepathic.home_updated", "Local de origem da TARDIS alterado.");
         provider.addTranslation("tardis.message.control.telepathic.home_denied", "A TARDIS recusa-se a mudar sua casa para você. Nível de lealdade PILOT necessário.");
         provider.addTranslation("tardis.message.control.telepathic.home_denied_nether", "A TARDIS rejeita o Nether como casa. Nível de lealdade OWNER necessário.");
@@ -3243,13 +3243,13 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
     }
 
     public void generate_RU_RU_Language(FabricDataGenerator.Pack pack) {
-        pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.RU_RU))); // ru_ru
+        pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.RU_RU, registriesFuture))); // ru_ru
         // (Russian
         // Russia)
     }
 
     public void generate_UK_UA_Language(FabricDataGenerator.Pack pack) {
-        pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.UK_UA))); // uk_ua
+        pack.addProvider(((output, registriesFuture) -> new AmbleLanguageProvider(output, LanguageType.UK_UA, registriesFuture))); // uk_ua
         // (Ukrainian
         // Ukraine)
     }

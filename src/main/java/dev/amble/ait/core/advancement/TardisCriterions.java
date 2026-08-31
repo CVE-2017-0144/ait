@@ -5,6 +5,7 @@ import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -58,7 +59,7 @@ public class TardisCriterions {
             if (!(entity instanceof ServerPlayer player))
                 return TardisEvents.Interaction.PASS;
 
-            Advancement advancement = player.getServer().getAdvancements().getAdvancement(ResourceLocation.parse("ait/enter_tardis"));
+            AdvancementHolder advancement = player.getServer().getAdvancements().get(ResourceLocation.parse("ait/enter_tardis"));
 
             Scheduler.get().runTaskLater(() -> {
                     if (advancement == null) {

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
@@ -52,6 +53,10 @@ public abstract class BOTIPaintingEntity extends HangingEntity implements ISpace
         this.direction = Direction.from2DDataValue(nbt.getByte("facing"));
         super.readAdditionalSaveData(nbt);
         this.setDirection(this.direction);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
     }
 
     @Override

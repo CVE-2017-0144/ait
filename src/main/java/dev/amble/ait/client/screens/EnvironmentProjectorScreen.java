@@ -206,20 +206,14 @@ public class EnvironmentProjectorScreen extends TardisScreen {
         );
         this.enabledLabel.alignRight();
         this.addRenderableOnly(this.enabledLabel);
-        this.enabledCheckbox = this.addRenderableWidget(new Checkbox(
-                checkboxX,
-                (height / 2 - 53),
-                20, 20,
-                Component.empty(),
-                enabled
-        ) {@Override
-            public void onPress() {
-                super.onPress();
-                boolean checked = this.selected();
-                EnvironmentProjectorScreen.this.enabledLabel.setMessage(EnvironmentProjectorScreen.this.projectorText(
-                        checked ? "enabled.on" : "enabled.off"));
-                AITMod.sendProjectorToggle(projectorPos, checked);
-            }});
+        this.enabledCheckbox = this.addRenderableWidget(Checkbox.builder(Component.empty(), this.font)
+                .pos(checkboxX, height / 2 - 53)
+                .selected(enabled)
+                .onValueChange((checkbox, checked) -> {
+                    this.enabledLabel.setMessage(this.projectorText(checked ? "enabled.on" : "enabled.off"));
+                    AITMod.sendProjectorToggle(projectorPos, checked);
+                })
+                .build());
         Component currentLabel = this.projectorText("current");
         this.addRenderableOnly(new StringWidget(
                 (width / 2 - this.font.width(currentLabel) / 2 - 72),

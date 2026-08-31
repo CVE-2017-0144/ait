@@ -133,12 +133,12 @@ public class MatrixEnergizerBlockEntity
         }
 
         @Override
-        public void onReceiveVibration(ServerLevel world, BlockPos pos, GameEvent event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
+        public void onReceiveVibration(ServerLevel world, BlockPos pos, Holder<GameEvent> event, @Nullable Entity sourceEntity, @Nullable Entity entity, float distance) {
             BlockState blockState = MatrixEnergizerBlockEntity.this.getBlockState();
             if (MatrixEnergizerBlock.isInactive(blockState)) {
                 MatrixEnergizerBlockEntity.this.setLastVibrationFrequency(VibrationSystem.getGameEventFrequency(event));
                 Block block = blockState.getBlock();
-                if (event.equals(GameEvent.SHRIEK) && block instanceof MatrixEnergizerBlock matrixEnergizerBlock) {
+                if (event.is(GameEvent.SHRIEK) && block instanceof MatrixEnergizerBlock matrixEnergizerBlock) {
                     matrixEnergizerBlock.setActive(world, this.pos, blockState,
                             MatrixEnergizerBlockEntity.this.getLastVibrationFrequency());
                 }

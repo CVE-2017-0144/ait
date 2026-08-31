@@ -96,7 +96,7 @@ public class AItemGroup extends CreativeModeTab {
             itemGroup.alignedRight = this.special;
             itemGroup.showTitle = this.renderName;
             itemGroup.canScroll = this.scrollbar;
-            itemGroup.backgroundSuffix = this.texture;
+            itemGroup.backgroundTexture = CreativeModeTab.createTextureLocation(this.texture);
             return itemGroup;
         }
     }

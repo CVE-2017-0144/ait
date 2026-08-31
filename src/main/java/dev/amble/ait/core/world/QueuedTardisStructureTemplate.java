@@ -3,6 +3,7 @@ package dev.amble.ait.core.world;
 import dev.drtheo.queue.api.util.structure.QueuedStructureTemplate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
@@ -18,7 +19,7 @@ public class QueuedTardisStructureTemplate extends QueuedStructureTemplate {
     }
 
     @Override
-    protected void readNbt(BlockEntity blockEntity, CompoundTag nbt, RandomSource random) {
+    protected void readNbt(ServerLevelAccessor world, BlockEntity blockEntity, CompoundTag nbt, RandomSource random) {
         if (blockEntity instanceof InteriorLinkableBlockEntity linkable) {
             /*
              It's faster to remove the tardis from the nbt
@@ -28,6 +29,6 @@ public class QueuedTardisStructureTemplate extends QueuedStructureTemplate {
             linkable.link(tardis);
         }
 
-        super.readNbt(blockEntity, nbt, random);
+        super.readNbt(world, blockEntity, nbt, random);
     }
 }

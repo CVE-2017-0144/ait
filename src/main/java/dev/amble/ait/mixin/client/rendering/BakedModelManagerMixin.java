@@ -15,7 +15,7 @@ import dev.amble.ait.client.renderers.BakedModelEditor;
 public abstract class BakedModelManagerMixin implements BakedModelEditor {
 
     @Shadow
-    private Map<ResourceLocation, BakedModel> bakedRegistry;
+    private Map<ModelResourceLocation, BakedModel> bakedRegistry;
 
     @Override
     @Shadow
@@ -28,7 +28,7 @@ public abstract class BakedModelManagerMixin implements BakedModelEditor {
 
     @Override
     public void ait$setModel(ResourceLocation identifier, BakedModel model) {
-        this.bakedRegistry.put(identifier, model);
+        this.bakedRegistry.put(ModelResourceLocation.inventory(identifier), model);
     }
 
     @Override

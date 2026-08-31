@@ -149,7 +149,7 @@ public class AbstractTardisPart extends Item {
     public static void attach(ItemStack machine, AbstractLinkItem link) {
         RegistryFriendlyByteBuf data = AitNetworking.buf();
         ItemStack.STREAM_CODEC.encode(data, machine);
-        ItemStack.STREAM_CODEC.encode(data, link);
+        ItemStack.STREAM_CODEC.encode(data, new ItemStack(link));
 
         AitNetworking.send(ATTACH, data);
     }

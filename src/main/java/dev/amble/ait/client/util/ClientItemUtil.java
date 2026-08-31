@@ -41,7 +41,7 @@ public class ClientItemUtil {
             float f = (float) (i >> 16 & 255) / 255.0F;
             float g = (float) (i >> 8 & 255) / 255.0F;
             float h = (float) (i & 255) / 255.0F;
-            vertices.putBulkData(entry, quad, f, g, h, light, overlay);
+            vertices.putBulkData(entry, quad, f, g, h, 1.0f, light, overlay);
         }
     }
 }

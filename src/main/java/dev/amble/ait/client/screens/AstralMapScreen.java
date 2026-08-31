@@ -121,7 +121,8 @@ public class AstralMapScreen extends Screen {
     }
 
     private void exit(AstralMapListWidget.Entry entry) {
-        var packetByteBuf = AitNetworking.buf().writeResourceLocation(entry.identifier);
+        var packetByteBuf = AitNetworking.buf();
+        packetByteBuf.writeResourceLocation(entry.identifier);
         packetByteBuf.writeEnum(entry.category);
         AitNetworking.send(AstralMapBlock.REQUEST_SEARCH, packetByteBuf);
         this.minecraft.setScreen(null);
@@ -233,7 +234,7 @@ public class AstralMapScreen extends Screen {
         }
 
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
             // Adjust for scrollbar width
             this.setX(this.getMaxScroll() > 0 ? -5 : 0);
 

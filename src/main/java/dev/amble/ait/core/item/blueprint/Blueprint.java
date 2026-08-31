@@ -22,11 +22,11 @@ public class Blueprint {
         this.requirements = StackUtil.cloneList(initialRequirements);
     }
 
-    public Blueprint(CompoundTag nbt) {
+    public Blueprint(CompoundTag nbt, HolderLookup.Provider registries) {
         this(BlueprintRegistry.getInstance().get(ResourceLocation.parse(nbt.getString("id"))));
 
         this.requirements.clear();
-        this.fromNbt(nbt);
+        this.fromNbt(nbt, registries);
     }
 
     /**
@@ -110,7 +110,7 @@ public class Blueprint {
 
         return nbt;
     }
-    protected CompoundTag fromNbt(CompoundTag nbt) {
+    protected CompoundTag fromNbt(CompoundTag nbt, HolderLookup.Provider registries) {
         ListTag list = nbt.getList("requirements", 10);
         for (int i = 0; i < list.size(); i++) {
             requirements.add(ItemStack.parseOptional(registries, list.getCompound(i)));

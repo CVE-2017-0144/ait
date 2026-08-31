@@ -148,7 +148,7 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
         this.blueprint = null;
 
         if (nbt.contains("Blueprint"))
-            this.blueprint = new Blueprint(nbt.getCompound("Blueprint"));
+            this.blueprint = new Blueprint(nbt.getCompound("Blueprint"), registries);
     }
 
     @Override

@@ -112,7 +112,7 @@ public class FakeStructureWorldAccess implements WorldGenLevel {
     public void levelEvent(@Nullable Player player, int eventId, BlockPos pos, int data) { }
 
     @Override
-    public void gameEvent(GameEvent event, Vec3 emitterPos, GameEvent.Context emitter) { }
+    public void gameEvent(Holder<GameEvent> event, Vec3 emitterPos, GameEvent.Context emitter) { }
 
     @Override
     public float getShade(Direction direction, boolean shaded) {

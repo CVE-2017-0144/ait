@@ -1,7 +1,7 @@
 package dev.amble.ait.core.blocks;
 
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.block.*;
@@ -66,7 +66,7 @@ public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     public FoodMachineBlock(Properties settings) {
-        super(FabricBlockSettings.of()
+        super(BlockBehaviour.Properties.of()
                 .strength(3.0F, 6.0F)
                 .requiresCorrectToolForDrops());
         this.registerDefaultState(this.stateDefinition.any().setValue(ROTATION, 0));

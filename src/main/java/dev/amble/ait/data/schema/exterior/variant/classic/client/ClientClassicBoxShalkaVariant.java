@@ -8,7 +8,7 @@ import dev.amble.ait.client.models.exteriors.ClassicHudolinExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 
 public class ClientClassicBoxShalkaVariant extends ClientClassicBoxVariant {
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_shalka.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_shalka.png");
 
     private final BiomeOverrides OVERRIDES = BiomeOverrides.builder(ClientClassicBoxVariant.OVERRIDES)
             .with(type -> type.getTexture(BIOME_IDENTIFIER),

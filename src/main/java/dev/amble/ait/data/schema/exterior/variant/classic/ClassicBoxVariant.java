@@ -16,7 +16,7 @@ public abstract class ClassicBoxVariant extends ExteriorVariantSchema {
     protected static final String TEXTURE_PATH = "textures/blockentities/exteriors/classic/classic_";
 
     protected ClassicBoxVariant(String name, String modId) {
-        super(ClassicCategory.REFERENCE, new ResourceLocation(modId, "exterior/classic/" + name),
+        super(ClassicCategory.REFERENCE, ResourceLocation.fromNamespaceAndPath(modId, "exterior/classic/" + name),
                 new Loyalty(Loyalty.Type.OWNER));
     }
 

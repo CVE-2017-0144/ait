@@ -2,13 +2,11 @@ package dev.amble.ait.registry.impl.console;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.datapack.DatapackConsole;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.console.type.*;
@@ -28,8 +26,8 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        FriendlyByteBuf secondary = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
+        FriendlyByteBuf secondary = AitNetworking.buf();
 
         int counter = 0;
         for (ConsoleTypeSchema schema : this.toList()) {
@@ -42,7 +40,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
         buf.writeInt(counter);
         buf.writeBytes(secondary);
 
-        ServerPlayNetworking.send(player, AITMod.id("sync_console_type"), buf);
+        AitNetworking.send(player, AITMod.id("sync_console_type"), buf);
     }
 
     @Override
@@ -65,7 +63,7 @@ public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
     @Override
     @Environment(EnvType.CLIENT)
     public void onClientInit() {
-        ClientPlayNetworking.registerGlobalReceiver(AITMod.id("sync_console_type"),
+        AitNetworking.registerClientReceiver(AITMod.id("sync_console_type"),
                 (client, handler, buf, responseSender) -> this.readFromServer(buf));
     }
 

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientJakeVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/jake";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             CATEGORY_PATH + "/jake.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/jake_";
 

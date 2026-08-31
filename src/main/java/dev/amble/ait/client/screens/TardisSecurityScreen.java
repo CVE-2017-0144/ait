@@ -24,7 +24,7 @@ import dev.amble.ait.core.tardis.handler.permissions.PermissionHandler;
 import dev.amble.ait.data.Loyalty;
 
 public class TardisSecurityScreen extends ConsoleScreen {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/security_menu.png");
 
     int bgHeight = 138;

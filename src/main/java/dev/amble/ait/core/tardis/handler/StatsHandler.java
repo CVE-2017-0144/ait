@@ -10,9 +10,9 @@ import java.util.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -62,8 +62,8 @@ public class StatsHandler extends KeyedTardisComponent {
     private static final Property<HashSet<String>> UNLOCKS = new Property<>(Property.STR_SET, "unlocks",
             new HashSet<>());
 
-    private static final Property<ResourceLocation> FLIGHT_FX = new Property<>(Property.IDENTIFIER, "flight_fx", new ResourceLocation(""));
-    private static final Property<ResourceLocation> VORTEX_FX = new Property<>(Property.IDENTIFIER, "vortex_fx", new ResourceLocation(""));
+    private static final Property<ResourceLocation> FLIGHT_FX = new Property<>(Property.IDENTIFIER, "flight_fx", ResourceLocation.parse(""));
+    private static final Property<ResourceLocation> VORTEX_FX = new Property<>(Property.IDENTIFIER, "vortex_fx", ResourceLocation.parse(""));
     private static final BoolProperty SECURITY = new BoolProperty("security", false);
     private static final BoolProperty HAIL_MARY = new BoolProperty("hail_mary", false);
     private static final BoolProperty RECEIVE_CALLS = new BoolProperty("receive_calls", true);
@@ -96,7 +96,7 @@ public class StatsHandler extends KeyedTardisComponent {
     private Lazy<VortexReference> vortexFxCache;
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(VORTEX_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(VORTEX_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             ResourceLocation id = buf.readResourceLocation();
 
             if (tardis == null || id == null)
@@ -105,7 +105,7 @@ public class StatsHandler extends KeyedTardisComponent {
             tardis.stats().setVortexEffects(id);
         })));
 
-        ServerPlayNetworking.registerGlobalReceiver(FLIGHT_SOUND_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(FLIGHT_SOUND_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             ResourceLocation id = buf.readResourceLocation();
 
             if (tardis == null || id == null)
@@ -114,7 +114,7 @@ public class StatsHandler extends KeyedTardisComponent {
             tardis.stats().setFlightEffects(id);
         })));
 
-        ServerPlayNetworking.registerGlobalReceiver(SHOULD_RECEIVE_CALLS, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(SHOULD_RECEIVE_CALLS, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             boolean bool = buf.readBoolean();
 
             if (tardis == null) return;

@@ -52,8 +52,7 @@ public class RespiratorModel extends EntityModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green,
-            float blue, float alpha) {
-        mask.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+        mask.render(matrices, vertices, light, overlay, color);
     }
 }

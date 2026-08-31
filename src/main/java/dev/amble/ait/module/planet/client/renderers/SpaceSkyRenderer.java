@@ -45,10 +45,10 @@ public class SpaceSkyRenderer {
             RenderSystem.setShaderTexture(0, this.faces[k]);
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             int l = 255;
-            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, -100.0f).uv(0.0f, 0.0f).color(255, 255, 255, l).endVertex();
-            bufferBuilder.vertex(matrix4f,-100.0f, -100.0f, 100.0f).uv(0.0f, 1.0f).color(255, 255, 255, l).endVertex();
-            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, 100.0f).uv(1.0f, 1.0f).color(255, 255, 255, l).endVertex();
-            bufferBuilder.vertex(matrix4f,100.0f, -100.0f, -100.0f).uv(1.0f, 0.0f).color(255, 255, 255, l).endVertex();
+            bufferBuilder.addVertex(matrix4f,-100.0f, -100.0f, -100.0f).setUv(0.0f, 0.0f).setColor(255, 255, 255, l);
+            bufferBuilder.addVertex(matrix4f,-100.0f, -100.0f, 100.0f).setUv(0.0f, 1.0f).setColor(255, 255, 255, l);
+            bufferBuilder.addVertex(matrix4f,100.0f, -100.0f, 100.0f).setUv(1.0f, 1.0f).setColor(255, 255, 255, l);
+            bufferBuilder.addVertex(matrix4f,100.0f, -100.0f, -100.0f).setUv(1.0f, 0.0f).setColor(255, 255, 255, l);
             tessellator.end();
             matrixStack.popPose();
         }

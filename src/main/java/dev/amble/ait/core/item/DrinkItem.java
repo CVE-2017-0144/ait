@@ -133,7 +133,7 @@ public class DrinkItem extends Item {
 
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         DrinkUtil.buildTooltip(stack, tooltip, 1.0f);
     }
 }

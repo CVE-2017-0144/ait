@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CoralRenderer<T extends CoralBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation CORAL_GROWTH_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation CORAL_GROWTH_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/coral/coral_growth.png");
 
     private final CoralGrowthModel coralModel;
@@ -35,9 +35,7 @@ public class CoralRenderer<T extends CoralBlockEntity> implements BlockEntityRen
         float f = blockState.getValue(CoralPlantBlock.FACING).toYRot();
         matrices.mulPose(Axis.YN.rotationDegrees(f));
         ModelPart currentAgeModel = getCurrentAge(blockState.getValue(CoralPlantBlock.AGE), this.coralModel);
-        currentAgeModel.render(matrices,
-                vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(CORAL_GROWTH_TEXTURE, true)), light,
-                overlay, 1, 1, 1, 1);
+        currentAgeModel.render(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(CORAL_GROWTH_TEXTURE, true)), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
     }
 

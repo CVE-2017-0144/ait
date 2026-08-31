@@ -5,10 +5,9 @@ import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.nextVariant;
 import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.previousConsole;
 import static dev.amble.ait.core.blockentities.ConsoleBlockEntity.previousVariant;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -27,6 +26,7 @@ import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.console.ConsoleVariantSchema;
@@ -87,8 +87,8 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (this.type != null)
             nbt.putString("console", this.type.toString());
@@ -171,13 +171,13 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         if (!hasLevel() || level.isClientSide())
             return;
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeUtf(getConsoleSchema().id().toString());
         buf.writeBlockPos(getBlockPos());
 
         for (Player player : level.players()) {
-            ServerPlayNetworking.send((ServerPlayer) player, SYNC_TYPE, buf);
+            AitNetworking.send((ServerPlayer) player, SYNC_TYPE, buf);
         }
     }
 
@@ -185,28 +185,28 @@ public class ConsoleGeneratorBlockEntity extends FluidLinkBlockEntity {
         if (!hasLevel() || level.isClientSide())
             return;
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeUtf(getConsoleVariant().id().toString());
         buf.writeBlockPos(getBlockPos());
 
         for (Player player : level.players()) {
-            ServerPlayNetworking.send((ServerPlayer) player, SYNC_VARIANT, buf);
+            AitNetworking.send((ServerPlayer) player, SYNC_VARIANT, buf);
         }
     }
 
     @Override
-    public void load(CompoundTag nbt) {
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         if (nbt.contains("console")) {
-            ResourceLocation console = new ResourceLocation(nbt.getString("console"));
+            ResourceLocation console = ResourceLocation.parse(nbt.getString("console"));
             this.setConsoleSchema(console);
         }
 
         if (nbt.contains("variant")) {
-            ResourceLocation variant = new ResourceLocation(nbt.getString("variant"));
+            ResourceLocation variant = ResourceLocation.parse(nbt.getString("variant"));
             this.setVariant(variant);
         }
 
-        super.load(nbt);
+        super.loadAdditional(nbt, registries);
     }
 }

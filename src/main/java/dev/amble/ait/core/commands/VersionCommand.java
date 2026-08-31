@@ -24,7 +24,7 @@ public class VersionCommand {
                == ==\\\\      ==||      ==||
               =======\\\\     ==||      ==||
              ##//   ##\\\\    ##||      ##||
-            ##//     ##\\\\ ######||    ##||""").copy().setStyle(Style.EMPTY.withFont(new ResourceLocation("uniform")));
+            ##//     ##\\\\ ######||    ##||""").copy().setStyle(Style.EMPTY.withFont(ResourceLocation.parse("uniform")));
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal(AITMod.MOD_ID).then(

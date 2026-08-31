@@ -16,6 +16,7 @@ import dev.amble.lib.client.bedrock.BedrockModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 
 public class BedrockExteriorModel implements ExteriorModel, Identifiable {
@@ -50,7 +51,7 @@ public class BedrockExteriorModel implements ExteriorModel, Identifiable {
             runTravelAnimations(holder, tardis, tickDelta);
         }
 
-        this.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
 
         matrices.popPose();
     }
@@ -77,7 +78,7 @@ public class BedrockExteriorModel implements ExteriorModel, Identifiable {
 
     @Override
     public <T extends Entity & Linkable> void renderEntity(T falling, ModelPart root, PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        this.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        this.render(matrices, vertexConsumer, light, overlay, FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
     }
 
     @Override

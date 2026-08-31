@@ -36,9 +36,9 @@ public class TriangleTestingUtil {
         for (int i = 0; i < 6; ++i) {
             matrixStack.rotateAround(
                     Axis.YP.rotationDegrees(i * ((i > 1f && i < 3f) || i == 4 ? 120f : 60F)), 0, 0, 0);
-            buffer.vertex(positionMatrix, -0.5f, 1, -0.865625f).color(1f, 1f, 1f, 1f).uv(0f, 0f).endVertex();
-            buffer.vertex(positionMatrix, 0, 0, /*-0.865625f*/ 0).color(1f, 0f, 0f, 1f).uv(0f, 1f).endVertex();
-            buffer.vertex(positionMatrix, 0.5f, 1, -0.865625f).color(0f, 0f, 1f, 1f).uv(1f, 0f).endVertex();
+            buffer.addVertex(positionMatrix, -0.5f, 1, -0.865625f).setColor(1f, 1f, 1f, 1f).setUv(0f, 0f);
+            buffer.addVertex(positionMatrix, 0, 0, /*-0.865625f*/ 0).setColor(1f, 0f, 0f, 1f).setUv(0f, 1f);
+            buffer.addVertex(positionMatrix, 0.5f, 1, -0.865625f).setColor(0f, 0f, 1f, 1f).setUv(1f, 0f);
         }
 
         RenderSystem.setShader(GameRenderer::getPositionColorShader);

@@ -97,8 +97,8 @@ public class GallifreyFallsModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 1024, 1024);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        painting.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        painting.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

@@ -88,10 +88,10 @@ public class SonicRendering {
 
         if (!buffer.building()) buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 
-        buffer.vertex(positionMatrix, 0, 0, 0).color(1f, 1f, 1f, 1f).uv(0f, 0f).endVertex();
-        buffer.vertex(positionMatrix, 0, -1, 0).color(1f, 1f, 1f, 1f).uv(0f, 1f).endVertex();
-        buffer.vertex(positionMatrix, 1, -1, 0).color(1f, 1f, 1f, 1f).uv(1f, 1f).endVertex();
-        buffer.vertex(positionMatrix, 1, 0, 0).color(1f, 1f, 1f, 1f).uv(1f, 0f).endVertex();
+        buffer.addVertex(positionMatrix, 0, 0, 0).setColor(1f, 1f, 1f, 1f).setUv(0f, 0f);
+        buffer.addVertex(positionMatrix, 0, -1, 0).setColor(1f, 1f, 1f, 1f).setUv(0f, 1f);
+        buffer.addVertex(positionMatrix, 1, -1, 0).setColor(1f, 1f, 1f, 1f).setUv(1f, 1f);
+        buffer.addVertex(positionMatrix, 1, 0, 0).setColor(1f, 1f, 1f, 1f).setUv(1f, 0f);
 
         boolean shouldRender = !texture.equals(previous);
 

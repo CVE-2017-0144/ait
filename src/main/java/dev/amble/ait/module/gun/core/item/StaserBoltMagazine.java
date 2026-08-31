@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.item.ZeitonShardItem;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.module.gun.core.entity.GunEntityTypes;
 import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
 
@@ -34,9 +35,10 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         nbt.putDouble(FUEL_KEY, MAX_FUEL);
+        ItemNbt.set(stack, nbt);
 
         return stack;
     }
@@ -61,8 +63,9 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     @Override
     public void onCraftedBy(ItemStack stack, Level world, Player player) {
         super.onCraftedBy(stack, world, player);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putDouble(FUEL_KEY, 0);
+        ItemNbt.set(stack, nbt);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         int currentFuel = (int) Math.round(this.getCurrentFuel(stack));
         ChatFormatting fuelColor = currentFuel > (MAX_FUEL / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;
 
@@ -82,6 +85,6 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
                         .append(Component.literal(String.valueOf(MAX_FUEL)).withStyle(ChatFormatting.GRAY))
         );
 
-        super.appendHoverText(stack, world, tooltip, context);
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
     }
 }

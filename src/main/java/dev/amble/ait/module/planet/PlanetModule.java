@@ -9,7 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -221,7 +221,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_ANORTHOSITE, 0.3f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE), has(PlanetBlocks.ANORTHOSITE)),
-                new ResourceLocation("ait", "smooth_anorthosite_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "smooth_anorthosite_from_anorthosite_smelted"));
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_ANORTHOSITE_SLAB, 6)
                         .pattern("###")
                         .define('#', PlanetBlocks.SMOOTH_ANORTHOSITE)
@@ -277,82 +277,82 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_BRICKS),
                                         RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_ANORTHOSITE_BRICKS, 0.7f, 200)
                                 .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_BRICKS), has(PlanetBlocks.ANORTHOSITE_BRICKS)),
-                        new ResourceLocation("ait", "cracked_anorthosite_bricks_from_anorthosite_bricks_smelted"));
+                        ResourceLocation.fromNamespaceAndPath("ait", "cracked_anorthosite_bricks_from_anorthosite_bricks_smelted"));
 
                 // anorthosite ores
                 //coal
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COAL_ORE), has(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
-                new ResourceLocation("ait", "coal_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "coal_from_anorthosite_smelted"));
 
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COAL_ORE), has(PlanetBlocks.ANORTHOSITE_COAL_ORE)),
-                new ResourceLocation("ait", "coal_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "coal_from_anorthosite_blasted"));
                 //copper
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COPPER_ORE), has(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
-                new ResourceLocation("ait", "copper_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "copper_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_COPPER_ORE), has(PlanetBlocks.ANORTHOSITE_COPPER_ORE)),
-                new ResourceLocation("ait", "copper_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "copper_from_anorthosite_blasted"));
                 //iron
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_IRON_ORE), has(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
-                new ResourceLocation("ait", "iron_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "iron_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_IRON_ORE), has(PlanetBlocks.ANORTHOSITE_IRON_ORE)),
-                new ResourceLocation("ait", "iron_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "iron_from_anorthosite_blasted"));
                 //gold
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_GOLD_ORE), has(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
-                new ResourceLocation("ait", "gold_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "gold_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_GOLD_ORE), has(PlanetBlocks.ANORTHOSITE_GOLD_ORE)),
-                new ResourceLocation("ait", "gold_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "gold_from_anorthosite_blasted"));
                 //redstone
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), has(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
-                new ResourceLocation("ait", "redstone_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "redstone_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE), has(PlanetBlocks.ANORTHOSITE_REDSTONE_ORE)),
-                new ResourceLocation("ait", "redstone_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "redstone_from_anorthosite_blasted"));
                 //lapis
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), has(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
-                new ResourceLocation("ait", "lapis_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "lapis_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_LAPIS_ORE), has(PlanetBlocks.ANORTHOSITE_LAPIS_ORE)),
-                new ResourceLocation("ait", "lapis_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "lapis_from_anorthosite_blasted"));
                 //diamond
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), has(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
-                new ResourceLocation("ait", "diamond_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "diamond_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE), has(PlanetBlocks.ANORTHOSITE_DIAMOND_ORE)),
-                new ResourceLocation("ait", "diamond_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "diamond_from_anorthosite_blasted"));
                 //emerald
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), has(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
-                new ResourceLocation("ait", "emerald_from_anorthosite_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "emerald_from_anorthosite_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.ANORTHOSITE_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.ANORTHOSITE_EMERALD_ORE), has(PlanetBlocks.ANORTHOSITE_EMERALD_ORE)),
-                new ResourceLocation("ait", "emerald_from_anorthosite_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "emerald_from_anorthosite_blasted"));
 
                 // moon sandstone section
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MOON_SANDSTONE_WALL, 6)
@@ -408,11 +408,11 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MOON_SANDSTONE_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MOON_SANDSTONE_BRICKS, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE_BRICKS), has(PlanetBlocks.MOON_SANDSTONE_BRICKS)),
-                new ResourceLocation("ait", "cracked_moon_sandstone_bricks_from_moon_sandstone_bricks_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "cracked_moon_sandstone_bricks_from_moon_sandstone_bricks_smelted"));
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MOON_SANDSTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MOON_SANDSTONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MOON_SANDSTONE), has(PlanetBlocks.MOON_SANDSTONE)),
-                new ResourceLocation("ait", "cracked_moon_sandstone_from_moon_sandstone_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "cracked_moon_sandstone_from_moon_sandstone_smelted"));
 
                 // martian section
 
@@ -421,74 +421,74 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COAL_ORE), has(PlanetBlocks.MARTIAN_COAL_ORE)),
-                new ResourceLocation("ait", "coal_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "coal_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_COAL_ORE),
                                 RecipeCategory.MISC, Items.COAL, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COAL_ORE), has(PlanetBlocks.MARTIAN_COAL_ORE)),
-                new ResourceLocation("ait", "coal_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "coal_from_martian_blasted"));
                 //copper
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COPPER_ORE), has(PlanetBlocks.MARTIAN_COPPER_ORE)),
-                new ResourceLocation("ait", "copper_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "copper_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_COPPER_ORE),
                                 RecipeCategory.MISC, Items.COPPER_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COPPER_ORE), has(PlanetBlocks.MARTIAN_COPPER_ORE)),
-                new ResourceLocation("ait", "copper_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "copper_from_martian_blasted"));
                 //iron
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_IRON_ORE), has(PlanetBlocks.MARTIAN_IRON_ORE)),
-                new ResourceLocation("ait", "iron_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "iron_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_IRON_ORE),
                                 RecipeCategory.MISC, Items.IRON_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_IRON_ORE), has(PlanetBlocks.MARTIAN_IRON_ORE)),
-                new ResourceLocation("ait", "iron_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "iron_from_martian_blasted"));
                 //gold
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_GOLD_ORE), has(PlanetBlocks.MARTIAN_GOLD_ORE)),
-                new ResourceLocation("ait", "gold_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "gold_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_GOLD_ORE),
                                 RecipeCategory.MISC, Items.GOLD_INGOT, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_GOLD_ORE), has(PlanetBlocks.MARTIAN_GOLD_ORE)),
-                new ResourceLocation("ait", "gold_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "gold_from_martian_blasted"));
                 //redstone
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_REDSTONE_ORE), has(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
-                new ResourceLocation("ait", "redstone_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "redstone_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_REDSTONE_ORE),
                                 RecipeCategory.MISC, Items.REDSTONE, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_REDSTONE_ORE), has(PlanetBlocks.MARTIAN_REDSTONE_ORE)),
-                new ResourceLocation("ait", "redstone_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "redstone_from_martian_blasted"));
                 //lapis
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_LAPIS_ORE), has(PlanetBlocks.MARTIAN_LAPIS_ORE)),
-                new ResourceLocation("ait", "lapis_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "lapis_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_LAPIS_ORE),
                                 RecipeCategory.MISC, Items.LAPIS_LAZULI, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_LAPIS_ORE), has(PlanetBlocks.MARTIAN_LAPIS_ORE)),
-                new ResourceLocation("ait", "lapis_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "lapis_from_martian_blasted"));
                 //diamond
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_DIAMOND_ORE), has(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
-                new ResourceLocation("ait", "diamond_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "diamond_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_DIAMOND_ORE),
                                 RecipeCategory.MISC, Items.DIAMOND, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_DIAMOND_ORE), has(PlanetBlocks.MARTIAN_DIAMOND_ORE)),
-                new ResourceLocation("ait", "diamond_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "diamond_from_martian_blasted"));
                 //emerald
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_EMERALD_ORE), has(PlanetBlocks.MARTIAN_EMERALD_ORE)),
-                new ResourceLocation("ait", "emerald_from_martian_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "emerald_from_martian_smelted"));
                 provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(PlanetBlocks.MARTIAN_EMERALD_ORE),
                                 RecipeCategory.MISC, Items.EMERALD, 0.7f, 100)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_EMERALD_ORE), has(PlanetBlocks.MARTIAN_EMERALD_ORE)),
-                new ResourceLocation("ait", "emerald_from_martian_blasted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "emerald_from_martian_blasted"));
 
                 // martian stones
                 provider.addShapelessRecipe(ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, PlanetBlocks.MARTIAN_STONE_BUTTON, 1)
@@ -501,7 +501,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_COBBLESTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_STONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_COBBLESTONE), has(PlanetBlocks.MARTIAN_COBBLESTONE)),
-                new ResourceLocation("ait", "martian_stone_from_martian_cobblestone_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "martian_stone_from_martian_cobblestone_smelted"));
                 // martian cobblestones
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_COBBLESTONE_WALL, 6)
                         .pattern("###")
@@ -538,7 +538,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_STONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_MARTIAN_STONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_STONE), has(PlanetBlocks.MARTIAN_STONE)),
-                new ResourceLocation("ait", "smooth_martian_stone_from_martian_stone_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "smooth_martian_stone_from_martian_stone_smelted"));
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.SMOOTH_MARTIAN_STONE_SLAB, 6)
                         .pattern("###")
                         .define('#', PlanetBlocks.SMOOTH_MARTIAN_STONE)
@@ -557,7 +557,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_SANDSTONE),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_SANDSTONE, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE), has(PlanetBlocks.MARTIAN_SANDSTONE)),
-                new ResourceLocation("ait", "cracked_martian_sandstone_from_martian_sandstone_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "cracked_martian_sandstone_from_martian_sandstone_smelted"));
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_SANDSTONE_WALL, 6)
                         .pattern("###")
                         .pattern("###")
@@ -602,7 +602,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_SANDSTONE_BRICKS, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS), has(PlanetBlocks.MARTIAN_SANDSTONE_BRICKS)),
-                new ResourceLocation("ait", "cracked_martian_sandstone_bricks_from_martian_sandstone_bricks_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "cracked_martian_sandstone_bricks_from_martian_sandstone_bricks_smelted"));
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CHISELED_MARTIAN_SANDSTONE, 1)
                         .pattern("#")
                         .pattern("#")
@@ -632,7 +632,7 @@ public class PlanetModule extends Module {
                 provider.addFurnaceRecipe(SimpleCookingRecipeBuilder.smelting(Ingredient.of(PlanetBlocks.MARTIAN_BRICKS),
                                 RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.CRACKED_MARTIAN_BRICKS, 0.7f, 200)
                         .unlockedBy(getHasName(PlanetBlocks.MARTIAN_BRICKS), has(PlanetBlocks.MARTIAN_BRICKS)),
-                new ResourceLocation("ait", "cracked_martian_bricks_from_martian_bricks_smelted"));
+                ResourceLocation.fromNamespaceAndPath("ait", "cracked_martian_bricks_from_martian_bricks_smelted"));
                 provider.addShapedRecipe(ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, PlanetBlocks.MARTIAN_PILLAR, 1)
                         .pattern("#")
                         .pattern("#")
@@ -951,7 +951,7 @@ public class PlanetModule extends Module {
                                 Component.translatable("achievements.ait.title.planet_root"),
                                 Component.translatable("achievements.ait.description.planet_root"),
                                 AITMod.id("textures/block/martian_stone.png"),
-                                FrameType.TASK,
+                                AdvancementType.TASK,
                                 false,
                                 false,
                                 false
@@ -965,7 +965,7 @@ public class PlanetModule extends Module {
                                 Component.translatable("achievements.ait.title.enter_mars"),
                                 Component.translatable("achievements.ait.description.enter_mars"),
                                 null,
-                                FrameType.TASK,
+                                AdvancementType.TASK,
                                 true,
                                 true,
                                 true
@@ -987,7 +987,7 @@ public class PlanetModule extends Module {
                                 Component.translatable("achievements.ait.title.enter_moon"),
                                 Component.translatable("achievements.ait.description.enter_moon"),
                                 null,
-                                FrameType.TASK,
+                                AdvancementType.TASK,
                                 true,
                                 true,
                                 true

@@ -13,9 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientRenegadeVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/renegade";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             CATEGORY_PATH + "/renegade.png");
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/renegade.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/renegade.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/renegade_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()

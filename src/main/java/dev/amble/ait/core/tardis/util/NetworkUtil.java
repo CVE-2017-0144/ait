@@ -8,7 +8,6 @@ import com.mojang.serialization.DataResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -27,6 +26,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
@@ -46,7 +46,7 @@ public class NetworkUtil {
         if (player == null)
             return;
 
-        ServerPlayNetworking.send(player, id, buf);
+        AitNetworking.send(player, id, buf);
     }
 
     public static <T> T receive(Codec<T> codec, FriendlyByteBuf buf) {

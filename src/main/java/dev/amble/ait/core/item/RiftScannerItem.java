@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.world.RiftChunkManager;
 import dev.amble.ait.core.world.TardisServerWorld;
 
@@ -52,17 +53,17 @@ public class RiftScannerItem extends Item {
         ChunkPos target = getTarget(stack);
         if (target == null || target.equals(ChunkPos.ZERO)) return;
 
-        boolean hasDinged = stack.getOrCreateTag().getBoolean(NBT_DINGED);
+        boolean hasDinged = ItemNbt.get(stack).getBoolean(NBT_DINGED);
 
         if (entity.chunkPosition().equals(target)) {
             if (!hasDinged) {
                 // Bling sound is kinda quiet so it should be set to about a volume of 3
                 world.playSound(null, entity.blockPosition(), AITSounds.TARDIS_BLING, SoundSource.PLAYERS, 3f, 1f);
-                stack.getOrCreateTag().putBoolean(NBT_DINGED, true);
+                ItemNbt.edit(stack, tag -> tag.putBoolean(NBT_DINGED, true));
             }
         } else {
             if (hasDinged) {
-                stack.getOrCreateTag().putBoolean(NBT_DINGED, false);
+                ItemNbt.edit(stack, tag -> tag.putBoolean(NBT_DINGED, false));
             }
         }
     }
@@ -103,14 +104,17 @@ public class RiftScannerItem extends Item {
     }
 
     private static void setTarget(ItemStack stack, ChunkPos pos) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putInt(NBT_X, pos.x);
+        ItemNbt.set(stack, nbt);
         nbt.putInt(NBT_Z, pos.z);
+        ItemNbt.set(stack, nbt);
         nbt.putBoolean(NBT_DINGED, false);
+        ItemNbt.set(stack, nbt);
     }
 
     public static ChunkPos getTarget(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         if (!(nbt.contains(NBT_X) && nbt.contains(NBT_Z)))
             return ChunkPos.ZERO;
         return new ChunkPos(nbt.getInt(NBT_X), nbt.getInt(NBT_Z));

@@ -42,7 +42,7 @@ public class AITModelProvider extends AmbleModelProvider {
     }
 
     private static ModelTemplate item(String modid, String parent, TextureSlot... requiredTextureKeys) {
-        return new ModelTemplate(Optional.of(new ResourceLocation(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
+        return new ModelTemplate(Optional.of(ResourceLocation.fromNamespaceAndPath(modid, "item/" + parent)), Optional.empty(), requiredTextureKeys);
     }
 
     private static ModelTemplate item(String parent, TextureSlot... requiredTextureKeys) {
@@ -133,7 +133,7 @@ public class AITModelProvider extends AmbleModelProvider {
     }
 
     private TextureMapping createTextureMap(Item item, String modid) {
-        ResourceLocation texture = new ResourceLocation(modid, "item/" + getItemName(item));
+        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(modid, "item/" + getItemName(item));
         if (!(doesTextureExist(texture))) {
             texture = AITMod.id("item/error");
         }

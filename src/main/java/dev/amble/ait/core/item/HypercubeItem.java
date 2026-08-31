@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.handler.distress.DistressCall;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class HypercubeItem extends Item {
 
@@ -74,8 +75,8 @@ public class HypercubeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         if (world == null) return;
 
@@ -90,14 +91,14 @@ public class HypercubeItem extends Item {
     }
 
     public static DistressCall getCall(ItemStack stack, int ticks) {
-        CompoundTag data = stack.getOrCreateTag();
+        CompoundTag data = ItemNbt.get(stack);
         if (!data.contains(DISTRESS_CALL_KEY)) return null;
 
         return DistressCall.fromNbt(data.getCompound(DISTRESS_CALL_KEY), ticks);
     }
 
     public static void setCall(ItemStack stack, DistressCall call) {
-        stack.getOrCreateTag().put(DISTRESS_CALL_KEY, call.toNbt());
+        ItemNbt.get(stack).put(DISTRESS_CALL_KEY, call.toNbt());
 
         stack.resetHoverName();
     }

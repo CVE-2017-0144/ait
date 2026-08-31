@@ -33,8 +33,8 @@ public class SantaHatModel extends EntityModel {
         return LayerDefinition.create(modelData, 64, 64);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        hat.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        hat.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

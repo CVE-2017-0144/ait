@@ -39,12 +39,12 @@ public abstract class GameRendererMixin {
         double realTargetFOV = Math.max((player.getMainHandItem().getItem() == GunItems.CULT_STASER_RIFLE ? 10 : 30), currentFOV - (player.getMainHandItem().getItem() == GunItems.CULT_STASER_RIFLE ? 70 : targetFOV));
         if (isADS(player)) {
             float speed = player.getMainHandItem().getItem() == GunItems.CULT_STASER_RIFLE ? 0.2f : 0.4f;
-            currentFOV = Mth.lerp(Math.min(speed * Minecraft.getInstance().getFrameTime(), speed), currentFOV, realTargetFOV);
+            currentFOV = Mth.lerp(Math.min(speed * Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), speed), currentFOV, realTargetFOV);
             goBackFOV = true;
             return currentFOV;
         }
         else if (goBackFOV && Math.abs(currentFOV - fov) > 0.00001) {
-            currentFOV = Mth.lerp(Math.min(0.95f * Minecraft.getInstance().getFrameTime(), 0.95f), currentFOV, fov);
+            currentFOV = Mth.lerp(Math.min(0.95f * Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), 0.95f), currentFOV, fov);
             return currentFOV;
         } else {
             currentFOV = fov;

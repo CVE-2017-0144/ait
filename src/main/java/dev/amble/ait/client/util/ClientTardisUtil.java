@@ -9,8 +9,6 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -26,6 +24,7 @@ import dev.amble.ait.api.tardis.TardisClientEvents;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisExterior;
 import dev.amble.ait.core.tardis.handler.SonicHandler;
@@ -67,11 +66,11 @@ public class ClientTardisUtil {
     }
 
     public static void changeExteriorWithScreen(UUID uuid, ResourceLocation variant, boolean variantchange) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeBoolean(variantchange);
         buf.writeResourceLocation(variant);
-        ClientPlayNetworking.send(TardisExterior.CHANGE_EXTERIOR, buf);
+        AitNetworking.send(TardisExterior.CHANGE_EXTERIOR, buf);
     }
 
     public static void changeExteriorWithScreen(ClientTardis tardis, ResourceLocation variant, boolean variantchange) {
@@ -79,11 +78,11 @@ public class ClientTardisUtil {
     }
 
     public static void changeSonicWithScreen(UUID uuid, SonicSchema schema, BlockPos consolePos) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeResourceLocation(schema.id());
         buf.writeBlockPos(consolePos);
-        ClientPlayNetworking.send(SonicHandler.CHANGE_SONIC, buf);
+        AitNetworking.send(SonicHandler.CHANGE_SONIC, buf);
     }
 
     public static void snapToOpenDoors(Tardis tardis) {
@@ -91,10 +90,10 @@ public class ClientTardisUtil {
     }
 
     public static void snapToOpenDoors(UUID uuid) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
 
-        ClientPlayNetworking.send(SNAP, buf);
+        AitNetworking.send(SNAP, buf);
     }
 
     public static void flyingSpeedPacket(Tardis tardis, String direction) {
@@ -102,11 +101,11 @@ public class ClientTardisUtil {
     }
 
     public static void flyingSpeedPacket(UUID uuid, String direction) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
         buf.writeUtf(direction);
 
-        ClientPlayNetworking.send(FLYING_SPEED, buf);
+        AitNetworking.send(FLYING_SPEED, buf);
     }
 
     public static void toggleAntigravs(Tardis tardis) {
@@ -114,10 +113,10 @@ public class ClientTardisUtil {
     }
 
     public static void toggleAntigravs(UUID uuid) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(uuid);
 
-        ClientPlayNetworking.send(TOGGLE_ANTIGRAVS, buf);
+        AitNetworking.send(TOGGLE_ANTIGRAVS, buf);
     }
 
     public static boolean isPlayerInATardis() {

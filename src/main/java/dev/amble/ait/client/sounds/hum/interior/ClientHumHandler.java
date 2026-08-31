@@ -3,8 +3,6 @@ package dev.amble.ait.client.sounds.hum.interior;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,6 +18,7 @@ import dev.amble.ait.client.sounds.PlayerFollowingLoopingSound;
 import dev.amble.ait.client.sounds.SoundHandler;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.handler.ServerHumHandler;
 import dev.amble.ait.data.hum.Hum;
 import dev.amble.ait.registry.impl.HumRegistry;
@@ -47,7 +46,7 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     protected ClientHumHandler() {
-        ClientPlayNetworking.registerGlobalReceiver(ServerHumHandler.SEND, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(ServerHumHandler.SEND, (client, handler, buf, responseSender) -> {
             ResourceLocation id = buf.readResourceLocation();
             SoundInstance sound = findSoundById(id);
 
@@ -85,11 +84,11 @@ public class ClientHumHandler extends SoundHandler {
     }
 
     public void setServersHum(ClientTardis tardis, Hum hum) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(tardis.getUuid());
         buf.writeResourceLocation(hum.id());
 
-        ClientPlayNetworking.send(ServerHumHandler.RECEIVE, buf);
+        AitNetworking.send(ServerHumHandler.RECEIVE, buf);
     }
 
     public static ClientHumHandler create() {

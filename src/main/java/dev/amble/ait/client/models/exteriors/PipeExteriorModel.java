@@ -32,10 +32,10 @@ public class PipeExteriorModel extends SimpleExteriorModel {
         return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(180f));
-        tardis.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        tardis.render(matrices, vertexConsumer, light, overlay, color);
         matrices.popPose();
     }
 

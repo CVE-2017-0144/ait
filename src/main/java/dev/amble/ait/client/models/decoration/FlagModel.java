@@ -38,8 +38,8 @@ public class FlagModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 64, 64);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        flag.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        flag.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

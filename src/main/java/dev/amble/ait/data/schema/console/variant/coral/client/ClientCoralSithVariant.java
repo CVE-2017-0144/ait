@@ -9,9 +9,9 @@ import dev.amble.ait.data.schema.console.variant.coral.CoralSithVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientCoralSithVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_sith.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_sith_emission.png"));
 
     public ClientCoralSithVariant() {

@@ -5,6 +5,7 @@ import com.mojang.serialization.Dynamic;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -26,7 +27,7 @@ import dev.amble.ait.core.blocks.MatrixEnergizerBlock;
 
 public class MatrixEnergizerBlockEntity
         extends BlockEntity
-        implements GameEventListener.Holder<VibrationSystem.Listener>,
+        implements GameEventListener.Provider<VibrationSystem.Listener>,
         VibrationSystem {
     private static final Logger LOGGER = LogUtils.getLogger();
     private VibrationSystem.Data listenerData;
@@ -49,8 +50,8 @@ public class MatrixEnergizerBlockEntity
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         this.lastVibrationFrequency = nbt.getInt("last_vibration_frequency");
         if (nbt.contains("listener", Tag.TAG_COMPOUND)) {
             VibrationSystem.Data.CODEC.parse(new Dynamic<>(
@@ -62,8 +63,8 @@ public class MatrixEnergizerBlockEntity
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         nbt.putInt("last_vibration_frequency", this.lastVibrationFrequency);
         VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.listenerData)
                 .resultOrPartial(LOGGER::error).ifPresent(listenerNbt -> nbt.put("listener", listenerNbt));

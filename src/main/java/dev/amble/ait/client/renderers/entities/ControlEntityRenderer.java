@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -114,25 +115,15 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
         matrices.scale(0.4f, 0.4f, 0.4f);
         matrices.mulPose(Axis.XN.rotationDegrees(180f));
         matrices.translate(0, (-2 - entity.getControlHeight() / 2) + entity.level().random.nextFloat() * 0.02, 0);
-        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getFrameTime() % 180));
+        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) % 180));
 
         float alpha = entity.level().random.nextInt(32) != 6 ? 0.4f : 0.05f;
         float red = entity.wasSequenced() ? 0.0f : 1.0f;
         float green = (entity.wasSequenced()) ? 1.0f : 1 - (entity.getSequencePercentage());
 
-        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light,
-                OverlayTexture.NO_OVERLAY,
-                red,
-                green,
-                0,
-                alpha);
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, red, green, 0));
 
-        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.eyes(TEXTURE)), 0xFF00F0,
-                OverlayTexture.NO_OVERLAY,
-                red,
-                green,
-                0,
-                alpha);
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.eyes(TEXTURE)), 0xFF00F0, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, red, green, 0));
 
         matrices.popPose();
     }

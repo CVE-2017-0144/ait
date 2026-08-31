@@ -32,7 +32,7 @@ public class StaserBoltEntityRenderer
         matrices.mulPose(Axis.YP.rotationDegrees(entity.getYRot()));
         matrices.mulPose(Axis.XN.rotationDegrees(entity.getXRot()));
         matrices.translate(0, -1.125f, 0);
-        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         matrices.popPose();
     }
 

@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -99,8 +100,8 @@ public class StallionExteriorModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        body.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        body.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class StallionExteriorModel extends SimpleExteriorModel {
             matrices.pushPose();
             matrices.scale(0.95f, 0.95f, 0.95f);
             matrices.translate(10, 10f, -1);
-            body.getChild("door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+            body.getChild("door").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
 

@@ -15,6 +15,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -65,7 +66,7 @@ public class ItemRendererMixin {
         riftScannerModel.setAngles(matrices, renderMode, leftHanded);
 
         ClientLevel clientWorld = world instanceof ClientLevel ? (ClientLevel) world : null;
-        riftScannerModel.render(clientWorld, entity, stack, matrices, vertexConsumers, light, overlay, seed);
+        riftScannerModel.render(clientWorld, entity, stack, matrices, FastColor.ARGB32.colorFromFloat(seed, vertexConsumers, light, overlay));
 
         matrices.popPose();
         ci.cancel();
@@ -84,7 +85,7 @@ public class ItemRendererMixin {
         handlesModel.setAngles(matrices, renderMode, leftHanded);
 
         ClientLevel clientWorld = world instanceof ClientLevel ? (ClientLevel) world : null;
-        handlesModel.render(clientWorld, entity, stack, matrices, vertexConsumers, light, overlay, seed);
+        handlesModel.render(clientWorld, entity, stack, matrices, FastColor.ARGB32.colorFromFloat(seed, vertexConsumers, light, overlay));
 
         matrices.popPose();
         ci.cancel();

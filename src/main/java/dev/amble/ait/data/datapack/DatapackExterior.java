@@ -30,7 +30,7 @@ import dev.amble.lib.client.bedrock.BedrockAnimationReference;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class DatapackExterior extends ExteriorVariantSchema implements AnimatedDoor, TravelAnimationMap.Holder {
 
-    public static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DEFAULT_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/desktop/missing_preview.png");
 
     public static final Codec<DatapackExterior> CODEC = RecordCodecBuilder.create(instance -> instance

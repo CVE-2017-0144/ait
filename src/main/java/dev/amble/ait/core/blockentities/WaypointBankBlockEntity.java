@@ -3,6 +3,7 @@ package dev.amble.ait.core.blockentities;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -14,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,6 +27,7 @@ import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blocks.WaypointBankBlock;
 import dev.amble.ait.core.item.WaypointItem;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.util.StackUtil;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
@@ -136,8 +137,8 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         ListTag waypoints = nbt.getList("waypoints", Tag.TAG_COMPOUND);
 
@@ -149,8 +150,8 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         ListTag waypoints = new ListTag();
 
@@ -192,10 +193,10 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
         }
 
         public static WaypointData fromStack(ItemStack stack) {
-            if (!stack.getOrCreateTag().contains(WaypointItem.POS_KEY))
+            if (!ItemNbt.get(stack).contains(WaypointItem.POS_KEY))
                 return null;
 
-            int color = ((DyeableLeatherItem) AITItems.WAYPOINT_CARTRIDGE).getColor(stack);
+            int color = WaypointItem.getColor(stack);
             Waypoint waypoint = Waypoint.fromStack(stack);
 
             return new WaypointData(color, waypoint);
@@ -208,7 +209,7 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
             result.setHoverName(Component.literal(this.name));
 
             if (this.color != WaypointItem.DEFAULT_LEATHER_COLOR)
-                ((DyeableLeatherItem) AITItems.WAYPOINT_CARTRIDGE).setColor(result, this.color);
+                WaypointItem.setColor(result, this.color);
 
             return result;
         }

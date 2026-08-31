@@ -22,7 +22,7 @@ public class Blueprint {
     }
 
     public Blueprint(CompoundTag nbt) {
-        this(BlueprintRegistry.getInstance().get(new ResourceLocation(nbt.getString("id"))));
+        this(BlueprintRegistry.getInstance().get(ResourceLocation.parse(nbt.getString("id"))));
 
         this.requirements.clear();
         this.fromNbt(nbt);

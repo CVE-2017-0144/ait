@@ -26,23 +26,11 @@ public class PlushieDynamicItemRenderer implements BuiltinItemRendererRegistry.D
             matrices.translate(0.5D, 0.0D, 0.5D);
             matrices.mulPose(Axis.XP.rotationDegrees(180F));
 
-            model.renderToBuffer(
-                    matrices,
-                    vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(plushieBlock.getTexture())),
-                    light,
-                    overlay,
-                    1.0f, 1.0f, 1.0f, 1.0f
-            );
+            model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(plushieBlock.getTexture())), light, overlay, 0xFFFFFFFF);
 
             ResourceLocation emission = plushieBlock.getEmissionTexture();
             if (emission != null) {
-                model.renderToBuffer(
-                        matrices,
-                        vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)),
-                        LightTexture.FULL_BRIGHT,
-                        overlay,
-                        1.0f, 1.0f, 1.0f, 1.0f
-                );
+                model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)), LightTexture.FULL_BRIGHT, overlay, 0xFFFFFFFF);
             }
 
             matrices.popPose();

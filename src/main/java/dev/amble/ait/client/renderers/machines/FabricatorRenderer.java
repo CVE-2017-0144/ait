@@ -26,7 +26,7 @@ import dev.amble.ait.core.item.blueprint.Blueprint;
 public class FabricatorRenderer<T extends FabricatorBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation FABRICATOR_TEXTURE = AITMod.id("textures/block/fabricator.png");
-    public static final ResourceLocation EMISSIVE_FABRICATOR_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSIVE_FABRICATOR_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/block/fabricator_emission.png");
     private final FabricatorModel fabricatorModel;
 
@@ -47,14 +47,10 @@ public class FabricatorRenderer<T extends FabricatorBlockEntity> implements Bloc
         matrices.mulPose(Axis.YP
                 .rotationDegrees(entity.getBlockState().getValue(FabricatorBlock.FACING).toYRot()));
 
-        this.fabricatorModel.renderToBuffer(matrices,
-                vertexConsumers.getBuffer(RenderType.entityTranslucent(FABRICATOR_TEXTURE)), light, overlay, 1.0F,
-                1.0F, 1.0F, 1.0F);
+        this.fabricatorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(FABRICATOR_TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         if (entity.isValid()) {
-            this.fabricatorModel.renderToBuffer(matrices,
-                    vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(EMISSIVE_FABRICATOR_TEXTURE, true)), 0xf000f0, overlay, 1.0F,
-                    1.0F, 1.0F, 1.0F);
+            this.fabricatorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(EMISSIVE_FABRICATOR_TEXTURE, true)), 0xf000f0, overlay, 0xFFFFFFFF);
         }
 
         matrices.popPose();

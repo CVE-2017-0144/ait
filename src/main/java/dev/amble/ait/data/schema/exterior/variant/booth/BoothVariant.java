@@ -16,7 +16,7 @@ public abstract class BoothVariant extends ExteriorVariantSchema {
     protected static final String TEXTURE_PATH = "textures/blockentities/exteriors/booth/booth_";
 
     protected BoothVariant(String name, String modId) { // idk why i added the modid bit i dont use it later lol
-        super(BoothCategory.REFERENCE, new ResourceLocation(modId, "exterior/booth/" + name),
+        super(BoothCategory.REFERENCE, ResourceLocation.fromNamespaceAndPath(modId, "exterior/booth/" + name),
                 new Loyalty(Loyalty.Type.PILOT));
     }
 

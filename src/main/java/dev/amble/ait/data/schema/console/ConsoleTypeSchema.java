@@ -76,7 +76,7 @@ public abstract class ConsoleTypeSchema implements Identifiable, Nameable {
             ResourceLocation id;
 
             try {
-                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+                id = ResourceLocation.parse(json.getAsJsonPrimitive().getAsString());
             } catch (ResourceLocationException e) {
                 id = CapsuleCategory.REFERENCE;
             }

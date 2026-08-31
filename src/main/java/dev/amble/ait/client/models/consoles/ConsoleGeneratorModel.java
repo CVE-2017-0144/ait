@@ -361,11 +361,10 @@ public class ConsoleGeneratorModel extends HierarchicalModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
 
-        bone7.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        bone7.render(matrices, vertexConsumer, light, overlay, color);
 
         matrices.popPose();
     }

@@ -1,7 +1,5 @@
 package dev.amble.ait.client.screens;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,11 +14,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.data.ClientLandingManager;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.landing.LandingPadRegion;
 
 public class LandingPadScreen extends Screen {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/landing_marker_gui.png");
     private final BlockPos pos;
     private final LandingPadRegion landingRegion;
@@ -82,13 +81,13 @@ public class LandingPadScreen extends Screen {
     }
 
     private void updateLandingCode() {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         if (this.pos == null) return;
 
         buf.writeBlockPos(this.pos);
         buf.writeUtf(this.landingCodeInput.getValue());
 
-        ClientPlayNetworking.send(TardisUtil.REGION_LANDING_CODE, buf);
+        AitNetworking.send(TardisUtil.REGION_LANDING_CODE, buf);
     }
 
     private <T extends AbstractWidget> void addButton(T button) {

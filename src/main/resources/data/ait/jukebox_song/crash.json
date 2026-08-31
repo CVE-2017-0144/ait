@@ -1,0 +1,8 @@
+{
+  "sound_event": "ait:tardis/arpalarm_mono",
+  "description": {
+    "translate": "jukebox_song.ait.crash"
+  },
+  "length_in_seconds": 69.0,
+  "comparator_output": 1
+}

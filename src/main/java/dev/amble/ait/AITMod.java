@@ -11,14 +11,11 @@ import dev.drtheo.multidim.MultiDim;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
@@ -71,6 +68,7 @@ import dev.amble.ait.core.item.part.MachineItem;
 import dev.amble.ait.core.likes.ItemOpinionRegistry;
 import dev.amble.ait.core.lock.LockedDimensionRegistry;
 import dev.amble.ait.core.loot.SetBlueprintLootFunction;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.sounds.flight.FlightSoundRegistry;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.animation.v2.blockbench.BlockbenchParser;
@@ -116,7 +114,7 @@ public class AITMod implements ModInitializer {
 
 
     public static final ResourceKey<PlacedFeature> CUSTOM_GEODE_PLACED_KEY = ResourceKey.create(Registries.PLACED_FEATURE,
-            new ResourceLocation(MOD_ID, "zeiton_geode"));
+            ResourceLocation.fromNamespaceAndPath(MOD_ID, "zeiton_geode"));
 
     // This DefaultParticleType gets called when you want to use your particle in code.
     public static final SimpleParticleType CORAL_PARTICLE = FabricParticleTypes.simple();
@@ -214,7 +212,7 @@ public class AITMod implements ModInitializer {
 
         BlueprintRegistry.BLUEPRINT_TYPE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE,
                 AITMod.id("set_blueprint"),
-                new LootItemFunctionType(new SetBlueprintLootFunction.Serializer()));
+                new LootItemFunctionType<>(SetBlueprintLootFunction.CODEC));
 
         WorldUtil.init();
         TardisUtil.init();
@@ -263,7 +261,7 @@ public class AITMod implements ModInitializer {
             SetDoorParticleCommand.register(dispatcher, registryAccess);
         }));
 
-        ServerPlayNetworking.registerGlobalReceiver(TardisUtil.REGION_LANDING_CODE,
+        AitNetworking.registerServerReceiver(TardisUtil.REGION_LANDING_CODE,
                 (server, player, handler, buf, responseSender) -> {
                     BlockPos pos = buf.readBlockPos();
                     String landingCode = buf.readUtf();
@@ -280,7 +278,7 @@ public class AITMod implements ModInitializer {
                     });
                 });
 
-        ServerPlayNetworking.registerGlobalReceiver(MachineItem.MACHINE_DISASSEMBLE,
+        AitNetworking.registerServerReceiver(MachineItem.MACHINE_DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
                     ItemStack machine = buf.readItem();
 
@@ -297,7 +295,7 @@ public class AITMod implements ModInitializer {
                     });
                 });
 
-        ServerPlayNetworking.registerGlobalReceiver(AbstractTardisPart.DISASSEMBLE,
+        AitNetworking.registerServerReceiver(AbstractTardisPart.DISASSEMBLE,
                 (server, player, handler, buf, responseSender) -> {
                     ItemStack machine = buf.readItem();
 
@@ -314,7 +312,7 @@ public class AITMod implements ModInitializer {
                     });
                 });
 
-        ServerPlayNetworking.registerGlobalReceiver(TOGGLE_PROJECTOR, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(TOGGLE_PROJECTOR, (server, player, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             boolean enabled = buf.readBoolean();
 
@@ -331,7 +329,7 @@ public class AITMod implements ModInitializer {
             });
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(PROJECTOR_SELECTION, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(PROJECTOR_SELECTION, (server, player, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             ResourceLocation id = buf.readResourceLocation();
             server.execute(() -> {
@@ -343,7 +341,7 @@ public class AITMod implements ModInitializer {
             });
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(PROJECTOR_ANGLES, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(PROJECTOR_ANGLES, (server, player, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             float yaw = buf.readFloat();
             float pitch = buf.readFloat();
@@ -421,33 +419,33 @@ public class AITMod implements ModInitializer {
     public static final ResourceLocation OPEN_SCREEN_CONSOLE = AITMod.id("open_screen_console");
     public static final ResourceLocation OPEN_SCREEN_PROJECTOR = AITMod.id("open_screen_projector");
     public static final ResourceLocation TOGGLE_PROJECTOR = AITMod.id("toggle_projector");
-    public static final ResourceLocation PROJECTOR_SELECTION = new ResourceLocation(MOD_ID, "projector_selection");
-    public static final ResourceLocation PROJECTOR_ANGLES = new ResourceLocation(MOD_ID, "projector_angles");
+    public static final ResourceLocation PROJECTOR_SELECTION = ResourceLocation.fromNamespaceAndPath(MOD_ID, "projector_selection");
+    public static final ResourceLocation PROJECTOR_ANGLES = ResourceLocation.fromNamespaceAndPath(MOD_ID, "projector_angles");
 
     public static void openScreen(ServerPlayer player, int id) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
-        ServerPlayNetworking.send(player, OPEN_SCREEN, buf);
+        AitNetworking.send(player, OPEN_SCREEN, buf);
     }
 
     public static void openScreen(ServerPlayer player, int id, UUID tardis) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeUUID(tardis);
-        ServerPlayNetworking.send(player, OPEN_SCREEN_TARDIS, buf);
+        AitNetworking.send(player, OPEN_SCREEN_TARDIS, buf);
     }
 
     public static void openScreen(ServerPlayer player, int id, UUID tardis, BlockPos console) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeUUID(tardis);
         buf.writeBlockPos(console);
 
-        ServerPlayNetworking.send(player, OPEN_SCREEN_CONSOLE, buf);
+        AitNetworking.send(player, OPEN_SCREEN_CONSOLE, buf);
     }
 
     public static void openScreen(ServerPlayer player, int id, BlockPos console) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(id);
         buf.writeBlockPos(console);
 
@@ -456,33 +454,33 @@ public class AITMod implements ModInitializer {
         for (ServerLevel world : worlds)
             buf.writeResourceLocation(world.dimension().location());
 
-        ServerPlayNetworking.send(player, OPEN_SCREEN_PROJECTOR, buf);
+        AitNetworking.send(player, OPEN_SCREEN_PROJECTOR, buf);
     }
 
 
     public static void sendProjectorToggle(BlockPos pos, boolean enabled) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeBoolean(enabled);
-        ClientPlayNetworking.send(TOGGLE_PROJECTOR, buf);
+        AitNetworking.send(TOGGLE_PROJECTOR, buf);
     }
 
     public static void sendProjectorSelection(BlockPos pos, ResourceLocation worldId) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeResourceLocation(worldId);
-        ClientPlayNetworking.send(PROJECTOR_SELECTION, buf);
+        AitNetworking.send(PROJECTOR_SELECTION, buf);
     }
 
     public static void sendProjectorAngles(BlockPos pos, float yaw, float pitch) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBlockPos(pos);
         buf.writeFloat(yaw);
         buf.writeFloat(pitch);
-        ClientPlayNetworking.send(PROJECTOR_ANGLES, buf);
+        AitNetworking.send(PROJECTOR_ANGLES, buf);
     }
 
     public static ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 }

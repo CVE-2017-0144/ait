@@ -94,14 +94,14 @@ public class HandlesModel extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        handles.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        handles.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     public void render(@Nullable ClientLevel world, @Nullable LivingEntity entity, ItemStack stack, PoseStack matrices, MultiBufferSource provider, int light, int overlay, int seed) {
-        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(TEXTURE)), light, overlay, 1, 1, 1, 1);
-        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutoutNoCullZOffset(EMISSION)), 0xf000f0, overlay, 1, 1, 1, 1);
+        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(TEXTURE)), light, overlay, 0xFFFFFFFF);
+        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutoutNoCullZOffset(EMISSION)), 0xf000f0, overlay, 0xFFFFFFFF);
         if (entity instanceof Player player && player.isShiftKeyDown())
-            this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutoutNoCullZOffset(MOUTH)), 0xf000f0, overlay, 1, 1, 1, 1);
+            this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutoutNoCullZOffset(MOUTH)), 0xf000f0, overlay, 0xFFFFFFFF);
     }
 }

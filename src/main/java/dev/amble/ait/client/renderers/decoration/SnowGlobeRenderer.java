@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockEntityRenderer<T> {
-    public static final ResourceLocation SNOW_GLOBE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation SNOW_GLOBE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/decoration/advent/snow_globe.png");
 
     public static final SnowGlobeModel model = new SnowGlobeModel(SnowGlobeModel.getTexturedModelData().bakeRoot());
@@ -32,7 +32,7 @@ public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockE
         matrices.mulPose(Axis.XP.rotationDegrees(180));
         float k = entity.getBlockState().getValue(SnowGlobeBlock.FACING).toYRot();
         matrices.mulPose(Axis.YP.rotationDegrees(k));
-        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(SNOW_GLOBE_TEXTURE)), light, overlay, 1, 1, 1, 1);
+        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(SNOW_GLOBE_TEXTURE)), light, overlay, 0xFFFFFFFF);
         matrices.pushPose();
         matrices.translate(0.17, 1.17, -0.2);
         matrices.mulPose(Axis.YP.rotationDegrees(225f));
@@ -40,9 +40,9 @@ public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockE
         ClientExteriorVariantSchema schema = ClientExteriorVariantRegistry.BOX_DEFAULT;
         ExteriorModel model = schema.model();
 
-        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityTranslucentCull(schema.texture())), light, overlay, 1, 1, 1, 1);
-        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(schema.emission(), true)), 0xf000f0, overlay, 1, 1, 1, 1);
-        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutoutNoCullZOffset(schema.overrides().get(BiomeHandler.BiomeType.SNOWY), false)), light, overlay, 1, 1, 1, 1);
+        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityTranslucentCull(schema.texture())), light, overlay, 0xFFFFFFFF);
+        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(schema.emission(), true)), 0xf000f0, overlay, 0xFFFFFFFF);
+        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutoutNoCullZOffset(schema.overrides().get(BiomeHandler.BiomeType.SNOWY), false)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
         matrices.popPose();

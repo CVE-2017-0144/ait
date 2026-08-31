@@ -48,23 +48,11 @@ public class MarketablePlushieRenderer<T extends MarketablePlushieBlockEntity> e
 
         model.setAngles(entity, entity.getAge() + tickDelta);
 
-        model.renderToBuffer(
-                matrices,
-                vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(getTexture(entity))),
-                light,
-                overlay,
-                1.0f, 1.0f, 1.0f, 1.0f
-        );
+        model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(getTexture(entity))), light, overlay, 0xFFFFFFFF);
 
         ResourceLocation emission = entity.getEmissionTexture();
         if (emission != null) {
-            model.renderToBuffer(
-                    matrices,
-                    vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)),
-                    LightTexture.FULL_BRIGHT,
-                    overlay,
-                    1.0f, 1.0f, 1.0f, 1.0f
-            );
+            model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCullZOffset(emission)), LightTexture.FULL_BRIGHT, overlay, 0xFFFFFFFF);
         }
 
         matrices.popPose();

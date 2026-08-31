@@ -1,16 +1,13 @@
 package dev.amble.lib.animation;
 
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
-import dev.amble.lib.client.bedrock.BedrockAnimationRegistry;
 import dev.amble.lib.util.ServerLifecycleHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -43,7 +40,7 @@ public class AnimationTracker {
 			getInstance().clear();
 		});
 
-		ClientPlayNetworking.registerGlobalReceiver(SYNC_KEY, ((client, handler, buf, responseSender) -> {
+		AitNetworking.registerClientReceiver(SYNC_KEY, ((client, handler, buf, responseSender) -> {
 			getInstance().receive(buf);
 		}));
 
@@ -94,7 +91,7 @@ public class AnimationTracker {
 	}
 
 	private FriendlyByteBuf toBuf(Map<UUID, BedrockAnimationReference> map) {
-		FriendlyByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(map.size());
 		for (Map.Entry<UUID, BedrockAnimationReference> entry : map.entrySet()) {
@@ -110,7 +107,7 @@ public class AnimationTracker {
 	}
 
 	private FriendlyByteBuf toBuf(UUID id, BedrockAnimationReference animation) {
-		FriendlyByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(1);
 		buf.writeUUID(id);
@@ -120,7 +117,7 @@ public class AnimationTracker {
 	}
 
 	private FriendlyByteBuf toRemovalBuf(UUID id) {
-		FriendlyByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(-1);
 		buf.writeUUID(id);
@@ -159,6 +156,6 @@ public class AnimationTracker {
 	}
 
 	private void sync(FriendlyByteBuf buf, ServerPlayer player) {
-		ServerPlayNetworking.send(player, SYNC_KEY, buf);
+		AitNetworking.send(player, SYNC_KEY, buf);
 	}
 }

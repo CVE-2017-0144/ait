@@ -142,7 +142,7 @@ public class AITModDataGenerator implements DataGeneratorEntrypoint {
             provider.addBlastFurnaceRecipe(SimpleCookingRecipeBuilder.blasting(Ingredient.of(AITItems.ZEITON_SHARD),
                             RecipeCategory.MISC, AITItems.SUPERHEATED_ZEITON, 0.2f, 500)
                     .unlockedBy(getHasName(AITItems.ZEITON_SHARD), has(AITItems.ZEITON_SHARD)),
-            new ResourceLocation("ait", "superheated_zeiton_from_zeiton_shard_blasting"));
+            ResourceLocation.fromNamespaceAndPath("ait", "superheated_zeiton_from_zeiton_shard_blasting"));
 
             provider.addShapedRecipe(
                     ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, AITBlocks.ZEITON_BLOCK, 1)

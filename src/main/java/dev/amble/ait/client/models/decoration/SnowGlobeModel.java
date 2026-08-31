@@ -37,8 +37,8 @@ public class SnowGlobeModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        group.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        group.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

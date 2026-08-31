@@ -5,8 +5,6 @@ import static dev.amble.ait.core.engine.SubSystem.Id.GRAVITATIONAL;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -23,6 +21,7 @@ import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.impl.GravitationalCircuit;
 import dev.amble.ait.core.entities.FallingTardisEntity;
 import dev.amble.ait.core.entities.FlightTardisEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.properties.bool.BoolProperty;
 import dev.amble.ait.data.properties.bool.BoolValue;
@@ -121,7 +120,7 @@ public class RealFlightHandler extends KeyedTardisComponent implements TardisTic
 
     private void sendEnterFlightPacket(ServerPlayer player) {
         if (!AITMod.CONFIG.rwfEnabled) return;
-        ServerPlayNetworking.send(player, ENTER_FLIGHT, PacketByteBufs.create());
+        AitNetworking.send(player, ENTER_FLIGHT, AitNetworking.buf());
   }
 
     public void exitFlight(ServerPlayer player) {
@@ -138,7 +137,7 @@ public class RealFlightHandler extends KeyedTardisComponent implements TardisTic
     }
 
     private void sendExitFlightPacket(ServerPlayer player) {
-        ServerPlayNetworking.send(player, EXIT_FLIGHT, PacketByteBufs.create());
+        AitNetworking.send(player, EXIT_FLIGHT, AitNetworking.buf());
     }
 
     public BoolValue falling() {

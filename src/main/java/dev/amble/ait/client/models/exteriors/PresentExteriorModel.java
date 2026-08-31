@@ -10,6 +10,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -39,8 +40,8 @@ public class PresentExteriorModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        present.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        present.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
@@ -104,8 +105,8 @@ public class PresentExteriorModel extends SimpleExteriorModel {
         if (isBOTI) {
             matrices.pushPose();
             matrices.translate(0, -1.5f, -3);
-            this.present.getChild("left_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
-            this.present.getChild("right_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+            this.present.getChild("left_door").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
+            this.present.getChild("right_door").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
     }

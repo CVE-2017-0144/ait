@@ -1,8 +1,7 @@
 package dev.amble.ait.core.tardis.handler;
 
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +17,7 @@ public class ServerHumHandler extends TardisComponent {
     private Hum current;
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(ServerHumHandler.RECEIVE,
+        AitNetworking.registerServerReceiver(ServerHumHandler.RECEIVE,
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     if (tardis == null) return;
 
@@ -50,11 +49,11 @@ public class ServerHumHandler extends TardisComponent {
     }
 
     private void updateClientHum() {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeResourceLocation(this.current.sound().getLocation());
 
         for (ServerPlayer player : this.tardis.asServer().world().players()) {
-            ServerPlayNetworking.send(player, SEND, buf);
+            AitNetworking.send(player, SEND, buf);
         }
     }
 }

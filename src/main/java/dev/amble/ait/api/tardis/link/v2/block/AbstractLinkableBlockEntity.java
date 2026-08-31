@@ -2,6 +2,7 @@ package dev.amble.ait.api.tardis.link.v2.block;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
@@ -34,16 +35,16 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (this.ref != null && this.ref.getId() != null)
             nbt.putUUID("tardis", this.ref.getId());
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         Tag id = nbt.get("tardis");
 
@@ -103,7 +104,7 @@ public abstract class AbstractLinkableBlockEntity extends BlockEntity implements
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         if (this.isLinked())
             this.mark();
 

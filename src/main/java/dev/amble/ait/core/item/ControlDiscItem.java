@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.item.sonic.SonicMode;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
@@ -62,22 +64,23 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
     }
 
     public static boolean canContainPlayers(ItemStack stack) {
-        CompoundTag main = stack.getOrCreateTag();
+        CompoundTag main = ItemNbt.get(stack);
         if (!main.contains(CAN_CONTAIN_PLAYERS))
             return false;
         return main.getBoolean(CAN_CONTAIN_PLAYERS);
     }
 
     public static void setCanContainPlayers(ItemStack stack, boolean canContainPlayers) {
-        CompoundTag main = stack.getOrCreateTag();
+        CompoundTag main = ItemNbt.get(stack);
         main.putBoolean(CAN_CONTAIN_PLAYERS, canContainPlayers);
+        ItemNbt.set(stack, main);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
-        CompoundTag main = stack.getOrCreateTag();
+        CompoundTag main = ItemNbt.get(stack);
         if (!main.contains(CAN_CONTAIN_PLAYERS))
             return;
         boolean canContainPlayers = main.getBoolean(CAN_CONTAIN_PLAYERS);

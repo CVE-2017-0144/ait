@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class AITDecorationItem extends Item {
     private final EntityType<? extends HangingEntity> entityType;
@@ -59,7 +60,7 @@ public class AITDecorationItem extends Item {
 
             BOTIPaintingEntity paintingEntity = optional.get();
 
-            CompoundTag nbtData = itemStack.getTag();
+            CompoundTag nbtData = ItemNbt.getNullable(itemStack);
             if (nbtData != null) {
                 EntityType.updateCustomEntityTag(world, player, paintingEntity, nbtData);
             }
@@ -83,8 +84,8 @@ public class AITDecorationItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
 
         if (stack.getItem() == AITItems.GALLIFREY_FALLS_PAINTING) {

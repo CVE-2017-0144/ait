@@ -19,6 +19,7 @@ import dev.amble.lib.register.datapack.DatapackRegistry;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.FastColor;
 
 public class ClientDoorRegistry extends DatapackRegistry<ClientDoorSchema> {
     private static final ClientDoorRegistry INSTANCE = new ClientDoorRegistry();
@@ -138,7 +139,7 @@ public class ClientDoorRegistry extends DatapackRegistry<ClientDoorSchema> {
                             this.root().getAllParts().forEach(ModelPart::resetPose);
                             animDoor.runAnimations(root, matrices, tickDelta, tardis);
                         }
-                        root.render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+                        root.render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
 
                         matrices.popPose();
                     }

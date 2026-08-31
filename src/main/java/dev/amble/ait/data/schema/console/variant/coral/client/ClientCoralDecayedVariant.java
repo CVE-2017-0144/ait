@@ -9,9 +9,9 @@ import dev.amble.ait.data.schema.console.variant.coral.CoralDecayedVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientCoralDecayedVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_decayed.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_decayed_emission.png"));
 
     public ClientCoralDecayedVariant() {

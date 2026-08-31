@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientGeometricVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/geometric";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/geometric.png");
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/geometric.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/geometric.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/geometric.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/geometric_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()

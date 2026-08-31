@@ -39,7 +39,7 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 
 public class SaveLoadInteriorScreen extends ConsoleScreen {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/security_menu.png");
     private final List<Button> buttons = Lists.newArrayList();
     int bgHeight = 138;

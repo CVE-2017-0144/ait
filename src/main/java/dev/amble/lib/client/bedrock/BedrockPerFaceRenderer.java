@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.FastColor;
 
 public final class BedrockPerFaceRenderer {
 
@@ -46,7 +47,7 @@ public final class BedrockPerFaceRenderer {
 
             PoseStack.Pose entry = matrices.last();
             for (BedrockPerFaceQuad q : buildQuads(cube, textureWidth, textureHeight)) {
-                q.render(entry, vertices, light, overlay, red, green, blue, alpha);
+                q.render(entry, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
             }
 
             matrices.popPose();

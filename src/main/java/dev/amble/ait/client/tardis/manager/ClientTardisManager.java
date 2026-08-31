@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -21,6 +20,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
 import dev.amble.ait.data.Exclude;
@@ -42,14 +42,14 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
     }
 
     private ClientTardisManager() {
-        ClientPlayNetworking.registerGlobalReceiver(SEND, (client, handler, buf, responseSender) -> this.syncTardis(buf));
+        AitNetworking.registerClientReceiver(SEND, (client, handler, buf, responseSender) -> this.syncTardis(buf));
 
-        ClientPlayNetworking.registerGlobalReceiver(SEND_BULK,
+        AitNetworking.registerClientReceiver(SEND_BULK,
                 (client, handler, buf, responseSender) -> this.syncBulk(buf));
 
-        ClientPlayNetworking.registerGlobalReceiver(REMOVE, (client, handler, buf, responseSender) -> this.remove(buf));
+        AitNetworking.registerClientReceiver(REMOVE, (client, handler, buf, responseSender) -> this.remove(buf));
 
-        ClientPlayNetworking.registerGlobalReceiver(SEND_COMPONENT, (client, handler, buf, responseSender) -> this.syncDelta(buf));
+        AitNetworking.registerClientReceiver(SEND_COMPONENT, (client, handler, buf, responseSender) -> this.syncDelta(buf));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null || client.level == null)

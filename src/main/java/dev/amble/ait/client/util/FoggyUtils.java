@@ -38,8 +38,8 @@ public class FoggyUtils {
                     }
                     stack.popPose();
                     RenderSystem
-                            .setShaderFogStart(Mth.lerpInt(mc.getFrameTime() / 100f, 1, 1));
-                    RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getFrameTime() / 100f, 1, 1));
+                            .setShaderFogStart(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, 1, 1));
+                    RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, 1, 1));
                     RenderSystem.setShaderFogShape(FogShape.SPHERE);
                     RenderSystem.setShaderFogColor(planet.render().color().x(),
                             planet.render().color().y(),
@@ -70,8 +70,8 @@ public class FoggyUtils {
         }
         if (tardis.crash().isToxic() && tardis.fuel().hasPower()) {
             RenderSystem
-                    .setShaderFogStart(Mth.lerpInt(mc.getFrameTime() / 100f, -8, 24));
-            RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getFrameTime() / 100f, 11, 32));
+                    .setShaderFogStart(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, -8, 24));
+            RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, 11, 32));
             RenderSystem.setShaderFogShape(FogShape.SPHERE);
 
             ItemStack stack = mc.player.getItemBySlot(EquipmentSlot.HEAD);
@@ -86,8 +86,8 @@ public class FoggyUtils {
 
             final float[] rgb = ClientTardisUtil.getPartyColors();
 
-            RenderSystem.setShaderFogStart(Mth.lerpInt(mc.getFrameTime() / 100f, -8, 24));
-            RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getFrameTime() / 100f, 20, 40));
+            RenderSystem.setShaderFogStart(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, -8, 24));
+            RenderSystem.setShaderFogEnd(Mth.lerpInt(mc.getTimer().getGameTimeDeltaPartialTick(true) / 100f, 20, 40));
             RenderSystem.setShaderFogShape(FogShape.SPHERE);
             RenderSystem.setShaderFogColor(rgb[0], rgb[1], rgb[2], 0.25f);
         }

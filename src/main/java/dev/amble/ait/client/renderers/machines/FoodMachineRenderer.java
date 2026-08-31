@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 public class FoodMachineRenderer<T extends FoodMachineBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/machines/food_machine.png");
 
     private final FoodMachineModel foodMachineModel;
@@ -44,8 +44,7 @@ public class FoodMachineRenderer<T extends FoodMachineBlockEntity> implements Bl
         matrices.translate(0.5, -1.5f, -0.5);
         matrices.mulPose(Axis.YN.rotationDegrees(h));
 
-        this.foodMachineModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)),
-                light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.foodMachineModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
     }

@@ -3,10 +3,8 @@ package dev.amble.ait.core.world;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,11 +13,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.landing.LandingPadRegion;
 
@@ -99,7 +98,7 @@ public class LandingPadManager {
             ServerLevel world = player.serverLevel();
             ChunkPos pos = player.chunkPosition();
 
-            FriendlyByteBuf buf = PacketByteBufs.create();
+            FriendlyByteBuf buf = AitNetworking.buf();
             buf.writeEnum(action);
 
             if (action != Action.CLEAR)
@@ -120,7 +119,7 @@ public class LandingPadManager {
         }
 
         public static void syncTracked(Action action, ServerLevel world, ChunkPos pos) {
-            FriendlyByteBuf buf = PacketByteBufs.create();
+            FriendlyByteBuf buf = AitNetworking.buf();
             buf.writeEnum(action);
 
             if (action != Action.CLEAR)
@@ -155,7 +154,7 @@ public class LandingPadManager {
                 syncForPlayer(Action.ADD, player);
             });
 
-            ServerPlayNetworking.registerGlobalReceiver(LandingPadManager.Network.REQUEST, (server, player, handler, buf, responseSender) -> {
+            AitNetworking.registerServerReceiver(LandingPadManager.Network.REQUEST, (server, player, handler, buf, responseSender) -> {
                 syncForPlayer(Action.ADD, player);
             });
         }

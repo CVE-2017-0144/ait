@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import dev.amble.ait.client.screens.widget.SwitcherManager;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
@@ -37,7 +37,7 @@ public class PermissionHandler extends KeyedTardisComponent {
     }
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(P19_LOYALTY_SYNC,
+        AitNetworking.registerServerReceiver(P19_LOYALTY_SYNC,
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     if (tardis == null)
                         return;

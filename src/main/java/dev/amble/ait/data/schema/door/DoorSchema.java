@@ -91,7 +91,7 @@ public abstract class DoorSchema implements Identifiable {
             ResourceLocation id;
 
             try {
-                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+                id = ResourceLocation.parse(json.getAsJsonPrimitive().getAsString());
             } catch (ResourceLocationException e) {
                 id = CapsuleDoorVariant.REFERENCE;
             }

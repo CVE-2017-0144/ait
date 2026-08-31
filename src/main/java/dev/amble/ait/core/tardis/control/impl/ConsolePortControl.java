@@ -8,9 +8,11 @@ import dev.amble.ait.core.item.WaypointItem;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisDesktop;
 import dev.amble.ait.core.tardis.control.Control;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.ait.module.gun.core.item.StaserBoltMagazine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -20,7 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.JukeboxSong;
 
 public class ConsolePortControl extends Control {
 
@@ -45,28 +47,29 @@ public class ConsolePortControl extends Control {
 
         ItemStack itemStack = player.getMainHandItem();
 
-        if (itemStack.is(AITTags.Items.INSERTABLE_DISCS) || itemStack.getItem() instanceof RecordItem) {
+        if (itemStack.is(AITTags.Items.INSERTABLE_DISCS) || itemStack.has(DataComponents.JUKEBOX_PLAYABLE)) {
             if (!tardis.extra().getInsertedDisc().isEmpty()) return Result.FAILURE;
 
 
             tardis.extra().setInsertedDisc(itemStack.copy());
-            if (itemStack.getItem() instanceof RecordItem musicDisc) {
-                currentMusic = musicDisc.getSound();
-                world.playSound(null, console, currentMusic, SoundSource.RECORDS, 6f, 1);
-            }
+            JukeboxSong.fromStack(world.registryAccess(), itemStack).ifPresent(song -> {
+                this.currentMusic = song.value().soundEvent().value();
+                world.playSound(null, console, this.currentMusic, SoundSource.RECORDS, 6f, 1);
+            });
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
             return Result.SUCCESS;
         }
 
         if (itemStack.getItem() instanceof StaserBoltMagazine) {
-            CompoundTag nbt = itemStack.getOrCreateTag();
+            CompoundTag nbt = ItemNbt.get(itemStack);
             double currentFuel = nbt.getDouble(StaserBoltMagazine.FUEL_KEY);
             double maxFuel = StaserBoltMagazine.MAX_FUEL;
 
             if (currentFuel < maxFuel) {
                 double newFuel = Math.min(currentFuel + 500, maxFuel);
                 nbt.putDouble(StaserBoltMagazine.FUEL_KEY, newFuel);
+                ItemNbt.set(itemStack, nbt);
                 tardis.removeFuel(500);
 
                 TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundSource.PLAYERS, 6f, 1);
@@ -85,7 +88,7 @@ public class ConsolePortControl extends Control {
             TardisDesktop.playSoundAtConsole(world, console, AITSounds.SLOT_IN, SoundSource.PLAYERS, 6f, 1);
             return Result.SUCCESS_ALT;
         } else if(itemStack.getItem() instanceof ControlDiscItem) {
-            CompoundTag stackNbt = itemStack.getOrCreateTag();
+            CompoundTag stackNbt = ItemNbt.get(itemStack);
             if (stackNbt.get(ControlDiscItem.POS_KEY) == null) return Result.FAILURE;
             // We're going to set both cartridge and disc booleans just for parity
             tardis.waypoint().setIsDisc();

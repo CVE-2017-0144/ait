@@ -24,7 +24,7 @@ public class SantaHatFeatureRenderer<T extends LivingEntity, M extends PlayerMod
         extends
             RenderLayer<T, M> {
 
-    private static final ResourceLocation SANTA_HAT = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation SANTA_HAT = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/entity/wearables/santa_hat.png");
     private final SantaHatModel model;
 
@@ -52,7 +52,7 @@ public class SantaHatFeatureRenderer<T extends LivingEntity, M extends PlayerMod
         this.model.setupAnim(livingEntity, f, g, j, k, l);
 
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderType.entitySmoothCutout(SANTA_HAT));
-        this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+        this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 
         matrixStack.popPose();
     }

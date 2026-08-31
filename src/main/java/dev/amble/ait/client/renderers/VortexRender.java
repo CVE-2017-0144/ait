@@ -67,15 +67,15 @@ public class VortexRender {
 
     public void replaceWith(ResourceLocation texture) {
         this.texture = texture;
-        secondLayer = new ResourceLocation(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
+        secondLayer = ResourceLocation.fromNamespaceAndPath(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
                 "_second" + ".png");
-        thirdLayer = new ResourceLocation(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
+        thirdLayer = ResourceLocation.fromNamespaceAndPath(texture.getNamespace(), texture.getPath().substring(0, texture.getPath().length() - 4) +
                 "_third" + ".png");
     }
 
     public void render(PoseStack matrixStack) {
 
-        time = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        time = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
 
         this.renderLayer(matrixStack, 1.0F, texture);
         this.renderLayer(matrixStack, 1.5f);
@@ -106,7 +106,7 @@ public class VortexRender {
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
         for (int i = 0; i < 32; ++i) {
-            this.renderSection(buffer, i,(Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount) / (120 / this.speed), (float) Math.sin(i * Math.PI / 32),
+            this.renderSection(buffer, i,(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount) / (120 / this.speed), (float) Math.sin(i * Math.PI / 32),
                     (float) Math.sin((i + 1) * Math.PI / 32), matrixStack.last().normal(), matrixStack.last().pose());
         }
 
@@ -221,7 +221,7 @@ public class VortexRender {
     }
 
     private void addVertex(VertexConsumer builder, Matrix3f normalMatrix, Matrix4f matrix, float x, float y, float z, float u, float v) {
-        builder.vertex(matrix, x, y, z).color(1, 1, 1, 1f).uv(u, v).uv2(0xF000F0).normal(normalMatrix,0, 0.0f, 0).endVertex();
+        builder.addVertex(matrix, x, y, z).setColor(1, 1, 1, 1f).setUv(u, v).setLight(0xF000F0).setNormal(normalMatrix,0, 0.0f, 0);
     }
 
     private float computeDistortionFactor(float time, int t) {

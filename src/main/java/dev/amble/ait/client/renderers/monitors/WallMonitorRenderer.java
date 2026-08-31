@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class WallMonitorRenderer<T extends WallMonitorBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation PLAQUE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation PLAQUE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/monitors/wall_monitor.png"));
     private final Font textRenderer = Minecraft.getInstance().font;
     private final PlaqueModel plaqueModel;
@@ -55,8 +55,7 @@ public class WallMonitorRenderer<T extends WallMonitorBlockEntity> implements Bl
         matrices.mulPose(Axis.YN.rotationDegrees(k.toYRot()));
         matrices.mulPose(Axis.XP.rotationDegrees(180));
 
-        this.plaqueModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(PLAQUE_TEXTURE)),
-                light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.plaqueModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(PLAQUE_TEXTURE)), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
 
         if (!entity.isLinked())

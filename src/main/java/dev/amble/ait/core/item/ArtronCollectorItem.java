@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class ArtronCollectorItem extends Item {
     public static final String AU_LEVEL = "au_level";
@@ -29,35 +30,40 @@ public class ArtronCollectorItem extends Item {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putDouble(AU_LEVEL, 0);
+        ItemNbt.set(stack, nbt);
         return super.getDefaultInstance();
     }
 
     public static UUID getUuid(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         if (nbt.contains(UUID_KEY))
             return nbt.getUUID(UUID_KEY);
         nbt.putUUID(UUID_KEY, UUID.randomUUID());
+        ItemNbt.set(stack, nbt);
         return nbt.getUUID(UUID_KEY);
     }
 
     public static double getFuel(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         if (nbt.contains(AU_LEVEL))
             return nbt.getDouble(AU_LEVEL);
         nbt.putDouble(AU_LEVEL, 0);
+        ItemNbt.set(stack, nbt);
         return 0d;
     }
 
     public static double addFuel(ItemStack stack, double fuel) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         double currentFuel = getFuel(stack);
         nbt.putDouble(AU_LEVEL, getFuel(stack) <= COLLECTOR_MAX_FUEL ? getFuel(stack) + fuel : COLLECTOR_MAX_FUEL);
+        ItemNbt.set(stack, nbt);
         if (getFuel(stack) > COLLECTOR_MAX_FUEL)
             nbt.putDouble(AU_LEVEL, COLLECTOR_MAX_FUEL);
+            ItemNbt.set(stack, nbt);
         if (getFuel(stack) == COLLECTOR_MAX_FUEL)
             return fuel - (COLLECTOR_MAX_FUEL - currentFuel);
         return 0;
@@ -69,7 +75,7 @@ public class ArtronCollectorItem extends Item {
         Level world = context.getLevel();
         BlockPos clickedPos = context.getClickedPos();
         ItemStack cellItemStack = context.getItemInHand();
-        CompoundTag nbt = cellItemStack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(cellItemStack);
 
         if (world.isClientSide())
             return InteractionResult.SUCCESS;
@@ -81,6 +87,7 @@ public class ArtronCollectorItem extends Item {
 
                 double residual = exterior.tardis().get().addFuel(nbt.getDouble(AU_LEVEL));
                 nbt.putDouble(AU_LEVEL, residual);
+                ItemNbt.set(cellItemStack, nbt);
                 return InteractionResult.CONSUME;
             } else if (world.getBlockEntity(clickedPos) instanceof ConsoleBlockEntity console) {
                 if (console.tardis().isEmpty())
@@ -88,6 +95,7 @@ public class ArtronCollectorItem extends Item {
 
                 double residual = console.tardis().get().addFuel(nbt.getDouble(AU_LEVEL));
                 nbt.putDouble(AU_LEVEL, residual);
+                ItemNbt.set(cellItemStack, nbt);
                 return InteractionResult.CONSUME;
             }
             return InteractionResult.FAIL;
@@ -97,8 +105,8 @@ public class ArtronCollectorItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        CompoundTag tag = stack.getOrCreateTag();
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        CompoundTag tag = ItemNbt.get(stack);
         String text = tag.contains(AU_LEVEL) ? "" + tag.getDouble(AU_LEVEL) : "0.0";
         tooltip.add(Component.literal(text + " / " + COLLECTOR_MAX_FUEL + ".0").withStyle(ChatFormatting.BLUE));
     }

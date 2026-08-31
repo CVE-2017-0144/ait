@@ -48,9 +48,8 @@ public class JakeTheDogExteriorModel  extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-                       float green, float blue, float alpha) {
-        jake.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        jake.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

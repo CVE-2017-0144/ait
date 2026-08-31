@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,13 +54,7 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
             batteryLevels.getChild("Light_4").visible = entity.getCurrentFuel() >= 1500;
         }
 
-        this.model.renderToBuffer(
-                matrices,
-                vertexConsumers.getBuffer(RenderType.entityTranslucent(entity.getTexture())),
-                light,
-                overlay,
-                1.0f, 1.0f, 1.0f, 1.0f
-        );
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(entity.getTexture())), light, overlay, 0xFFFFFFFF);
 
         ResourceLocation emission = entity.getEmissionTexture();
 
@@ -89,13 +84,7 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
             consumer = new FrameOffsetVertexConsumer(emissive, nextFrame, FRAME_COUNT);
         }
 
-        this.model.renderToBuffer(
-                matrices,
-                consumer,
-                LightTexture.FULL_BRIGHT,
-                overlay,
-                1.0f, 1.0f, 1.0f, alpha
-        );
+        this.model.renderToBuffer(matrices, consumer, LightTexture.FULL_BRIGHT, overlay, FastColor.ARGB32.colorFromFloat(alpha, 1.0f, 1.0f, 1.0f));
 
         matrices.popPose();
     }
@@ -117,54 +106,39 @@ public class ArtronCollectorRenderer<T extends ArtronCollectorBlockEntity> imple
             implements VertexConsumer {
 
         @Override
-        public VertexConsumer uv(float u, float v) {
-            this.delegate.uv(u, (v + this.frame) / this.frameCount);
+        public VertexConsumer setUv(float u, float v) {
+            this.delegate.setUv(u, (v + this.frame) / this.frameCount);
             return this;
         }
 
         @Override
-        public VertexConsumer vertex(double x, double y, double z) {
-            this.delegate.vertex(x, y, z);
+        public VertexConsumer addVertex(float x, float y, float z) {
+            this.delegate.addVertex(x, y, z);
             return this;
         }
 
         @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
-            this.delegate.color(red, green, blue, alpha);
+        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            this.delegate.setColor(red, green, blue, alpha);
             return this;
         }
 
         @Override
-        public VertexConsumer overlayCoords(int u, int v) {
-            this.delegate.overlayCoords(u, v);
+        public VertexConsumer setUv1(int u, int v) {
+            this.delegate.setUv1(u, v);
             return this;
         }
 
         @Override
-        public VertexConsumer uv2(int u, int v) {
-            this.delegate.uv2(u, v);
+        public VertexConsumer setUv2(int u, int v) {
+            this.delegate.setUv2(u, v);
             return this;
         }
 
         @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            this.delegate.normal(x, y, z);
+        public VertexConsumer setNormal(float x, float y, float z) {
+            this.delegate.setNormal(x, y, z);
             return this;
-        }
-
-        @Override
-        public void endVertex() {
-            this.delegate.endVertex();
-        }
-
-        @Override
-        public void defaultColor(int red, int green, int blue, int alpha) {
-            this.delegate.defaultColor(red, green, blue, alpha);
-        }
-
-        @Override
-        public void unsetDefaultColor() {
-            this.delegate.unsetDefaultColor();
         }
     }
 }

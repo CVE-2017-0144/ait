@@ -69,9 +69,8 @@ public class ClassicDoorModel extends DoorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        classic.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        classic.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

@@ -8,9 +8,9 @@ import dev.amble.ait.data.schema.console.variant.hartnell.WoodenHartnellVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientWoodenHartnellVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hartnell_wooden_console.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hartnell_console_emission.png"));
 
     public ClientWoodenHartnellVariant() {

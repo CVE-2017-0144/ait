@@ -9,9 +9,9 @@ import dev.amble.ait.data.schema.console.variant.copper.CopperVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientCopperVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/copper_console.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/copper_console_emission.png"));
 
     public ClientCopperVariant() {

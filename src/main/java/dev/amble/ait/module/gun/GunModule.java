@@ -45,7 +45,7 @@ public class GunModule extends Module {
         HudRenderCallback.EVENT.register(new ScopeOverlay());
         EntityRendererRegistry.register(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, StaserBoltEntityRenderer::new);
 
-        ItemProperties.register(GunItems.CULT_STASER_RIFLE, new ResourceLocation("ads"),
+        ItemProperties.register(GunItems.CULT_STASER_RIFLE, ResourceLocation.parse("ads"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null) return 0.0f;
                     if (itemStack.getItem() == GunItems.CULT_STASER_RIFLE && livingEntity.getMainHandItem().getItem() == GunItems.CULT_STASER_RIFLE) {
@@ -56,7 +56,7 @@ public class GunModule extends Module {
                     }
                     return 0.0F;
                 });
-        ItemProperties.register(GunItems.CULT_STASER, new ResourceLocation("ads"),
+        ItemProperties.register(GunItems.CULT_STASER, ResourceLocation.parse("ads"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null) return 0.0f;
                     if (itemStack.getItem() == GunItems.CULT_STASER && livingEntity.getMainHandItem().getItem() == GunItems.CULT_STASER) {

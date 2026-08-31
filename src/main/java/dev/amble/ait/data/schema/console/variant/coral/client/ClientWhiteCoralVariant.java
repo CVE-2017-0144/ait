@@ -9,9 +9,9 @@ import dev.amble.ait.data.schema.console.variant.coral.WhiteCoralVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientWhiteCoralVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_white.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/coral_white_emission.png"));
 
     public ClientWhiteCoralVariant() {

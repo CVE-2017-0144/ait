@@ -58,7 +58,7 @@ public class TardisCriterions {
             if (!(entity instanceof ServerPlayer player))
                 return TardisEvents.Interaction.PASS;
 
-            Advancement advancement = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("ait/enter_tardis"));
+            Advancement advancement = player.getServer().getAdvancements().getAdvancement(ResourceLocation.parse("ait/enter_tardis"));
 
             Scheduler.get().runTaskLater(() -> {
                     if (advancement == null) {

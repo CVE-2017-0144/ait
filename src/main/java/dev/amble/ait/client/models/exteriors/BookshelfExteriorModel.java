@@ -12,6 +12,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -149,9 +150,8 @@ public class BookshelfExteriorModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        bookshelf.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        bookshelf.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
@@ -216,8 +216,8 @@ public class BookshelfExteriorModel extends SimpleExteriorModel {
             matrices.scale(1F, 1F, 1F);
            matrices.mulPose(Axis.YP.rotationDegrees(180f));
            matrices.translate(0.04f, -1.28f, -0.10f);
-           this.bookshelf.getChild("left_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
-           this.bookshelf.getChild("right_door").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+           this.bookshelf.getChild("left_door").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
+           this.bookshelf.getChild("right_door").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
     }

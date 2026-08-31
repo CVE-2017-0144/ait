@@ -286,7 +286,7 @@ public class BedrockAnimation {
 
 				if (provider != null) {
 					if (!provider.isSilent()) {
-						Vec3 pos = provider.getEffectPosition(Minecraft.getInstance().getFrameTime());
+						Vec3 pos = provider.getEffectPosition(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
 						provider.getWorld().playSound(Minecraft.getInstance().player, pos.x, pos.y, pos.z, event, provider.getSoundCategory(), 1F, 1F);
 					}
 				} else {

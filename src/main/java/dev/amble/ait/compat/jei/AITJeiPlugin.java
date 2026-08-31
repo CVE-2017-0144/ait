@@ -16,7 +16,7 @@ public class AITJeiPlugin implements IModPlugin {
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return new ResourceLocation(AITMod.MOD_ID, "jei_plugin");
+        return ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, "jei_plugin");
     }
 
     @Override

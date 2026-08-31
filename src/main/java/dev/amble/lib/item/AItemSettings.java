@@ -1,17 +1,15 @@
 package dev.amble.lib.item;
 
-import net.fabricmc.fabric.api.item.v1.CustomDamageHandler;
-import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.Rarity;
 
-public class AItemSettings extends FabricItemSettings {
+public class AItemSettings extends Properties {
 
     private CreativeModeTab group;
 
@@ -24,15 +22,7 @@ public class AItemSettings extends FabricItemSettings {
         return this;
     }
 
-    @Override
-    public AItemSettings equipmentSlot(EquipmentSlotProvider equipmentSlotProvider) {
-        return (AItemSettings) super.equipmentSlot(equipmentSlotProvider);
-    }
 
-    @Override
-    public AItemSettings customDamage(CustomDamageHandler handler) {
-        return (AItemSettings) super.customDamage(handler);
-    }
 
     @Override
     public AItemSettings food(FoodProperties foodComponent) {
@@ -44,10 +34,6 @@ public class AItemSettings extends FabricItemSettings {
         return (AItemSettings) super.stacksTo(maxCount);
     }
 
-    @Override
-    public AItemSettings defaultDurability(int maxDamage) {
-        return (AItemSettings) super.defaultDurability(maxDamage);
-    }
 
     @Override
     public AItemSettings durability(int maxDamage) {

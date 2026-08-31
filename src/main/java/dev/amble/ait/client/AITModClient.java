@@ -17,7 +17,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
@@ -91,7 +90,9 @@ import dev.amble.ait.core.drinks.DrinkUtil;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
 import dev.amble.ait.core.entities.RiftEntity;
 import dev.amble.ait.core.item.*;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
 import dev.amble.ait.module.ModuleRegistry;
@@ -184,7 +185,7 @@ public class AITModClient implements ClientModInitializer {
             TardisStar.render(context, tardis);
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(OPEN_SCREEN, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
             Screen screen = screenFromId(id);
 
@@ -194,7 +195,7 @@ public class AITModClient implements ClientModInitializer {
             client.execute(() -> client.forceSetScreen(screen));
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN_TARDIS, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(OPEN_SCREEN_TARDIS, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
             UUID uuid = buf.readUUID();
 
@@ -208,7 +209,7 @@ public class AITModClient implements ClientModInitializer {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN_CONSOLE, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(OPEN_SCREEN_CONSOLE, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
             UUID uuid = buf.readUUID();
             BlockPos console = buf.readBlockPos();
@@ -223,7 +224,7 @@ public class AITModClient implements ClientModInitializer {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(OPEN_SCREEN_PROJECTOR, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(OPEN_SCREEN_PROJECTOR, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
             BlockPos projector = buf.readBlockPos();
 
@@ -243,7 +244,7 @@ public class AITModClient implements ClientModInitializer {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(ConsoleGeneratorBlockEntity.SYNC_TYPE,
+        AitNetworking.registerClientReceiver(ConsoleGeneratorBlockEntity.SYNC_TYPE,
                 (client, handler, buf, responseSender) -> {
                     if (client.level == null)
                         return;
@@ -256,7 +257,7 @@ public class AITModClient implements ClientModInitializer {
                         console.setConsoleSchema(type.id());
                 });
 
-        ClientPlayNetworking.registerGlobalReceiver(ConsoleGeneratorBlockEntity.SYNC_VARIANT,
+        AitNetworking.registerClientReceiver(ConsoleGeneratorBlockEntity.SYNC_VARIANT,
                 (client, handler, buf, responseSender) -> {
                     if (client.level == null)
                         return;
@@ -275,7 +276,7 @@ public class AITModClient implements ClientModInitializer {
 
         SonicModelLoader.init();
 
-        ClientPlayNetworking.registerGlobalReceiver(AstralMapBlock.OPEN_ASTRAL_MAP, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(AstralMapBlock.OPEN_ASTRAL_MAP, (client, handler, buf, responseSender) -> {
             List<ResourceLocation> ids = buf.readList(FriendlyByteBuf::readResourceLocation);
             client.execute(() -> {
                 AstralMapBlock.structureIds = ids;
@@ -307,7 +308,7 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public void chargedZeitonCrystalPredicate() {
-        ItemProperties.register(AITItems.CHARGED_ZEITON_CRYSTAL, new ResourceLocation("fuel"),
+        ItemProperties.register(AITItems.CHARGED_ZEITON_CRYSTAL, ResourceLocation.parse("fuel"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (livingEntity == null)
                         return 0.0F;
@@ -327,13 +328,13 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void waypointPredicate() {
-        ItemProperties.register(AITItems.WAYPOINT_CARTRIDGE, new ResourceLocation("type"),
+        ItemProperties.register(AITItems.WAYPOINT_CARTRIDGE, ResourceLocation.parse("type"),
                 (stack, clientWorld, livingEntity, integer) ->
-                        stack.getOrCreateTag().contains(WaypointItem.POS_KEY) ? 1 : 0);
+                        ItemNbt.get(stack).contains(WaypointItem.POS_KEY) ? 1 : 0);
     }
 
     public static void hammerPredicate() {
-        ItemProperties.register(AITItems.HAMMER, new ResourceLocation("toymakered"),
+        ItemProperties.register(AITItems.HAMMER, ResourceLocation.parse("toymakered"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof HammerItem) {
                         if (itemStack.getHoverName().getString().equalsIgnoreCase("Toymaker Hammer"))
@@ -346,17 +347,17 @@ public class AITModClient implements ClientModInitializer {
     }
 
     public static void siegeItemPredicate() {
-        ItemProperties.register(AITItems.HAMMER, new ResourceLocation("bricked"),
+        ItemProperties.register(AITItems.HAMMER, ResourceLocation.parse("bricked"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
-                    if (itemStack.getOrCreateTag().contains(SiegeTardisItem.CURRENT_TEXTURE_KEY)) {
-                        return itemStack.getOrCreateTag().getInt(SiegeTardisItem.CURRENT_TEXTURE_KEY);
+                    if (ItemNbt.get(itemStack).contains(SiegeTardisItem.CURRENT_TEXTURE_KEY)) {
+                        return ItemNbt.get(itemStack).getInt(SiegeTardisItem.CURRENT_TEXTURE_KEY);
                     }
                     return 0.0f;
                 });
     }
 
     public static void adventItemPredicates() {
-        ItemProperties.register(AITItems.HYPERCUBE, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.HYPERCUBE, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof HypercubeItem) {
                         return isUnlockedOnThisDay(Calendar.JANUARY, 1) ? 1.0F : 0.0F;
@@ -364,7 +365,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ItemProperties.register(AITItems.HAZANDRA, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.HAZANDRA, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof InteriorTeleporterItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 28) ? 1.0F : 0.0F;
@@ -372,7 +373,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ItemProperties.register(AITItems.IRON_KEY, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.IRON_KEY, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -380,7 +381,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ItemProperties.register(AITItems.GOLD_KEY, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.GOLD_KEY, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -388,7 +389,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ItemProperties.register(AITItems.NETHERITE_KEY, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.NETHERITE_KEY, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -396,7 +397,7 @@ public class AITModClient implements ClientModInitializer {
                     return 0.0F;
                 });
 
-        ItemProperties.register(AITItems.CLASSIC_KEY, new ResourceLocation("advent"),
+        ItemProperties.register(AITItems.CLASSIC_KEY, ResourceLocation.parse("advent"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
                     if (itemStack.getItem() instanceof KeyItem) {
                         return isUnlockedOnThisDay(Calendar.DECEMBER, 26) ? 1.0F : 0.0F;
@@ -495,8 +496,7 @@ public class AITModClient implements ClientModInitializer {
             if (tintIndex != 0)
                 return -1;
 
-            WaypointItem waypoint = (WaypointItem) stack.getItem();
-            return waypoint.getColor(stack);
+            return WaypointItem.getColor(stack);
         }, AITItems.WAYPOINT_CARTRIDGE);
     }
 
@@ -598,7 +598,7 @@ public class AITModClient implements ClientModInitializer {
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
             PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
-            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getFrameTime()));
+            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
                     LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
                             world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
@@ -626,7 +626,7 @@ public class AITModClient implements ClientModInitializer {
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
             PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
-            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getFrameTime()));
+            BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
                     LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
                             world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
@@ -651,7 +651,7 @@ public class AITModClient implements ClientModInitializer {
             stack.mulPose(Axis.YP.rotationDegrees(rift.getYRot()));
             stack.mulPose(Axis.XP.rotationDegrees(rift.getXRot()));
             RiftModel riftModel = new RiftModel(RiftModel.getTexturedModelData().bakeRoot());
-            BlockPos blockPos = BlockPos.containing(rift.getLightProbePosition(client.getFrameTime()));
+            BlockPos blockPos = BlockPos.containing(rift.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             RiftBOTI.renderRiftBoti(stack, riftModel, LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos), world.getBrightness(LightLayer.SKY, blockPos)));
             stack.popPose();
         }

@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -1689,14 +1690,13 @@ public class HudolinConsoleModel extends SimpleConsoleModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-                       float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
 
         matrices.mulPose(Axis.YN.rotationDegrees(180f));
 
-        console.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        toolbox.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        console.render(matrices, vertexConsumer, light, overlay, color);
+        toolbox.render(matrices, vertexConsumer, light, overlay, color);
 
         matrices.popPose();
     }
@@ -1704,7 +1704,7 @@ public class HudolinConsoleModel extends SimpleConsoleModel {
     @Override
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getFrameTime();
+        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTimer().getGameTimeDeltaPartialTick(true);
         matrices.pushPose();
         matrices.translate(0.5f, -1.5f, -0.5f);
         matrices.mulPose(Axis.YN.rotationDegrees(180f));
@@ -1802,7 +1802,7 @@ public class HudolinConsoleModel extends SimpleConsoleModel {
         hammer.skipDraw = tardis.extra().getConsoleHammer() == null || tardis.extra().getConsoleHammer().isEmpty();
 
         super.renderWithAnimations(console, tardis, root, matrices, vertices, light, overlay, red, green, blue, pAlpha);
-        toolbox.render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+        toolbox.render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
 
         matrices.popPose();
     }

@@ -29,13 +29,13 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 
 public class SiegeHandler extends KeyedTardisComponent implements TardisTickable {
 
-    public static final ResourceLocation DEFAULT_TEXTURRE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DEFAULT_TEXTURRE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/siege_mode.png");
-    public static final ResourceLocation BRICK_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation BRICK_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/siege_mode_brick.png");
-    public static final ResourceLocation COMPANION_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation COMPANION_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/companion_cube.png");
-    public static final ResourceLocation APERTURE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation APERTURE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/siege_mode/weighted_cube.png");
 
     private static final Property<UUID> HELD_KEY = new Property<>(Property.UUID, "siege_held_uuid");

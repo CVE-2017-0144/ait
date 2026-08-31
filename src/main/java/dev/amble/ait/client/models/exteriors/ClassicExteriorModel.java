@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -128,9 +129,8 @@ public class ClassicExteriorModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        classic.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        classic.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class ClassicExteriorModel extends SimpleExteriorModel {
             matrices.pushPose();
             matrices.scale(0.64F, 0.64F, 0.64F);
             matrices.translate(0, 0f, 0);
-            this.classic.getChild("Doors").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+            this.classic.getChild("Doors").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
     }

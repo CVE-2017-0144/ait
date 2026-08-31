@@ -61,7 +61,7 @@ public class AddonExterior extends ExteriorVariantSchema {
     private Vec3 seatTranslations;
 
     public AddonExterior(ResourceLocation category, String modid, String name) {
-        super(category, new ResourceLocation(modid, "exterior/" + name), Loyalty.fromLevel(Loyalty.Type.OWNER.level));
+        super(category, ResourceLocation.fromNamespaceAndPath(modid, "exterior/" + name), Loyalty.fromLevel(Loyalty.Type.OWNER.level));
 
         this.modid = modid;
         this.name = name;
@@ -259,12 +259,12 @@ public class AddonExterior extends ExteriorVariantSchema {
         }
         @Override
         public ResourceLocation texture() {
-            return new ResourceLocation(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + ".png");
+            return ResourceLocation.fromNamespaceAndPath(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + ".png");
         }
 
         @Override
         public ResourceLocation emission() {
-            ResourceLocation id = new ResourceLocation(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + "_emission.png");
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(server.modid, "textures/blockentities/exteriors/" + server.name + "/" + server.name + "_emission.png");
 
             if (!checkedEmission && Minecraft.getInstance().getResourceManager() != null) {
                 this.hasEmission = InteriorSettingsScreen.doesTextureExist(id);

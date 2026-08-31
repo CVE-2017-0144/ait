@@ -9,7 +9,6 @@ import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.drtheo.queue.api.ActionQueue;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +21,7 @@ import net.minecraft.world.entity.monster.Monster;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.Exclude;
@@ -52,7 +52,7 @@ public class ServerAlarmHandler extends KeyedTardisComponent implements TardisTi
     private final BoolValue hostilePresence = HOSTILE_PRESENCE.create(this);
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(TOGGLE_HOSTILE_ALARMS, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(TOGGLE_HOSTILE_ALARMS, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             boolean bool = buf.readBoolean();
 
             if (tardis == null)

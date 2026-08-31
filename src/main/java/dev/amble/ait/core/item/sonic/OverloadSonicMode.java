@@ -17,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCandleBlock;
-import net.minecraft.world.level.block.AbstractGlassBlock;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -186,7 +186,7 @@ public class OverloadSonicMode extends SonicMode {
         else if (block instanceof LeverBlock lever) {
             lever.pull(state, world, pos);
         }
-        else if (block instanceof AbstractGlassBlock || block instanceof IronBarsBlock) {
+        else if (block instanceof TransparentBlock || block instanceof IronBarsBlock) {
             breakBlock(world, pos, user, state, blockHit);
         }
         else if (canLight(ticks) && block instanceof TntBlock) {

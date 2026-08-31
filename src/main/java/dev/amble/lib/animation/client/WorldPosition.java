@@ -78,7 +78,7 @@ public class WorldPosition {
 	}
 
 	public WorldPosition update(BedrockAnimation anim, String boneName, float progress, EffectProvider target, ModelPart root) {
-		float tickDelta = Minecraft.getInstance().getFrameTime();
+		float tickDelta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
 
 		this.area = target.getWorld();
 

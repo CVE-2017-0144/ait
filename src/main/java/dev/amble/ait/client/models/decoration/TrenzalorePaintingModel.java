@@ -108,11 +108,11 @@ public class TrenzalorePaintingModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 1024, 1024);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
         matrices.translate(0.5, 1, 5.5);
         painting.getChild("plane").visible = false;
-        painting.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        painting.render(matrices, vertexConsumer, light, overlay, color);
         matrices.popPose();
     }
 

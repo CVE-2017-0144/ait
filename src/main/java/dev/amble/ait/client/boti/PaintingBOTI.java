@@ -32,7 +32,7 @@ public class PaintingBOTI extends BOTI {
 
         MultiBufferSource.BufferSource botiProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
 
-        model.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.entityCutout(frameTexture)), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        model.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.entityCutout(frameTexture)), light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         botiProvider.endBatch();
 
         stack.translate(0, 0, -0.125);
@@ -62,7 +62,7 @@ public class PaintingBOTI extends BOTI {
         stack.pushPose();
         stack.translate(0, 0, -4f);
         RenderSystem.enableCull();
-        paintingContents.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(paintingContentsTexture)), 0xf000f0, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        paintingContents.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(paintingContentsTexture)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         RenderSystem.disableCull();
         botiProvider.endBatch();
         stack.popPose();

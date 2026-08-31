@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
+import dev.amble.ait.core.util.ItemNbt;
 
 public abstract class LinkableItem extends Item {
 
@@ -36,9 +37,9 @@ public abstract class LinkableItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         this.handleTooltip(stack, tooltip);
-        super.appendHoverText(stack, world, tooltip, context);
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
     }
 
     private void handleTooltip(ItemStack stack, List<Component> tooltip) {
@@ -71,15 +72,15 @@ public abstract class LinkableItem extends Item {
     }
 
     public void link(ItemStack stack, UUID uuid) {
-        stack.getOrCreateTag().putUUID(this.path, uuid);
+        ItemNbt.edit(stack, tag -> tag.putUUID(this.path, uuid));
     }
 
     public void unlink(ItemStack stack) {
-        stack.getOrCreateTag().remove(this.path);
+        ItemNbt.edit(stack, tag -> tag.remove(this.path));
     }
 
     public boolean isLinked(ItemStack stack) {
-        return stack.getOrCreateTag().contains(this.path);
+        return ItemNbt.get(stack).contains(this.path);
     }
 
     public boolean isOf(ItemStack stack, Tardis tardis) {
@@ -90,7 +91,7 @@ public abstract class LinkableItem extends Item {
     }
 
     public UUID getTardisId(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         Tag element = nbt.get(path);
 
         if (element == null)
@@ -101,6 +102,7 @@ public abstract class LinkableItem extends Item {
             UUID converted = UUID.fromString(element.getAsString());
 
             nbt.putUUID(path, converted);
+            ItemNbt.set(stack, nbt);
             return converted;
         }
 

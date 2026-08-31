@@ -124,7 +124,7 @@ public abstract class ConsoleVariantSchema extends BasicSchema implements Unlock
             ResourceLocation id;
 
             try {
-                id = new ResourceLocation(json.getAsJsonPrimitive().getAsString());
+                id = ResourceLocation.parse(json.getAsJsonPrimitive().getAsString());
             } catch (ResourceLocationException e) {
                 id = AITMod.id("console/borealis");
             }

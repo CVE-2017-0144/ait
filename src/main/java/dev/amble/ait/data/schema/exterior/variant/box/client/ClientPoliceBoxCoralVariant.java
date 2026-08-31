@@ -8,7 +8,7 @@ import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientPoliceBoxCoralVariant extends ClientPoliceBoxVariant {
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box_coral.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box_coral.png");
     public ClientPoliceBoxCoralVariant() {
         super("coral");
     }

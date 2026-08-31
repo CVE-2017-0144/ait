@@ -16,13 +16,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import dev.amble.ait.core.AITStatusEffects;
 
-public class AnorthositeSwordItem extends TieredItem implements Vanishable {
+public class AnorthositeSwordItem extends TieredItem {
     private final float attackDamage;
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 

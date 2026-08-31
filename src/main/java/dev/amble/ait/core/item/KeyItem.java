@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -207,9 +208,9 @@ public class KeyItem extends LinkableItem {
      */
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         if (stack.getItem() == AITItems.SKELETON_KEY)
             tooltip.add(Component.translatable("tooltip.ait.skeleton_key").withStyle(ChatFormatting.DARK_PURPLE));
-        super.appendHoverText(stack, world, tooltip, context);
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
     }
 }

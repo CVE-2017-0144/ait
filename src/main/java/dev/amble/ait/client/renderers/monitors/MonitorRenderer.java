@@ -31,9 +31,9 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 public class MonitorRenderer<T extends MonitorBlockEntity> implements BlockEntityRenderer<T> {
 
 
-    private static final ResourceLocation MONITOR_TEXTURE_DEFAULT = new ResourceLocation(AITMod.MOD_ID, "textures/blockentities/monitors/crt_monitor.png");
-    private static final ResourceLocation MONITOR_TEXTURE_BLAZE = new ResourceLocation(AITMod.MOD_ID, "textures/blockentities/monitors/crt_monitor/blaze.png");
-    public static final ResourceLocation EMISSIVE_MONITOR_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation MONITOR_TEXTURE_DEFAULT = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, "textures/blockentities/monitors/crt_monitor.png");
+    private static final ResourceLocation MONITOR_TEXTURE_BLAZE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, "textures/blockentities/monitors/crt_monitor/blaze.png");
+    public static final ResourceLocation EMISSIVE_MONITOR_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/monitors/crt_monitor_emission.png"));
     private final Font textRenderer = Minecraft.getInstance().font;
     private final CRTMonitorModel crtMonitorModel;
@@ -64,13 +64,9 @@ public class MonitorRenderer<T extends MonitorBlockEntity> implements BlockEntit
         matrices.mulPose(Axis.YN.rotationDegrees(h));
         matrices.mulPose(Axis.XP.rotationDegrees(180));
 
-        this.crtMonitorModel.renderToBuffer(matrices,
-                vertexConsumers.getBuffer(RenderType.entityTranslucent(texture)), light, overlay, 1.0F,
-                1.0F, 1.0F, 1.0F);
+        this.crtMonitorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(texture)), light, overlay, 0xFFFFFFFF);
         if (state == MonitorStateUtil.DEFAULT) {
-            this.crtMonitorModel.renderToBuffer(matrices,
-                    vertexConsumers.getBuffer(RenderType.entityTranslucentEmissive(EMISSIVE_MONITOR_TEXTURE)),
-                    0xF000F00, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+            this.crtMonitorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucentEmissive(EMISSIVE_MONITOR_TEXTURE)), 0xF000F00, overlay, 0xFFFFFFFF);
         }
         matrices.popPose();
 

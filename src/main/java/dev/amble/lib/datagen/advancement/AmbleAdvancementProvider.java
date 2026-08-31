@@ -3,8 +3,8 @@ package dev.amble.lib.datagen.advancement;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -40,11 +40,11 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
     }
 
     public Builder challenge(Advancement parent, String name) {
-        return create(parent, name).frame(FrameType.CHALLENGE);
+        return create(parent, name).frame(AdvancementType.CHALLENGE);
     }
 
     public Builder goal(Advancement parent, String name) {
-        return create(parent, name).frame(FrameType.GOAL);
+        return create(parent, name).frame(AdvancementType.GOAL);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
 
         private ItemLike item = Items.BARRIER;
         private boolean hidden = false;
-        private FrameType frame = FrameType.TASK;
+        private AdvancementType frame = AdvancementType.TASK;
         private ResourceLocation background;
         private boolean announce = true;
         private boolean showToast = true;
@@ -87,7 +87,7 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
             return this;
         }
 
-        public Builder frame(FrameType frame) {
+        public Builder frame(AdvancementType frame) {
             this.frame = frame;
             return this;
         }
@@ -98,7 +98,7 @@ public class AmbleAdvancementProvider extends FabricAdvancementProvider {
         }
 
         public Builder background(String background) {
-            return background(new ResourceLocation(AmbleAdvancementProvider.this.output.getModId(), background));
+            return background(ResourceLocation.fromNamespaceAndPath(AmbleAdvancementProvider.this.output.getModId(), background));
         }
 
         public Builder silent() {

@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -44,7 +45,7 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
 
 public class MonitorScreen extends ConsoleScreen {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/monitor_gui.png");
     private final List<Button> buttons = Lists.newArrayList();
     private ExteriorCategorySchema category;
@@ -326,7 +327,7 @@ public class MonitorScreen extends ConsoleScreen {
     }
 
     protected void drawTardisExterior(GuiGraphics context, int x, int y, float scale) {
-        float delta = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
         Tardis tardis = this.tardis();
 
         if (tardis == null)
@@ -395,12 +396,10 @@ public class MonitorScreen extends ConsoleScreen {
 
         float base = isExtUnlocked ? 1f : 0.1f;
 
-        model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.entityTranslucentCull(texture)),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, base, base, base, 1f);
+        model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.entityTranslucentCull(texture)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, base, base, base));
 
         if (hasPower && emissive != null && !(emissive.equals(DatapackConsole.EMPTY))) {
-            model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(emissive, true)),
-                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, base, base, base, 1f);
+            model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(emissive, true)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, base, base, base));
         }
         stack.popPose();
 

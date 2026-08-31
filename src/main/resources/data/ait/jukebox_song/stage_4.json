@@ -1,0 +1,8 @@
+{
+  "sound_event": "ait:tardis/secret/stage_4",
+  "description": {
+    "translate": "jukebox_song.ait.stage_4"
+  },
+  "length_in_seconds": 239.0,
+  "comparator_output": 15
+}

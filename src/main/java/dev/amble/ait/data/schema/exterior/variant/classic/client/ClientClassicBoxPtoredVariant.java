@@ -7,7 +7,7 @@ import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientClassicBoxPtoredVariant extends ClientClassicBoxVariant {
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_ptored.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_ptored.png");
 
     private final BiomeOverrides OVERRIDES = BiomeOverrides.builder(ClientClassicBoxVariant.OVERRIDES)
             .with(type -> type.getTexture(BIOME_IDENTIFIER), BiomeHandler.BiomeType.CHERRY, BiomeHandler.BiomeType.CHORUS,

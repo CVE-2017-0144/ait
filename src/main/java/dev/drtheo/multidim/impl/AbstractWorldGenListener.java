@@ -2,7 +2,7 @@ package dev.drtheo.multidim.impl;
 
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
 
 public class AbstractWorldGenListener implements ChunkProgressListener {

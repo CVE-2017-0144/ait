@@ -36,7 +36,7 @@ public class SkinGrabber {
     public static final SkinGrabber INSTANCE = new SkinGrabber();
 	public static final String DEFAULT_DIR = "./" + AmbleKit.MOD_ID + "/";
     public static final String SKIN_DIR = DEFAULT_DIR + "/skins/";
-    private static final ResourceLocation MISSING = new ResourceLocation(AmbleKit.MOD_ID, "textures/skins/error.png");
+    private static final ResourceLocation MISSING = ResourceLocation.fromNamespaceAndPath(AmbleKit.MOD_ID, "textures/skins/error.png");
     private static final String USER_AGENT = AmbleKit.MOD_ID + "/1.0";
 
     private final ConcurrentHashMap<String, ResourceLocation> downloads;

@@ -13,9 +13,6 @@ import dev.drtheo.scheduler.api.common.TaskStage;
 import dev.drtheo.scheduler.api.task.Task;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
@@ -38,6 +35,7 @@ import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.lock.LockedDimension;
 import dev.amble.ait.core.lock.LockedDimensionRegistry;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
 import dev.amble.ait.core.tardis.animation.v2.datapack.TardisAnimationRegistry;
 import dev.amble.ait.core.tardis.control.impl.EngineOverloadControl;
@@ -140,7 +138,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
             }
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(ANIMATION_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(ANIMATION_PACKET, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             State state = buf.readEnum(State.class);
             ResourceLocation id = buf.readResourceLocation();
 
@@ -155,7 +153,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
 
     @Environment(EnvType.CLIENT)
     private static void initializeClient() {
-        ClientPlayNetworking.registerGlobalReceiver(TravelHandler.CANCEL_DEMAT_SOUND, (client, handler, buf,
+        AitNetworking.registerClientReceiver(TravelHandler.CANCEL_DEMAT_SOUND, (client, handler, buf,
                                                                                        responseSender) -> {
             ClientTardisManager.getInstance().getTardis(buf.readUUID(), (tardis) -> {
                 if (tardis == null) return;
@@ -452,7 +450,7 @@ public final class TravelHandler extends AnimatedTravelHandler implements Crasha
 
         this.tardis.getDesktop().playSoundAtEveryConsole(AITSounds.ABORT_FLIGHT, SoundSource.AMBIENT);
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(this.tardis().getUuid());
 
         NetworkUtil.getSubscribedPlayers(this.tardis.asServer()).forEach(player -> {

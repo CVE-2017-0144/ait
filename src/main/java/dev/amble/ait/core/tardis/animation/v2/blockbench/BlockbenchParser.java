@@ -11,10 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
@@ -28,6 +25,7 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.AnimationKeyframe;
 import dev.amble.ait.core.tardis.animation.v2.keyframe.KeyframeTracker;
 import dev.amble.lib.AmbleKit;
@@ -58,13 +56,13 @@ public class BlockbenchParser implements
 
     @Environment(EnvType.CLIENT)
     private static void initClient() {
-        ClientPlayNetworking.registerGlobalReceiver(SYNC, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(SYNC, (client, handler, buf, responseSender) -> {
             BlockbenchParser.getInstance().receive(buf);
         });
     }
 
     private FriendlyByteBuf toBuf() {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeInt(this.tardisAnimationsRaw.size());
         for (Map.Entry<String, List<JsonObject>> entry : this.tardisAnimationsRaw.entrySet()) {
@@ -82,7 +80,7 @@ public class BlockbenchParser implements
     private void sync(ServerPlayer target) {
         if (ServerLifecycleHooks.get() == null) return;
 
-        ServerPlayNetworking.send(target, SYNC, toBuf());
+        AitNetworking.send(target, SYNC, toBuf());
     }
 
     private void sync() {
@@ -91,7 +89,7 @@ public class BlockbenchParser implements
         FriendlyByteBuf buf = toBuf();
 
         for (ServerPlayer player : ServerLifecycleHooks.get().getPlayerList().getPlayers()) {
-            ServerPlayNetworking.send(player, SYNC, buf);
+            AitNetworking.send(player, SYNC, buf);
         }
     }
 

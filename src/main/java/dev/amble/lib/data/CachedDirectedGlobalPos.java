@@ -96,7 +96,7 @@ public class CachedDirectedGlobalPos extends DirectedGlobalPos {
     public static CachedDirectedGlobalPos fromNbt(CompoundTag compound) {
         BlockPos pos = NbtUtils.readBlockPos(compound);
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
-                new ResourceLocation(compound.getString("dimension")));
+                ResourceLocation.parse(compound.getString("dimension")));
 
         byte rotation = compound.getByte("rotation");
         return createNew(null, dimension, pos, rotation);

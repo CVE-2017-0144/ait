@@ -72,10 +72,10 @@ public class RiftEntityRenderer extends EntityRenderer<RiftEntity> {
 
         float half = size / 2.0f;
 
-        vertexConsumer.vertex(positionMatrix, -half, -half, 0).color(red, green, blue, alpha).uv(0.0f, 0.5f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
-        vertexConsumer.vertex(positionMatrix, half, -half, 0).color(red, green, blue, alpha).uv(0.5f, 0.5f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
-        vertexConsumer.vertex(positionMatrix, half, half, 0).color(red, green, blue, alpha).uv(0.5f, 0.0f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
-        vertexConsumer.vertex(positionMatrix, -half, half, 0).color(red, green, blue, alpha).uv(0.0f, 0.0f).overlayCoords(overlay).uv2(light).normal(normalMatrix, 0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.addVertex(positionMatrix, -half, -half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.5f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, half, -half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.5f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, half, half, 0).setColor(red, green, blue, alpha).setUv(0.5f, 0.0f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
+        vertexConsumer.addVertex(positionMatrix, -half, half, 0).setColor(red, green, blue, alpha).setUv(0.0f, 0.0f).setOverlay(overlay).setLight(light).setNormal(normalMatrix, 0.0f, 0.0f, 1.0f);
     }
 
     @Override

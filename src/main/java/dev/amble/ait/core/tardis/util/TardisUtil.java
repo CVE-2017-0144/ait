@@ -7,7 +7,6 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import it.unimi.dsi.fastutil.longs.LongBidirectionalIterator;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.util.TriState;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
@@ -46,6 +45,7 @@ import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.entities.FlightTardisEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisDesktop;
@@ -90,7 +90,7 @@ public class TardisUtil {
     }
 
     public static void init() {
-        ServerPlayNetworking.registerGlobalReceiver(SNAP, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(SNAP, (server, player, handler, buf, responseSender) -> {
             UUID uuid = buf.readUUID();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
                 if (notPilot(tardis, player))
@@ -139,7 +139,7 @@ public class TardisUtil {
             });
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(FLYING_SPEED, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(FLYING_SPEED, (server, player, handler, buf, responseSender) -> {
             UUID uuid = buf.readUUID();
             String direction = buf.readUtf();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
@@ -155,7 +155,7 @@ public class TardisUtil {
                 }
             });
         });
-        ServerPlayNetworking.registerGlobalReceiver(TOGGLE_ANTIGRAVS, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(TOGGLE_ANTIGRAVS, (server, player, handler, buf, responseSender) -> {
             UUID uuid = buf.readUUID();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
                 if (notPilot(tardis, player)) return;

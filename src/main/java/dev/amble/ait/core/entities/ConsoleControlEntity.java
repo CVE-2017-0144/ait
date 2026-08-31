@@ -61,6 +61,7 @@ import dev.amble.ait.core.tardis.TardisManager;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.control.ControlTypes;
 import dev.amble.ait.core.tardis.control.impl.HammerHangerControl;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.registry.impl.ControlRegistry;
 
@@ -113,19 +114,19 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
     }
 
     @Override
-    public void defineSynchedData() {
-        super.defineSynchedData();
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
 
-        this.entityData.define(WIDTH, 0.125f);
-        this.entityData.define(HEIGHT, 0.125f);
-        this.entityData.define(OFFSET, new Vector3f(0));
-        this.entityData.define(PART_OF_SEQUENCE, false);
-        this.entityData.define(SEQUENCE_INDEX, 0);
-        this.entityData.define(SEQUENCE_LENGTH, 0);
-        this.entityData.define(WAS_SEQUENCED, false);
-        this.entityData.define(ON_DELAY, false);
-        this.entityData.define(CONSOLE_BLOCK_POS, BlockPos.ZERO);
-        this.entityData.define(CONTROL_ID, "");
+        builder.define(WIDTH, 0.125f);
+        builder.define(HEIGHT, 0.125f);
+        builder.define(OFFSET, new Vector3f(0));
+        builder.define(PART_OF_SEQUENCE, false);
+        builder.define(SEQUENCE_INDEX, 0);
+        builder.define(SEQUENCE_LENGTH, 0);
+        builder.define(WAS_SEQUENCED, false);
+        builder.define(ON_DELAY, false);
+        builder.define(CONSOLE_BLOCK_POS, BlockPos.ZERO);
+        builder.define(CONTROL_ID, "");
     }
 
     @Override
@@ -208,10 +209,12 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
         }
 
         if (handStack.is(AITBlocks.REDSTONE_CONTROL_BLOCK.asItem()) && this.getControl() != null) {
-            CompoundTag nbt = handStack.getOrCreateTag();
+            CompoundTag nbt = ItemNbt.get(handStack);
             nbt.putString(ControlBlockItem.CONTROL_ID_KEY, this.getControl().id().toString());
+            ItemNbt.set(handStack, nbt);
             ConsoleBlockEntity consoleBlockEntity = this.getConsole();
             nbt.putString(ControlBlockItem.CONSOLE_TYPE_ID_KEY, consoleBlockEntity.getTypeSchema().id().toString());
+            ItemNbt.set(handStack, nbt);
             return InteractionResult.SUCCESS;
         }
 

@@ -8,6 +8,7 @@ import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
 import dev.amble.ait.core.engine.registry.SubSystemRegistry;
 import dev.amble.ait.core.util.SoundData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
@@ -67,8 +68,8 @@ public class SubSystemBlockEntity extends FluidLinkBlockEntity {
     public void tick(Level world, BlockPos pos, BlockState state) {}
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (this.id != null) {
             nbt.putString("SystemId", this.id.name());
@@ -76,8 +77,8 @@ public class SubSystemBlockEntity extends FluidLinkBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         if (nbt.contains("SystemId")) {
             this.id = SubSystemRegistry.getInstance().get(nbt.getString("SystemId"));

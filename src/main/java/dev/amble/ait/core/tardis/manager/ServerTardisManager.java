@@ -2,21 +2,18 @@ package dev.amble.ait.core.tardis.manager;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.AITMod;
-import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.WorldWithTardis;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.manager.old.DeprecatedServerTardisManager;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
@@ -75,7 +72,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
                 tardis.consumeDelta(component -> this.writeComponent(component, buf));
 
                 NetworkUtil.getSubscribedPlayers(tardis).forEach(
-                        watching -> ServerPlayNetworking.send(watching, SEND_COMPONENT, buf)
+                        watching -> AitNetworking.send(watching, SEND_COMPONENT, buf)
                 );
             }
 
@@ -94,7 +91,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
     }
 
     private void sendTardis(ServerPlayer player, FriendlyByteBuf data) {
-        ServerPlayNetworking.send(player, SEND, data);
+        AitNetworking.send(player, SEND, data);
     }
 
     private void writeSend(ServerTardis tardis, FriendlyByteBuf buf) {
@@ -110,14 +107,14 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
     }
 
     private FriendlyByteBuf prepareSend(ServerTardis tardis) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         this.writeSend(tardis, data);
 
         return data;
     }
 
     private FriendlyByteBuf prepareSendDelta(ServerTardis tardis) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
 
         data.writeUUID(tardis.getUuid());
         data.writeShort(tardis.getDeltaSize());
@@ -126,7 +123,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
     }
 
     protected void sendTardisBulk(ServerPlayer player, Set<ServerTardis> set) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeInt(set.size());
 
         for (ServerTardis tardis : set) {
@@ -136,7 +133,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
             this.writeSend(tardis, data);
         }
 
-        ServerPlayNetworking.send(player, SEND_BULK, data);
+        AitNetworking.send(player, SEND_BULK, data);
     }
 
     protected void sendTardisAll(ServerPlayer player, Set<ServerTardis> set) {

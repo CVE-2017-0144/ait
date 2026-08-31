@@ -3,15 +3,14 @@ package dev.amble.lib.block;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.material.PushReaction;
 import org.jetbrains.annotations.ApiStatus;
 
 @SuppressWarnings("deprecation")
-public class ABlockSettings extends FabricBlockSettings {
+public class ABlockSettings extends Properties {
 
     public static ABlockSettings of() {
         return new ABlockSettings();
@@ -170,10 +169,6 @@ public class ABlockSettings extends FabricBlockSettings {
         return (ABlockSettings) super.offsetType(offsetType);
     }
 
-    @Override
-    public ABlockSettings noParticlesOnBreak() {
-        return (ABlockSettings) super.noParticlesOnBreak();
-    }
 
     @Override
     public ABlockSettings requiredFeatures(FeatureFlag... features) {
@@ -225,35 +220,15 @@ public class ABlockSettings extends FabricBlockSettings {
         return (ABlockSettings) super.lightLevel(lightLevel);
     }
 
-    @Override
-    public ABlockSettings luminance(int luminance) {
-        return (ABlockSettings) super.luminance(luminance);
-    }
 
-    @Override
-    public ABlockSettings drops(ResourceLocation dropTableId) {
-        return (ABlockSettings) super.drops(dropTableId);
-    }
 
-    @Override
-    public ABlockSettings materialColor(MapColor color) {
-        return (ABlockSettings) super.materialColor(color);
-    }
 
-    @Override
-    public ABlockSettings materialColor(DyeColor color) {
-        return (ABlockSettings) super.materialColor(color);
-    }
 
     @Override
     public ABlockSettings mapColor(DyeColor color) {
         return (ABlockSettings) super.mapColor(color);
     }
 
-    @Override
-    public ABlockSettings collidable(boolean collidable) {
-        return (ABlockSettings) super.collidable(collidable);
-    }
 
     public Item.Properties itemSettings() {
         return settings;

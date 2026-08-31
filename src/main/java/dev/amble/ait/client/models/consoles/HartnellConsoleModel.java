@@ -31,9 +31,9 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 // Paste this class into your mod and generate all required imports
 public class HartnellConsoleModel extends SimpleConsoleModel {
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/consoles/hartnell_console.png");
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/consoles/hartnell_console_emission.png");
 
     private final ModelPart bone;
@@ -1383,15 +1383,14 @@ public class HartnellConsoleModel extends SimpleConsoleModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        bone.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        bone.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getFrameTime();
+        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTimer().getGameTimeDeltaPartialTick(true);
         matrices.pushPose();
         matrices.translate(0.5f, -1.5f, -0.5f);
 

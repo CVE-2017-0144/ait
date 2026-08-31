@@ -14,8 +14,6 @@ import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -35,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -53,8 +52,8 @@ import dev.amble.ait.client.screens.widget.IconButtonWidget;
 import dev.amble.ait.client.screens.widget.SwitcherManager;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.client.tardis.ClientTardis;
-import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.sounds.flight.FlightSound;
 import dev.amble.ait.core.tardis.TardisDesktop;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
@@ -72,13 +71,13 @@ import dev.amble.ait.registry.impl.DesktopRegistry;
 
 @Environment(EnvType.CLIENT)
 public class InteriorSettingsScreen extends ConsoleScreen {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/interior_settings.png");
-    private static final ResourceLocation ANIM_BACKGROUND = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation ANIM_BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/interior_settings_anim.png");
-    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/interior_settings.png");
-    private static final ResourceLocation MISSING_PREVIEW = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation MISSING_PREVIEW = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/presets/missing_preview.png");
     private static final int PREVIEW_X_OFFSET = 151;
     private static final int PREVIEW_Y_OFFSET = 10;
@@ -171,11 +170,11 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         if (this.console == null)
             return;
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(this.tardis().getUuid());
         buf.writeBlockPos(this.console);
 
-        ClientPlayNetworking.send(TardisDesktop.CACHE_CONSOLE, buf);
+        AitNetworking.send(TardisDesktop.CACHE_CONSOLE, buf);
         this.onClose();
     }
 
@@ -328,7 +327,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         context.pose().popPose();
 
         // TODO: this is a fucking nightmare
-        int buttonIndex = DependencyChecker.hasGravity() ? 4 : 3;
+        int buttonIndex = 3;
 
         // arrow buttons (hum/misc screen)
         if (!this.buttons.get(buttonIndex).isHovered())
@@ -538,7 +537,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
 
-        float spin = (client.player.tickCount + client.getFrameTime()) / 100f * 360f;
+        float spin = (client.player.tickCount + client.getTimer().getGameTimeDeltaPartialTick(true)) / 100f * 360f;
 
         PoseStack vortexStack = new PoseStack();
         vortexStack.mulPose(Axis.ZP.rotationDegrees(spin));
@@ -572,7 +571,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
             return;
 
         Minecraft client = Minecraft.getInstance();
-        float delta = client.getFrameTime();
+        float delta = client.getTimer().getGameTimeDeltaPartialTick(true);
 
         float alpha = 1f;
         Vector3f animPosition = new Vector3f();
@@ -610,9 +609,7 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         stack.mulPose(Axis.YP.rotationDegrees(animRotation.y()));
         stack.mulPose(Axis.ZP.rotationDegrees(animRotation.x()));
 
-        model.render(stack,
-                context.bufferSource().getBuffer(AITRenderLayers.entityTranslucentCull(variant.texture())),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha);
+        model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.entityTranslucentCull(variant.texture())), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, 1f, 1f, 1f));
 
         stack.popPose();
     }
@@ -783,11 +780,11 @@ public class InteriorSettingsScreen extends ConsoleScreen {
         if (this.selectedDesktop == null)
             return;
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeUUID(tardis().getUuid());
         buf.writeResourceLocation(this.selectedDesktop.id());
 
-        ClientPlayNetworking.send(CHANGE_DESKTOP, buf);
+        AitNetworking.send(CHANGE_DESKTOP, buf);
 
         Minecraft.getInstance().setScreen(null);
     }

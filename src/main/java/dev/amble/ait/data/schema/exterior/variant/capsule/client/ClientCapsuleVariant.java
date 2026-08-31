@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientCapsuleVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/capsule";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/capsule.png");
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/capsule.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/capsule.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/capsule.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/capsule_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()

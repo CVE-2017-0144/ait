@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 @Mixin(ItemRenderer.class)
 public class ItemRendererMixin {
 
-    @Unique private static final ResourceLocation HAND_MODEL = new ResourceLocation(AITMod.MOD_ID, "tardis_item");
+    @Unique private static final ResourceLocation HAND_MODEL = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, "tardis_item");
 
     @Unique private static final ModelResourceLocation HAND_MODEL_ID = new ModelResourceLocation(HAND_MODEL, "inventory");
 

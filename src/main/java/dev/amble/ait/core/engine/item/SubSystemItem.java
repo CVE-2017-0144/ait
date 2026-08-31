@@ -26,8 +26,8 @@ public class SubSystemItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
             tooltip.add(Component.translatable(this.id().toTranslationKey()).withStyle(ChatFormatting.YELLOW));

@@ -35,9 +35,8 @@ public class CelestialBodyModel extends HierarchicalModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-                       float green, float blue, float alpha) {
-        body.getChild("planet").render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        body.getChild("planet").render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

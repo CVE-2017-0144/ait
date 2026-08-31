@@ -95,11 +95,10 @@ public class CoralGrowthDoorModel extends DoorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
         matrices.mulPose(Axis.YP.rotationDegrees(180f));
-        coral.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        coral.render(matrices, vertexConsumer, light, overlay, color);
         matrices.popPose();
     }
 

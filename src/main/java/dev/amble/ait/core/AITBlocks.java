@@ -9,7 +9,7 @@ import java.util.List;
 
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
@@ -52,29 +52,29 @@ public class AITBlocks extends BlockContainer {
     @NoBlockDrop
     @NoEnglish
     public static final Block EXTERIOR_BLOCK = new ExteriorBlock(
-            FabricBlockSettings.of().noOcclusion().noParticlesOnBreak().strength(-1.0f, 3600000.0f).noLootTable()
+            BlockBehaviour.Properties.of().noOcclusion().noTerrainParticles().strength(-1.0f, 3600000.0f).noLootTable()
                     .pushReaction(PushReaction.IGNORE).lightLevel(ExteriorBlock.STATE_TO_LUMINANCE));
 
     @PickaxeMineable
     @NoEnglish
-    public static final Block DOOR_BLOCK = new DoorBlock(FabricBlockSettings.of().noOcclusion().noCollission()
+    public static final Block DOOR_BLOCK = new DoorBlock(BlockBehaviour.Properties.of().noOcclusion().noCollission()
             .instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.5F, 6.0F).pushReaction(PushReaction.IGNORE).lightLevel(ExteriorBlock.STATE_TO_LUMINANCE));
 
     @NoBlockDrop
     @NoEnglish
     public static final Block CONSOLE = new ConsoleBlock(
-            FabricBlockSettings.of().noOcclusion().noParticlesOnBreak().strength(-1.0f, 3600000.0f).noLootTable()
+            BlockBehaviour.Properties.of().noOcclusion().noTerrainParticles().strength(-1.0f, 3600000.0f).noLootTable()
                     .instrument(NoteBlockInstrument.COW_BELL).pushReaction(PushReaction.IGNORE));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     @NoBlockDrop
     public static final Block WAYPOINT_BANK = new WaypointBankBlock(
-            FabricBlockSettings.of().noOcclusion().requiresCorrectToolForDrops().instrument(NoteBlockInstrument.BASEDRUM).strength(0.5F, 6.0F)
+            BlockBehaviour.Properties.of().noOcclusion().requiresCorrectToolForDrops().instrument(NoteBlockInstrument.BASEDRUM).strength(0.5F, 6.0F)
                     .pushReaction(PushReaction.IGNORE).lightLevel(light -> 3));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     @NoEnglish
-    public static final Block LANDING_PAD = new LandingPadBlock(FabricBlockSettings.of().requiresCorrectToolForDrops()
+    public static final Block LANDING_PAD = new LandingPadBlock(BlockBehaviour.Properties.of().requiresCorrectToolForDrops()
             .instrument(NoteBlockInstrument.BASEDRUM).strength(0.5F, 6.0F).pushReaction(PushReaction.IGNORE));
 
     @NoEnglish
@@ -84,102 +84,102 @@ public class AITBlocks extends BlockContainer {
             .instrument(NoteBlockInstrument.BASEDRUM).noOcclusion().strength(1.5F, 6.0F).pushReaction(PushReaction.IGNORE));
     @PickaxeMineable
     public static final Block CONSOLE_GENERATOR = new ConsoleGeneratorBlock(
-            FabricBlockSettings.of().noOcclusion().noParticlesOnBreak().requiresCorrectToolForDrops().strength(1.5F)
+            BlockBehaviour.Properties.of().noOcclusion().noTerrainParticles().requiresCorrectToolForDrops().strength(1.5F)
                     .instrument(NoteBlockInstrument.COW_BELL).pushReaction(PushReaction.DESTROY));
     @PickaxeMineable
     @NoEnglish
     public static final Block ARTRON_COLLECTOR_BLOCK = new ArtronCollectorBlock(
-            FabricBlockSettings.of().noParticlesOnBreak().requiresCorrectToolForDrops().strength(1F).noOcclusion().lightLevel(state -> 6)
+            BlockBehaviour.Properties.of().noTerrainParticles().requiresCorrectToolForDrops().strength(1F).noOcclusion().lightLevel(state -> 6)
                     .instrument(NoteBlockInstrument.BANJO).pushReaction(PushReaction.IGNORE));
 
     // Coral Blocks
     @NoEnglish
-    public static final Block CORAL_PLANT = new CoralPlantBlock(FabricBlockSettings.of().randomTicks().noOcclusion()
+    public static final Block CORAL_PLANT = new CoralPlantBlock(BlockBehaviour.Properties.of().randomTicks().noOcclusion()
             .noCollission().instabreak().sound(SoundType.GRASS).pushReaction(PushReaction.DESTROY));
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
-    public static final Block MATRIX_ENERGIZER = new MatrixEnergizerBlock(FabricBlockSettings.of().randomTicks().noOcclusion()
+    public static final Block MATRIX_ENERGIZER = new MatrixEnergizerBlock(BlockBehaviour.Properties.of().randomTicks().noOcclusion()
             .lightLevel(light -> 0).instrument(NoteBlockInstrument.COW_BELL)
             .strength(1.5F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.ANVIL).pushReaction(PushReaction.IGNORE));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_BLOCK = new Block(FabricBlockSettings.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_BLOCK = new Block(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_STAIRS = new StairBlock(TARDIS_CORAL_BLOCK.defaultBlockState(), FabricBlockSettings.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_STAIRS = new StairBlock(TARDIS_CORAL_BLOCK.defaultBlockState(), BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_FENCE = new FenceBlock(FabricBlockSettings.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_FENCE = new FenceBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_WALL = new WallBlock(FabricBlockSettings.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_WALL = new WallBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     public static final Block TARDIS_CORAL_LEAVES = new LeavesBlock(ABlockSettings.copyOf(Blocks.CHERRY_LEAVES));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_SLAB = new SlabBlock(FabricBlockSettings.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_SLAB = new SlabBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block TARDIS_CORAL_FAN = new TardisCoralFanBlock(FabricBlockSettings.of().mapColor(MapColor.GOLD).noCollission().instabreak().sound(SoundType.WET_GRASS).pushReaction(PushReaction.DESTROY).requiresCorrectToolForDrops().strength(7f, 6.0f));
+    public static final Block TARDIS_CORAL_FAN = new TardisCoralFanBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).noCollission().instabreak().sound(SoundType.WET_GRASS).pushReaction(PushReaction.DESTROY).requiresCorrectToolForDrops().strength(7f, 6.0f));
 
     // TARDIS Blocks
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     @NoEnglish
-    public static final Block MONITOR_BLOCK = new MonitorBlock(FabricBlockSettings.of().noOcclusion().requiresCorrectToolForDrops()
+    public static final Block MONITOR_BLOCK = new MonitorBlock(BlockBehaviour.Properties.of().noOcclusion().requiresCorrectToolForDrops()
             .instrument(NoteBlockInstrument.COW_BELL).strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
     @NoEnglish
     public static final Block PLAQUE_BLOCK = new PlaqueBlock(
-            FabricBlockSettings.of().noOcclusion().noParticlesOnBreak().instrument(NoteBlockInstrument.COW_BELL)
+            BlockBehaviour.Properties.of().noOcclusion().noTerrainParticles().instrument(NoteBlockInstrument.COW_BELL)
                     .strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
     @NoEnglish
     public static final Block WALL_MONITOR_BLOCK = new WallMonitorBlock(
-            FabricBlockSettings.of().noOcclusion().noParticlesOnBreak().instrument(NoteBlockInstrument.COW_BELL)
+            BlockBehaviour.Properties.of().noOcclusion().noTerrainParticles().instrument(NoteBlockInstrument.COW_BELL)
                     .strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
     @NoEnglish
-    public static final Block DETECTOR_BLOCK = new DetectorBlock(FabricBlockSettings.of().noOcclusion()
+    public static final Block DETECTOR_BLOCK = new DetectorBlock(BlockBehaviour.Properties.of().noOcclusion()
             .instrument(NoteBlockInstrument.COW_BELL).strength(1.5F, 6.0F).pushReaction(PushReaction.NORMAL));
 
     // Zeiton Blocks
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     @NoEnglish
-    public static final Block ZEITON_BLOCK = new AmethystBlock(FabricBlockSettings.of().mapColor(MapColor.WARPED_STEM)
+    public static final Block ZEITON_BLOCK = new AmethystBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM)
             .strength(1.5F, 6.0F).sound(SoundType.AMETHYST).requiresCorrectToolForDrops());
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     public static final Block BUDDING_ZEITON = new BuddingZeitonBlock(
-            FabricBlockSettings.of().mapColor(MapColor.WARPED_STEM).randomTicks().strength(1.5F, 6.0F)
+            BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).randomTicks().strength(1.5F, 6.0F)
                     .sound(SoundType.AMETHYST).requiresCorrectToolForDrops().pushReaction(PushReaction.DESTROY));
     @NoBlockDrop
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     public static final Block ZEITON_CLUSTER = new AmethystClusterBlock(7, 3,
-            FabricBlockSettings.of().mapColor(MapColor.WARPED_STEM).forceSolidOn().noOcclusion().randomTicks()
+            BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).forceSolidOn().noOcclusion().randomTicks()
                     .sound(SoundType.AMETHYST_CLUSTER).strength(1.5F, 6.0F).lightLevel((state) -> 5)
                     .pushReaction(PushReaction.DESTROY));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     public static final Block LARGE_ZEITON_BUD = new AmethystClusterBlock(5, 3,
-            FabricBlockSettings.copyOf(ZEITON_CLUSTER).sound(SoundType.MEDIUM_AMETHYST_BUD).forceSolidOn()
+            BlockBehaviour.Properties.copyOf(ZEITON_CLUSTER).sound(SoundType.MEDIUM_AMETHYST_BUD).forceSolidOn()
                     .lightLevel((state) -> 4).pushReaction(PushReaction.DESTROY));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     public static final Block MEDIUM_ZEITON_BUD = new AmethystClusterBlock(4, 3,
-            FabricBlockSettings.copyOf(ZEITON_CLUSTER).sound(SoundType.LARGE_AMETHYST_BUD).forceSolidOn()
+            BlockBehaviour.Properties.copyOf(ZEITON_CLUSTER).sound(SoundType.LARGE_AMETHYST_BUD).forceSolidOn()
                     .lightLevel((state) -> 2).pushReaction(PushReaction.DESTROY));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     public static final Block SMALL_ZEITON_BUD = new AmethystClusterBlock(3, 4,
-            FabricBlockSettings.copyOf(ZEITON_CLUSTER).sound(SoundType.SMALL_AMETHYST_BUD).forceSolidOn()
+            BlockBehaviour.Properties.copyOf(ZEITON_CLUSTER).sound(SoundType.SMALL_AMETHYST_BUD).forceSolidOn()
                     .lightLevel((state) -> 1).pushReaction(PushReaction.DESTROY));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     @AutomaticModel
-    public static final Block COMPACT_ZEITON = new Block(FabricBlockSettings.copyOf(ZEITON_BLOCK));
+    public static final Block COMPACT_ZEITON = new Block(BlockBehaviour.Properties.copyOf(ZEITON_BLOCK));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.STONE)
     @AutomaticModel
-    public static final Block ZEITON_COBBLE = new Block(FabricBlockSettings.copyOf(ZEITON_BLOCK));
+    public static final Block ZEITON_COBBLE = new Block(BlockBehaviour.Properties.copyOf(ZEITON_BLOCK));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
     @AutomaticModel()
@@ -200,11 +200,11 @@ public class AITBlocks extends BlockContainer {
             .requiresCorrectToolForDrops().instrument(NoteBlockInstrument.COW_BELL).strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
 
     @NoBlockItem
-    public static final Block RADIO = new RadioBlock(FabricBlockSettings.of().noOcclusion());
+    public static final Block RADIO = new RadioBlock(BlockBehaviour.Properties.of().noOcclusion());
 
     // Machines
     @NoBlockItem
-    public static final Block MACHINE_CASING = new MachineCasingBlock(FabricBlockSettings.of().noOcclusion()
+    public static final Block MACHINE_CASING = new MachineCasingBlock(BlockBehaviour.Properties.of().noOcclusion()
             .requiresCorrectToolForDrops().instrument(NoteBlockInstrument.COW_BELL).strength(1.5F, 6.0F));
 
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
@@ -214,20 +214,20 @@ public class AITBlocks extends BlockContainer {
 
     @AutomaticModel(justItem = true)
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block ASTRAL_MAP = new AstralMapBlock(FabricBlockSettings.of().noOcclusion().strength(1.5F, 6.0F));
+    public static final Block ASTRAL_MAP = new AstralMapBlock(BlockBehaviour.Properties.of().noOcclusion().strength(1.5F, 6.0F));
 
     // Control Blocks
     @NoBlockItem
     @NoEnglish
     public static final Block REDSTONE_CONTROL_BLOCK = new RedstoneControlBlock(
-            FabricBlockSettings.of().noOcclusion().strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
+            BlockBehaviour.Properties.of().noOcclusion().strength(1.5F, 6.0F).pushReaction(PushReaction.DESTROY));
 
-    public static final Block ENVIRONMENT_PROJECTOR = new EnvironmentProjectorBlock(FabricBlockSettings.of());
+    public static final Block ENVIRONMENT_PROJECTOR = new EnvironmentProjectorBlock(BlockBehaviour.Properties.of());
 
     // TODO ADVENT
     static {
         if (isUnlockedOnThisDay(Calendar.DECEMBER, 30)) {
-            SNOW_GLOBE = new SnowGlobeBlock(FabricBlockSettings.of().noOcclusion().instrument(NoteBlockInstrument.GUITAR).strength(1.5F, 6.0F));
+            SNOW_GLOBE = new SnowGlobeBlock(BlockBehaviour.Properties.of().noOcclusion().instrument(NoteBlockInstrument.GUITAR).strength(1.5F, 6.0F));
         }
     }
 
@@ -273,7 +273,7 @@ public class AITBlocks extends BlockContainer {
     @NoBlockItem
     @NoBlockDrop
     @NoEnglish
-    public static final Block POTTED_SONIC_SCREWDRIVER = new PottedSonicScrewdriverBlock(FabricBlockSettings.copyOf(Blocks.POTTED_POPPY));
+    public static final Block POTTED_SONIC_SCREWDRIVER = new PottedSonicScrewdriverBlock(BlockBehaviour.Properties.copyOf(Blocks.POTTED_POPPY));
     public static List<Block> get() {
         List<Block> list = new ArrayList<>();
 

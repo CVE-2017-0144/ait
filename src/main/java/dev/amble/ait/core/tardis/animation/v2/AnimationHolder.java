@@ -5,7 +5,6 @@ import java.util.UUID;
 import dev.drtheo.queue.api.ActionQueue;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import org.joml.Math;
 import org.joml.Vector3f;
@@ -24,6 +23,7 @@ import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.client.sounds.flight.FlightSoundPlayer;
 import dev.amble.ait.core.effects.ZeitonHighEffect;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
@@ -312,7 +312,7 @@ public class AnimationHolder implements TardisTickable, Disposable, Linkable {
 
         ServerTardis tardis = this.tardis().get().asServer();
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
 
         buf.writeEnum(state);
         buf.writeResourceLocation(this.current.id());

@@ -58,7 +58,7 @@ public class SkyboxUtil extends LevelRenderer {
         matrices.pushPose();
         float scale = 100f;
         float zOffset = 500 * scale;
-        float delta = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
         if (!tardis.travel().autopilot() && tardis.travel().getState() != TravelHandlerBase.State.LANDED)
             matrices.mulPose(Axis.YN.rotationDegrees((delta) * (tardis.travel().speed() * 0.7f)));
         if (!tardis.crash().isNormal())
@@ -77,7 +77,7 @@ public class SkyboxUtil extends LevelRenderer {
         matrices.pushPose();
         float scale = 100f;
         float zOffset = 500 * scale;
-        float delta = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
         matrices.mulPose(Axis.YN.rotationDegrees(delta));
         matrices.mulPose(Axis.XP.rotationDegrees(delta));
         matrices.mulPose(Axis.ZP.rotationDegrees(delta));
@@ -111,13 +111,13 @@ public class SkyboxUtil extends LevelRenderer {
             Matrix4f matrix4f = matrices.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-            bufferBuilder.vertex(matrix4f, -100.0f, -100.0f, -100.0f).uv(0.0f, 0.0f).color(40, 40, 40, 255).endVertex();
+            bufferBuilder.addVertex(matrix4f, -100.0f, -100.0f, -100.0f).setUv(0.0f, 0.0f).setColor(40, 40, 40, 255);
 
-            bufferBuilder.vertex(matrix4f, -100.0f, -100.0f, 100.0f).uv(0.0f, 16.0f).color(40, 40, 40, 255).endVertex();
+            bufferBuilder.addVertex(matrix4f, -100.0f, -100.0f, 100.0f).setUv(0.0f, 16.0f).setColor(40, 40, 40, 255);
 
-            bufferBuilder.vertex(matrix4f, 100.0f, -100.0f, 100.0f).uv(16.0f, 16.0f).color(40, 40, 40, 255).endVertex();
+            bufferBuilder.addVertex(matrix4f, 100.0f, -100.0f, 100.0f).setUv(16.0f, 16.0f).setColor(40, 40, 40, 255);
 
-            bufferBuilder.vertex(matrix4f, 100.0f, -100.0f, -100.0f).uv(16.0f, 0.0f).color(40, 40, 40, 255).endVertex();
+            bufferBuilder.addVertex(matrix4f, 100.0f, -100.0f, -100.0f).setUv(16.0f, 0.0f).setColor(40, 40, 40, 255);
 
             tessellator.end();
             matrices.popPose();
@@ -213,13 +213,13 @@ public class SkyboxUtil extends LevelRenderer {
             float l = fs[2];
             Matrix4f matrix4f = matrices.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(j, k, l, fs[3]).endVertex();
+            bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
             int m = 16;
             for (int n = 0; n <= 16; ++n) {
                 o = (float)n * ((float)Math.PI * 2) / 16.0f;
                 p = Mth.sin(o);
                 q = Mth.cos(o);
-                bufferBuilder.vertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
+                bufferBuilder.addVertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).setColor(fs[0], fs[1], fs[2], 0.0f);
             }
             BufferUploader.drawWithShader(bufferBuilder.end());
             matrices.popPose();

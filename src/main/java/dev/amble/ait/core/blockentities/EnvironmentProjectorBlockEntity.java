@@ -13,6 +13,7 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.properties.Value;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -72,10 +73,10 @@ public class EnvironmentProjectorBlockEntity extends InteriorLinkableBlockEntity
 
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
-        this.current = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
+        this.current = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString("dimension")));
 
         if (nbt.contains("yaw")) {
             this.currentYaw = nbt.getFloat("yaw");
@@ -93,8 +94,8 @@ public class EnvironmentProjectorBlockEntity extends InteriorLinkableBlockEntity
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         nbt.putString("dimension", this.current.location().toString());
         nbt.putFloat("yaw", this.currentYaw);

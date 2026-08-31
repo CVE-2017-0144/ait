@@ -283,15 +283,15 @@ public abstract class SkyboxMixin {
 
             Matrix4f matrix4f = matrices.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(j, k, l, fs[3]).endVertex();
+            bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
 
             for (int n = 0; n <= 16; n++) {
                 o = (float) n * ((float) Math.PI * 2) / 16.0f;
                 p = Mth.sin(o);
                 q = Mth.cos(o);
 
-                bufferBuilder.vertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3])
-                        .color(fs[0], fs[1], fs[2], 0.0f).endVertex();
+                bufferBuilder.addVertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3])
+                        .setColor(fs[0], fs[1], fs[2], 0.0f);
             }
 
             BufferUploader.drawWithShader(bufferBuilder.end());
@@ -315,10 +315,10 @@ public abstract class SkyboxMixin {
         RenderSystem.setShaderTexture(0, SUN_LOCATION);
 
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix4f2, -k, 100.0f, -k).uv(0.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, k, 100.0f, -k).uv(1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, k, 100.0f, k).uv(1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, -k, 100.0f, k).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.addVertex(matrix4f2, -k, 100.0f, -k).setUv(0.0f, 0.0f);
+        bufferBuilder.addVertex(matrix4f2, k, 100.0f, -k).setUv(1.0f, 0.0f);
+        bufferBuilder.addVertex(matrix4f2, k, 100.0f, k).setUv(1.0f, 1.0f);
+        bufferBuilder.addVertex(matrix4f2, -k, 100.0f, k).setUv(0.0f, 1.0f);
 
         BufferUploader.drawWithShader(bufferBuilder.end());
         k = 20.0f;
@@ -334,10 +334,10 @@ public abstract class SkyboxMixin {
         q = (float) (m + 1) / 2.0f;
 
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix4f2, -k, -100.0f, k).uv(p, q).endVertex();
-        bufferBuilder.vertex(matrix4f2, k, -100.0f, k).uv(t, q).endVertex();
-        bufferBuilder.vertex(matrix4f2, k, -100.0f, -k).uv(t, o).endVertex();
-        bufferBuilder.vertex(matrix4f2, -k, -100.0f, -k).uv(p, o).endVertex();
+        bufferBuilder.addVertex(matrix4f2, -k, -100.0f, k).setUv(p, q);
+        bufferBuilder.addVertex(matrix4f2, k, -100.0f, k).setUv(t, q);
+        bufferBuilder.addVertex(matrix4f2, k, -100.0f, -k).setUv(t, o);
+        bufferBuilder.addVertex(matrix4f2, -k, -100.0f, -k).setUv(p, o);
 
         BufferUploader.drawWithShader(bufferBuilder.end());
         float u = level.getStarBrightness(tickDelta) * i;
@@ -412,13 +412,13 @@ public abstract class SkyboxMixin {
             float l = fs[2];
             Matrix4f matrix4f = matrices.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(j, k, l, fs[3]).endVertex();
+            bufferBuilder.addVertex(matrix4f, 0.0f, 100.0f, 0.0f).setColor(j, k, l, fs[3]);
             int m = 16;
             for (int n = 0; n <= 16; ++n) {
                 o = (float)n * ((float)Math.PI * 2) / 16.0f;
                 p = Mth.sin(o);
                 q = Mth.cos(o);
-                bufferBuilder.vertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
+                bufferBuilder.addVertex(matrix4f, p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).setColor(fs[0], fs[1], fs[2], 0.0f);
             }
             BufferUploader.drawWithShader(bufferBuilder.end());
             matrices.popPose();

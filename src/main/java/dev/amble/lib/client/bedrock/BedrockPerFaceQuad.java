@@ -29,12 +29,12 @@ public record BedrockPerFaceQuad(
                                float u, float v, Vector3f n,
                                int light, int overlay,
                                float red, float green, float blue, float alpha) {
-        vc.vertex(pos, p.x(), p.y(), p.z())
-                .color(red, green, blue, alpha)
-                .uv(u, v)
-                .overlayCoords(overlay)
-                .uv2(light)
-                .normal(n.x(), n.y(), n.z())
-                .endVertex();
+        vc.addVertex(pos, p.x(), p.y(), p.z())
+                .setColor(red, green, blue, alpha)
+                .setUv(u, v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(n.x(), n.y(), n.z())
+                ;
     }
 }

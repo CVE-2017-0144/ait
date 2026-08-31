@@ -26,8 +26,8 @@ public class BotiThickPortalModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 32, 32);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        BOTI.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        BOTI.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

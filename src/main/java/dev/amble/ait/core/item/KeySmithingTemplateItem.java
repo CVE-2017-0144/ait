@@ -24,8 +24,8 @@ public class KeySmithingTemplateItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
         tooltip.add(Component.translatable("message.ait.keysmithing.upgrade").withStyle(TITLE_FORMATTING));
         tooltip.add(CommonComponents.EMPTY);
         tooltip.add(Component.translatable("message.ait.keysmithing.key").withStyle(TITLE_FORMATTING));

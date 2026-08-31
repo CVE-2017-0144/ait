@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,7 +21,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.RecordItem;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.drinks.DrinkRegistry;
@@ -61,7 +59,7 @@ public class AITItems extends ItemContainer {
             new AItemSettings().group(AITItemGroups.MAIN).fireResistant().stacksTo(1));
 
     @NoEnglish
-    public static final LinkableItem SIEGE_ITEM = new SiegeTardisItem(new FabricItemSettings().fireResistant());
+    public static final LinkableItem SIEGE_ITEM = new SiegeTardisItem(new Item.Properties().fireResistant());
 
     // Functional Items
     @NoEnglish
@@ -200,36 +198,44 @@ public class AITItems extends ItemContainer {
 
     // Music discs
     @NoEnglish
-    public static final Item TWO_THOUSAND_MUSIC_DISC = new RecordItem(1, AITSounds.TWO_THOUSAND,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 169);
+    public static final Item TWO_THOUSAND_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.TWO_THOUSAND));
 
     @NoEnglish
-    public static final Item STAGE_4_MUSIC_DISC = new RecordItem(15, AITSounds.STAGE_4,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 239);
+    public static final Item STAGE_4_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.STAGE_4));
 
     @NoEnglish
-    public static final Item WONDERFUL_TIME_IN_SPACE_MUSIC_DISC = new RecordItem(1, AITSounds.WONDERFUL_TIME_IN_SPACE,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 73);
+    public static final Item WONDERFUL_TIME_IN_SPACE_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.WONDERFUL_TIME_IN_SPACE));
 
     @NoEnglish
-    public static final Item VENUS_MUSIC_DISC = new RecordItem(1, AITSounds.VENUS_MUSIC,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 342);
+    public static final Item VENUS_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.VENUS));
 
     @NoEnglish
-    public static final Item GOOD_MAN_MUSIC_DISC = new RecordItem(1, AITSounds.GOOD_MAN_MUSIC,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 342);
+    public static final Item GOOD_MAN_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.GOOD_MAN));
 
     @NoEnglish
-    public static final Item AIT_THEME_MUSIC_DISC = new RecordItem(1, AITSounds.AIT_THEME_MONO,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 180);
+    public static final Item AIT_THEME_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.AIT_THEME));
 
     @NoEnglish
-    public static final Item EARTH_MUSIC_DISC = new RecordItem(1, AITSounds.EARTH_MUSIC,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 315);
+    public static final Item EARTH_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.EARTH));
 
     @NoEnglish
-    public static final Item CRASH_MUSIC_DISC = new RecordItem(1, AITSounds.ARPALARM_MONO,
-            new AItemSettings().stacksTo(1).rarity(Rarity.RARE), 69);
+    public static final Item CRASH_MUSIC_DISC = new Item(
+            new AItemSettings().stacksTo(1).rarity(Rarity.RARE)
+                    .jukeboxPlayable(AITJukeboxSongs.CRASH));
 
 
     // Block controls

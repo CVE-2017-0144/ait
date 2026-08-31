@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -41,16 +42,16 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         nbt.putDouble("artronAmount", this.artronAmount);
     }
 
     @Override
-    public void load(CompoundTag nbt) {
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         if (nbt.contains("artronAmount"))
             this.setCurrentFuel(nbt.getDouble("artronAmount"));
-        super.load(nbt);
+        super.loadAdditional(nbt, registries);
     }
 
     public void useOn(Level world, boolean sneaking, Player player) {
@@ -101,8 +102,8 @@ public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements 
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag nbtCompound = super.getUpdateTag();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag nbtCompound = super.getUpdateTag(registries);
         nbtCompound.putDouble("artronAmount", this.artronAmount);
         return nbtCompound;
     }

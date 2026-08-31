@@ -7,41 +7,41 @@ import net.minecraft.resources.ResourceLocation;
 // TODO: move to client exterior schema or sum
 public class DoomConstants {
 
-    public static final ResourceLocation DOOM_FRONT_BACK = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back.png");
-    public static final ResourceLocation DOOM_LEFT_SIDE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side.png");
-    public static final ResourceLocation DOOM_RIGHT_SIDE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side.png");
-    public static final ResourceLocation DOOM_LEFT_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal.png");
-    public static final ResourceLocation DOOM_RIGHT_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal.png");
-    public static final ResourceLocation DOOM_BLANK_DIAGONAL = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_BLANK_DIAGONAL = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_blank_diagonal.png");
-    public static final ResourceLocation DOOM_TEXTURE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_TEXTURE_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_emission.png");
-    public static final ResourceLocation DOOM_LEFT_SIDE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side_emission.png");
-    public static final ResourceLocation DOOM_RIGHT_SIDE_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side_emission.png");
-    public static final ResourceLocation DOOM_DIAGONAL_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_DIAGONAL_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_diagonal_emission.png");
-    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal_open.png");
-    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal_open.png");
-    public static final ResourceLocation DOOM_LEFT_SIDE_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_SIDE_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_side_open.png");
-    public static final ResourceLocation DOOM_RIGHT_SIDE_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_SIDE_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_side_open.png");
-    public static final ResourceLocation DOOM_FRONT_BACK_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back_open.png");
-    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_LEFT_DIAGONAL_OPEN_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_left_diagonal_open_emission.png");
-    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_RIGHT_DIAGONAL_OPEN_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_right_diagonal_open_emission.png");
-    public static final ResourceLocation DOOM_FRONT_BACK_OPEN_EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_FRONT_BACK_OPEN_EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_front_back_open_emission.png");
 
     public static ResourceLocation getTextureForRotation(float rotation, Tardis tardis) {

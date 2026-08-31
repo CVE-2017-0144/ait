@@ -16,7 +16,7 @@ public abstract class StallionVariant extends ExteriorVariantSchema {
     protected static final String TEXTURE_PATH = "textures/blockentities/exteriors/stallion/stallion_";
 
     protected StallionVariant(String name, String modId) {
-        super(StallionCategory.REFERENCE, new ResourceLocation(modId, "exterior/stallion/" + name),
+        super(StallionCategory.REFERENCE, ResourceLocation.fromNamespaceAndPath(modId, "exterior/stallion/" + name),
                 new Loyalty(Loyalty.Type.COMPANION));
     }
 

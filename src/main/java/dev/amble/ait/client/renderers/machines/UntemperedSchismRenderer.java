@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class UntemperedSchismRenderer<T extends UntemperedSchismBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation UNTEMPERED_SCHISM_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation UNTEMPERED_SCHISM_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/machines/untempered_schism.png"));
     private final UntemperedSchismModel untemperedSchismModel;
 
@@ -38,9 +38,7 @@ public class UntemperedSchismRenderer<T extends UntemperedSchismBlockEntity> imp
 
         matrices.mulPose(Axis.XP.rotationDegrees(180));
 
-        this.untemperedSchismModel.renderToBuffer(matrices,
-                vertexConsumers.getBuffer(RenderType.entityTranslucent(UNTEMPERED_SCHISM_TEXTURE)), light, overlay, 1.0F,
-                1.0F, 1.0F, 1.0F);
+        this.untemperedSchismModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(UNTEMPERED_SCHISM_TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
     }

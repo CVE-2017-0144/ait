@@ -72,7 +72,7 @@ public class MultiBlockStructureRenderer {
     }
 
     private void renderBlockEntities(BlockEntity entity,  PoseStack matrices, MultiBufferSource provider) {
-        client.getBlockEntityRenderDispatcher().render(entity, Minecraft.getInstance().getFrameTime(), matrices, provider);
+        client.getBlockEntityRenderDispatcher().render(entity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), matrices, provider);
     }
 
     public void renderOffset(MultiBlockStructure.BlockOffset offset, BlockPos centre, BlockAndTintGetter view, PoseStack matrices, MultiBufferSource provider, boolean holographic) {

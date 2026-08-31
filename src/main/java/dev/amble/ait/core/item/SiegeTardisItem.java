@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
@@ -20,6 +21,7 @@ import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 // todo fix so many issues with having more than one of this item
@@ -99,8 +101,8 @@ public class SiegeTardisItem extends LinkableItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        CompoundTag tag = stack.getOrCreateTag();
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        CompoundTag tag = ItemNbt.get(stack);
         String text = tag.contains("tardis-uuid")
                 ? tag.getUUID("tardis-uuid").toString().substring(0, 8)
                 : Component.translatable("tooltip.ait.remoteitem.notardis").getString();

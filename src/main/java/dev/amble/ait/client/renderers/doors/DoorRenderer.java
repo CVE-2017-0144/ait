@@ -52,8 +52,7 @@ public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRende
             matrices.mulPose(Axis.YN.rotationDegrees(k + 180));
             matrices.mulPose(Axis.XP.rotationDegrees(180f));
             CapsuleDoorModel doorModel = new CapsuleDoorModel(CapsuleDoorModel.getTexturedModelData().bakeRoot());
-            doorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutout(ClientExteriorVariantRegistry.CAPSULE_DEFAULT.texture())),
-                    light, overlay, 1, 1, 1, 1);
+            doorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutout(ClientExteriorVariantRegistry.CAPSULE_DEFAULT.texture())), light, overlay, 0xFFFFFFFF);
             matrices.popPose();
             return;
         }

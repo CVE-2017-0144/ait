@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 public class AstralMapRenderer<T extends AstralMapBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/machines/astral_map.png");
 
     private final AstralMapModel model;
@@ -44,8 +44,7 @@ public class AstralMapRenderer<T extends AstralMapBlockEntity> implements BlockE
         matrices.translate(0.5, -1.5f, -0.5);
         matrices.mulPose(Axis.YN.rotationDegrees(h));
 
-        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)),
-                light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
         matrices.pushPose();
@@ -53,9 +52,7 @@ public class AstralMapRenderer<T extends AstralMapBlockEntity> implements BlockE
         matrices.translate(0.5, 0, -0.5);
         matrices.mulPose(Axis.YN.rotationDegrees(h));
 
-        this.model.void_cube.render(matrices,
-                vertexConsumers.getBuffer(RenderType.endGateway()),
-                light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.model.void_cube.render(matrices, vertexConsumers.getBuffer(RenderType.endGateway()), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
     }
 }

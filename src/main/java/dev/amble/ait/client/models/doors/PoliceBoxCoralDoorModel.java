@@ -167,9 +167,8 @@ public class PoliceBoxCoralDoorModel extends DoorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        TARDIS.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        TARDIS.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

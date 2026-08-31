@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class TardisMatrixItem extends Item {
     public TardisMatrixItem(Properties settings) {
@@ -24,16 +25,20 @@ public class TardisMatrixItem extends Item {
 
     public static ItemStack randomize() {
         ItemStack stack = new ItemStack(AITItems.TARDIS_MATRIX);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putInt("r", (int) (Math.random() * 256));
+        ItemNbt.set(stack, nbt);
         nbt.putInt("g", (int) (Math.random() * 256));
+        ItemNbt.set(stack, nbt);
         nbt.putInt("b", (int) (Math.random() * 256));
+        ItemNbt.set(stack, nbt);
         nbt.putString("name", StatsHandler.getRandomName());
+        ItemNbt.set(stack, nbt);
         return stack;
     }
 
     public int[] getColor(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         if (!nbt.contains("r") && !nbt.contains("g") && !nbt.contains("b")) {
             return new int[]{255, 255, 255};
         }
@@ -52,10 +57,10 @@ public class TardisMatrixItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
-        tooltip.add(Component.translatable("tooltip.ait.tardis_matrix.name", stack.getOrCreateTag().getString("name"))
+        tooltip.add(Component.translatable("tooltip.ait.tardis_matrix.name", ItemNbt.get(stack).getString("name"))
                 .withStyle(ChatFormatting.BLUE));
         tooltip.add(Component.literal("#" + colorToInt(getColor(stack)[0], getColor(stack)[1], getColor(stack)[2]))
                 .withStyle(ChatFormatting.GRAY));

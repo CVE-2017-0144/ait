@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -12,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.animation.v2.AnimationHolder;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimation;
 import dev.amble.ait.core.tardis.animation.v2.TardisAnimationMap;
@@ -35,7 +35,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
 
     @Environment(EnvType.CLIENT)
     public static void initClient() {
-        ClientPlayNetworking.registerGlobalReceiver(AnimationHolder.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(AnimationHolder.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
             State state = buf.readEnum(State.class);
             ResourceLocation id = buf.readResourceLocation();
             UUID uuid = buf.readUUID();

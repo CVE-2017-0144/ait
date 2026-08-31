@@ -5,9 +5,6 @@ import java.util.WeakHashMap;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,7 +21,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import qouteall.imm_ptl.core.CHelper;
 import qouteall.imm_ptl.core.ClientWorldLoader;
 import qouteall.imm_ptl.core.api.PortalAPI;
 import qouteall.imm_ptl.core.chunk_loading.ChunkLoader;
@@ -36,6 +32,7 @@ import qouteall.q_misc_util.my_util.DQuaternion;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 
 public class PortalVisualizerUtil {
 
@@ -48,7 +45,7 @@ public class PortalVisualizerUtil {
     public static void init() {
         PortalsAPI.VISUALIZER = Optional.of(PortalVisualizerUtil::open);
 
-        ServerPlayNetworking.registerGlobalReceiver(CLOSE_VISUALIZER, (server, player, handler, buf, sender) -> {
+        AitNetworking.registerServerReceiver(CLOSE_VISUALIZER, (server, player, handler, buf, sender) -> {
             server.execute(() -> removeChunkLoaderFor(player));
         });
     }
@@ -80,11 +77,11 @@ public class PortalVisualizerUtil {
         chunkLoaderMap.put(player, chunkLoader);
 
         // Tell the client to open the screen
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeResourceKey(world.dimension());
         buf.writeBlockPos(pos);
 
-        ServerPlayNetworking.send(player, OPEN_VISUALIZER, buf);
+        AitNetworking.send(player, OPEN_VISUALIZER, buf);
     }
 
     @Environment(EnvType.CLIENT)
@@ -108,7 +105,7 @@ public class PortalVisualizerUtil {
         private static RenderTarget frameBuffer;
 
         public static void clientInit() {
-            ClientPlayNetworking.registerGlobalReceiver(OPEN_VISUALIZER, (client, handler, buf, sender) -> {
+            AitNetworking.registerClientReceiver(OPEN_VISUALIZER, (client, handler, buf, sender) -> {
                 ResourceKey<Level> dim = buf.readResourceKey(Registries.DIMENSION);
                 BlockPos pos = buf.readBlockPos();
 
@@ -131,7 +128,7 @@ public class PortalVisualizerUtil {
         public void onClose() {
             super.onClose();
 
-            ClientPlayNetworking.send(CLOSE_VISUALIZER, PacketByteBufs.create());
+            AitNetworking.send(CLOSE_VISUALIZER, AitNetworking.buf());
         }
 
         @Override

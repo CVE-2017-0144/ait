@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -45,11 +46,9 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             matrices.translate(0.5, 1.5, 0.5);
             matrices.mulPose(Axis.XP.rotationDegrees(180f));
             HartnellConsoleModel model = new HartnellConsoleModel(HartnellConsoleModel.getTexturedModelData().bakeRoot());
-            model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutout(ClientConsoleVariantRegistry.HARTNELL.texture())),
-                    light, overlay, 1, 1, 1, 1);
+            model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutout(ClientConsoleVariantRegistry.HARTNELL.texture())), light, overlay, 0xFFFFFFFF);
             RenderType layer = AITRenderLayers.tardisEmissiveCullZOffset(ClientConsoleVariantRegistry.HARTNELL.emission(), true);
-            model.renderToBuffer(matrices, vertexConsumers.getBuffer(layer),
-                    0xf000f0, overlay, 1, 1, 1, 1);
+            model.renderToBuffer(matrices, vertexConsumers.getBuffer(layer), 0xf000f0, overlay, 0xFFFFFFFF);
             matrices.popPose();
             return;
         }
@@ -71,7 +70,7 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
         matrices.translate(1, 2 + entity.getLevel().random.nextFloat() * 0.02, 0.5);
         matrices.mulPose(Axis.XN.rotationDegrees(180f));
         matrices.mulPose(Axis.YP.rotationDegrees(30f));
-        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getFrameTime() % 180));
+        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) % 180));
         matrices.translate(0.58, 0.1, -0.25);
         matrices.scale(0.9f, 0.9f, 0.9f);
 
@@ -88,7 +87,7 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
         matrices.translate(-1, 2 + entity.getLevel().random.nextFloat() * 0.02, -0.5);
         matrices.mulPose(Axis.XN.rotationDegrees(180f));
         matrices.mulPose(Axis.YP.rotationDegrees(30f));
-        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getFrameTime() % 180));
+        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) % 180));
         matrices.translate(0.78, 0.15, -0.11);
         matrices.scale(0.9f, 0.9f, 0.9f);
 
@@ -157,7 +156,7 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             //handlesModel.setAngles(matrices, ModelTransformationMode.GROUND, false);
             handlesModel.handles.getChild("stalk").xRot = 45f;
             handlesModel.handles.getChild("stalk").getChild("head").xRot = -0.25f;
-            handlesModel.render(null, Minecraft.getInstance().player, stack, matrices, vertexConsumers, light, overlay, 0);
+            handlesModel.render(null, Minecraft.getInstance().player, stack, matrices, FastColor.ARGB32.colorFromFloat(0, vertexConsumers, light, overlay));
             matrices.popPose();
         } else {
             matrices.pushPose();

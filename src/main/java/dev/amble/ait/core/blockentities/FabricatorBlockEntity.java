@@ -4,6 +4,7 @@ package dev.amble.ait.core.blockentities;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -141,8 +142,8 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         this.blueprint = null;
 
@@ -151,8 +152,8 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (blueprint != null)
             nbt.put("Blueprint", blueprint.toNbt());

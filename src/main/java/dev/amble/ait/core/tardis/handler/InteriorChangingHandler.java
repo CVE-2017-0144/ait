@@ -8,7 +8,6 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -35,10 +34,12 @@ import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.lock.LockedDimension;
 import dev.amble.ait.core.lock.LockedDimensionRegistry;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.tardis.util.TardisUtil;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
@@ -54,7 +55,7 @@ import dev.amble.lib.data.DirectedGlobalPos;
 
 public class InteriorChangingHandler extends KeyedTardisComponent implements TardisTickable {
     public static final ResourceLocation CHANGE_DESKTOP = AITMod.id("change_desktop");
-    private static final Property<ResourceLocation> QUEUED_INTERIOR_PROPERTY = new Property<>(Property.IDENTIFIER, "queued_interior", new ResourceLocation(""));
+    private static final Property<ResourceLocation> QUEUED_INTERIOR_PROPERTY = new Property<>(Property.IDENTIFIER, "queued_interior", ResourceLocation.parse(""));
     private static final BoolProperty QUEUED = new BoolProperty("queued");
     private static final BoolProperty REGENERATING = new BoolProperty("regenerating");
     private static final int MIN_FUEL_COST = 5000;
@@ -119,7 +120,7 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
         TardisEvents.LOSE_POWER.register(tardis -> tardis.interiorChangingHandler().queued.set(false));
 
-        ServerPlayNetworking.registerGlobalReceiver(InteriorChangingHandler.CHANGE_DESKTOP,
+        AitNetworking.registerServerReceiver(InteriorChangingHandler.CHANGE_DESKTOP,
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     TardisDesktopSchema desktop = DesktopRegistry.getInstance().get(buf.readResourceLocation());
 
@@ -379,7 +380,7 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
                     this.queueInteriorChange(DesktopRegistry.getInstance().get(AITMod.id("cave")));
 
                     if (stack.is(AITItems.TARDIS_MATRIX)) {
-                        CompoundTag nbt = stack.getOrCreateTag();
+                        CompoundTag nbt = ItemNbt.get(stack);
                         if (nbt.contains("name")) {
                             this.tardis.stats().setName(nbt.getString("name"));
                         }

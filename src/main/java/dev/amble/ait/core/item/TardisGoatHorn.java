@@ -30,6 +30,7 @@ import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.data.enummap.EnumSet;
 import dev.amble.ait.data.enummap.Ordered;
@@ -105,7 +106,7 @@ public class TardisGoatHorn extends LinkableItem {
     }
 
     private Optional<Holder<Instrument>> getInstrument(ItemStack stack) {
-        CompoundTag nbtCompound = stack.getTag();
+        CompoundTag nbtCompound = ItemNbt.getNullable(stack);
         if (nbtCompound != null && nbtCompound.contains("instrument", 8)) {
             ResourceLocation identifier = ResourceLocation.tryParse(nbtCompound.getString("instrument"));
             if (identifier != null) {

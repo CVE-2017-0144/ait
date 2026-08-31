@@ -2,7 +2,6 @@ package dev.amble.lib.datagen.recipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -11,6 +10,7 @@ import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +34,7 @@ public class AmbleRecipeProvider extends FabricRecipeProvider {
     }
 
     @Override
-    public void buildRecipes(Consumer<FinishedRecipe> exporter) {
+    public void buildRecipes(Consumer<RecipeOutput> exporter) {
         for (ShapelessRecipeBuilder shapelessRecipeJsonBuilder : shapelessRecipes) {
             shapelessRecipeJsonBuilder.save(exporter);
         }
@@ -90,7 +90,7 @@ public class AmbleRecipeProvider extends FabricRecipeProvider {
     }
 
     private ResourceLocation getStonecuttingIdentifier(Block in, Block out) {
-        return new ResourceLocation(this.output.getModId(), fixupBlockKey(in.getDescriptionId()) + "_to_" + fixupBlockKey(out.getDescriptionId()) + "_stonecutting");
+        return ResourceLocation.fromNamespaceAndPath(this.output.getModId(), fixupBlockKey(in.getDescriptionId()) + "_to_" + fixupBlockKey(out.getDescriptionId()) + "_stonecutting");
     }
 
     private String fixupBlockKey(String key) {

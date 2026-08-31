@@ -63,8 +63,8 @@ public class ClassicHudolinDoorModel extends DoorModel {
         return LayerDefinition.create(modelData, 512, 512);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        hudolin.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        hudolin.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

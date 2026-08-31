@@ -64,7 +64,7 @@ public record PlanetTransition(ResourceLocation target, int height) {
     public boolean isEmpty() {
         return this == EMPTY;
     }
-    public static final PlanetTransition EMPTY = new PlanetTransition(new ResourceLocation("empty"), 0);
+    public static final PlanetTransition EMPTY = new PlanetTransition(ResourceLocation.parse("empty"), 0);
     public static PlanetTransition toSpace(int height) {
         return new PlanetTransition(AITDimensions.SPACE.location(), height);
     }

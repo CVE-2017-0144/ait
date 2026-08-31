@@ -53,7 +53,7 @@ public interface RegistryContainer<T> {
                 if (field.isAnnotationPresent(AssignedName.class))
                     name = field.getAnnotation(AssignedName.class).value();
 
-                ResourceLocation id = new ResourceLocation(namespace, name);
+                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, name);
 
                 // Only register the value when it isn't already present in the target
                 // registry. Some external APIs (e.g. TerraformersMC's boat API) register

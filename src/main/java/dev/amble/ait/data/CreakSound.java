@@ -25,6 +25,6 @@ public class CreakSound {
     }
 
     private static ResourceLocation createId(String modid, String name) {
-        return new ResourceLocation(modid, "creak/" + name);
+        return ResourceLocation.fromNamespaceAndPath(modid, "creak/" + name);
     }
 }

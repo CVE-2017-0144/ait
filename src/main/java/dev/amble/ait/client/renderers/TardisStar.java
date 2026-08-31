@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
@@ -23,7 +24,7 @@ import dev.amble.ait.core.world.TardisServerWorld;
 
 public class TardisStar {
 
-    public static final ResourceLocation TARDIS_STAR_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TARDIS_STAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/environment/eye_of_harmony.png");
     private static final float HALF_SQRT_3 = (float) (Math.sqrt(3.0) / 2.0);
 
@@ -56,20 +57,14 @@ public class TardisStar {
         matrixStack.translate(0, diff.y, 0);
         matrixStack.scale(40f, 40f, 40f);
 
-        float delta = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
         matrixStack.mulPose(Axis.YP
                 .rotationDegrees(delta));
 
-        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack,
-                provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE, true)),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tardis.isGrowth() ? 0.1f : 1,
-                tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1, 0.5f);
+        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE, true)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(0.5f, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1));
 
         matrixStack.scale(0.9f, 0.9f, 0.9f);
-        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack,
-                provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE, true)),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1, tardis.isGrowth() ? 0.2f : 1,
-                tardis.isGrowth() ? 0f : 1, 1f);
+        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE, true)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 1, tardis.isGrowth() ? 0.2f : 1, tardis.isGrowth() ? 0f : 1));
     }
 
     public static void renderShine(WorldRenderContext context, Tardis tardis) {
@@ -87,8 +82,8 @@ public class TardisStar {
 
         Vec3 diff = targetPos.subtract(cameraPos);
 
-        float l = (Minecraft.getInstance().getFrameTime() / 50120L);
-        float delta = Minecraft.getInstance().getFrameTime() + Minecraft.getInstance().player.tickCount;
+        float l = (Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) / 50120L);
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) + Minecraft.getInstance().player.tickCount;
         float sinFunc = (float) Math.sin((delta * (tardis.travel().speed() + 1)) * 0.2f + 0.2f);
         RandomSource random = RandomSource.create(432L);
         VertexConsumer vertexConsumer4 = provider.getBuffer(AITRenderLayers.lightning());
@@ -136,23 +131,23 @@ public class TardisStar {
     }
 
     public static void putDeathLightSourceVertex(Tardis tardis, VertexConsumer buffer, Matrix4f matrix, int alpha) {
-        buffer.vertex(matrix, 0.0f, 0.0f, 0.0f).color(255, 255, 255, alpha).endVertex();
+        buffer.addVertex(matrix, 0.0f, 0.0f, 0.0f).setColor(255, 255, 255, alpha);
     }
 
     public static void putDeathLightNegativeXTerminalVertex(Tardis tardis, VertexConsumer buffer, Matrix4f matrix,
                                                             float radius, float width) {
-        buffer.vertex(matrix, -HALF_SQRT_3 * width, radius, -0.5f * width)
-                .color(255, tardis.isGrowth() ? 30 : 154, 0, 0).endVertex();
+        buffer.addVertex(matrix, -HALF_SQRT_3 * width, radius, -0.5f * width)
+                .setColor(255, tardis.isGrowth() ? 30 : 154, 0, 0);
     }
 
     public static void putDeathLightPositiveXTerminalVertex(Tardis tardis, VertexConsumer buffer, Matrix4f matrix,
                                                             float radius, float width) {
-        buffer.vertex(matrix, HALF_SQRT_3 * width, radius, -0.5f * width).color(255, tardis.isGrowth() ? 30 : 154, 0, 0)
-                .endVertex();
+        buffer.addVertex(matrix, HALF_SQRT_3 * width, radius, -0.5f * width).setColor(255, tardis.isGrowth() ? 30 : 154, 0, 0)
+                ;
     }
 
     public static void putDeathLightPositiveZTerminalVertex(Tardis tardis, VertexConsumer buffer, Matrix4f matrix,
                                                             float radius, float width) {
-        buffer.vertex(matrix, 0.0f, radius, width).color(255, tardis.isGrowth() ? 30 : 154, 0, 0).endVertex();
+        buffer.addVertex(matrix, 0.0f, radius, width).setColor(255, tardis.isGrowth() ? 30 : 154, 0, 0);
     }
 }

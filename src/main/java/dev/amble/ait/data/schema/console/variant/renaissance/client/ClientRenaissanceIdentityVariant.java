@@ -10,9 +10,9 @@ import dev.amble.ait.data.schema.console.variant.renaissance.RenaissanceIdentity
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientRenaissanceIdentityVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/renaissance_identity.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/renaissance_identity_emission.png"));
 
     public ClientRenaissanceIdentityVariant() {

@@ -29,7 +29,7 @@ public class FlagBlockEntityRenderer<T extends FlagBlockEntity> implements Block
         matrices.mulPose(Axis.XP.rotationDegrees(180));
         float k = entity.getBlockState().getValue(FlagBlock.FACING).toYRot();
         matrices.mulPose(Axis.YP.rotationDegrees(k));
-        flagModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(FLAG_TEXTURE)), light, overlay, 1, 1, 1, 1);
+        flagModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(FLAG_TEXTURE)), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
     }
 }

@@ -5,9 +5,6 @@ import java.util.function.Predicate;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -25,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -38,6 +36,8 @@ import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.AITStatusEffects;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class BaseGunItem extends ProjectileWeaponItem {
     public static final ResourceLocation SHOOT = AITMod.id("shoot_gun");
@@ -50,7 +50,7 @@ public class BaseGunItem extends ProjectileWeaponItem {
     }
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(SHOOT, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(SHOOT, (server, player, handler, buf, responseSender) -> {
         boolean shoot = buf.readBoolean();
         boolean isAds = buf.readBoolean();
 
@@ -62,14 +62,16 @@ public class BaseGunItem extends ProjectileWeaponItem {
                 }
                 BaseGunItem.shoot(player.level(), player, InteractionHand.MAIN_HAND, player.getMainHandItem(), GunItems.STASER_BOLT_MAGAZINE.getDefaultInstance(),
                         1.0f, false, 4.0f, player.hasEffect(AITStatusEffects.ZEITON_HIGH) ? 20f : gun.getAimDeviation(isAds), 0.0f);
-                CompoundTag compound = player.getMainHandItem().getOrCreateTag();
+                CompoundTag compound = ItemNbt.get(player.getMainHandItem());
                 double current = compound.getDouble(AMMO_KEY);
                 double removableAmmo = (isAds ? 2 : 1);
                 player.getCooldowns().addCooldown(gun, gun.getCooldown());
                 if (current - removableAmmo <= 0) {
                     compound.putDouble(AMMO_KEY, 0);
+                    ItemNbt.set(player.getMainHandItem(), compound);
                 } else {
                     compound.putDouble(AMMO_KEY, current - removableAmmo <= 0 ? 0 : current - removableAmmo);
+                    ItemNbt.set(player.getMainHandItem(), compound);
                 }
             }
         }
@@ -79,17 +81,18 @@ public class BaseGunItem extends ProjectileWeaponItem {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putDouble(AMMO_KEY, 0);
+        ItemNbt.set(stack, nbt);
         return stack;
     }
 
     @Environment(EnvType.CLIENT)
     public static void shootGun(boolean shoot, boolean isAds) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeBoolean(shoot);
         buf.writeBoolean(isAds);
-        ClientPlayNetworking.send(BaseGunItem.SHOOT, buf);
+        AitNetworking.send(BaseGunItem.SHOOT, buf);
     }
 
     @Environment(EnvType.CLIENT)
@@ -137,13 +140,13 @@ public class BaseGunItem extends ProjectileWeaponItem {
 
     public double getCurrentAmmo(ItemStack stack) {
         if (stack.getItem() == this)
-            return stack.getOrCreateTag().getDouble(AMMO_KEY);
+            return ItemNbt.get(stack).getDouble(AMMO_KEY);
         return 0.0d;
     }
 
     public void setCurrentAmmo(double var, ItemStack stack) {
         if (stack.getItem() == this)
-            stack.getOrCreateTag().putDouble(AMMO_KEY, Math.min(var, this.getMaxAmmo()));
+            ItemNbt.edit(stack, tag -> tag.putDouble(AMMO_KEY, Math.min(var, this.getMaxAmmo())));
     }
 
     public double getMaxAmmo() {
@@ -203,8 +206,8 @@ public class BaseGunItem extends ProjectileWeaponItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         double currentAmmo = this.getCurrentAmmo(stack);
         ChatFormatting ammoColor = currentAmmo > (this.getMaxAmmo() / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;

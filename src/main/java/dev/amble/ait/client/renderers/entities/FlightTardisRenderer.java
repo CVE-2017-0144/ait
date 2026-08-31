@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 
 public class FlightTardisRenderer extends EntityRenderer<FlightTardisEntity> {
@@ -115,8 +116,8 @@ public class FlightTardisRenderer extends EntityRenderer<FlightTardisEntity> {
 
             float delta = ((tickDelta + entity.tickCount) * 0.03f);
             ShieldsModel shieldsModel = new ShieldsModel(ShieldsModel.getTexturedModelData().bakeRoot());
-            VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderType.energySwirl(new ResourceLocation("textures/misc/forcefield.png"), delta % 1.0F, (delta * 0.1F) % 1.0F));
-            shieldsModel.renderToBuffer(matrices, vertexConsumer, maxLight, OverlayTexture.NO_OVERLAY, 0f, 0.25f, 0.5f, 1f);
+            VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderType.energySwirl(ResourceLocation.parse("textures/misc/forcefield.png"), delta % 1.0F, (delta * 0.1F) % 1.0F));
+            shieldsModel.renderToBuffer(matrices, vertexConsumer, maxLight, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 0f, 0.25f, 0.5f));
             matrices.popPose();
         }
     }

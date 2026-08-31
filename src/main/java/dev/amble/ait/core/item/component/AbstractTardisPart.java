@@ -2,8 +2,6 @@ package dev.amble.ait.core.item.component;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +17,8 @@ import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.item.SonicItem;
 import dev.amble.ait.core.item.link.AbstractLinkItem;
 import dev.amble.ait.core.item.sonic.SonicMode;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.util.StackUtil;
 import dev.amble.ait.data.schema.MachineRecipeSchema;
 
@@ -36,7 +36,7 @@ public class AbstractTardisPart extends Item {
     }
 
     private static void set(ItemStack stack, AbstractLinkItem item, AbstractLinkItem.Type type) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         StackUtil.write(nbt, type.toString(), item);
     }
 
@@ -53,7 +53,7 @@ public class AbstractTardisPart extends Item {
     }
 
     public static AbstractLinkItem get(ItemStack stack, AbstractLinkItem.Type type) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         Item result = StackUtil.readItem(nbt, type.toString());
 
         if (result != null)
@@ -130,28 +130,28 @@ public class AbstractTardisPart extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void disassemble(ItemStack machine) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeItem(StackUtil.take(machine));
 
-        ClientPlayNetworking.send(DISASSEMBLE, data);
+        AitNetworking.send(DISASSEMBLE, data);
     }
 
     @Environment(value = EnvType.CLIENT)
     public static void unattach(ItemStack machine, AbstractLinkItem.Type link) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeItem(machine);
         data.writeEnum(link);
 
-        ClientPlayNetworking.send(UNATTACH, data);
+        AitNetworking.send(UNATTACH, data);
     }
 
     @Environment(value = EnvType.CLIENT)
     public static void attach(ItemStack machine, AbstractLinkItem link) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeItem(machine);
         StackUtil.writeItem(data, link);
 
-        ClientPlayNetworking.send(ATTACH, data);
+        AitNetworking.send(ATTACH, data);
     }
 
     @Environment(value = EnvType.SERVER)

@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -130,9 +131,8 @@ public class PoliceBoxCoralModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        TARDIS.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        TARDIS.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class PoliceBoxCoralModel extends SimpleExteriorModel {
             matrices.pushPose();
             matrices.scale(0.63F, 0.63F, 0.63F);
             matrices.translate(0, 0.125f, -0.01);
-            this.TARDIS.getChild("Doors").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+            this.TARDIS.getChild("Doors").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
     }

@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.core.*;
 import net.minecraft.world.phys.*;
@@ -226,7 +227,7 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
                 t = rgb[1];
                 s = rgb[2];
             } else if (tardis.sonic().getExteriorSonic() != null) {
-                float time = Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getFrameTime();
+                float time = Minecraft.getInstance().player.tickCount + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
                 float progress = (float)((Math.sin(time * 0.03) + 1) / 2.0f);
 
                 final float FROM_R = 1.0f, FROM_G = 1.0f, FROM_B = 1.0f;
@@ -289,8 +290,7 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
             matrices.pushPose();
             matrices.translate(0.5F, 0.0F, 0.5F);
 
-            SHIELDS_MODEL.renderToBuffer(matrices, vertexConsumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0f,
-                    0.25f, 0.5f, alpha);
+            SHIELDS_MODEL.renderToBuffer(matrices, vertexConsumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, 0f, 0.25f, 0.5f));
 
             matrices.popPose();
             profiler.pop();

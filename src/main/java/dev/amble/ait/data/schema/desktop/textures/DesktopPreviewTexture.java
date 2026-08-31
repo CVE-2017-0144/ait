@@ -40,6 +40,6 @@ public class DesktopPreviewTexture {
     }
 
     public static ResourceLocation pathFromDesktopId(ResourceLocation desktopId) {
-        return new ResourceLocation(desktopId.getNamespace(), "textures/desktop/" + desktopId.getPath() + ".png");
+        return ResourceLocation.fromNamespaceAndPath(desktopId.getNamespace(), "textures/desktop/" + desktopId.getPath() + ".png");
     }
 }

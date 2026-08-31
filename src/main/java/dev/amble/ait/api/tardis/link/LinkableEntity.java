@@ -50,8 +50,8 @@ public abstract class LinkableEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(TARDIS_ID, Optional.empty());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(TARDIS_ID, Optional.empty());
     }
 
     @Override

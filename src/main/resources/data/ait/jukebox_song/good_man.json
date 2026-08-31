@@ -1,0 +1,8 @@
+{
+  "sound_event": "ait:music/good_man_dian",
+  "description": {
+    "translate": "jukebox_song.ait.good_man"
+  },
+  "length_in_seconds": 342.0,
+  "comparator_output": 1
+}

@@ -21,7 +21,7 @@ public enum DefaultThemes {
     PRIME("accursed", "exterior/capsule/default", "prime", "console/hartnell"),
     TOYOTA("toyota", "exterior/police_box/default", "toyota", "console/toyota"),
     RENAISSANCE("renaissance", "exterior/police_box/renaissance", "renaissance", "console/renaissance"),
-    WAR(AITMod.id("war"), new ResourceLocation("frooploof", "coral_war"), AITMod.id("coral"), AITMod.id("console/coral")),
+    WAR(AITMod.id("war"), ResourceLocation.fromNamespaceAndPath("frooploof", "coral_war"), AITMod.id("coral"), AITMod.id("console/coral")),
     CRYSTALLINE("crystalline", "exterior/police_box/renaissance", "renaissance", "console/crystalline"),
     COPPER("copper", "exterior/police_box/default", "copper", "console/copper");
     private final ResourceLocation desktop;

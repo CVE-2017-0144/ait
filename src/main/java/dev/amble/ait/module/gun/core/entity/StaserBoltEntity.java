@@ -18,12 +18,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -77,7 +77,7 @@ public class StaserBoltEntity extends AbstractArrow implements ISpaceImmune {
             boolean allowGriefing = world.getServer().getGameRules().getBoolean(AITMod.STASER_GRIEFING);
             BlockHitResult result = (BlockHitResult) hitResult;
             Block block = this.level().getBlockState(result.getBlockPos()).getBlock();
-            if (allowGriefing && (block instanceof IceBlock || block instanceof LanternBlock || block instanceof TorchBlock || this.level().getBlockState(result.getBlockPos()).canBeReplaced() || block instanceof GlassBlock || block instanceof IronBarsBlock || block instanceof StainedGlassBlock)) {
+            if (allowGriefing && (block instanceof IceBlock || block instanceof LanternBlock || block instanceof TorchBlock || this.level().getBlockState(result.getBlockPos()).canBeReplaced() || block instanceof TransparentBlock || block instanceof IronBarsBlock || block instanceof StainedGlassBlock)) {
                 this.level().destroyBlock(result.getBlockPos(), false);
             }
             this.level().playSound(null, result.getBlockPos(), AITSounds.STASER, SoundSource.BLOCKS, 0.25f, 0.5f);

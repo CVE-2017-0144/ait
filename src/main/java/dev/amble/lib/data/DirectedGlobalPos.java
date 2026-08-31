@@ -147,7 +147,7 @@ public class DirectedGlobalPos {
     public static DirectedGlobalPos fromNbt(CompoundTag compound) {
         BlockPos pos = NbtUtils.readBlockPos(compound);
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION,
-                new ResourceLocation(compound.getString("dimension")));
+                ResourceLocation.parse(compound.getString("dimension")));
 
         byte rotation = compound.getByte("rotation");
         return DirectedGlobalPos.create(dimension, pos, rotation);

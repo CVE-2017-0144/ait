@@ -11,9 +11,9 @@ import dev.amble.ait.data.schema.console.variant.hudolin.HudolinNatureVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientHudolinNatureVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hudolin_console_nature.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/hudolin_console_nature_emission.png"));
 
     public ClientHudolinNatureVariant() {

@@ -21,9 +21,9 @@ import net.minecraft.world.level.LightLayer;
 // Paste this class into your mod and generate all required imports
 public class EngineRenderer<T extends EngineBlockEntity> implements BlockEntityRenderer<T> {
 
-    public static final ResourceLocation ENGINE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation ENGINE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/machines/engine.png"));
-    public static final ResourceLocation EMISSIVE_ENGINE_TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSIVE_ENGINE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/machines/engine_emission.png"));
     private final EngineModel engineModel;
 

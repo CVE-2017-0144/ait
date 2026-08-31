@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.control.impl.DirectionControl;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.Waypoint;
@@ -36,11 +37,11 @@ public abstract class AbstractCoordinateModifierItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
-            CompoundTag main = stack.getOrCreateTag();
+            CompoundTag main = ItemNbt.get(stack);
 
             if (!main.contains(POS_KEY))
                 return;
@@ -79,7 +80,7 @@ public abstract class AbstractCoordinateModifierItem extends Item {
     }
 
     public static CachedDirectedGlobalPos getPos(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         if (!nbt.contains(POS_KEY))
             return null;
@@ -93,7 +94,7 @@ public abstract class AbstractCoordinateModifierItem extends Item {
     }
 
     public static void setPos(ItemStack stack, DirectedGlobalPos pos) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         if (pos == null) return;
         CachedDirectedGlobalPos cached = CachedDirectedGlobalPos.create(pos.getDimension(), pos.getPos(), pos.getRotation());
         if (cached.getWorld() instanceof TardisServerWorld) {

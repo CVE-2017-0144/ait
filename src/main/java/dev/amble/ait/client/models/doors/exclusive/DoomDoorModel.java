@@ -21,9 +21,9 @@ import dev.amble.ait.client.tardis.ClientTardis;
 public class DoomDoorModel extends DoorModel {
     private final ModelPart doom;
 
-    public static final ResourceLocation DOOM_DOOR = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_DOOR = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_door.png");
-    public static final ResourceLocation DOOM_DOOR_OPEN = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation DOOM_DOOR_OPEN = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/exteriors/exclusive/doom/doom_door_open.png");
 
     public DoomDoorModel(ModelPart root) {
@@ -39,9 +39,8 @@ public class DoomDoorModel extends DoorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
-        doom.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        doom.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

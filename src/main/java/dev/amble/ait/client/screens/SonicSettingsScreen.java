@@ -25,11 +25,12 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.item.SonicItem;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
 import dev.amble.ait.registry.impl.SonicRegistry;
 
 public class SonicSettingsScreen extends ConsoleScreen {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/tardis/monitor/sonic_selection.png");
     private final List<Button> buttons = Lists.newArrayList();
     int bgHeight = 130;
@@ -141,7 +142,7 @@ public class SonicSettingsScreen extends ConsoleScreen {
 
         ItemStack sonic = consoleBlockEntity.getSonicScrewdriver(); //this.tardis().sonic().getConsoleSonic();
         if (sonic.isEmpty()) return;
-        CompoundTag nbt = sonic.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(sonic);
 
         if (this.tardis() != null) {
             PoseStack stack = context.pose();

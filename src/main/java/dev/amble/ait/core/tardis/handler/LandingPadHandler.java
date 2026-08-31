@@ -1,9 +1,9 @@
 package dev.amble.ait.core.tardis.handler;
 
 
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -51,7 +51,7 @@ public class LandingPadHandler extends KeyedTardisComponent {
             return TardisEvents.Interaction.PASS;
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(LANDING_CODE, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(LANDING_CODE, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             if (tardis == null)
                 return;
 

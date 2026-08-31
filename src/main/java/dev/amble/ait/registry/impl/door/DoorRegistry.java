@@ -2,10 +2,10 @@ package dev.amble.ait.registry.impl.door;
 
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.schema.door.DatapackDoor;
 import dev.amble.ait.data.schema.door.DoorSchema;
 import dev.amble.ait.data.schema.door.impl.*;
@@ -63,8 +63,8 @@ public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        FriendlyByteBuf secondary = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
+        FriendlyByteBuf secondary = AitNetworking.buf();
 
         int counter = 0;
         for (DoorSchema schema : this.toList()) {
@@ -77,7 +77,7 @@ public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
         buf.writeInt(counter);
         buf.writeBytes(secondary);
 
-        ServerPlayNetworking.send(player, this.packet, buf);
+        AitNetworking.send(player, this.packet, buf);
     }
 
     @Override

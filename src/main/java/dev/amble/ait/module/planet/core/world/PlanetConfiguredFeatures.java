@@ -2,7 +2,7 @@ package dev.amble.ait.module.planet.core.world;
 
 import java.util.List;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -32,7 +32,7 @@ public class PlanetConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ANORTHOSITE_DIAMOND_ORE = registryKey("anorthosite_diamond_ore");
     public static final ResourceKey<ConfiguredFeature<?, ?>> ANORTHOSITE_EMERALD_ORE = registryKey("anorthosite_emerald_ore");
 
-   public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> context) {
+   public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
        RuleTest martianStoneReplaceables = new BlockMatchTest(PlanetBlocks.MARTIAN_STONE);
        RuleTest anorthositeReplaceables = new BlockMatchTest(PlanetBlocks.ANORTHOSITE);
 
@@ -82,7 +82,7 @@ public class PlanetConfiguredFeatures {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, AITMod.id(name));
     }
 
-    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(BootstapContext<ConfiguredFeature<?, ?>> context,
+    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(BootstrapContext<ConfiguredFeature<?, ?>> context,
                                                                                    ResourceKey<ConfiguredFeature<?, ?>> key, F feature, FC configuration) {
         context.register(key, new ConfiguredFeature<>(feature, configuration));
     }

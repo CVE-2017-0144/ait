@@ -10,6 +10,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -73,11 +74,11 @@ public class DalekModExteriorModel extends SimpleExteriorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
         matrices.scale(1f, 1f, 1f);
         matrices.translate(0, -0.1, 0);
-        dalekmod.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        dalekmod.render(matrices, vertexConsumer, light, overlay, color);
         matrices.popPose();
     }
 
@@ -99,7 +100,7 @@ public class DalekModExteriorModel extends SimpleExteriorModel {
             matrices.pushPose();
             matrices.scale(0.945F, 0.945F, 0.945F);
             matrices.translate(-0.002, -0.0012f, -0.004);
-            this.dalekmod.getChild("Doors").render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+            this.dalekmod.getChild("Doors").render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
             matrices.popPose();
         }
     }

@@ -1,5 +1,6 @@
 package dev.amble.ait.api;
 
+import dev.amble.ait.core.util.ItemNbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
@@ -7,7 +8,7 @@ public interface ArtronHolderItem {
     String FUEL_KEY = "fuel";
 
     default double getCurrentFuel(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         if (!nbt.contains(this.getFuelKey())) {
             this.setCurrentFuel(0, stack);
@@ -18,9 +19,10 @@ public interface ArtronHolderItem {
     }
 
     default void setCurrentFuel(double var, ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         nbt.putDouble(this.getFuelKey(), var <= 0 ? 0 : var);
+        ItemNbt.set(stack, nbt);
     }
 
     default double addFuel(double val, ItemStack stack) {

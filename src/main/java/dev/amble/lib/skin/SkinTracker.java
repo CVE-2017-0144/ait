@@ -2,16 +2,14 @@ package dev.amble.lib.skin;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.util.ServerLifecycleHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -63,7 +61,7 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 			getInstance().clear();
 		});
 
-		ClientPlayNetworking.registerGlobalReceiver(SYNC_KEY, ((client, handler, buf, responseSender) -> {
+		AitNetworking.registerClientReceiver(SYNC_KEY, ((client, handler, buf, responseSender) -> {
 			getInstance().receive(buf);
 		}));
 	}
@@ -87,7 +85,7 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 	}
 
 	private FriendlyByteBuf toBuf(UUID id, SkinData data) {
-		FriendlyByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(1);
 
@@ -102,7 +100,7 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 	}
 
 	private FriendlyByteBuf toBuf(Map<UUID, SkinData> map) {
-		FriendlyByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = AitNetworking.buf();
 
 		buf.writeInt(map.size());
 
@@ -120,7 +118,7 @@ public class SkinTracker extends HashMap<UUID, SkinData> {
 	}
 
 	private void sync(FriendlyByteBuf buf, ServerPlayer player) {
-		ServerPlayNetworking.send(player, SYNC_KEY, buf);
+		AitNetworking.send(player, SYNC_KEY, buf);
 	}
 
 	private void receive(FriendlyByteBuf buf) {

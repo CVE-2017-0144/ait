@@ -31,9 +31,6 @@ public class AITMixinPlugin implements IMixinConfigPlugin {
         String[] parts = mixinClassName.split("\\.");
 
         String id = parts[5];
-        if (id.equals("gravity"))
-            return DependencyChecker.hasGravity();
-
         if (id.equals("portals"))
             return DependencyChecker.hasPortals();
 

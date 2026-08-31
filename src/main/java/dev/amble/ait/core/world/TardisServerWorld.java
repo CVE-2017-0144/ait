@@ -174,7 +174,7 @@ public class TardisServerWorld extends MultiDimServerWorld {
     }
 
     private static ResourceLocation idForTardis(ServerTardis tardis) {
-        return new ResourceLocation(NAMESPACE, tardis.getUuid().toString());
+        return ResourceLocation.fromNamespaceAndPath(NAMESPACE, tardis.getUuid().toString());
     }
 
     public static boolean isTardisDimension(ResourceKey<Level> key) {

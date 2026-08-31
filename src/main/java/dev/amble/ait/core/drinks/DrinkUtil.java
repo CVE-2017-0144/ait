@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.item.TardisMatrixItem;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class DrinkUtil {
 
@@ -33,7 +34,7 @@ public class DrinkUtil {
     public static final Drink EMPTY = DrinkRegistry.EMPTY_MUG;
 
     public static List<MobEffectInstance> getDrinkEffects(ItemStack stack) {
-        return DrinkUtil.getDrinkEffects(stack.getTag());
+        return DrinkUtil.getDrinkEffects(ItemNbt.getNullable(stack));
     }
 
     public static List<MobEffectInstance> getDrinkEffects(Drink drink, Collection<MobEffectInstance> custom) {
@@ -55,7 +56,7 @@ public class DrinkUtil {
     }
 
     public static List<MobEffectInstance> getCustomDrinkEffects(ItemStack stack) {
-        return DrinkUtil.getCustomDrinkEffects(stack.getTag());
+        return DrinkUtil.getCustomDrinkEffects(ItemNbt.getNullable(stack));
     }
 
     public static List<MobEffectInstance> getCustomDrinkEffects(@Nullable CompoundTag nbt) {
@@ -77,7 +78,7 @@ public class DrinkUtil {
     }
 
     public static int getColor(ItemStack stack) {
-        CompoundTag nbtCompound = stack.getTag();
+        CompoundTag nbtCompound = ItemNbt.getNullable(stack);
         if (nbtCompound != null && nbtCompound.contains(CUSTOM_DRINK_COLOR_KEY, Tag.TAG_ANY_NUMERIC)) {
             return nbtCompound.getInt(CUSTOM_DRINK_COLOR_KEY);
         }
@@ -137,7 +138,7 @@ public class DrinkUtil {
     }
 
     public static Drink getDrink(ItemStack stack) {
-        return DrinkUtil.getDrink(stack.getTag());
+        return DrinkUtil.getDrink(ItemNbt.getNullable(stack));
     }
 
     public static Drink getDrink(@Nullable CompoundTag compound) {
@@ -149,9 +150,9 @@ public class DrinkUtil {
 
     public static ItemStack setDrink(ItemStack stack, Drink drink) {
         if (drink == null || drink == EMPTY) {
-            stack.removeTagKey(DRINK_KEY);
+            ItemNbt.edit(stack, tag -> tag.remove(DRINK_KEY));
         } else {
-            stack.getOrCreateTag().putString(DRINK_KEY, drink.id().toString());
+            ItemNbt.edit(stack, tag -> tag.putString(DRINK_KEY, drink.id().toString()));
         }
         return stack;
     }
@@ -160,7 +161,7 @@ public class DrinkUtil {
         if (effects.isEmpty()) {
             return stack;
         }
-        CompoundTag nbtCompound = stack.getOrCreateTag();
+        CompoundTag nbtCompound = ItemNbt.get(stack);
         ListTag nbtList = nbtCompound.getList(CUSTOM_DRINK_EFFECTS_KEY, Tag.TAG_LIST);
         for (MobEffectInstance statusEffectInstance : effects) {
             nbtList.add(statusEffectInstance.save(new CompoundTag()));

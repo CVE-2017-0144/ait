@@ -1,0 +1,8 @@
+{
+  "sound_event": "ait:music/ait_theme_mono",
+  "description": {
+    "translate": "jukebox_song.ait.ait_theme"
+  },
+  "length_in_seconds": 180.0,
+  "comparator_output": 1
+}

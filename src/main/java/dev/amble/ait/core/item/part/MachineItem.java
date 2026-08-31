@@ -2,8 +2,6 @@ package dev.amble.ait.core.item.part;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +14,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.item.SonicItem;
 import dev.amble.ait.core.item.sonic.SonicMode;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.schema.MachineRecipeSchema;
 
 public class MachineItem extends Item {
@@ -46,10 +45,10 @@ public class MachineItem extends Item {
 
     @Environment(value = EnvType.CLIENT)
     public static void disassemble(ItemStack machine) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeItem(machine.copyWithCount(1));
 
-        ClientPlayNetworking.send(MACHINE_DISASSEMBLE, data);
+        AitNetworking.send(MACHINE_DISASSEMBLE, data);
         machine.shrink(1);
     }
 

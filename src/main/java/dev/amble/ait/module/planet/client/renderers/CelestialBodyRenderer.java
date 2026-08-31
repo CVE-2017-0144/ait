@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.renderers.AITRenderLayers;
@@ -45,9 +46,7 @@ public class CelestialBodyRenderer {
         //RenderSystem.depthFunc(GL11.GL_NOTEQUAL);
         RenderSystem.setProjectionMatrix(matrixStack.last().pose().perspective(90, 1, 0.05f, 10000000), VertexSorting.ORTHOGRAPHIC_Z);
 
-        CelestialBodyModel.getTexturedModelData().bakeRoot().render(matrixStack,
-                provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)),
-                0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+        CelestialBodyModel.getTexturedModelData().bakeRoot().render(matrixStack, provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         provider.endBatch();
 
         if (hasAtmosphere) {
@@ -80,7 +79,7 @@ public class CelestialBodyRenderer {
         matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         matrixStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
         if (isTardisSkybox) {
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(mc.level.getTimeOfDay(mc.getFrameTime()) * 360.0f));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(mc.level.getTimeOfDay(mc.getTimer().getGameTimeDeltaPartialTick(true)) * 360.0f));
             matrixStack.translate(0, -4000, 0);
             matrixStack.scale(0.25f, 0.25f, 0.25f);
         }
@@ -99,9 +98,7 @@ public class CelestialBodyRenderer {
         RenderSystem.depthMask(true);
 
         //RenderSystem.setShaderColor(atmosphereColor.x + 0.25f, atmosphereColor.y + 0.25f, atmosphereColor.z + 0.25f, 1f);
-        model.renderToBuffer(matrixStack,
-                provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)),
-                0xf000f00, OverlayTexture.NO_OVERLAY, 1 - atmosphereColor.x, 1 - atmosphereColor.y, 1 - atmosphereColor.z, 1f);
+        model.renderToBuffer(matrixStack, provider.getBuffer(AITRenderLayers.beaconBeam(texture, false)), 0xf000f00, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 1 - atmosphereColor.x, 1 - atmosphereColor.y, 1 - atmosphereColor.z));
         provider.endBatch();
         //RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
@@ -152,13 +149,9 @@ public class CelestialBodyRenderer {
         matrixStack.mulPose(Axis.ZP.rotationDegrees(rotation.z()));
 
         CelestialBodyModel celestialBodyModel = new CelestialBodyModel(CelestialBodyModel.getTexturedModelData().bakeRoot());
-        celestialBodyModel.renderToBuffer(matrixStack,
-                provider.getBuffer(AITRenderLayers.entityNoOutline(texture)),
-                0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+        celestialBodyModel.renderToBuffer(matrixStack, provider.getBuffer(AITRenderLayers.entityNoOutline(texture)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         if (hasRings) {
-            celestialBodyModel.ring.render(matrixStack,
-                    provider.getBuffer(AITRenderLayers.entityNoOutline(texture)),
-                    0xf000f0, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+            celestialBodyModel.ring.render(matrixStack, provider.getBuffer(AITRenderLayers.entityNoOutline(texture)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         }
         provider.endBatch();
 
@@ -182,21 +175,15 @@ public class CelestialBodyRenderer {
             matrixStack.pushPose();
             float gg = 1.0f + ((i != 0 ? i : i + 1) * 0.025f);
             matrixStack.scale(gg, gg, gg);
-            RenderType renderLayer = AITRenderLayers.itemEntityTranslucentCull(new ResourceLocation("textures/environment/clouds.png"));//RenderLayer.getEnergySwirl(new Identifier("textures/environment/clouds.png"), delta % 1.0F, (delta * 0.1F) % 1.0F);
+            RenderType renderLayer = AITRenderLayers.itemEntityTranslucentCull(ResourceLocation.parse("textures/environment/clouds.png"));//RenderLayer.getEnergySwirl(new Identifier("textures/environment/clouds.png"), delta % 1.0F, (delta * 0.1F) % 1.0F);
             ResourceLocation texture = AITMod.id("textures/environment/atmosphere.png");
             if (i != 1) {
-                model.renderToBuffer(matrixStack,
-                        provider.getBuffer(isStar && (i == 2 || i == 3 || i == 4) ?
-                                AITRenderLayers.eyes(texture) : AITRenderLayers.itemEntityTranslucentCull(texture)),
-                        15728864, OverlayTexture.NO_OVERLAY,  1 + Math.min(color.x + (0.015f * i), 5.0f), 1 + Math.min(color.y + (0.015f * i), 5.0f), 1 + Math.min(color.z + (0.015f * i), 5.0f), -1 + alpha);
+                model.renderToBuffer(matrixStack, provider.getBuffer(isStar && (i == 2 || i == 3 || i == 4) ?
+                                AITRenderLayers.eyes(texture) : AITRenderLayers.itemEntityTranslucentCull(texture)), 15728864, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(-1 + alpha, 1 + Math.min(color.x + (0.015f * i), 5.0f), 1 + Math.min(color.y + (0.015f * i), 5.0f), 1 + Math.min(color.z + (0.015f * i), 5.0f)));
             } else if (hasClouds) {
-                model.renderToBuffer(matrixStack,
-                        provider.getBuffer(renderLayer),
-                        15728864, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1F);
+                model.renderToBuffer(matrixStack, provider.getBuffer(renderLayer), 15728864, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
                 matrixStack.scale(1.01f, 1.01f, 1.01f);
-                model.renderToBuffer(matrixStack,
-                        provider.getBuffer(renderLayer),
-                        15728864, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1F);
+                model.renderToBuffer(matrixStack, provider.getBuffer(renderLayer), 15728864, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
             }
             matrixStack.popPose();
         }

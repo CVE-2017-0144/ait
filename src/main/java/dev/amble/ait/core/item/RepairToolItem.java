@@ -39,8 +39,8 @@ public class RepairToolItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         addMultilineTooltip(tooltip, Component.translatable("tooltip.ait.repair_tool")
                 .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));

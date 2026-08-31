@@ -28,9 +28,9 @@ public class RespiratorFeatureRenderer<T extends LivingEntity, M extends EntityM
         extends
             RenderLayer<T, M> {
 
-    private static final ResourceLocation RESPIRATOR = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation RESPIRATOR = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/entity/wearables/respirator.png");
-    private static final ResourceLocation FACELESS_RESPIRATOR = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation FACELESS_RESPIRATOR = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/entity/wearables/faceless_respirator.png");
     private final RespiratorModel model;
 
@@ -56,7 +56,7 @@ public class RespiratorFeatureRenderer<T extends LivingEntity, M extends EntityM
 
             VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderType.entitySmoothCutout(
                     stack.getItem() == AITItems.RESPIRATOR ? RESPIRATOR : FACELESS_RESPIRATOR));
-            this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+            this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 
             matrixStack.popPose();
         }

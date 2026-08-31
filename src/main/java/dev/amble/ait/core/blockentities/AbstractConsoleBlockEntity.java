@@ -3,6 +3,7 @@ package dev.amble.ait.core.blockentities;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -31,8 +32,8 @@ public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEn
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         this.lock = LockCode.fromTag(nbt);
         if (nbt.contains("CustomName", Tag.TAG_STRING)) {
             this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"));
@@ -40,8 +41,8 @@ public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEn
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         this.lock.addToTag(nbt);
         if (this.customName != null) {
             nbt.putString("CustomName", Component.Serializer.toJson(this.customName));

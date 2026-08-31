@@ -195,7 +195,7 @@ public class StackUtil {
         if (raw.isEmpty())
             return null;
 
-        return BuiltInRegistries.ITEM.get(new ResourceLocation(raw));
+        return BuiltInRegistries.ITEM.get(ResourceLocation.parse(raw));
     }
 
     public static Item readItemNonNull(CompoundTag nbt, String key) {

@@ -12,8 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientPoliceBoxVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/police_box";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/police_box.png");
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box.png");
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/police_box.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/police_box.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/police_box_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()

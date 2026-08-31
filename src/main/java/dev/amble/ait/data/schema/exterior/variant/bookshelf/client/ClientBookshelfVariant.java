@@ -12,9 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientBookshelfVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/bookshelf";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             CATEGORY_PATH + "/bookshelf.png");
-    protected static final ResourceLocation BIOME_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/bookshelf.png");
+    protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/bookshelf.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/bookshelf_";
 
     protected static final BiomeOverrides OVERRIDES = BiomeOverrides.builder()

@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -42,7 +43,7 @@ public class TardisDoorBOTI extends BOTI {
 
         BOTI_HANDLER.setupFramebuffer();
 
-        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getFrameTime());
+        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getTimer().getGameTimeDeltaPartialTick(true));
         if (AITModClient.CONFIG.greenScreenBOTI)
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, 0, 1, 0, 1);
         else
@@ -80,9 +81,9 @@ public class TardisDoorBOTI extends BOTI {
             RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
                     RenderType.debugFilledBox() : RenderType.endGateway();
             float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-            mask.render(stack, botiProvider.getBuffer(whichOne), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
+            mask.render(stack, botiProvider.getBuffer(whichOne), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2]));
         } else {
-            mask.render(stack, botiProvider.getBuffer(RenderType.entityTranslucentCull(frameTex)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+            mask.render(stack, botiProvider.getBuffer(RenderType.entityTranslucentCull(frameTex)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         }
         botiProvider.endBatch();
         stack.popPose();
@@ -95,7 +96,7 @@ public class TardisDoorBOTI extends BOTI {
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
         stack.pushPose();
-        float delta = client.getFrameTime() + client.player.tickCount;
+        float delta = client.getTimer().getGameTimeDeltaPartialTick(true) + client.player.tickCount;
         if (!tardis.travel().autopilot() && tardis.travel().getState() != TravelHandlerBase.State.LANDED)
             stack.mulPose(Axis.YN.rotationDegrees((delta) * (tardis.travel().speed() * 0.7f)));
         if (!tardis.crash().isNormal())
@@ -124,7 +125,6 @@ public class TardisDoorBOTI extends BOTI {
 
             // TODO: use DoorRenderer/ClientLightUtil instead.
             frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, tickDelta);
-            //((DoorModel) frame).render(stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.DEFAULT_UV, 1, 1F, 1.0F, 1.0F);
             botiProvider.endBatch();
             stack.popPose();
 

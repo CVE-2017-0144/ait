@@ -2,6 +2,7 @@ package dev.amble.ait.core.blockentities.control;
 
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,8 +33,8 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (this.getControl() != null)
             nbt.putString(ControlBlockItem.CONTROL_ID_KEY, this.getControl().id().toString());
@@ -43,14 +44,14 @@ public abstract class ControlBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         if (nbt.contains(ControlBlockItem.CONTROL_ID_KEY))
-            this.setControlId(new ResourceLocation(nbt.getString(ControlBlockItem.CONTROL_ID_KEY)));
+            this.setControlId(ResourceLocation.parse(nbt.getString(ControlBlockItem.CONTROL_ID_KEY)));
 
         if (nbt.contains(ControlBlockItem.CONSOLE_TYPE_ID_KEY))
-            this.setConsoleId(new ResourceLocation(nbt.getString(ControlBlockItem.CONSOLE_TYPE_ID_KEY)));
+            this.setConsoleId(ResourceLocation.parse(nbt.getString(ControlBlockItem.CONSOLE_TYPE_ID_KEY)));
     }
 
     /**

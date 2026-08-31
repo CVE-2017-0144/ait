@@ -66,12 +66,11 @@ public class BoothDoorModel extends DoorModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         BoothExteriorModel boothExteriorModel = new BoothExteriorModel(BoothExteriorModel.getTexturedModelData().bakeRoot());
         ModelPart part = boothExteriorModel.root();
         part.getChild("Door").visible = false;
-        part.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        part.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

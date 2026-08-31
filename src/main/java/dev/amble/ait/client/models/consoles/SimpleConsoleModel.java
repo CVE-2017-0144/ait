@@ -10,6 +10,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -62,7 +63,7 @@ public abstract class SimpleConsoleModel extends HierarchicalModel implements Co
         this.root().getAllParts().forEach(ModelPart::resetPose);
 
         if (hasPower && AITModClient.CONFIG.animateConsole)
-            this.animate(console.ANIM_STATE, this.getAnimationForState(state), client.getFrameTime() + console.getAge());
+            this.animate(console.ANIM_STATE, this.getAnimationForState(state), client.getTimer().getGameTimeDeltaPartialTick(true) + console.getAge());
     }
 
     @Override
@@ -73,7 +74,7 @@ public abstract class SimpleConsoleModel extends HierarchicalModel implements Co
     // Overloaded method for compatibility with older code
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        root.render(matrices, vertices, light, overlay, red, green, blue, pAlpha);
+        root.render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
     }
 
     @Override

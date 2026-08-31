@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     public static final double MAX_FUEL = 5000;
@@ -28,9 +29,10 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         nbt.putDouble(FUEL_KEY, getMaxFuel(stack));
+        ItemNbt.set(stack, nbt);
 
         return stack;
     }
@@ -38,8 +40,9 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     @Override
     public void onCraftedBy(ItemStack stack, Level world, Player player) {
         super.onCraftedBy(stack, world, player);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putDouble(FUEL_KEY, 0);
+        ItemNbt.set(stack, nbt);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         int currentFuel = (int) Math.round(this.getCurrentFuel(stack));
         ChatFormatting fuelColor = currentFuel > (MAX_FUEL / 4) ? ChatFormatting.GREEN : ChatFormatting.RED;
 
@@ -59,7 +62,7 @@ public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
                         .append(Component.literal(String.valueOf(MAX_FUEL)).withStyle(ChatFormatting.GRAY))
         );
 
-        super.appendHoverText(stack, world, tooltip, context);
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
     }
 
     @Override

@@ -96,8 +96,8 @@ public class RiftScannerModel extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        root.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        root.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     public void setAngles(PoseStack matrices, ItemDisplayContext renderMode, boolean left) {
@@ -109,8 +109,8 @@ public class RiftScannerModel extends Model {
 
     public void render(@Nullable ClientLevel world, @Nullable LivingEntity entity, ItemStack stack, PoseStack matrices, MultiBufferSource provider, int light, int overlay, int seed) {
         this.root.getChild("arrow").zRot = this.unclampedCall(stack, world, entity, seed) * MULTIPLIER;
-        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(TEXTURE)), light, overlay, 1, 1, 1, 1);
-        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(EMISSION)), 0xf000f0, overlay, 1, 1, 1, 1);
+        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(TEXTURE)), light, overlay, 0xFFFFFFFF);
+        this.renderToBuffer(matrices, provider.getBuffer(RenderType.entityCutout(EMISSION)), 0xf000f0, overlay, 0xFFFFFFFF);
     }
 
     public float unclampedCall(ItemStack stack, @Nullable ClientLevel clientWorld, @Nullable LivingEntity livingEntity, int i) {

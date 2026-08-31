@@ -61,7 +61,7 @@ public class MachineRecipeSchema implements Identifiable {
         @Override
         public MachineRecipeSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            return MachineRecipeRegistry.getInstance().get(new ResourceLocation(json.getAsJsonPrimitive().getAsString()));
+            return MachineRecipeRegistry.getInstance().get(ResourceLocation.parse(json.getAsJsonPrimitive().getAsString()));
         }
 
         @Override

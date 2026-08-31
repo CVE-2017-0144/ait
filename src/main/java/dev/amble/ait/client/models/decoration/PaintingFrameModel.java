@@ -18,6 +18,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 
 public class PaintingFrameModel extends HierarchicalModel {
@@ -34,13 +35,13 @@ public class PaintingFrameModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         frame.getChild("plane").visible = false;
-        frame.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        frame.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     public void renderWithFbo(PoseStack matrices, MultiBufferSource vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha, ResourceLocation frameTex) {
-        frame.getChild("plane").render(matrices, vertexConsumer.getBuffer(RenderType.entityTranslucentCull(frameTex)), light, overlay, red, green, blue, alpha);
+        frame.getChild("plane").render(matrices, vertexConsumer.getBuffer(RenderType.entityTranslucentCull(frameTex)), light, overlay, FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
     }
 
     @Override

@@ -2,7 +2,6 @@ package dev.amble.ait.core.tardis.handler;
 
 import java.util.function.Consumer;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -16,6 +15,7 @@ import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.item.SonicItem;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.data.properties.Property;
@@ -32,7 +32,7 @@ public class SonicHandler extends KeyedTardisComponent implements ArtronHolderIt
     private final Value<ItemStack> exteriorSonic = EXTERIOR_SONIC.create(this); // The current sonic in the exterior's
                                                                                 // keyhole
     static {
-        ServerPlayNetworking.registerGlobalReceiver(CHANGE_SONIC,
+        AitNetworking.registerServerReceiver(CHANGE_SONIC,
                 ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
                     ResourceLocation id = buf.readResourceLocation();
                     BlockPos pos = buf.readBlockPos();

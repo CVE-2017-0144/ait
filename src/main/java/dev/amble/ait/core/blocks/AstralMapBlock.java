@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.mojang.datafixers.util.Pair;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -45,6 +43,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.client.screens.AstralMapScreen;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.blockentities.AstralMapBlockEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.control.impl.TelepathicControl;
 import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
@@ -62,7 +61,7 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
     public static List<ResourceLocation> structureIds;
 
     static {
-        ServerPlayNetworking.registerGlobalReceiver(REQUEST_SEARCH, (server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(REQUEST_SEARCH, (server, player, handler, buf, responseSender) -> {
             try {
                 ServerLevel checkWorld = player.serverLevel();
                 BlockPos playerPos = player.blockPosition();
@@ -193,9 +192,9 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
             structureIds = ids;
         }
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeCollection(structureIds, FriendlyByteBuf::writeResourceLocation);
-        ServerPlayNetworking.send(target, OPEN_ASTRAL_MAP, buf);
+        AitNetworking.send(target, OPEN_ASTRAL_MAP, buf);
     }
 
     @Override

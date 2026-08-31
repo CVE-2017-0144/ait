@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Random;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.AITRegistryEvents;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.datapack.DatapackExterior;
 import dev.amble.ait.data.schema.exterior.ExteriorCategorySchema;
 import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
@@ -74,8 +74,8 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
 
     @Override
     public void syncToClient(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        FriendlyByteBuf secondary = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
+        FriendlyByteBuf secondary = AitNetworking.buf();
 
         int counter = 0;
         for (ExteriorVariantSchema schema : this.toList()) {
@@ -88,7 +88,7 @@ public class ExteriorVariantRegistry extends UnlockableRegistry<ExteriorVariantS
         buf.writeInt(counter);
         buf.writeBytes(secondary);
 
-        ServerPlayNetworking.send(player, this.packet, buf);
+        AitNetworking.send(player, this.packet, buf);
     }
 
     @Override

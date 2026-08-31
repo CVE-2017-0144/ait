@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -44,7 +45,7 @@ public class TardisExteriorBOTI extends BOTI {
 
         BOTI_HANDLER.setupFramebuffer();
 
-        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getFrameTime());
+        Vec3 skyColor = client.level.getSkyColor(client.player.position(), client.getTimer().getGameTimeDeltaPartialTick(true));
         if (AITModClient.CONFIG.greenScreenBOTI)
             BOTI.setFramebufferColor(BOTI_HANDLER.afbo, 0, 1, 0, 1);
         else
@@ -88,7 +89,7 @@ public class TardisExteriorBOTI extends BOTI {
         RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
                 RenderType.debugFilledBox() : RenderType.endGateway();
         float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0, 1} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-        mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.NO_OVERLAY, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2], 1);
+        mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2]));
         botiProvider.endBatch();
         stack.popPose();
 

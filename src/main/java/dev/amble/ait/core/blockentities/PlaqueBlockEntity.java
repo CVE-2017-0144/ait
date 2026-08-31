@@ -4,6 +4,7 @@ import com.google.gson.JsonParseException;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -48,14 +49,14 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         nbt.putString("CustomPlaqueText", Component.Serializer.toJson(this.customPlaqueText));
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         if (nbt.contains("CustomPlaqueText", Tag.TAG_STRING)) {
             this.customPlaqueText = readPlaqueText(nbt.getString("CustomPlaqueText"));
         }
@@ -65,7 +66,7 @@ public class PlaqueBlockEntity extends InteriorLinkableBlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         return saveWithoutMetadata();
     }
 

@@ -12,6 +12,7 @@ import dev.amble.ait.core.entities.RiftEntity;
 import dev.amble.ait.core.util.EntityRef;
 import dev.amble.ait.core.world.RiftChunkManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -35,8 +36,8 @@ public class UntemperedSchismBlockEntity extends FluidLinkBlockEntity implements
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         nbt.putDouble("artronAmount", this.artronAmount);
         nbt.putBoolean("hasCreatedRift", this.hasCreatedRift);
         if (this.riftRef != null) {
@@ -45,14 +46,14 @@ public class UntemperedSchismBlockEntity extends FluidLinkBlockEntity implements
     }
 
     @Override
-    public void load(CompoundTag nbt) {
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         if (nbt.contains("artronAmount"))
             this.setCurrentFuel(nbt.getDouble("artronAmount"));
         if (nbt.contains("hasCreatedRift"))
             this.hasCreatedRift = nbt.getBoolean("hasCreatedRift");
         if (nbt.contains("riftId"))
             this.riftRef = new EntityRef<>(null, nbt.getUUID("riftId"));
-        super.load(nbt);
+        super.loadAdditional(nbt, registries);
     }
 
     @Override
@@ -72,8 +73,8 @@ public class UntemperedSchismBlockEntity extends FluidLinkBlockEntity implements
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag nbtCompound = super.getUpdateTag();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag nbtCompound = super.getUpdateTag(registries);
         nbtCompound.putDouble("artronAmount", this.artronAmount);
         return nbtCompound;
     }

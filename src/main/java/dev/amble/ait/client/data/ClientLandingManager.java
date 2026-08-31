@@ -5,8 +5,6 @@ import java.util.Map;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,6 +13,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.core.world.LandingPadManager;
 import dev.amble.ait.data.landing.LandingPadRegion;
@@ -33,7 +32,7 @@ public class ClientLandingManager {
         ClientChunkEvents.CHUNK_UNLOAD.register((world, chunk)
                 -> ClientLandingManager.getInstance().remove(chunk.getPos()));
 
-        ClientPlayNetworking.registerGlobalReceiver(LandingPadManager.Network.SYNC, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(LandingPadManager.Network.SYNC, (client, handler, buf, responseSender) -> {
             ClientLandingManager.getInstance().receive(buf);
         });
 
@@ -82,10 +81,10 @@ public class ClientLandingManager {
         data.putString("World", world.location().toString());
         data.putLong("Chunk", chunk);
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeNbt(data);
 
-        ClientPlayNetworking.send(LandingPadManager.Network.REQUEST, buf);
+        AitNetworking.send(LandingPadManager.Network.REQUEST, buf);
     }
 
     private void request(ClientLevel world, LevelChunk chunk) {

@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
@@ -28,6 +29,7 @@ import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
 import dev.amble.ait.core.item.sonic.SonicMode;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.sonic.SonicSchema;
 import dev.amble.ait.registry.impl.SonicRegistry;
 
@@ -45,13 +47,16 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
 
         nbt.putInt(MODE_KEY, -1);
+        ItemNbt.set(stack, nbt);
         nbt.putDouble(FUEL_KEY, getMaxFuel(stack));
+        ItemNbt.set(stack, nbt);
 
         if (SonicRegistry.DEFAULT != null)
             nbt.putString(SONIC_TYPE, SonicRegistry.DEFAULT.id().toString());
+            ItemNbt.set(stack, nbt);
 
         return stack;
     }
@@ -172,7 +177,7 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     private static final Component TEXT_CASING = Component.translatable("message.ait.sonic.currenttype").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         tooltip.add(TEXT_MODE.copy().append(mode(stack).text()));
 
         int fuel = (int) Math.round(this.getCurrentFuel(stack));
@@ -182,21 +187,22 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
                 .withStyle(acceptableFuel ? ChatFormatting.GREEN : ChatFormatting.RED)));
 
         tooltip.add(TEXT_CASING.copy().append(schema(stack).name()));
-        super.appendHoverText(stack, world, tooltip, context);
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
     }
 
     public static SonicMode mode(ItemStack stack) {
-        CompoundTag nbtCompound = stack.getOrCreateTag();
+        CompoundTag nbtCompound = ItemNbt.get(stack);
         return SonicMode.Modes.getAndWrap(nbtCompound.getInt(MODE_KEY));
     }
 
     public static void setMode(ItemStack stack, SonicMode mode) {
-        CompoundTag nbtCompound = stack.getOrCreateTag();
+        CompoundTag nbtCompound = ItemNbt.get(stack);
         nbtCompound.putInt(MODE_KEY, mode.index());
+        ItemNbt.set(stack, nbtCompound);
     }
 
     public static SonicSchema schema(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         String rawId = nbt.getString(SONIC_TYPE);
 
         if (rawId == null)
@@ -209,8 +215,9 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     public static void setSchema(ItemStack stack, ResourceLocation id) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putString(SONIC_TYPE, id.toString());
+        ItemNbt.set(stack, nbt);
     }
 
     public static void setSchema(ItemStack stack, SonicSchema schema) {

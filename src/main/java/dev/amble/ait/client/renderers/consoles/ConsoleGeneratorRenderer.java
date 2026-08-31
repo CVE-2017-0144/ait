@@ -30,7 +30,7 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
     private final ConsoleGeneratorModel generator;
     private final EntityRenderDispatcher dispatcher;
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/blockentities/consoles/console_generator/console_generator.png");
 
     private static final int VARIANT_TEXT_COLOR_TURQUOISE = FastColor.ARGB32.color(1, 0, 175, 235);
@@ -61,8 +61,7 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         matrices.mulPose(Axis.XP.rotationDegrees(180f));
         matrices.translate(0.5f, -1.5f, -0.5f);
 
-        this.generator.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light,
-                overlay, 1, 1, 1, 1);
+        this.generator.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
 
@@ -70,7 +69,7 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         matrices.mulPose(Axis.XP.rotationDegrees(180f));
 
         matrices.translate(0.5f, -1.5f + entity.getLevel().random.nextFloat() * 0.02, -0.5f);
-        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getFrameTime() % 180));
+        matrices.mulPose(Axis.YP.rotationDegrees(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) % 180));
 
         if (console instanceof BedrockConsoleModel bedrockConsoleModel) {
             bedrockConsoleModel.applyOffsets(matrices, entity.getConsoleVariant());
@@ -79,22 +78,15 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
 
         //if (powered) {
             if (tardis.isUnlocked(entity.getConsoleVariant())) {
-                console.render(matrices,
-                        vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                RenderType.entityTranslucentCull(consoleTexture)), 0xf000f0, overlay, 0.3607843137f,
-                        0.9450980392f, 1, entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f);
+                console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
+                                RenderType.entityTranslucentCull(consoleTexture)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
                 if (consoleEmission != null && !consoleEmission.equals(DatapackConsole.EMPTY)) {
-                    console.render(matrices,
-                            vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                    RenderType.entityTranslucentCull(consoleEmission)), 0xf000f0, overlay, 0.3607843137f,
-                            0.9450980392f, 1, entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f);
+                    console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
+                                    RenderType.entityTranslucentCull(consoleEmission)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
                 }
             } else {
-                console.render(matrices,
-                        vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                RenderType.entityTranslucentCull(consoleTexture)), light,
-                        OverlayTexture.NO_OVERLAY, 0.2f, 0.2f, 0.2f,
-                        entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f);
+                console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
+                                RenderType.entityTranslucentCull(consoleTexture)), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.2f, 0.2f, 0.2f));
             }
         //}
         matrices.popPose();

@@ -5,10 +5,7 @@ import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.lib.AmbleKit;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.util.ServerLifecycleHooks;
@@ -41,7 +39,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
 
     protected SimpleDatapackRegistry(Function<InputStream, T> deserializer, Codec<T> codec, String packet, String name,
             boolean sync, String modid) {
-        this(deserializer, codec, new ResourceLocation(modid, "sync_" + packet), new ResourceLocation(modid, name),
+        this(deserializer, codec, ResourceLocation.fromNamespaceAndPath(modid, "sync_" + packet), ResourceLocation.fromNamespaceAndPath(modid, name),
                 sync);
     }
 
@@ -61,7 +59,7 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
         if (!this.sync)
             return;
 
-        ClientPlayNetworking.registerGlobalReceiver(this.packet, (client, handler, buf, responseSender) -> {
+        AitNetworking.registerClientReceiver(this.packet, (client, handler, buf, responseSender) -> {
             FriendlyByteBuf copy = new FriendlyByteBuf(buf.copy());
             client.execute(() -> {
                 try {
@@ -110,14 +108,14 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
         if (!this.sync)
             return;
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = AitNetworking.buf();
         buf.writeInt(REGISTRY.size());
 
         for (T schema : REGISTRY.values()) {
             buf.writeJsonWithCodec(this.codec, schema);
         }
 
-        ServerPlayNetworking.send(player, this.packet, buf);
+        AitNetworking.send(player, this.packet, buf);
     }
 
     @Override

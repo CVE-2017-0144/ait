@@ -66,7 +66,7 @@ public class SpacesuitFeatureRenderer<T extends LivingEntity, M extends EntityMo
         this.model.setupAnim(livingEntity, f, g, j, k, l);
 
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderType.entityCutoutNoCullZOffset(BLANK_SPACESUIT));
-        this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1f);
+        this.model.renderToBuffer(matrixStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 
         matrixStack.popPose();
     }

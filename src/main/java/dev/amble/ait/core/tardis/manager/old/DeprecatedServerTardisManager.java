@@ -12,9 +12,7 @@ import com.mojang.datafixers.util.Either;
 import dev.drtheo.multidim.MultiDim;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
@@ -29,6 +27,7 @@ import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.WorldWithTardis;
 import dev.amble.ait.core.events.ServerCrashEvent;
 import dev.amble.ait.core.events.WorldSaveEvent;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
@@ -90,7 +89,7 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         if (tardis == null)
             return;
 
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeUUID(tardis.getUuid());
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -99,14 +98,14 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
     }
 
     protected void sendTardisRemoval(ServerPlayer player, ServerTardis tardis) {
-        FriendlyByteBuf data = PacketByteBufs.create();
+        FriendlyByteBuf data = AitNetworking.buf();
         data.writeUUID(tardis.getUuid());
 
         this.sendTardisRemoval(player, data);
     }
 
     protected void sendTardisRemoval(ServerPlayer player, FriendlyByteBuf data) {
-        ServerPlayNetworking.send(player, REMOVE, data);
+        AitNetworking.send(player, REMOVE, data);
     }
 
     public abstract void markComponentDirty(TardisComponent component);
@@ -230,7 +229,7 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         return tardis;
     }
 
-    public static ServerPlayNetworking.PlayChannelHandler receiveTardis(Receiver receiver) {
+    public static AitNetworking.ServerHandler receiveTardis(Receiver receiver) {
         return (server, player, handler, buf, responseSender) -> {
             ServerTardisManager.getInstance().getTardis(server, buf.readUUID(),
                     tardis -> receiver.receive(tardis, server, player, handler, buf, responseSender));

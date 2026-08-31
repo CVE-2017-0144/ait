@@ -7,7 +7,6 @@ import java.util.Set;
 import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.queue.api.util.block.ChunkEraser;
 import dev.drtheo.queue.api.util.structure.QueuedStructureTemplate;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
@@ -32,6 +31,7 @@ import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.blockentities.ConsoleGeneratorBlockEntity;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.blockentities.EngineBlockEntity;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.core.tardis.util.TardisUtil;
@@ -56,7 +56,7 @@ public class TardisDesktop extends TardisComponent {
         BlockPos first = new BlockPos(RADIUS, 0, RADIUS);
         CORNERS = new Corners(first.multiply(-1), first);
 
-        ServerPlayNetworking.registerGlobalReceiver(TardisDesktop.CACHE_CONSOLE,
+        AitNetworking.registerServerReceiver(TardisDesktop.CACHE_CONSOLE,
                 ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
                     BlockPos console = buf.readBlockPos();
 

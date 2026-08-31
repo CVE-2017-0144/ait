@@ -2,6 +2,7 @@ package dev.amble.ait.core.engine.block.generic;
 
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -139,8 +140,8 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         if (this.idSource != null) {
             nbt.put("SourceStack", this.idSource.save(new CompoundTag()));
@@ -148,8 +149,8 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         if (nbt.contains("SourceStack")) {
             this.idSource = ItemStack.of(nbt.getCompound("SourceStack"));

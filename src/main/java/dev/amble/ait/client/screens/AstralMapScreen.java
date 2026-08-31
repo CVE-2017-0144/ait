@@ -4,8 +4,6 @@ import java.util.*;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,12 +21,13 @@ import org.lwjgl.glfw.GLFW;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.screens.widget.CallbackCheckboxWidget;
 import dev.amble.ait.core.blocks.AstralMapBlock;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.util.WorldUtil;
 
 @Environment(EnvType.CLIENT)
 public class AstralMapScreen extends Screen {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/astral_map.png");
     private static final Component SEARCH_TEXT = Component.translatable("gui.socialInteractions.search_hint")
             .withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
@@ -122,9 +121,9 @@ public class AstralMapScreen extends Screen {
     }
 
     private void exit(AstralMapListWidget.Entry entry) {
-        var packetByteBuf = PacketByteBufs.create().writeResourceLocation(entry.identifier);
+        var packetByteBuf = AitNetworking.buf().writeResourceLocation(entry.identifier);
         packetByteBuf.writeEnum(entry.category);
-        ClientPlayNetworking.send(AstralMapBlock.REQUEST_SEARCH, packetByteBuf);
+        AitNetworking.send(AstralMapBlock.REQUEST_SEARCH, packetByteBuf);
         this.minecraft.setScreen(null);
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -127,8 +128,8 @@ public class EnvironmentProjectorBlock extends HorizontalDirectionalBlock implem
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
-        super.appendHoverText(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, tooltipContext, tooltip, options);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
             tooltip.add(Component.translatable("tooltip.ait.use_in_tardis").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));

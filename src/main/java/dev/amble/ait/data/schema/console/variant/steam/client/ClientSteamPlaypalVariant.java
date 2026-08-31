@@ -9,9 +9,9 @@ import dev.amble.ait.data.schema.console.variant.steam.SteamPlaypalVariant;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientSteamPlaypalVariant extends ClientConsoleVariantSchema {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/steam_playpal.png"));
-    public static final ResourceLocation EMISSION = new ResourceLocation(AITMod.MOD_ID,
+    public static final ResourceLocation EMISSION = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             ("textures/blockentities/consoles/steam_playpal_emission.png"));
 
     public ClientSteamPlaypalVariant() {

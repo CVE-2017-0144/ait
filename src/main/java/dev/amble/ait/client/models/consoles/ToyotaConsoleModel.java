@@ -1636,13 +1636,12 @@ public class ToyotaConsoleModel extends SimpleConsoleModel {
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red,
-            float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         matrices.pushPose();
 
         matrices.mulPose(Axis.YN.rotationDegrees(180f));
 
-        toyota.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        toyota.render(matrices, vertexConsumer, light, overlay, color);
 
         matrices.popPose();
     }
@@ -1650,7 +1649,7 @@ public class ToyotaConsoleModel extends SimpleConsoleModel {
     @Override
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getFrameTime();
+        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTimer().getGameTimeDeltaPartialTick(true);
         matrices.pushPose();
         matrices.translate(0.5f, -1.5f, -0.5f);
         matrices.mulPose(Axis.YN.rotationDegrees(180f));

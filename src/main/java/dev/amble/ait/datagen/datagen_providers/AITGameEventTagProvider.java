@@ -5,12 +5,13 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.gameevent.GameEvent;
 import dev.amble.ait.core.AITTags;
 
-public class AITGameEventTagProvider extends FabricTagProvider.GameEventTagProvider {
+public class AITGameEventTagProvider extends FabricTagProvider<GameEvent> {
     public AITGameEventTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(output, completableFuture);
+        super(output, Registries.GAME_EVENT, completableFuture);
     }
 
     @Override

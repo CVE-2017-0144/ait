@@ -40,7 +40,7 @@ public class PlushieBlocks extends BlockContainer {
         for (String name : DEVS) {
             ABlockSettings settings = new ABlockSettings();
             Block block = new MarketablePlushieBlock(settings, name);
-            ResourceLocation id = new ResourceLocation(namespace, name + "_marketable_plushie");
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, name + "_marketable_plushie");
 
             Registry.register(BuiltInRegistries.BLOCK, id, block);
 

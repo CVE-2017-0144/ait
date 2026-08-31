@@ -62,7 +62,7 @@ public abstract class TardisDesktopSchema extends BasicSchema implements Unlocka
     private ResourceLocation getStructureLocation() {
         ResourceLocation id = this.id();
 
-        return new ResourceLocation(id.getNamespace(), "interiors/" + id.getPath());
+        return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "interiors/" + id.getPath());
     }
 
     @Override
@@ -88,7 +88,7 @@ public abstract class TardisDesktopSchema extends BasicSchema implements Unlocka
         @Override
         public TardisDesktopSchema deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            return DesktopRegistry.getInstance().get(new ResourceLocation(json.getAsJsonPrimitive().getAsString()));
+            return DesktopRegistry.getInstance().get(ResourceLocation.parse(json.getAsJsonPrimitive().getAsString()));
         }
 
         @Override

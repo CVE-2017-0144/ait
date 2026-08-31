@@ -66,9 +66,9 @@ public abstract class LinkableLivingEntity extends LivingEntity implements Linka
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(TARDIS_ID, Optional.empty());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(TARDIS_ID, Optional.empty());
     }
 
     @Override

@@ -19,7 +19,7 @@ public class BuiltinSonic extends SonicSchema {
         ResourceLocation[] identifiers = new ResourceLocation[MODES.length];
 
         for (int i = 0; i < MODES.length; i++) {
-            identifiers[i] = new ResourceLocation(MOD_ID, prefix + id + "/" + MODES[i]);
+            identifiers[i] = ResourceLocation.fromNamespaceAndPath(MOD_ID, prefix + id + "/" + MODES[i]);
         }
 
         ResourceLocation sonicId = AITMod.id(id);

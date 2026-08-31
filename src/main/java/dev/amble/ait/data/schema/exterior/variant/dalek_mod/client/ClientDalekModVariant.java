@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ClientDalekModVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/dalek_mod";
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             CATEGORY_PATH + "/dalek_mod.png");
     protected static final ResourceLocation BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/dalek_mod.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/dalek_mod_";

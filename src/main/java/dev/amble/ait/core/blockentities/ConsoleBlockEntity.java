@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -41,6 +42,7 @@ import dev.amble.ait.core.tardis.control.ControlTypes;
 import dev.amble.ait.core.tardis.control.sequences.SequenceHandler;
 import dev.amble.ait.core.tardis.handler.FuelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.world.RiftChunkManager;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
@@ -87,8 +89,8 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
 
         nbt.putString("type", this.getTypeSchema().id().toString());
         nbt.putString("variant", this.getVariant().id().toString());
@@ -156,8 +158,8 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
 
         this.setType(ConsoleRegistry.getInstance().get(ResourceLocation.tryParse(nbt.getString("type"))));
 
@@ -196,12 +198,12 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         if (level.dimension().equals(Level.OVERWORLD)) {
-            return super.getUpdateTag();
+            return super.getUpdateTag(registries);
         }
         this.markNeedsControl();
-        return super.getUpdateTag();
+        return super.getUpdateTag(registries);
     }
 
     public ConsoleTypeSchema getTypeSchema() {
@@ -250,13 +252,14 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         }
 
         if (itemStack.getItem() instanceof ChargedZeitonCrystalItem) {
-            CompoundTag nbt = itemStack.getOrCreateTag();
+            CompoundTag nbt = ItemNbt.get(itemStack);
 
             if (!nbt.contains(ChargedZeitonCrystalItem.FUEL_KEY))
                 return;
 
             this.tardis().get().addFuel(nbt.getDouble(ChargedZeitonCrystalItem.FUEL_KEY));
             nbt.putDouble(ChargedZeitonCrystalItem.FUEL_KEY, 0);
+            ItemNbt.set(itemStack, nbt);
         }
     }
 

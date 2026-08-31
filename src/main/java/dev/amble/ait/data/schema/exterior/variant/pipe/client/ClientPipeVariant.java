@@ -12,7 +12,7 @@ public abstract class ClientPipeVariant extends ClientExteriorVariantSchema {
     private final String name;
     protected static final String CATEGORY_PATH = "textures/blockentities/exteriors/pipe";
 //    protected static final Identifier BIOME_IDENTIFIER = AITMod.id(CATEGORY_PATH + "/biome" + "/pipe.png");
-    protected static final ResourceLocation CATEGORY_IDENTIFIER = new ResourceLocation(AITMod.MOD_ID,
+    protected static final ResourceLocation CATEGORY_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             CATEGORY_PATH + "/pipe.png");
     protected static final String TEXTURE_PATH = CATEGORY_PATH + "/pipe_";
 

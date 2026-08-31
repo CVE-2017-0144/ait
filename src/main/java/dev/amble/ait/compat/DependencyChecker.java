@@ -9,7 +9,6 @@ public class DependencyChecker {
 
     private static final boolean HAS_PORTALS = doesModExist("imm_ptl_core");
     private static final boolean HAS_IRIS = doesModExist("iris");
-    private static final boolean HAS_GRAVITY = doesModExist("gravity_changer_q");
     private static final boolean HAS_INDIUM = doesModExist("indium");
     private static final boolean HAS_PERMISSION_API = doesModExist("fabric-permissions-api");
 
@@ -26,10 +25,6 @@ public class DependencyChecker {
 
     public static boolean hasIris() {
         return HAS_IRIS;
-    }
-
-    public static boolean hasGravity() {
-        return HAS_GRAVITY;
     }
 
     public static boolean hasIndium() {

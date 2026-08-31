@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -46,8 +47,8 @@ public class TARDISDecoBlock extends Block {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag options) {
-        super.appendHoverText(stack, world, tooltip, options);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag options) {
+        super.appendHoverText(stack, tooltipContext, tooltip, options);
 
         tooltip.add(Component.translatable("tooltip.ait.tardisdeco_type").withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
         tooltip.add(Component.literal(DecoID()).withStyle(ChatFormatting.DARK_GREEN));

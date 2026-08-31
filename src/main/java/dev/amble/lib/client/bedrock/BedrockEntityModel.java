@@ -36,8 +36,8 @@ public class BedrockEntityModel<T extends Entity & AnimatedEntity> extends Entit
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-		this.getPart().render(matrices, vertices, light, overlay, red, green, blue, alpha);
+	public void renderToBuffer(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+		this.getPart().render(matrices, vertices, light, overlay, color);
 
 		List<BedrockModel.PerFaceCube> deferred = model.deferredPerFaceCubes();
 		if (deferred.isEmpty()) return;
@@ -52,7 +52,7 @@ public class BedrockEntityModel<T extends Entity & AnimatedEntity> extends Entit
 				vertices,
 				light,
 				overlay,
-				red, green, blue, alpha,
+				color,
 				this.textureWidth,
 				this.textureHeight
 		);

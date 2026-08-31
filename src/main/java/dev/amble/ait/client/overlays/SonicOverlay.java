@@ -17,6 +17,7 @@ import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.item.SonicItem;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class SonicOverlay implements HudRenderCallback {
 
@@ -45,7 +46,7 @@ public class SonicOverlay implements HudRenderCallback {
                 ItemStack sonic = player.getMainHandItem();
                 if (sonic == null)
                     return false;
-                CompoundTag nbt = sonic.getOrCreateTag();
+                CompoundTag nbt = ItemNbt.get(sonic);
                 if (!nbt.contains(SonicItem.FUEL_KEY))
                     return false;
                 if (crosshairTarget.getType() == HitResult.Type.BLOCK) {
@@ -59,7 +60,7 @@ public class SonicOverlay implements HudRenderCallback {
                 ItemStack sonic = player.getOffhandItem();
                 if (sonic == null)
                     return false;
-                CompoundTag nbt = sonic.getOrCreateTag();
+                CompoundTag nbt = ItemNbt.get(sonic);
                 if (!nbt.contains(SonicItem.FUEL_KEY))
                     return false;
                 if (crosshairTarget.getType() == HitResult.Type.BLOCK) {

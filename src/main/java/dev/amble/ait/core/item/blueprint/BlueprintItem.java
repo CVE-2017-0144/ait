@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.util.ItemNbt;
 
 public class BlueprintItem extends Item {
 
@@ -28,16 +29,17 @@ public class BlueprintItem extends Item {
         BlueprintSchema blueprint = BlueprintRegistry.getInstance().getRandom();
 
         if (blueprint != null) {
-            CompoundTag nbt = stack.getOrCreateTag();
+            CompoundTag nbt = ItemNbt.get(stack);
             nbt.putString("Blueprint", blueprint.id().toString());
+            ItemNbt.set(stack, nbt);
         }
 
         return stack;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        super.appendHoverText(stack, world, tooltip, context);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
+        super.appendHoverText(stack, tooltipContext, tooltip, context);
 
         addShiftHiddenTooltip(stack, tooltip, tooltips -> {
             BlueprintSchema blueprint = getSchema(stack);
@@ -54,7 +56,7 @@ public class BlueprintItem extends Item {
     }
 
     public static BlueprintSchema getSchema(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         Tag element = nbt.get("Blueprint");
 
         if (element == null) {
@@ -62,6 +64,7 @@ public class BlueprintItem extends Item {
 
             BlueprintSchema schema = BlueprintRegistry.getInstance().getRandom();
             nbt.putString("Blueprint", schema.id().toString());
+            ItemNbt.set(stack, nbt);
             return schema;
         }
 
@@ -90,8 +93,9 @@ public class BlueprintItem extends Item {
         return stack;
     }
     public static ItemStack setSchema(ItemStack stack, BlueprintSchema schema) {
-        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag nbt = ItemNbt.get(stack);
         nbt.putString("Blueprint", schema.id().toString());
+        ItemNbt.set(stack, nbt);
         return stack;
     }
 }

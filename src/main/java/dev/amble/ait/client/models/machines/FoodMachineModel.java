@@ -125,9 +125,9 @@ public class FoodMachineModel extends HierarchicalModel {
         return LayerDefinition.create(modelData, 128, 128);
     }
     @Override
-    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
-        pannel.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
-        bb_main.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        pannel.render(matrices, vertexConsumer, light, overlay, color);
+        bb_main.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     @Override

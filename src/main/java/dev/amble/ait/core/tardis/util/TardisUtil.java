@@ -81,11 +81,16 @@ public class TardisUtil {
         return world.getGameRules().getBoolean(AITMod.TARDIS_FIRE_GRIEFING);
     }
 
+    private static boolean notPilot(ServerTardis tardis, ServerPlayerEntity player) {
+        return !tardis.loyalty().get(player).isOf(Loyalty.Type.PILOT);
+    }
+
     public static void init() {
         ServerPlayNetworking.registerGlobalReceiver(SNAP, (server, player, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
-                Loyalty loyalty = tardis.loyalty().get(player);
+                if (notPilot(tardis, player))
+                    return;
 
                 if (tardis.flight().isFlying()) {
                     server.execute(() -> {
@@ -98,9 +103,6 @@ public class TardisUtil {
 
                     return;
                 }
-
-                if (!loyalty.isOf(Loyalty.Type.PILOT))
-                    return;
 
                 player.getWorld().playSound(null, player.getBlockPos(), AITSounds.SNAP, SoundCategory.PLAYERS, 4f, 1f);
 
@@ -137,6 +139,7 @@ public class TardisUtil {
             UUID uuid = buf.readUuid();
             String direction = buf.readString();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
+                if (notPilot(tardis, player)) return;
                 if (!tardis.flight().isFlying()) return;
                 switch (direction) {
                     case "up":
@@ -151,6 +154,7 @@ public class TardisUtil {
         ServerPlayNetworking.registerGlobalReceiver(TOGGLE_ANTIGRAVS, (server, player, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
             ServerTardisManager.getInstance().getTardis(server, uuid, tardis -> {
+                if (notPilot(tardis, player)) return;
                 if (!tardis.flight().isFlying()) return;
                 tardis.travel().antigravs().toggle();
             });

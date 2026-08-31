@@ -172,6 +172,8 @@ public class AITModClient implements ClientModInitializer {
             WorldRenderEvents.AFTER_ENTITIES.register(this::riftBOTI);
         }
 
+        WorldRenderEvents.END.register(context -> BOTI.clearAll());
+
         // @TODO idk why but this gets rid of other important stuff, not sure
         DimensionRenderingRegistry.registerDimensionEffects(AITDimensions.MARS.getValue(), new MarsSkyProperties());
 

@@ -29,6 +29,14 @@ public class BOTI {
     public static Queue<ExteriorBlockEntity> EXTERIOR_RENDER_QUEUE = new LinkedList<>();
     private static boolean HAS_BEEN_WARNED = false;
 
+    public static void clearAll() {
+        RIFT_RENDERING_QUEUE.clear();
+        DOOR_RENDER_QUEUE.clear();
+        GALLIFREYAN_RENDER_QUEUE.clear();
+        TRENZALORE_PAINTING_QUEUE.clear();
+        EXTERIOR_RENDER_QUEUE.clear();
+    }
+
     public static void copyFramebuffer(Framebuffer src, Framebuffer dest) {
         GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.fbo);
         GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.fbo);

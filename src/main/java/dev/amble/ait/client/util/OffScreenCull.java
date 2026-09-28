@@ -5,6 +5,7 @@ import java.util.WeakHashMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.iris.IrisCompat;
+import dev.amble.ait.compat.portal.PortalsAPI;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Camera;
@@ -116,7 +117,9 @@ public final class OffScreenCull {
      */
     private static boolean behindCamera(BlockEntity entity, ModelPart root, double originX, double originY,
             double originZ, double radiusScale, double slop, boolean perAxis) {
-        if (suspended > 0 || entity == null || root == null || IrisCompat.isRenderingShadowPass())
+        // ip never turns the camera look vector, the half space test is wrong inside its passes
+        if (suspended > 0 || entity == null || root == null || IrisCompat.isRenderingShadowPass()
+                || PortalsAPI.RENDERING_PORTAL.getAsBoolean())
             return false;
 
         Camera camera = cameraOrNull();

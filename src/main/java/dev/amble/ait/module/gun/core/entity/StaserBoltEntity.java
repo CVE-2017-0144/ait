@@ -27,8 +27,10 @@ import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.StainedGlassBlock;
+import net.minecraft.world.level.block.TintedGlassBlock;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.WaterloggedTransparentBlock;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -45,12 +47,12 @@ public class StaserBoltEntity extends AbstractArrow implements ISpaceImmune {
 
     private StaserBoltEntity(Level world, double x, double y, double z) {
         super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, x, y, z, world,
-                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), ItemStack.EMPTY);
+                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), null);
     }
 
     private StaserBoltEntity(Level world, LivingEntity shooter) {
         super(GunEntityTypes.STASER_BOLT_ENTITY_TYPE, shooter, world,
-                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), ItemStack.EMPTY);
+                new ItemStack(GunItems.STASER_BOLT_MAGAZINE), null);
     }
 
     @Override
@@ -79,13 +81,18 @@ public class StaserBoltEntity extends AbstractArrow implements ISpaceImmune {
     }
 
     @Override
+    public boolean shotFromCrossbow() {
+        return true;
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
         // Handle block collisions and block breaking safely
         if (hitResult.getType() == HitResult.Type.BLOCK && this.level() instanceof ServerLevel world) {
             boolean allowGriefing = world.getServer().getGameRules().getBoolean(AITMod.STASER_GRIEFING);
             BlockHitResult result = (BlockHitResult) hitResult;
             Block block = this.level().getBlockState(result.getBlockPos()).getBlock();
-            if (allowGriefing && (block instanceof IceBlock || block instanceof LanternBlock || block instanceof TorchBlock || this.level().getBlockState(result.getBlockPos()).canBeReplaced() || block instanceof TransparentBlock || block instanceof IronBarsBlock || block instanceof StainedGlassBlock)) {
+            if (allowGriefing && (block instanceof IceBlock || block instanceof LanternBlock || block instanceof TorchBlock || this.level().getBlockState(result.getBlockPos()).canBeReplaced() || (block instanceof TransparentBlock && !(block instanceof TintedGlassBlock) && !(block instanceof WaterloggedTransparentBlock)) || block instanceof IronBarsBlock || block instanceof StainedGlassBlock)) {
                 this.level().destroyBlock(result.getBlockPos(), false);
             }
             this.level().playSound(null, result.getBlockPos(), AITSounds.STASER, SoundSource.BLOCKS, 0.25f, 0.5f);

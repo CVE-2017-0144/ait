@@ -27,7 +27,7 @@ public class ScopeOverlay implements HudRenderEvents.HudRender {
 
         if(mc.player.getMainHandItem().getItem() instanceof StaserRifleItem && mc.options.getCameraType().isFirstPerson()) {
             if (mc.options.keyUse.isDown()) {
-                float f = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+                float f = v.getGameTimeDeltaTicks();
                 this.spyglassScale = Mth.lerp(0.5f * f, this.spyglassScale, 1.125f);
                 this.renderSpyglassOverlay(drawContext, this.spyglassScale);
             }

@@ -195,21 +195,19 @@ public class AITModClient implements ClientModEntrypoint {
 
         ClientInputEvents.PRE_ATTACK.register((client, player, clickCount) -> (player.getMainHandItem().getItem() instanceof BaseGunItem));
 
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            if (!DependencyChecker.isIrisShaderPackInUse())
+                this.renderBOTI(context);
+        });
+
         if (DependencyChecker.hasIris()) {
-            WorldRenderEvents.END.register(this::exteriorBOTI);
-            WorldRenderEvents.END.register(this::doorBOTI);
-            WorldRenderEvents.END.register(this::gallifreyanBOTI);
-            WorldRenderEvents.END.register(this::trenzaloreBOTI);
-            WorldRenderEvents.END.register(this::riftBOTI);
+            WorldRenderEvents.END.register(context -> {
+                if (DependencyChecker.isIrisShaderPackInUse())
+                    this.renderBOTI(context);
+            });
 
             WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.GbufferInjectionProbe::run);
             WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.ExteriorGbufferInjection::run);
-        } else {
-            WorldRenderEvents.AFTER_ENTITIES.register(this::exteriorBOTI);
-            WorldRenderEvents.AFTER_ENTITIES.register(this::doorBOTI);
-            WorldRenderEvents.AFTER_ENTITIES.register(this::gallifreyanBOTI);
-            WorldRenderEvents.AFTER_ENTITIES.register(this::trenzaloreBOTI);
-            WorldRenderEvents.AFTER_ENTITIES.register(this::riftBOTI);
         }
 
         ClientEvents.CLIENT_STARTED.register(client -> AITRenderHelper.setIsStencilEnabled(client.getMainRenderTarget(), true));
@@ -566,6 +564,14 @@ public class AITModClient implements ClientModEntrypoint {
 
     public static boolean skipPaintingBOTI() {
         return !CONFIG.enableTardisBOTI;
+    }
+
+    private void renderBOTI(WorldRenderContext context) {
+        this.exteriorBOTI(context);
+        this.doorBOTI(context);
+        this.gallifreyanBOTI(context);
+        this.trenzaloreBOTI(context);
+        this.riftBOTI(context);
     }
 
     public void exteriorBOTI(WorldRenderContext context) {

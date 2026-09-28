@@ -1,5 +1,9 @@
 package dev.amble.ait.mixin.server;
 
+import dev.amble.ait.client.util.ClientTardisUtil;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.data.Loyalty;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.core.BlockPos;
@@ -16,10 +20,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import dev.amble.ait.client.util.ClientTardisUtil;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.data.Loyalty;
 
 @Mixin(BedBlock.class)
 public class BedInTardisMixin {

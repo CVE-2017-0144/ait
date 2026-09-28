@@ -1,10 +1,18 @@
 package dev.amble.ait.module.planet.core;
 
+import dev.amble.ait.core.blocks.FlagBlock;
+import dev.amble.ait.module.planet.PlanetModule;
+import dev.amble.ait.module.planet.core.block.OxygenatorBlock;
+import dev.amble.lib.container.impl.BlockContainer;
+import dev.amble.lib.datagen.util.AutomaticModel;
+import dev.amble.lib.datagen.util.NoBlockDrop;
+import dev.amble.lib.datagen.util.PickaxeMineable;
+import dev.amble.lib.item.AItemSettings;
 import net.minecraft.util.ColorRGBA;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -20,14 +28,6 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.material.PushReaction;
-import dev.amble.ait.core.blocks.FlagBlock;
-import dev.amble.ait.module.planet.PlanetModule;
-import dev.amble.ait.module.planet.core.block.OxygenatorBlock;
-import dev.amble.lib.container.impl.BlockContainer;
-import dev.amble.lib.datagen.util.AutomaticModel;
-import dev.amble.lib.datagen.util.NoBlockDrop;
-import dev.amble.lib.datagen.util.PickaxeMineable;
-import dev.amble.lib.item.AItemSettings;
 
 public class PlanetBlocks extends BlockContainer {
 

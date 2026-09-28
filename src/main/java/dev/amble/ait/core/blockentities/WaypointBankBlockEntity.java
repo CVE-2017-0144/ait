@@ -21,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITItems;
@@ -32,6 +31,7 @@ import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.util.StackUtil;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import org.jetbrains.annotations.Nullable;
 
 public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
 
@@ -89,7 +89,7 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
         this.waypoints[slot] = null;
         this.sync(state);
 
-        player.addItem(waypoint.toStack());
+        player.getInventory().placeItemBackInInventory(waypoint.toStack());
         return InteractionResult.SUCCESS;
     }
 

@@ -1,12 +1,12 @@
 package dev.amble.ait.data.schema.door.impl;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class RenegadeDoorVariant extends DoorSchema {
 

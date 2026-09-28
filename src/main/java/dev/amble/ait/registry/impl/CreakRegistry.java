@@ -2,14 +2,14 @@ package dev.amble.ait.registry.impl;
 
 import java.util.Random;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.CreakSound;
 import dev.amble.lib.platform.registry.PlatformRegistries;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
 
 // do i really need a registry for this?? no, but also YES.
 // TODO replace this with sound tags perhaps?

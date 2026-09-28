@@ -92,7 +92,7 @@ sourceSets {
         }
 
         java {
-            exclude "dev/amble/ait/compat/portal/**"
+            exclude { it.relativePath.pathString.startsWith("dev/amble/ait/compat/portal/") && it.name != "PortalsAPI.java" }
             exclude "dev/amble/ait/mixin/compat/portals/**"
 
             exclude "dev/amble/ait/compat/lambdynlights/**"
@@ -118,6 +118,8 @@ dependencies {
 
     compileOnly "mezz.jei:jei-${project.minecraft_version}-neoforge-api:${project.jei_version}"
     runtimeOnly "mezz.jei:jei-${project.minecraft_version}-neoforge:${project.jei_version}"
+
+    compileOnly "maven.modrinth:iris:1.8.12+1.21.1-neoforge"
 
 }
 

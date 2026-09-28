@@ -9,8 +9,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.engine.SubSystem;
+import org.jetbrains.annotations.Nullable;
 
 public class SubSystemItem extends Item {
     protected final SubSystem.IdLike id;

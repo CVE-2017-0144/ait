@@ -1,7 +1,16 @@
 package dev.amble.ait.core.blockentities;
 
 import dev.amble.ait.AITMod;
-import dev.amble.lib.AmbleKit;
+import dev.amble.ait.api.ArtronHolder;
+import dev.amble.ait.api.ArtronHolderItem;
+import dev.amble.ait.core.AITBlockEntityTypes;
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
+import dev.amble.ait.core.item.ArtronCollectorItem;
+import dev.amble.ait.core.item.ChargedZeitonCrystalItem;
+import dev.amble.ait.core.world.RiftChunkManager;
+import dev.amble.ait.module.gun.core.item.StaserBoltMagazine;
 import dev.amble.lib.animation.BedrockModelProvider;
 import dev.amble.lib.client.bedrock.BedrockModelReference;
 import net.minecraft.ChatFormatting;
@@ -17,16 +26,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.amble.ait.api.ArtronHolder;
-import dev.amble.ait.api.ArtronHolderItem;
-import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
-import dev.amble.ait.core.item.ArtronCollectorItem;
-import dev.amble.ait.core.item.ChargedZeitonCrystalItem;
-import dev.amble.ait.core.world.RiftChunkManager;
-import dev.amble.ait.module.gun.core.item.StaserBoltMagazine;
 import org.jetbrains.annotations.Nullable;
 
 public class ArtronCollectorBlockEntity extends FluidLinkBlockEntity implements BedrockModelProvider, BlockEntityTicker<ArtronCollectorBlockEntity>, ArtronHolder {

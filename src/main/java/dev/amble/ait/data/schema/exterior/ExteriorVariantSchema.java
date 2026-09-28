@@ -4,6 +4,14 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import com.google.gson.*;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.data.Loyalty;
+import dev.amble.ait.data.schema.BasicSchema;
+import dev.amble.ait.data.schema.door.DoorSchema;
+import dev.amble.ait.registry.impl.CategoryRegistry;
+import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
+import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
+import dev.amble.lib.register.unlockable.Unlockable;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ResourceLocationException;
@@ -13,14 +21,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.data.Loyalty;
-import dev.amble.ait.data.schema.BasicSchema;
-import dev.amble.ait.data.schema.door.DoorSchema;
-import dev.amble.ait.registry.impl.CategoryRegistry;
-import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
-import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
-import dev.amble.lib.register.unlockable.Unlockable;
 
 /**
  * A variant for a {@link ExteriorCategorySchema} which provides a model,

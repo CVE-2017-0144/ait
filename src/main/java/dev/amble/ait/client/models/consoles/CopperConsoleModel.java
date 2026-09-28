@@ -1,25 +1,8 @@
 package dev.amble.ait.client.models.consoles;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.model.*;
-import net.minecraft.client.model.geom.*;
-import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.animation.console.copper.CopperAnimations;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
@@ -30,6 +13,22 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.model.*;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 
 public class CopperConsoleModel extends SimpleConsoleModel {
     private final ModelPart copper;
@@ -2117,11 +2116,16 @@ public class CopperConsoleModel extends SimpleConsoleModel {
     }
 
     @Override
+    protected void applyRootTransform(PoseStack matrices) {
+        matrices.translate(0.5f, -1.52f, -0.5f);
+    }
+
+    @Override
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTimer().getGameTimeDeltaPartialTick(true);
+        float delta = this.controlDelta();
         matrices.pushPose();
-        matrices.translate(0.5f, -1.52f, -0.5f);
+        this.applyRootTransform(matrices);
 
         // Fuel Gauge
         float fuelTarget = (float) ((tardis.getFuel() / FuelHandler.TARDIS_MAX_FUEL) * 3f);
@@ -2248,14 +2252,18 @@ public class CopperConsoleModel extends SimpleConsoleModel {
         Component positionDimensionText = WorldUtil.worldText(abpp.getDimension());
         String positionDirectionText = DirectionControl.rotationToDirection(abpp.getRotation()).toUpperCase();
         int y = 40;
-        renderer.drawInBatch8xOutline(Component.nullToEmpty("\uD83D\uDCCD").getVisualOrderText(), 0, y, 0x00EEFF, 0x000000,
-                matrices.last().pose(), vertexConsumers, 0xF000F0);
-        renderer.drawInBatch8xOutline(Component.nullToEmpty(positionPosText).getVisualOrderText(), 8, y, 0xFFFFFF, 0x000000,
-                matrices.last().pose(), vertexConsumers, 0xF000F0);
-        renderer.drawInBatch8xOutline(positionDimensionText.getVisualOrderText(), 8, y + 8, 0xFFFFFF, 0x000000,
-                matrices.last().pose(), vertexConsumers, 0xF000F0);
-        renderer.drawInBatch8xOutline(Component.nullToEmpty(positionDirectionText).getVisualOrderText(), 8, y + 16, 0xFFFFFF, 0x000000,
-                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch(Component.nullToEmpty("\uD83D\uDCCD").getVisualOrderText(), 0, y, 0x00EEFF, true,
+                matrices.last().pose(), vertexConsumers,
+                Font.DisplayMode.POLYGON_OFFSET, 0, 0xF000F0);
+        renderer.drawInBatch(Component.nullToEmpty(positionPosText).getVisualOrderText(), 8, y, 0xFFFFFF, true,
+                matrices.last().pose(), vertexConsumers,
+                Font.DisplayMode.POLYGON_OFFSET, 0, 0xF000F0);
+        renderer.drawInBatch(positionDimensionText.getVisualOrderText(), 8, y + 8, 0xFFFFFF, true,
+                matrices.last().pose(), vertexConsumers,
+                Font.DisplayMode.POLYGON_OFFSET, 0, 0xF000F0);
+        renderer.drawInBatch(Component.nullToEmpty(positionDirectionText).getVisualOrderText(), 8, y + 16, 0xFFFFFF, true,
+                matrices.last().pose(), vertexConsumers,
+                Font.DisplayMode.POLYGON_OFFSET, 0, 0xF000F0);
         matrices.popPose();
 
         matrices.pushPose();
@@ -2268,9 +2276,10 @@ public class CopperConsoleModel extends SimpleConsoleModel {
                 ? "⏳: 0%"
                 : "⏳: " + tardis.travel().getDurationAsPercentage() + "%";
         matrices.translate(-10, -47, -48.5f);
-        renderer.drawInBatch8xOutline(Component.nullToEmpty(progressText).getVisualOrderText(),
-                -renderer.width(progressText) / 2, 0, 0xffffff, 0x000000,
-                matrices.last().pose(), vertexConsumers, 0xF000F0);
+        renderer.drawInBatch(Component.nullToEmpty(progressText).getVisualOrderText(),
+                -renderer.width(progressText) / 2, 0, 0xffffff, true,
+                matrices.last().pose(), vertexConsumers,
+                Font.DisplayMode.POLYGON_OFFSET, 0, 0xF000F0);
         matrices.popPose();
 
     }

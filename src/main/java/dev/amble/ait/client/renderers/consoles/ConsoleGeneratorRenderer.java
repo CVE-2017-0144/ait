@@ -1,6 +1,5 @@
 package dev.amble.ait.client.renderers.consoles;
 
-import org.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
@@ -12,7 +11,6 @@ import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.data.datapack.DatapackConsole;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.ConsoleVariantSchema;
-import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,6 +22,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.profiling.ProfilerFiller;
+import org.joml.Matrix4f;
 
 public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> implements BlockEntityRenderer<T> {
 
@@ -47,6 +47,19 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         if (entity.getLevel() == null || !entity.isLinked())
             return;
 
+        ProfilerFiller profiler = entity.getLevel().getProfiler();
+        profiler.push("console_generator");
+        profiler.incrementCounter("ait_generator_drawn");
+
+        this.render0(entity, profiler, matrices, vertexConsumers, light, overlay);
+
+        profiler.pop();
+    }
+
+    private void render0(T entity, ProfilerFiller profiler, PoseStack matrices, MultiBufferSource vertexConsumers,
+            int light, int overlay) {
+        profiler.push("setup");
+
         Tardis tardis = entity.tardis().get();
 
         ConsoleVariantSchema variant = entity.getConsoleVariant();
@@ -56,6 +69,8 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         ResourceLocation consoleTexture = clientVariant.texture();
         ResourceLocation consoleEmission = clientVariant.emission();
 
+        profiler.popPush("frame_model");
+
         matrices.pushPose();
 
         matrices.mulPose(Axis.XP.rotationDegrees(180f));
@@ -64,6 +79,8 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         this.generator.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
+
+        profiler.popPush("hologram");
 
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(180f));
@@ -78,18 +95,17 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
 
         //if (powered) {
             if (tardis.isUnlocked(entity.getConsoleVariant())) {
-                console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                RenderType.entityTranslucentCull(consoleTexture)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
+                console.render(matrices, vertexConsumers.getBuffer(clientVariant.hologramLayer(consoleTexture)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
                 if (consoleEmission != null && !consoleEmission.equals(DatapackConsole.EMPTY)) {
-                    console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                    RenderType.entityTranslucentCull(consoleEmission)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
+                    console.render(matrices, vertexConsumers.getBuffer(clientVariant.hologramLayer(consoleEmission)), 0xf000f0, overlay, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.3607843137f, 0.9450980392f, 1));
                 }
             } else {
-                console.render(matrices, vertexConsumers.getBuffer(entity.getConsoleVariant().getClient().equals(ClientConsoleVariantRegistry.COPPER) ? RenderType.entityTranslucent(consoleTexture) :
-                                RenderType.entityTranslucentCull(consoleTexture)), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.2f, 0.2f, 0.2f));
+                console.render(matrices, vertexConsumers.getBuffer(clientVariant.hologramLayer(consoleTexture)), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(entity.getLevel().random.nextInt(32) != 6 ? 0.4f : 0.05f, 0.2f, 0.2f, 0.2f));
             }
         //}
         matrices.popPose();
+
+        profiler.popPush("label");
 
         matrices.pushPose();
         matrices.translate(0.5F, 2.75F, 0.5F);
@@ -133,5 +149,7 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
                     Font.DisplayMode.SEE_THROUGH, 0x000000, 0xf000f0);
             matrices.popPose();
         }
+
+        profiler.pop();
     }
 }

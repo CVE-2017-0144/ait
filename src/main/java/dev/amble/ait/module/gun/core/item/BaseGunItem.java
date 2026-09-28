@@ -3,6 +3,11 @@ package dev.amble.ait.module.gun.core.item;
 import java.util.List;
 import java.util.function.Predicate;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.AITStatusEffects;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.util.ItemNbt;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
@@ -36,11 +41,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.AITStatusEffects;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.util.ItemNbt;
 
 public class BaseGunItem extends ProjectileWeaponItem {
     public static final ResourceLocation SHOOT = AITMod.id("shoot_gun");
@@ -63,8 +63,11 @@ public class BaseGunItem extends ProjectileWeaponItem {
         boolean shoot = buf.readBoolean();
         boolean isAds = buf.readBoolean();
 
-        if (shoot) {
-            if (player.getMainHandItem().getItem() instanceof BaseGunItem gun) {
+        if (!shoot)
+            return;
+
+        server.execute(() -> {
+            if (player.getMainHandItem().getItem() instanceof BaseGunItem gun && !player.getCooldowns().isOnCooldown(gun)) {
                 if (gun.getCurrentAmmo(player.getMainHandItem()) <= 0) {
                     player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.STONE_BUTTON_CLICK_OFF, SoundSource.PLAYERS, 1.0f, 1.0f);
                     return;
@@ -83,7 +86,7 @@ public class BaseGunItem extends ProjectileWeaponItem {
                     ItemNbt.set(player.getMainHandItem(), compound);
                 }
             }
-        }
+        });
         });
     }
 

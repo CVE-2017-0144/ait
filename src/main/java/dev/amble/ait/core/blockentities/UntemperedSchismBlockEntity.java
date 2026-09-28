@@ -2,7 +2,6 @@ package dev.amble.ait.core.blockentities;
 
 import dev.amble.ait.api.ArtronHolder;
 import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.blocks.UntemperedSchismBlock;
 import dev.amble.ait.core.engine.link.IFluidLink;
 import dev.amble.ait.core.engine.link.IFluidSource;

@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,6 +54,14 @@ public class SubSystemBlockEntity extends FluidLinkBlockEntity {
 
         if (this.system() == null) return;
         this.system().setEnabled(false);
+    }
+
+    @Override
+    public void onBroken(Level world, BlockPos pos) {
+        super.onBroken(world, pos);
+
+        if (this.isLinked())
+            this.tardis().get().interiorChanging().addRestorationStack(new ItemStack(this.getBlockState().getBlock()));
     }
 
     @Override

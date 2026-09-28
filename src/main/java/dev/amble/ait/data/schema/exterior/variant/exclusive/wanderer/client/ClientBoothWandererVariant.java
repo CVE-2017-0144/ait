@@ -1,12 +1,12 @@
 package dev.amble.ait.data.schema.exterior.variant.exclusive.wanderer.client;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.BoothExteriorModel;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class ClientBoothWandererVariant extends ClientExteriorVariantSchema {
 

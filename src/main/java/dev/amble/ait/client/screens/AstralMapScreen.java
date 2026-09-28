@@ -2,6 +2,12 @@ package dev.amble.ait.client.screens;
 
 import java.util.*;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.screens.widget.CallbackCheckboxWidget;
+import dev.amble.ait.core.blocks.AstralMapBlock;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.util.WorldUtil;
+import dev.amble.lib.platform.Platform;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
@@ -11,18 +17,13 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.screens.widget.CallbackCheckboxWidget;
-import dev.amble.ait.core.blocks.AstralMapBlock;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.util.WorldUtil;
-import dev.amble.lib.platform.Platform;
 
 @OnlyIn(Dist.CLIENT)
 public class AstralMapScreen extends Screen {
@@ -39,6 +40,7 @@ public class AstralMapScreen extends Screen {
     int bgWidth = 324;
     int left, top;
 
+    private final BlockPos pos;
     private EditBox searchBox;
     private AstralMapListWidget entryList;
     private CallbackCheckboxWidget showStructuresCheckbox;
@@ -59,9 +61,10 @@ public class AstralMapScreen extends Screen {
         }
     }
 
-    public AstralMapScreen() {
+    public AstralMapScreen(BlockPos pos) {
         super(Component.translatable("screen." + AITMod.MOD_ID + ".astral_map"));
         this.minecraft = Minecraft.getInstance();
+        this.pos = pos;
     }
 
     @Override
@@ -128,6 +131,7 @@ public class AstralMapScreen extends Screen {
         var packetByteBuf = AitNetworking.buf();
         packetByteBuf.writeResourceLocation(entry.identifier);
         packetByteBuf.writeEnum(entry.category);
+        packetByteBuf.writeBlockPos(this.pos);
         AitNetworking.send(AstralMapBlock.REQUEST_SEARCH, packetByteBuf);
         this.minecraft.setScreen(null);
     }

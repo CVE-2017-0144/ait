@@ -1,6 +1,5 @@
 package dev.amble.ait.data.schema.exterior.variant.capsule;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
 import dev.amble.ait.data.schema.door.impl.CapsuleDoorVariant;
@@ -9,6 +8,7 @@ import dev.amble.ait.data.schema.exterior.category.CapsuleCategory;
 import dev.amble.ait.registry.impl.door.DoorRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 // a useful class for creating tardim variants as they all have the same filepath you know
 public abstract class CapsuleVariant extends ExteriorVariantSchema {

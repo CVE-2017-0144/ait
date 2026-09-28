@@ -1,8 +1,8 @@
 package dev.amble.ait.module.planet.core;
 
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import dev.amble.ait.module.planet.core.blockentities.OxygenatorBlockEntity;
 import dev.amble.lib.container.impl.BlockEntityContainer;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class PlanetBlockEntities implements BlockEntityContainer {
 

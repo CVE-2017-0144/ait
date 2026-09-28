@@ -1,12 +1,13 @@
 package dev.amble.ait.module.planet.core.item;
 
+import dev.amble.ait.core.AITStatusEffects;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.*;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
@@ -14,7 +15,6 @@ import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.amble.ait.core.AITStatusEffects;
 
 public class AnorthositeSwordItem extends TieredItem {
     public AnorthositeSwordItem(Tier toolMaterial, Item.Properties settings) {

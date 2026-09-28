@@ -3,10 +3,10 @@ package dev.amble.ait.core;
 import java.util.function.Supplier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.commands.argument.*;
 import dev.amble.lib.platform.command.Commands;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 
 public class AITArgumentTypes {
 

@@ -22,11 +22,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class MultiBlockStructureRenderer {
 
     private final Minecraft client;
-    private final ProfilerFiller profiler;
 
     protected MultiBlockStructureRenderer(Minecraft client) {
         this.client = client;
-        this.profiler = client.getProfiler();
     }
 
     private MultiBlockStructureRenderer() {
@@ -34,12 +32,16 @@ public class MultiBlockStructureRenderer {
     }
 
     public void render(MultiBlockStructure structure, BlockPos centre, BlockAndTintGetter view, PoseStack matrices, MultiBufferSource provider, boolean holographic) {
+        ProfilerFiller profiler = this.client.getProfiler();
         profiler.push("multi_block_structure");
         profiler.push("iterate_offsets");
         structure.forEach(offset -> renderOffset(offset, centre, view, matrices, provider, holographic));
+        profiler.pop();
+        profiler.pop();
     }
 
     public void renderForInterior(MultiBlockStructure structure, BlockPos centre, BlockAndTintGetter view, PoseStack matrices, MultiBufferSource provider, boolean holographic) {
+        ProfilerFiller profiler = this.client.getProfiler();
         profiler.push("multi_block_structure");
         profiler.push("iterate_offsets");
         structure.forEach(offset -> renderOffsetInterior(offset, centre, view, matrices, provider, holographic));

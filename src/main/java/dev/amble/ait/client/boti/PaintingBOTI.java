@@ -2,7 +2,6 @@ package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import org.lwjgl.opengl.GL11;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.decoration.PaintingFrameModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
@@ -10,6 +9,7 @@ import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 public class PaintingBOTI extends BOTI {
     public static void renderBOTIPainting(PoseStack stack, PaintingFrameModel frame,

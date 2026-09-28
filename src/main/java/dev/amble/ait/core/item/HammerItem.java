@@ -1,11 +1,11 @@
 package dev.amble.ait.core.item;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.blocks.PeanutBlock;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.tardis.util.TardisUtil;
@@ -26,6 +26,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
 
 public class HammerItem extends SwordItem {
 
@@ -60,6 +61,9 @@ public class HammerItem extends SwordItem {
             return InteractionResult.PASS;
 
         Tardis tardis = consoleBlockEntity.tardis().get();
+
+        if (SecurityControl.cannotAccess(tardis.asServer(), (ServerPlayer) player))
+            return InteractionResult.PASS;
 
         TravelHandler travel = tardis.travel();
 
@@ -114,7 +118,6 @@ public class HammerItem extends SwordItem {
         int hammerUses = travel.getHammerUses();
 
         double fuel = tardis.fuel().getCurrentFuel();
-        double maxFuel = tardis.fuel().getMaxFuel();
 
         double fuelCost = bonus / 5.0;
 
@@ -123,7 +126,7 @@ public class HammerItem extends SwordItem {
             fuelCost += (150 * travel.speed() * hammerUses) / 7.0;
         }
 
-        if (!world.isClientSide() && fuel + fuelCost > maxFuel) {
+        if (!world.isClientSide() && fuel < fuelCost) {
             travel.crash();
 
             tardis.fuel().setCurrentFuel(0.0);

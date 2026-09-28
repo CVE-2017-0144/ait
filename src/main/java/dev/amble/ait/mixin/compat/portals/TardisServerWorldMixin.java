@@ -1,5 +1,8 @@
 package dev.amble.ait.mixin.compat.portals;
 
+import dev.amble.ait.compat.portal.PortalsDimSync;
+import dev.amble.ait.core.tardis.ServerTardis;
+import dev.amble.ait.core.world.TardisServerWorld;
 import dev.drtheo.multidim.api.MultiDimServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -7,9 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import dev.amble.ait.compat.portal.PortalsDimSync;
-import dev.amble.ait.core.tardis.ServerTardis;
-import dev.amble.ait.core.world.TardisServerWorld;
 
 @Mixin(TardisServerWorld.class)
 public class TardisServerWorldMixin {

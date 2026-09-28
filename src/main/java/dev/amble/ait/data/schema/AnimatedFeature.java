@@ -1,10 +1,10 @@
 package dev.amble.ait.data.schema;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.amble.ait.client.tardis.ClientTardis;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.geom.ModelPart;
-import com.mojang.blaze3d.vertex.PoseStack;
-import dev.amble.ait.client.tardis.ClientTardis;
 
 public interface AnimatedFeature {
     @OnlyIn(Dist.CLIENT)

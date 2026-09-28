@@ -14,11 +14,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisManager;
 import dev.amble.ait.core.util.ItemNbt;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class LinkableItem extends Item {
 
@@ -97,16 +97,20 @@ public abstract class LinkableItem extends Item {
         if (element == null)
             return null;
 
-        // convert old string data
-        if (element.getId() == Tag.TAG_STRING) {
-            UUID converted = UUID.fromString(element.getAsString());
+        try {
+            // convert old string data
+            if (element.getId() == Tag.TAG_STRING) {
+                UUID converted = UUID.fromString(element.getAsString());
 
-            nbt.putUUID(path, converted);
-            ItemNbt.set(stack, nbt);
-            return converted;
+                nbt.putUUID(path, converted);
+                ItemNbt.set(stack, nbt);
+                return converted;
+            }
+
+            return NbtUtils.loadUUID(element);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-
-        return NbtUtils.loadUUID(element);
     }
 
     public Tardis getTardis(Level world, ItemStack stack) {

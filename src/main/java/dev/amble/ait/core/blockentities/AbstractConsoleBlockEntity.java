@@ -1,6 +1,5 @@
 package dev.amble.ait.core.blockentities;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -19,6 +18,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractConsoleBlockEntity extends InteriorLinkableBlockEntity implements Container,
         MenuProvider,

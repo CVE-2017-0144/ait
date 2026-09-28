@@ -1,10 +1,10 @@
 package dev.amble.ait.data.schema.exterior.variant.classic.client;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class ClientClassicBoxDefinitiveVariant extends ClientClassicBoxVariant {
     protected static final ResourceLocation BIOME_IDENTIFIER = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, CATEGORY_PATH + "/biome" + "/classic_definitive.png");

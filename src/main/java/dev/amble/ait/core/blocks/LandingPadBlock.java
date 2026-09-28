@@ -1,7 +1,12 @@
 package dev.amble.ait.core.blocks;
 
+import dev.amble.ait.client.screens.LandingPadScreen;
+import dev.amble.ait.core.world.LandingPadManager;
+import dev.amble.ait.data.landing.LandingPadRegion;
+import dev.amble.ait.data.landing.LandingPadSpot;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -16,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -24,10 +28,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.ait.client.screens.LandingPadScreen;
-import dev.amble.ait.core.world.LandingPadManager;
-import dev.amble.ait.data.landing.LandingPadRegion;
-import dev.amble.ait.data.landing.LandingPadSpot;
 
 public class LandingPadBlock extends Block {
     private static final BooleanProperty ACTIVE = BooleanProperty.create("active"); // whether this block created a region

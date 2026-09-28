@@ -1,15 +1,15 @@
 package dev.amble.ait.core.util;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
-import net.minecraft.world.item.trading.MerchantOffer;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITVillagers;
 import dev.amble.ait.module.planet.core.PlanetBlocks;
 import dev.amble.lib.platform.registry.PlatformRegistries;
 import java.util.Optional;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
 
 public class CustomTrades {
     public static void register() {

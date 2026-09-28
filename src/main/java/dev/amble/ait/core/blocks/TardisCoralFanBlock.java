@@ -1,16 +1,16 @@
 package dev.amble.ait.core.blocks;
 
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -68,7 +68,7 @@ public class TardisCoralFanBlock extends Block implements SimpleWaterloggedBlock
         BlockPos attachedPos = pos.relative(face.getOpposite());
         BlockState attachedState = world.getBlockState(attachedPos);
 
-        if (canPlaceOn(attachedState, face.getOpposite())) {
+        if (canPlaceOn(world, attachedPos, attachedState, face.getOpposite())) {
             return this.defaultBlockState()
                     .setValue(FACING, face)
                     .setValue(WATERLOGGED, ctx.getLevel().getFluidState(ctx.getClickedPos()).getType() == Fluids.WATER);
@@ -77,7 +77,7 @@ public class TardisCoralFanBlock extends Block implements SimpleWaterloggedBlock
         for (Direction direction : FACING.getPossibleValues()) {
             attachedPos = pos.relative(direction.getOpposite());
             attachedState = world.getBlockState(attachedPos);
-            if (canPlaceOn(attachedState, direction.getOpposite())) {
+            if (canPlaceOn(world, attachedPos, attachedState, direction.getOpposite())) {
                 return this.defaultBlockState()
                         .setValue(FACING, direction)
                         .setValue(WATERLOGGED, ctx.getLevel().getFluidState(ctx.getClickedPos()).getType() == Fluids.WATER);
@@ -92,12 +92,11 @@ public class TardisCoralFanBlock extends Block implements SimpleWaterloggedBlock
         Direction facing = state.getValue(FACING);
         BlockPos attachedPos = pos.relative(facing.getOpposite());
         BlockState attachedState = world.getBlockState(attachedPos);
-        return canPlaceOn(attachedState, facing.getOpposite());
+        return canPlaceOn(world, attachedPos, attachedState, facing.getOpposite());
     }
 
-    private boolean canPlaceOn(BlockState state, Direction direction) {
-        return state.isFaceSturdy(
-                BlockGetter.class.cast(null), BlockPos.ZERO, direction);
+    private boolean canPlaceOn(LevelReader world, BlockPos pos, BlockState state, Direction direction) {
+        return state.isFaceSturdy(world, pos, direction);
     }
 
     @Override

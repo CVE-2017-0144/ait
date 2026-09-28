@@ -1,15 +1,12 @@
 package dev.amble.ait.client.sounds;
 
 import dev.amble.ait.client.sounds.alarm.ClientAlarmHandler;
-import dev.amble.ait.client.sounds.flight.ClientFlightMusicHandler;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.client.Minecraft;
 import dev.amble.ait.client.sounds.console.ClientConsoleAmbientSoundsHandler;
 import dev.amble.ait.client.sounds.drifting.ClientTwoThousandSoundHandler;
 import dev.amble.ait.client.sounds.engine.ClientEngineLoopSoundHandler;
 import dev.amble.ait.client.sounds.fall.ClientFallSoundHandler;
 import dev.amble.ait.client.sounds.flight.ClientFlightHandler;
+import dev.amble.ait.client.sounds.flight.ClientFlightMusicHandler;
 import dev.amble.ait.client.sounds.hum.exterior.ExteriorHumHandler;
 import dev.amble.ait.client.sounds.hum.interior.ClientCreakHandler;
 import dev.amble.ait.client.sounds.hum.interior.ClientHumHandler;
@@ -18,6 +15,9 @@ import dev.amble.ait.client.sounds.rain.ClientRainSoundHandler;
 import dev.amble.ait.client.sounds.rain.ClientThunderSoundHandler;
 import dev.amble.ait.client.sounds.sonic.SonicSoundHandler;
 import dev.amble.ait.client.sounds.vortex.ClientVortexSoundsHandler;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.Minecraft;
 
 /**
  * A class for playing + managing our custom sounds on the client, right now

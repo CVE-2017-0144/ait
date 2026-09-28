@@ -5,6 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITDimensions;
+import dev.amble.ait.core.entities.FlightTardisEntity;
+import dev.amble.ait.module.planet.core.space.planet.Planet;
+import dev.amble.ait.module.planet.core.space.planet.PlanetRenderInfo;
+import dev.amble.ait.module.planet.core.space.system.Space;
+import dev.amble.lib.platform.lifecycle.ServerTickEvents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,13 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITDimensions;
-import dev.amble.ait.core.entities.FlightTardisEntity;
-import dev.amble.ait.module.planet.core.space.planet.Planet;
-import dev.amble.ait.module.planet.core.space.planet.PlanetRenderInfo;
-import dev.amble.ait.module.planet.core.space.system.Space;
-import dev.amble.lib.platform.lifecycle.ServerTickEvents;
 
 // todo - all this code is very sucky
 public class SpaceUtils {

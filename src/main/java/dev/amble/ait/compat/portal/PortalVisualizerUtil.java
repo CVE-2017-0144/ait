@@ -2,7 +2,10 @@ package dev.amble.ait.compat.portal;
 
 import java.util.Optional;
 import java.util.WeakHashMap;
-
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -29,10 +32,6 @@ import qouteall.imm_ptl.core.render.GuiPortalRendering;
 import qouteall.imm_ptl.core.render.MyRenderHelper;
 import qouteall.imm_ptl.core.render.context_management.WorldRenderInfo;
 import qouteall.q_misc_util.my_util.DQuaternion;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.net.AitNetworking;
 
 public class PortalVisualizerUtil {
 

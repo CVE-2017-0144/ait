@@ -108,6 +108,7 @@ public final class HomeCommand {
             if (current == null)
                 return -1;
 
+            homePos = current;
             tardis.stats().setHome(current);
         }
 

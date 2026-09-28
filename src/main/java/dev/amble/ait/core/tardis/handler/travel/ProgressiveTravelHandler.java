@@ -1,10 +1,5 @@
 package dev.amble.ait.core.tardis.handler.travel;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITSounds;
@@ -15,6 +10,12 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 import dev.amble.ait.data.properties.integer.IntProperty;
 import dev.amble.ait.data.properties.integer.IntValue;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public abstract class ProgressiveTravelHandler extends TravelHandlerBase {
 
@@ -99,8 +100,13 @@ public abstract class ProgressiveTravelHandler extends TravelHandlerBase {
         int prevCap = this.missedHardCap;
         this.missedHardCap = TravelUtil.getHardCap(this.getTargetTicks());
 
-        if (prevCap > 0)
-            this.missedEvents = Mth.floor((float) this.missedEvents / prevCap * this.missedHardCap);
+        // Rescale the missed events into the new cap. prevCap is zero on a TARDIS that has never
+        // flown, which crashed the server thread the first time anything set a destination. The
+        // ratio is taken in floating point as well, since an int division truncated every value
+        // below the old cap to nothing.
+        this.missedEvents = prevCap == 0
+                ? 0
+                : Mth.floor((float) this.missedEvents / prevCap * this.missedHardCap);
     }
 
     protected void startFlight() {
@@ -164,8 +170,7 @@ public abstract class ProgressiveTravelHandler extends TravelHandlerBase {
 
     @Override
     protected int clampSpeed(int value) {
-        int max = this.autopilot() ? Math.min(AITMod.CONFIG.maxStabilizedSpeed, this.maxSpeed.get())
-                : this.maxSpeed.get();
+        int max = this.autopilot() ? AITMod.CONFIG.maxStabilizedSpeed : this.maxSpeed.get();
         if (!this.tardis.subsystems().stabilisers().isEnabled()) max = 3;
 
         return Mth.clamp(value, 0, max);
@@ -201,7 +206,7 @@ public abstract class ProgressiveTravelHandler extends TravelHandlerBase {
             return;
         }
 
-        if (server.getTickCount() % (this.maxSpeed.get() - this.speed() + 1) == 0)
+        if (server.getTickCount() % Math.max(1, this.maxSpeed.get() - this.speed() + 1) == 0)
             this.setFlightTicks(this.getFlightTicks() + AITMod.CONFIG.travelPerTick
                     + this.instability() - 1);
     }

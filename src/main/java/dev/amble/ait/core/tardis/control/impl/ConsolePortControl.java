@@ -111,7 +111,7 @@ public class ConsolePortControl extends Control {
         for (ServerPlayer otherPlayer : world.players()) {
             otherPlayer.connection.send(stopPacket);
         }
-        player.addItem(tardis.extra().getInsertedDisc());
+        player.getInventory().placeItemBackInInventory(tardis.extra().getInsertedDisc());
         tardis.extra().setInsertedDisc(ItemStack.EMPTY);
         currentMusic = null;
     }

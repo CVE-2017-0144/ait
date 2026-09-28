@@ -36,6 +36,7 @@ public final class WorldRenderEvents {
         });
     }
 
+    public static final Event<Render> START = event();
     public static final Event<Render> AFTER_SETUP = event();
     public static final Event<Render> BEFORE_ENTITIES = event();
     public static final Event<Render> AFTER_ENTITIES = event();
@@ -45,8 +46,11 @@ public final class WorldRenderEvents {
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent.class, event -> {
             RenderLevelStageEvent.Stage stage = event.getStage();
 
-            if (stage == RenderLevelStageEvent.Stage.AFTER_SKY)
-                AFTER_SETUP.invoker().render(wrap(event));
+            if (stage == RenderLevelStageEvent.Stage.AFTER_SKY) {
+                WorldRenderContext ctx = wrap(event);
+                START.invoker().render(ctx);
+                AFTER_SETUP.invoker().render(ctx);
+            }
             else if (stage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
                 BEFORE_ENTITIES.invoker().render(wrap(event));
             else if (stage == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)

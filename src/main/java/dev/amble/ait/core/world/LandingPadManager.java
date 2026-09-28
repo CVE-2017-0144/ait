@@ -1,8 +1,15 @@
 package dev.amble.ait.core.world;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.util.NetworkUtil;
+import dev.amble.ait.data.landing.LandingPadRegion;
+import dev.amble.lib.platform.PlayerLookup;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.lifecycle.ServerPlayerEvents;
+import dev.amble.lib.platform.registry.Attachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -13,14 +20,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.util.NetworkUtil;
-import dev.amble.ait.data.landing.LandingPadRegion;
-import dev.amble.lib.platform.PlayerLookup;
-import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
-import dev.amble.lib.platform.lifecycle.ServerPlayerEvents;
-import dev.amble.lib.platform.registry.Attachments;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LandingPadManager {
@@ -30,33 +29,7 @@ public class LandingPadManager {
     );
 
     public static void init() {
-        ServerConnectionEvents.JOIN.register((player, server) -> {
-            Network.syncForPlayer(Network.Action.ADD, player);
-        });
-
-        ServerPlayerEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
-            Network.syncForPlayer(Network.Action.CLEAR, player);
-            Network.syncForPlayer(Network.Action.ADD, player);
-        });
-
-        AitNetworking.registerServerReceiver(Network.REQUEST, (server, player, handler, buf, responseSender) -> {
-            CompoundTag data = buf.readNbt();
-
-            if (data == null)
-                return;
-
-            ServerLevel world = player.serverLevel();
-
-            if (!world.dimension().location().toString().equals(data.getString("World")))
-                return;
-
-            ChunkPos pos = new ChunkPos(data.getLong("Chunk"));
-
-            if (!PlayerLookup.tracking(world, pos).contains(player))
-                return;
-
-            Network.syncForPlayer(Network.Action.ADD, player, world, pos);
-        });
+        Network.init();
     }
 
     private final ServerLevel world;
@@ -121,50 +94,80 @@ public class LandingPadManager {
         public static final ResourceLocation REQUEST = AITMod.id("landingpad_request");
 
         public static void syncForPlayer(Action action, ServerPlayer player) {
-            syncForPlayer(action, player, player.serverLevel(), player.chunkPosition());
+            syncForPlayer(action, player, player.chunkPosition());
         }
 
-        public static void syncForPlayer(Action action, ServerPlayer player, ServerLevel world, ChunkPos pos) {
-            LandingPadRegion region = null;
+        public static void syncForPlayer(Action action, ServerPlayer player, ChunkPos pos) {
+            ServerLevel world = player.serverLevel();
 
-            if (action == Action.ADD) {
-                region = LandingPadManager.getInstance(world).getRegion(pos);
-
-                if (region == null)
-                    return;
-            }
-
-            send(player, action, pos, region);
-        }
-
-        public static void syncTracked(Action action, ServerLevel world, ChunkPos pos) {
-            LandingPadRegion region = null;
-
-            if (action == Action.ADD) {
-                region = LandingPadManager.getInstance(world).getRegion(pos);
-
-                if (region == null)
-                    return;
-            }
-
-            for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
-                send(player, action, pos, region);
-            }
-        }
-
-        private static void send(ServerPlayer player, Action action, ChunkPos pos, @Nullable LandingPadRegion region) {
             RegistryFriendlyByteBuf buf = AitNetworking.buf();
             buf.writeEnum(action);
 
             if (action != Action.CLEAR)
                 buf.writeChunkPos(pos);
 
-            if (region == null) {
-                NetworkUtil.send(player, SYNC, buf);
+            if (action == Action.ADD) {
+                LandingPadManager manager = LandingPadManager.getInstance(world);
+                LandingPadRegion region = manager.getRegion(pos);
+
+                if (region == null)
+                    return;
+
+                NetworkUtil.send(player, buf, SYNC, LandingPadRegion.CODEC, region);
                 return;
             }
 
-            NetworkUtil.send(player, buf, SYNC, LandingPadRegion.CODEC, region);
+            NetworkUtil.send(player, SYNC, buf);
+        }
+
+        public static void syncTracked(Action action, ServerLevel world, ChunkPos pos) {
+            RegistryFriendlyByteBuf buf = AitNetworking.buf();
+            buf.writeEnum(action);
+
+            if (action != Action.CLEAR)
+                buf.writeChunkPos(pos);
+
+            if (action == Action.ADD) {
+                LandingPadManager manager = LandingPadManager.getInstance(world);
+                LandingPadRegion region = manager.getRegion(pos);
+
+                if (region == null)
+                    return;
+
+                Attachments.set(world.getChunk(pos.x, pos.z), PERSISTENT, region);
+
+                for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
+                    NetworkUtil.send(player, buf, SYNC, LandingPadRegion.CODEC, region);
+                }
+
+                return;
+            }
+
+            for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
+                NetworkUtil.send(player, SYNC, buf);
+            }
+        }
+
+        private static void init() {
+            ServerConnectionEvents.JOIN.register((player, server) -> {
+                syncForPlayer(Action.ADD, player);
+            });
+
+            ServerPlayerEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
+                syncForPlayer(Action.CLEAR, player);
+                syncForPlayer(Action.ADD, player);
+            });
+
+            AitNetworking.registerServerReceiver(LandingPadManager.Network.REQUEST, (server, player, handler, buf, responseSender) -> {
+                ChunkPos pos = new ChunkPos(buf.readNbt().getLong("Chunk"));
+
+                server.execute(() -> {
+                    ServerLevel world = player.serverLevel();
+
+                    if (world.hasChunk(pos.x, pos.z) && PlayerLookup.tracking(world, pos).contains(player))
+                        syncForPlayer(Action.ADD, player, pos);
+                });
+            });
         }
 
         public enum Action {

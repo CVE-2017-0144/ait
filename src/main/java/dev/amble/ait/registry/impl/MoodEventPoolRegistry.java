@@ -2,16 +2,16 @@ package dev.amble.ait.registry.impl;
 
 import java.util.List;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.handler.mood.MoodDictatedEvent;
 import dev.amble.ait.core.tardis.handler.mood.TardisMood;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.platform.registry.PlatformRegistries;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 
 public class MoodEventPoolRegistry {
     public static final MappedRegistry<MoodDictatedEvent> REGISTRY = PlatformRegistries.createRegistry(ResourceKey.<MoodDictatedEvent>createRegistryKey(AITMod.id("mood_event_pool")));

@@ -2,7 +2,6 @@ package dev.amble.ait.core.blockentities;
 
 import static dev.amble.ait.core.blocks.EnvironmentProjectorBlock.*;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
@@ -28,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class EnvironmentProjectorBlockEntity extends InteriorLinkableBlockEntity {
 
@@ -65,7 +65,8 @@ public class EnvironmentProjectorBlockEntity extends InteriorLinkableBlockEntity
 
         if (player.isShiftKeyDown()) {
             state = state.cycle(ENABLED);
-            AITMod.sendProjectorToggle(pos, state.getValue(ENABLED));
+            world.setBlock(pos, state, Block.UPDATE_ALL);
+            EnvironmentProjectorBlock.toggle(tardis, null, world, pos, state, state.getValue(ENABLED));
         }
 
         return InteractionResult.SUCCESS;

@@ -1,13 +1,12 @@
 package dev.amble.ait.core.bind;
 
 import java.util.function.Consumer;
-
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.amble.ait.AITMod;
 import dev.amble.lib.platform.render.ClientRegistries;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 
 public class KeyBind {
 

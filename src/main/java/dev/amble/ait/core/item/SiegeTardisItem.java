@@ -1,9 +1,9 @@
 package dev.amble.ait.core.item;
 
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,13 +16,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import org.jetbrains.annotations.Nullable;
 
 // todo fix so many issues with having more than one of this item
 public class SiegeTardisItem extends LinkableItem {
@@ -58,8 +57,9 @@ public class SiegeTardisItem extends LinkableItem {
             return;
         }
 
-        if (!tardis.siege().isActive()) {
+        if (!tardis.siege().isSiegeBeingHeld()) {
             tardis.setSiegeBeingHeld(null);
+            stack.setCount(0);
             return;
         }
 
@@ -67,10 +67,6 @@ public class SiegeTardisItem extends LinkableItem {
             tardis.siege().setSiegeBeingHeld(player.getUUID());
 
         tardis.travel().forcePosition(fromEntity(entity));
-
-        if (!tardis.isSiegeBeingHeld()) {
-            tardis.setSiegeBeingHeld(entity.getUUID());
-        }
     }
 
 
@@ -91,7 +87,7 @@ public class SiegeTardisItem extends LinkableItem {
         if (tardis == null)
             return InteractionResult.CONSUME;
 
-        if (!tardis.siege().isActive()) {
+        if (!tardis.siege().isSiegeBeingHeld()) {
             tardis.setSiegeBeingHeld(null);
             return InteractionResult.SUCCESS;
         }
@@ -102,9 +98,9 @@ public class SiegeTardisItem extends LinkableItem {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
-        CompoundTag tag = ItemNbt.get(stack);
-        String text = tag.contains("tardis-uuid")
-                ? tag.getUUID("tardis-uuid").toString().substring(0, 8)
+        UUID id = this.getTardisId(stack);
+        String text = id != null
+                ? id.toString().substring(0, 8)
                 : Component.translatable("tooltip.ait.remoteitem.notardis").getString();
 
         tooltip.add(Component.literal("→ " + text).withStyle(ChatFormatting.BLUE));
@@ -121,7 +117,7 @@ public class SiegeTardisItem extends LinkableItem {
     }
 
     public static void pickupTardis(Tardis tardis, ServerPlayer player) {
-        if (tardis.travel().handbrake())
+        if (tardis.travel().handbrake() || player.getInventory().getFreeSlot() == -1)
             return;
 
         tardis.travel().deleteExterior();

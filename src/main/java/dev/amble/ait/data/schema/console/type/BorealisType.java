@@ -1,6 +1,5 @@
 package dev.amble.ait.data.schema.console.type;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.tardis.control.ControlTypes;
 import dev.amble.ait.core.tardis.control.impl.*;
@@ -11,6 +10,7 @@ import dev.amble.ait.core.tardis.control.impl.pos.ZControl;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityDimensions;
+import org.joml.Vector3f;
 
 public class BorealisType extends ConsoleTypeSchema {
     public static final ResourceLocation REFERENCE = AITMod.id("console/borealis");

@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import org.joml.Vector3f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
@@ -22,6 +21,7 @@ import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.core.blockentities.FabricatorBlockEntity;
 import dev.amble.ait.core.blocks.FabricatorBlock;
 import dev.amble.ait.core.item.blueprint.Blueprint;
+import org.joml.Vector3f;
 
 public class FabricatorRenderer<T extends FabricatorBlockEntity> implements BlockEntityRenderer<T> {
 
@@ -50,7 +50,7 @@ public class FabricatorRenderer<T extends FabricatorBlockEntity> implements Bloc
         this.fabricatorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(FABRICATOR_TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         if (entity.isValid()) {
-            this.fabricatorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(EMISSIVE_FABRICATOR_TEXTURE, true)), 0xf000f0, overlay, 0xFFFFFFFF);
+            this.fabricatorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(EMISSIVE_FABRICATOR_TEXTURE)), 0xf000f0, overlay, 0xFFFFFFFF);
         }
 
         matrices.popPose();

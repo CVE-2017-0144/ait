@@ -1,11 +1,5 @@
 package dev.amble.ait.registry.impl.exterior;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.BedrockExteriorModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
@@ -52,6 +46,12 @@ import dev.amble.lib.client.bedrock.BedrockModelRegistry;
 import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.platform.resource.SimpleReloadListener;
 import dev.amble.lib.register.datapack.DatapackRegistry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
+import org.joml.Vector3f;
 
 public class ClientExteriorVariantRegistry extends DatapackRegistry<ClientExteriorVariantSchema> implements
         SimpleReloadListener {

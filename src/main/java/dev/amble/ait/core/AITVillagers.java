@@ -1,6 +1,8 @@
 package dev.amble.ait.core;
 
 import com.google.common.collect.ImmutableSet;
+import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -9,8 +11,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.level.block.Block;
-import dev.amble.ait.AITMod;
-import dev.amble.lib.platform.registry.PlatformRegistries;
 
 public class AITVillagers {
     public static final ResourceKey<PoiType> FABRICATOR_ENGINEER_POI_KEY = poiKey("fabricator_engineer_poi");

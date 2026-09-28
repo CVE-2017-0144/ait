@@ -4,10 +4,11 @@ import static dev.amble.ait.client.util.TooltipUtil.addShiftHiddenTooltip;
 
 import java.util.List;
 
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.blockentities.FabricatorBlockEntity;
+import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,22 +23,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.blockentities.FabricatorBlockEntity;
-import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
 
 public class FabricatorBlock extends HorizontalDirectionalBlock implements EntityBlock {
 
@@ -57,21 +55,11 @@ public class FabricatorBlock extends HorizontalDirectionalBlock implements Entit
     }
 
     @Override
-    public void wasExploded(Level world, BlockPos pos, Explosion explosion) {
-        if (world.getBlockEntity(pos) instanceof FabricatorBlockEntity be) {
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock()) && world.getBlockEntity(pos) instanceof FabricatorBlockEntity be)
             be.onBroken();
-        }
 
-        super.wasExploded(world, pos, explosion);
-    }
-
-    @Override
-    public void destroy(LevelAccessor world, BlockPos pos, BlockState state) {
-        if (world.getBlockEntity(pos) instanceof FabricatorBlockEntity be) {
-            be.onBroken();
-        }
-
-        super.destroy(world, pos, state);
+        super.onRemove(state, world, pos, newState, moved);
     }
 
     @Override

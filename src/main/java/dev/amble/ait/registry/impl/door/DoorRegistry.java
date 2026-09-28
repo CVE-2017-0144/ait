@@ -1,8 +1,6 @@
 package dev.amble.ait.registry.impl.door;
 
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.schema.door.DatapackDoor;
@@ -11,6 +9,8 @@ import dev.amble.ait.data.schema.door.impl.*;
 import dev.amble.ait.data.schema.door.impl.exclusive.BlueBoxDoorVariant;
 import dev.amble.ait.data.schema.door.impl.exclusive.DoomDoorVariant;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class DoorRegistry extends SimpleDatapackRegistry<DoorSchema> {
     private static DoorRegistry INSTANCE;

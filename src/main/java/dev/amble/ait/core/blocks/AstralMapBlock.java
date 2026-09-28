@@ -1,11 +1,22 @@
 package dev.amble.ait.core.blocks;
 
+import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.MapCodec;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.screens.AstralMapScreen;
+import dev.amble.ait.core.AITBlockEntityTypes;
+import dev.amble.ait.core.blockentities.AstralMapBlockEntity;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.ServerTardis;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
+import dev.amble.ait.core.tardis.control.impl.TelepathicControl;
+import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
+import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -15,13 +26,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.*;
-import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -41,16 +52,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.BlockHitResult;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.screens.AstralMapScreen;
-import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.blockentities.AstralMapBlockEntity;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.ServerTardis;
-import dev.amble.ait.core.tardis.control.impl.TelepathicControl;
-import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
-import dev.amble.ait.core.world.TardisServerWorld;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
     public static final int MAX_ROTATION_INDEX = RotationSegment.getMaxSegmentIndex();
@@ -64,28 +65,29 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
 
     static {
         AitNetworking.registerServerReceiver(REQUEST_SEARCH, (server, player, handler, buf, responseSender) -> {
-            try {
-                ServerLevel checkWorld = player.serverLevel();
-                BlockPos playerPos = player.blockPosition();
-                boolean hasAccess = false;
-                for (BlockPos nearby : BlockPos.withinManhattan(playerPos, 4, 4, 4)) {
-                    if (checkWorld.getBlockState(nearby).getBlock() instanceof AstralMapBlock) {
-                        hasAccess = true;
-                        break;
+            ResourceLocation target = buf.readResourceLocation();
+            AstralMapScreen.Category category = buf.readEnum(AstralMapScreen.Category.class);
+            BlockPos pos = buf.readBlockPos();
+
+            server.execute(() -> {
+                try {
+                    ServerLevel checkWorld = player.serverLevel();
+
+                    if (checkWorld instanceof TardisServerWorld tardisWorld && SecurityControl.cannotAccess(tardisWorld.getTardis(), player))
+                        return;
+
+                    if (!player.canInteractWithBlock(pos, 1.0)
+                            || !(checkWorld.getBlockState(pos).getBlock() instanceof AstralMapBlock))
+                        return;
+
+                    switch(category) {
+                        case BIOMES -> handleBiomeRequest(player, target);
+                        case STRUCTURES -> handleStructureRequest(player, target);
                     }
+                } catch (Exception e) {
+                    AITMod.LOGGER.error("Error handling search request", e);
                 }
-                if (!hasAccess) return;
-
-                ResourceLocation target = buf.readResourceLocation();
-                AstralMapScreen.Category category = buf.readEnum(AstralMapScreen.Category.class);
-
-                switch(category) {
-                    case BIOMES -> handleBiomeRequest(player, target);
-                    case STRUCTURES -> handleStructureRequest(player, target);
-                }
-            } catch (Exception e) {
-                AITMod.LOGGER.error("Error handling search request", e);
-            }
+            });
         });
     }
 
@@ -113,7 +115,7 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
             ServerLevel serverWorld = (ServerLevel) world;
             ServerPlayer serverPlayer = (ServerPlayer) player;
 
-            sendStructuresAndOpenScreen(serverWorld, serverPlayer);
+            sendStructuresAndOpenScreen(serverWorld, serverPlayer, pos);
 
             player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 1.0F);
         }
@@ -162,21 +164,19 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
 
     private static void handleBiomeRequest(ServerPlayer player, ResourceLocation target) {
         player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.searching_for_biome"), false);
-        player.getServer().execute(() -> {
-            ServerLevel world = player.serverLevel();
-            if (!TardisServerWorld.isTardisDimension(world))
-                return;
 
-            ServerTardis tardis = ((TardisServerWorld) world).getTardis();
-            CachedDirectedGlobalPos currentPos = tardis.travel().position();
-            ServerLevel targetWorld = currentPos.getWorld();
-            BlockPos start = currentPos.getPos();
-            ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, target);
+        if (!(player.serverLevel() instanceof TardisServerWorld tardisWorld))
+            return;
 
-            Pair<BlockPos, Holder<Biome>> r = targetWorld.findClosestBiome3d(
-                    entry -> entry.is(biomeKey),
-                    start, AITMod.CONFIG.astralMapBiomeLocatorRange, 32, 64);
+        ServerTardis tardis = tardisWorld.getTardis();
+        CachedDirectedGlobalPos currentPos = tardis.travel().position();
+        ServerLevel targetWorld = currentPos.getWorld();
+        BlockPos start = currentPos.getPos();
+        ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, target);
 
+        CompletableFuture.supplyAsync(() -> targetWorld.findClosestBiome3d(
+                entry -> entry.is(biomeKey),
+                start, AITMod.CONFIG.astralMapBiomeLocatorRange, 32, 64), AsyncLocatorUtil.LOCATING_EXECUTOR_SERVICE).thenAcceptAsync(r -> {
             if (r != null) {
                 BlockPos locatedBiome = r.getFirst();
                 int distance = (int) Math.round(Math.sqrt(locatedBiome.distSqr(start)));
@@ -186,10 +186,13 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
             } else {
                 player.displayClientMessage(Component.translatable("block.ait.astral_map.finder.biome_not_found"), false);
             }
+        }, player.getServer()).exceptionally(e -> {
+            AITMod.LOGGER.error("Error locating biome {}", target, e);
+            return null;
         });
     }
 
-    private static void sendStructuresAndOpenScreen(ServerLevel world, ServerPlayer target) {
+    private static void sendStructuresAndOpenScreen(ServerLevel world, ServerPlayer target, BlockPos pos) {
         if (structureIds == null || structureIds.isEmpty()) {
             Registry<Structure> registry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
             List<ResourceLocation> ids = new ArrayList<>(registry.size());
@@ -200,6 +203,7 @@ public class AstralMapBlock extends BaseEntityBlock implements EntityBlock {
         }
 
         RegistryFriendlyByteBuf buf = AitNetworking.buf();
+        buf.writeBlockPos(pos);
         buf.writeCollection(structureIds, FriendlyByteBuf::writeResourceLocation);
         AitNetworking.send(target, OPEN_ASTRAL_MAP, buf);
     }

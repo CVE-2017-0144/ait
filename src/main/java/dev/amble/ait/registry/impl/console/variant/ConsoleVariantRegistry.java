@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.datapack.DatapackConsole;
@@ -31,6 +27,10 @@ import dev.amble.ait.data.schema.console.variant.toyota.ToyotaBlueVariant;
 import dev.amble.ait.data.schema.console.variant.toyota.ToyotaLegacyVariant;
 import dev.amble.ait.data.schema.console.variant.toyota.ToyotaVariant;
 import dev.amble.lib.register.unlockable.UnlockableRegistry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class ConsoleVariantRegistry extends UnlockableRegistry<ConsoleVariantSchema> {
     private static ConsoleVariantRegistry INSTANCE;

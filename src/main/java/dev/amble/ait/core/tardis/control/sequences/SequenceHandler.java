@@ -2,6 +2,14 @@ package dev.amble.ait.core.tardis.control.sequences;
 
 import java.util.UUID;
 
+import dev.amble.ait.api.tardis.KeyedTardisComponent;
+import dev.amble.ait.api.tardis.TardisTickable;
+import dev.amble.ait.core.tardis.TardisDesktop;
+import dev.amble.ait.core.tardis.control.Control;
+import dev.amble.ait.data.Exclude;
+import dev.amble.ait.data.properties.bool.BoolProperty;
+import dev.amble.ait.data.properties.bool.BoolValue;
+import dev.amble.ait.registry.impl.SequenceRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import net.minecraft.core.BlockPos;
@@ -14,14 +22,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.api.tardis.KeyedTardisComponent;
-import dev.amble.ait.api.tardis.TardisTickable;
-import dev.amble.ait.core.tardis.TardisDesktop;
-import dev.amble.ait.core.tardis.control.Control;
-import dev.amble.ait.data.Exclude;
-import dev.amble.ait.data.properties.bool.BoolProperty;
-import dev.amble.ait.data.properties.bool.BoolValue;
-import dev.amble.ait.registry.impl.SequenceRegistry;
 
 public class SequenceHandler extends KeyedTardisComponent implements TardisTickable {
 

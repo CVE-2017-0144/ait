@@ -5,13 +5,13 @@ import static net.minecraft.commands.Commands.literal;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.Platform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import dev.amble.ait.AITMod;
-import dev.amble.lib.platform.Platform;
 
 public class VersionCommand {
 

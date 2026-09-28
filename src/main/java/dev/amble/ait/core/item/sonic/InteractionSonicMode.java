@@ -1,8 +1,8 @@
 package dev.amble.ait.core.item.sonic;
 
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.data.schema.sonic.SonicSchema;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -13,20 +13,20 @@ import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.ComparatorBlock;
 import net.minecraft.world.level.block.DaylightDetectorBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.data.schema.sonic.SonicSchema;
 
 public class InteractionSonicMode extends SonicMode {
 
@@ -64,6 +64,8 @@ public class InteractionSonicMode extends SonicMode {
         Block block = state.getBlock();
 
         if (!state.is(AITTags.Blocks.SONIC_INTERACTABLE)) return;
+        if (!(user instanceof Player player) || !world.mayInteract(player, pos)) return;
+        if (!player.mayBuild() && !(block instanceof ButtonBlock)) return;
 
         if (block == Blocks.IRON_DOOR && state.hasProperty(BlockStateProperties.OPEN)) {
             boolean isOpen = state.getValue(BlockStateProperties.OPEN);
@@ -97,7 +99,7 @@ public class InteractionSonicMode extends SonicMode {
             return;
         }
 
-        if (user instanceof Player player && block instanceof ButtonBlock button) {
+        if (block instanceof ButtonBlock button) {
             state.useWithoutItem(world, player, blockHit);
             return;
         }

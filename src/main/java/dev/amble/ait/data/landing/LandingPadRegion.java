@@ -8,9 +8,9 @@ import net.minecraft.world.level.ChunkPos;
 import com.google.common.collect.ImmutableCollection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.lib.util.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class LandingPadRegion {
 
@@ -45,13 +45,11 @@ public class LandingPadRegion {
         this.landingCode = landingCode;
 
         this.defaultY = y;
-
-        if (spots.isEmpty())
-            this.createAllSpots();
     }
 
     public LandingPadRegion(ChunkPos pos, int y, String landingCode) {
         this(pos, y, new ArrayList<>(), landingCode);
+        this.createAllSpots();
     }
 
     public @Nullable LandingPadSpot getFreeSpot() {

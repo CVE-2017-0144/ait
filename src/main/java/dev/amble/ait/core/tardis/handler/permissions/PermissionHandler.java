@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import dev.amble.ait.client.screens.widget.SwitcherManager;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
+import dev.amble.ait.client.screens.widget.SwitcherManager;
 import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 public class PermissionHandler extends KeyedTardisComponent {
 
@@ -45,7 +45,7 @@ public class PermissionHandler extends KeyedTardisComponent {
                     PermissionHandler permissions = tardis.handler(Id.PERMISSIONS);
                     Loyalty.Type type = buf.readEnum(Loyalty.Type.class);
 
-                    permissions.p19Loyalty.set(type);
+                    server.execute(() -> permissions.p19Loyalty.set(type));
                 })));
     }
 

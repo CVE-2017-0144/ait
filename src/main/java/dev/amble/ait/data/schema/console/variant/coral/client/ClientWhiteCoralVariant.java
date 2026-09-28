@@ -1,12 +1,12 @@
 package dev.amble.ait.data.schema.console.variant.coral.client;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.CoralConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.coral.WhiteCoralVariant;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class ClientWhiteCoralVariant extends ClientConsoleVariantSchema {
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,

@@ -1,20 +1,27 @@
 package dev.amble.ait.core.blocks;
 
 import com.mojang.serialization.MapCodec;
+import dev.amble.ait.core.AITBlockEntityTypes;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.blockentities.FoodMachineBlockEntity;
+import dev.amble.ait.core.drinks.DrinkRegistry;
+import dev.amble.ait.core.drinks.DrinkUtil;
+import dev.amble.lib.platform.interaction.PlayerInteractionEvents;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.*;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.*;
-import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -34,13 +41,6 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.blockentities.FoodMachineBlockEntity;
-import dev.amble.ait.core.drinks.DrinkRegistry;
-import dev.amble.ait.core.drinks.DrinkUtil;
-import dev.amble.lib.platform.interaction.PlayerInteractionEvents;
 
 public class FoodMachineBlock extends BaseEntityBlock implements EntityBlock {
     public static final int MAX_ROTATION_INDEX = RotationSegment.getMaxSegmentIndex();

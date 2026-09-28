@@ -2,6 +2,17 @@ package dev.amble.ait.core.util;
 
 import java.util.*;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.util.ClientTardisUtil;
+import dev.amble.ait.core.AITDimensions;
+import dev.amble.ait.core.tardis.ServerTardis;
+import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.ait.mixin.server.EnderDragonFightAccessor;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.lifecycle.ServerWorldEvents;
+import dev.amble.lib.util.ServerLifecycleHooks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -24,17 +35,6 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.util.ClientTardisUtil;
-import dev.amble.ait.core.AITDimensions;
-import dev.amble.ait.core.tardis.ServerTardis;
-import dev.amble.ait.core.world.TardisServerWorld;
-import dev.amble.ait.mixin.server.EnderDragonFightAccessor;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
-import dev.amble.lib.platform.Platform;
-import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
-import dev.amble.lib.platform.lifecycle.ServerWorldEvents;
-import dev.amble.lib.util.ServerLifecycleHooks;
 
 public class WorldUtil {
 

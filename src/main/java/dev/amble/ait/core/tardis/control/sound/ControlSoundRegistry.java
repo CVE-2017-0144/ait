@@ -1,10 +1,5 @@
 package dev.amble.ait.core.tardis.control.sound;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.tardis.control.Control;
@@ -13,6 +8,11 @@ import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.lib.platform.registry.PlatformRegistries;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 
 public class ControlSoundRegistry extends SimpleDatapackRegistry<ControlSound> {
     private static final ControlSoundRegistry instance = new ControlSoundRegistry();

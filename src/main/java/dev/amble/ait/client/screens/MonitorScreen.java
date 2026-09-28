@@ -399,7 +399,7 @@ public class MonitorScreen extends ConsoleScreen {
         model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.entityTranslucentCull(texture)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, base, base, base));
 
         if (hasPower && emissive != null && !(emissive.equals(DatapackConsole.EMPTY))) {
-            model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(emissive, true)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, base, base, base));
+            model.render(stack, context.bufferSource().getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(emissive)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, base, base, base));
         }
         stack.popPose();
 

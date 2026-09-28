@@ -1,15 +1,15 @@
 package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import dev.amble.ait.client.renderers.AITRenderLayers;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import java.util.SequencedMap;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
-import dev.amble.ait.client.renderers.AITRenderLayers;
-import java.util.SequencedMap;
 
 @OnlyIn(Dist.CLIENT)
 public class AITBufferBuilderStorage extends RenderBuffers {

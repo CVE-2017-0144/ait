@@ -1,11 +1,5 @@
 package dev.amble.ait.mixin.server;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.amble.ait.core.events.WorldSaveEvent;
 import dev.amble.ait.core.item.SiegeTardisItem;
 import dev.amble.ait.core.tardis.Tardis;
@@ -13,6 +7,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerLevel.class)
 public class ServerWorldMixin {
@@ -36,7 +35,9 @@ public class ServerWorldMixin {
                 return;
 
             // kill ourselves and place down the exterior
-            SiegeTardisItem.placeTardis(found, SiegeTardisItem.fromEntity(entity));
+            if (found.siege().isSiegeBeingHeld())
+                SiegeTardisItem.placeTardis(found, SiegeTardisItem.fromEntity(entity));
+
             entity.kill();
         }
     }

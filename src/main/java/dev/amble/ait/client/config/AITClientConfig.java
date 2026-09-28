@@ -1,5 +1,6 @@
 package dev.amble.ait.client.config;
 
+import dev.amble.ait.AITMod;
 import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
@@ -9,7 +10,6 @@ import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import dev.isxander.yacl3.gui.ValueFormatters;
 import dev.isxander.yacl3.platform.YACLPlatform;
 import net.minecraft.network.chat.Component;
-import dev.amble.ait.AITMod;
 
 public class AITClientConfig {
 

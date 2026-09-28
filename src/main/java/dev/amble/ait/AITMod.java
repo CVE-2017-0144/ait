@@ -7,35 +7,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
-import dev.drtheo.multidim.MultiDim;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import dev.amble.ait.api.AITModInitializer;
 import dev.amble.ait.config.AITServerConfig;
 import dev.amble.ait.core.*;
@@ -96,6 +67,36 @@ import dev.amble.lib.platform.worldgen.BiomeModifications;
 import dev.amble.lib.platform.worldgen.BiomeSelectors;
 import dev.amble.lib.register.AmbleRegistries;
 import dev.amble.lib.util.ServerLifecycleHooks;
+import dev.drtheo.multidim.MultiDim;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AITMod implements ModEntrypoint {
 
@@ -254,6 +255,12 @@ public class AITMod implements ModEntrypoint {
             ListCommand.register(dispatcher);
             LoadCommand.register(dispatcher);
             DebugCommand.register(dispatcher);
+
+            if (!FMLEnvironment.production) {
+                ProfileClientCommand.register(dispatcher);
+                PerfScenarioCommand.register(dispatcher);
+            }
+
             EraseChunksCommand.register(dispatcher);
             FlightCommand.register(dispatcher);
             SetDoorParticleCommand.register(dispatcher, registryAccess);
@@ -265,6 +272,9 @@ public class AITMod implements ModEntrypoint {
                     String landingCode = buf.readUtf();
 
                     server.execute(() -> {
+                        if (!player.canInteractWithBlock(pos, 1.0))
+                            return;
+
                         LandingPadRegion region = LandingPadManager.getInstance((ServerLevel) player.level()).getRegionAt(pos);
 
                         if (region == null)
@@ -272,7 +282,7 @@ public class AITMod implements ModEntrypoint {
 
                         region.setLandingCode(landingCode);
                         LandingPadManager.Network.syncTracked(LandingPadManager.Network.Action.ADD, player.serverLevel(),
-                                new ChunkPos(player.blockPosition()));
+                                new ChunkPos(pos));
                     });
                 });
 
@@ -316,6 +326,10 @@ public class AITMod implements ModEntrypoint {
 
             server.execute(() -> {
                 Level world = player.level();
+
+                if (!player.canInteractWithBlock(pos, 1.0))
+                    return;
+
                 BlockState state = world.getBlockState(pos);
 
                 if (!(world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector))
@@ -332,8 +346,13 @@ public class AITMod implements ModEntrypoint {
             ResourceLocation id = buf.readResourceLocation();
             server.execute(() -> {
                 ServerLevel world = player.serverLevel();
-                if (world != null && world.getBlockEntity(pos) instanceof dev.amble.ait.core.blockentities.EnvironmentProjectorBlockEntity projector) {
+                if (player.canInteractWithBlock(pos, 1.0)
+                        && world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector) {
                     ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, id);
+
+                    if (!WorldUtil.getProjectorWorlds().contains(server.getLevel(key)))
+                        return;
+
                     projector.setCurrentFromClient(key, player);
                 }
             });
@@ -345,7 +364,8 @@ public class AITMod implements ModEntrypoint {
             float pitch = buf.readFloat();
             server.execute(() -> {
                 ServerLevel world = player.serverLevel();
-                if (world != null && world.getBlockEntity(pos) instanceof dev.amble.ait.core.blockentities.EnvironmentProjectorBlockEntity projector) {
+                if (player.canInteractWithBlock(pos, 1.0)
+                        && world.getBlockEntity(pos) instanceof EnvironmentProjectorBlockEntity projector) {
                     projector.setAnglesFromClient(yaw, pitch, player);
                 }
             });
@@ -419,6 +439,7 @@ public class AITMod implements ModEntrypoint {
     public static final ResourceLocation TOGGLE_PROJECTOR = AITMod.id("toggle_projector");
     public static final ResourceLocation PROJECTOR_SELECTION = ResourceLocation.fromNamespaceAndPath(MOD_ID, "projector_selection");
     public static final ResourceLocation PROJECTOR_ANGLES = ResourceLocation.fromNamespaceAndPath(MOD_ID, "projector_angles");
+    public static final ResourceLocation PROFILE_CLIENT = AITMod.id("profile_client");
 
     public static void openScreen(ServerPlayer player, int id) {
         RegistryFriendlyByteBuf buf = AitNetworking.buf();

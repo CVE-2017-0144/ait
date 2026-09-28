@@ -11,12 +11,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.queue.api.util.Value;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.TaskStage;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class SafePosSearch {
 
@@ -238,7 +238,7 @@ public class SafePosSearch {
 
             floor = current;
             current = above;
-            above = chunk.getBlockState(cursor);
+            above = chunk.getBlockState(cursor.above());
 
             return Iter.CONTINUE;
         }
@@ -280,29 +280,25 @@ public class SafePosSearch {
                 return DoubleIter.FAIL;
 
             if (canGoUp) {
-                if (isSafe(floorUp, curUp, aboveUp)) {
-                    upCursor = upCursor.below();
+                if (isSafe(floorUp, curUp, aboveUp))
                     return DoubleIter.SUCCESS_A;
-                }
 
                 upCursor = upCursor.above();
 
                 floorUp = curUp;
                 curUp = aboveUp;
-                aboveUp = chunk.getBlockState(upCursor);
+                aboveUp = chunk.getBlockState(upCursor.above());
             }
 
             if (canGoDown) {
-                if (isSafe(floorDown, curDown, aboveDown)) {
-                    downCursor = downCursor.above();
+                if (isSafe(floorDown, curDown, aboveDown))
                     return DoubleIter.SUCCESS_B;
-                }
 
                 downCursor = downCursor.below();
 
-                curDown = aboveDown;
-                aboveDown = floorDown;
-                floorDown = chunk.getBlockState(downCursor);
+                aboveDown = curDown;
+                curDown = floorDown;
+                floorDown = chunk.getBlockState(downCursor.below());
             }
 
             return DoubleIter.CONTINUE;

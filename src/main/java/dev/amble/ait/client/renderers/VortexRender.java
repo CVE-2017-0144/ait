@@ -8,14 +8,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.amble.ait.core.tardis.vortex.reference.VortexReference;
+import dev.amble.ait.core.tardis.vortex.reference.VortexReferenceRegistry;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import dev.amble.ait.core.tardis.vortex.reference.VortexReference;
-import dev.amble.ait.core.tardis.vortex.reference.VortexReferenceRegistry;
 
 public class VortexRender {
     private static VortexRender INSTANCE;

@@ -6,14 +6,14 @@ import java.util.function.Function;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.amble.ait.core.tardis.handler.BiomeHandler;
+import dev.amble.ait.data.enummap.EnumMap;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StringRepresentable;
-import dev.amble.ait.core.tardis.handler.BiomeHandler;
-import dev.amble.ait.data.enummap.EnumMap;
 
 public record BiomeOverrides(EnumMap.Compliant<BiomeHandler.BiomeType, ResourceLocation> lookup) {
 

@@ -3,11 +3,6 @@ package dev.amble.ait.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.bind.KeyBind;
@@ -15,6 +10,10 @@ import dev.amble.ait.core.entities.FlightTardisEntity;
 import dev.amble.ait.core.item.KeyItem;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
 
 public class AITKeyBinds {
 

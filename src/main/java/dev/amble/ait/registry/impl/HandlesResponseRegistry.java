@@ -3,16 +3,6 @@ package dev.amble.ait.registry.impl;
 import java.util.HashMap;
 import java.util.List;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.ItemStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.handles.HandlesResponse;
@@ -25,6 +15,16 @@ import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.lib.platform.lifecycle.ServerPlayerEvents;
 import dev.amble.lib.platform.registry.PlatformRegistries;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Registry for Handles responses.
@@ -505,6 +505,10 @@ public class HandlesResponseRegistry {
                 Tardis tardis = item.getTardis(player.level(), stack);
 
                 if (tardis.butler().getHandles() == null) {
+                    if (response.requiresSudo() && tardis.stats().security().get()
+                            && !SecurityControl.hasMatchingKey(player, tardis))
+                        return true;
+
                     response.run(player, HandlesSound.of(player), tardis.asServer());
                     return false;
                 }

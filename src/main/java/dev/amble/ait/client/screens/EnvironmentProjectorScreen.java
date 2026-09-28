@@ -87,7 +87,7 @@ public class EnvironmentProjectorScreen extends TardisScreen {
         AITMod.sendProjectorSelection(projectorPos, key.location());
 
         ClientTardis tardis = tardis();
-        if (tardis != null && state.getValue(EnvironmentProjectorBlock.ENABLED)) {
+        if (tardis != null && state.getOptionalValue(EnvironmentProjectorBlock.ENABLED).orElse(false)) {
             this.apply(tardis, state);
         }
     }
@@ -190,7 +190,7 @@ public class EnvironmentProjectorScreen extends TardisScreen {
         this.addRenderableWidget(this.worldList);
 
         BlockState state = this.minecraft.level.getBlockState(projectorPos);
-        boolean enabled = state.getValue(EnvironmentProjectorBlock.ENABLED);
+        boolean enabled = state.getOptionalValue(EnvironmentProjectorBlock.ENABLED).orElse(false);
 
         Component onText = this.projectorText("enabled.on");
         Component offText = this.projectorText("enabled.off");

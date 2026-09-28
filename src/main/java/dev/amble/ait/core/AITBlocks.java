@@ -6,11 +6,25 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.blocks.*;
+import dev.amble.ait.core.blocks.CoralPlantBlock;
+import dev.amble.ait.core.blocks.DoorBlock;
+import dev.amble.ait.core.blocks.control.RedstoneControlBlock;
+import dev.amble.ait.core.engine.block.generic.GenericSubSystemBlock;
+import dev.amble.lib.block.ABlockSettings;
+import dev.amble.lib.container.impl.BlockContainer;
+import dev.amble.lib.container.impl.NoBlockItem;
+import dev.amble.lib.datagen.util.AutomaticModel;
+import dev.amble.lib.datagen.util.NoBlockDrop;
+import dev.amble.lib.datagen.util.NoEnglish;
+import dev.amble.lib.datagen.util.PickaxeMineable;
+import dev.amble.lib.item.AItemSettings;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -28,21 +42,6 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.blocks.*;
-import dev.amble.ait.core.blocks.CoralPlantBlock;
-import dev.amble.ait.core.blocks.DoorBlock;
-import dev.amble.ait.core.blocks.control.RedstoneControlBlock;
-import dev.amble.ait.core.engine.block.generic.GenericSubSystemBlock;
-import dev.amble.lib.block.ABlockSettings;
-import dev.amble.lib.container.impl.BlockContainer;
-import dev.amble.lib.container.impl.NoBlockItem;
-import dev.amble.lib.datagen.util.AutomaticModel;
-import dev.amble.lib.datagen.util.NoBlockDrop;
-import dev.amble.lib.datagen.util.NoEnglish;
-import dev.amble.lib.datagen.util.PickaxeMineable;
-import dev.amble.lib.item.AItemSettings;
-import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public class AITBlocks extends BlockContainer {
     public static Block SNOW_GLOBE;

@@ -1,6 +1,7 @@
 package dev.amble.lib.data;
 
 
+import dev.amble.ait.data.Exclude;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import dev.amble.ait.data.Exclude;
 
 public class CachedDirectedGlobalPos extends DirectedGlobalPos {
 

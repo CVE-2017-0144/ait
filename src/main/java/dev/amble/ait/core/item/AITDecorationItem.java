@@ -19,10 +19,10 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.entities.BOTIPaintingEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class AITDecorationItem extends Item {
     private final EntityType<? extends HangingEntity> entityType;

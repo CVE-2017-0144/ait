@@ -2,11 +2,11 @@ package dev.amble.ait.core.likes;
 
 import java.util.Optional;
 
+import dev.amble.ait.AITMod;
+import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import dev.amble.ait.AITMod;
-import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class ItemOpinionRegistry extends SimpleDatapackRegistry<ItemOpinion> {
     private static final ItemOpinionRegistry instance = new ItemOpinionRegistry();

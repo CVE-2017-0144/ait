@@ -1,11 +1,11 @@
 package dev.amble.ait.module.gun.core.item;
 
+import dev.amble.lib.container.impl.ItemContainer;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import dev.amble.lib.container.impl.ItemContainer;
-import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 
 public class GunItems extends ItemContainer {

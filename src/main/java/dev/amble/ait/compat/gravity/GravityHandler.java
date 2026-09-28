@@ -1,14 +1,5 @@
 package dev.amble.ait.compat.gravity;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.Direction;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisClientEvents;
@@ -19,11 +10,21 @@ import dev.amble.ait.client.screens.widget.DynamicPressableTextWidget;
 import dev.amble.ait.core.gravity.AitGravity;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.entity.EntityTypeTest;
 
 public class GravityHandler extends KeyedTardisComponent implements TardisTickable {
 
@@ -81,15 +82,15 @@ public class GravityHandler extends KeyedTardisComponent implements TardisTickab
 
     public static void init() {
         AitNetworking.registerServerReceiver(SYNC,
-                ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
+                ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     if (tardis == null)
                         return;
 
                     GravityHandler gravity = tardis.handler(ID);
                     Direction direction = buf.readEnum(Direction.class);
 
-                    gravity.direction.set(direction);
-                }));
+                    server.execute(() -> gravity.direction.set(direction));
+                })));
 
         TardisComponentRegistry.getInstance().register(ID);
 

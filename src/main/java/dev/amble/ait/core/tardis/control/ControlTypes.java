@@ -2,7 +2,6 @@ package dev.amble.ait.core.tardis.control;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.joml.Vector3f;
 import dev.amble.ait.core.blocks.ConsoleBlock;
 import dev.amble.ait.core.entities.ConsoleControlEntity;
 import dev.amble.ait.data.codec.MoreCodec;
@@ -10,6 +9,7 @@ import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.registry.impl.ControlRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityDimensions;
+import org.joml.Vector3f;
 
 /**
  * Holds a control which will be ran when interacted with, an

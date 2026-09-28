@@ -13,11 +13,8 @@ import dev.amble.ait.core.blockentities.MatrixEnergizerBlockEntity;
 import dev.amble.ait.core.item.TardisMatrixItem;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.entity.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +24,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.SpawnUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
@@ -40,6 +38,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SculkShriekerBlock;
@@ -47,6 +46,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SculkShriekerBlockEntity;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -193,12 +193,12 @@ public class MatrixEnergizerBlock extends Block implements EntityBlock {
         if (!hasPower(state)) return;
 
         // Drop if the block has power, gets broken, and isn't at finished producing the matrix. - Loqor
-        ItemStack netherStar = new ItemStack(Items.NETHER_STAR);
-        popResource((Level) world, pos, netherStar);
-
         if (this.getAge(state) == this.getMaxAge()) {
             ItemStack pmStack = TardisMatrixItem.randomize();
             popResource((Level) world, pos, pmStack);
+        } else {
+            ItemStack netherStar = new ItemStack(Items.NETHER_STAR);
+            popResource((Level) world, pos, netherStar);
         }
         super.destroy(world, pos, state);
     }

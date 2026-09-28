@@ -3,6 +3,12 @@ package dev.amble.ait.datagen.datagen_providers;
 
 import java.util.concurrent.CompletableFuture;
 
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.module.ModuleRegistry;
+import dev.amble.ait.module.planet.core.PlanetItems;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
@@ -11,12 +17,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.module.ModuleRegistry;
-import dev.amble.ait.module.planet.core.PlanetItems;
-import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
 public class AITItemTagProvider extends IntrinsicHolderTagsProvider<Item> {
     public AITItemTagProvider(PlatformDataOutput output,

@@ -1,6 +1,14 @@
 package dev.amble.ait.client.renderers.entities;
 
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.AITModClient;
+import dev.amble.ait.client.boti.BOTI;
+import dev.amble.ait.compat.DependencyChecker;
+import dev.amble.ait.core.entities.RiftEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -9,14 +17,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.compat.DependencyChecker;
-import dev.amble.ait.client.AITModClient;
-import dev.amble.ait.client.boti.BOTI;
-import dev.amble.ait.core.entities.RiftEntity;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 

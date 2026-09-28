@@ -1,5 +1,13 @@
 package dev.amble.ait.module.planet.core;
 
+import dev.amble.ait.core.item.HandlesItem;
+import dev.amble.ait.module.planet.PlanetModule;
+import dev.amble.ait.module.planet.core.item.AnorthositeSwordItem;
+import dev.amble.ait.module.planet.core.item.PlanetToolMaterial;
+import dev.amble.ait.module.planet.core.item.SpacesuitItem;
+import dev.amble.lib.container.impl.ItemContainer;
+import dev.amble.lib.item.AItemSettings;
+import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.item.*;
@@ -15,14 +23,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SwordItem;
-import dev.amble.ait.core.item.HandlesItem;
-import dev.amble.ait.module.planet.PlanetModule;
-import dev.amble.ait.module.planet.core.item.AnorthositeSwordItem;
-import dev.amble.ait.module.planet.core.item.PlanetToolMaterial;
-import dev.amble.ait.module.planet.core.item.SpacesuitItem;
-import dev.amble.lib.container.impl.ItemContainer;
-import dev.amble.lib.item.AItemSettings;
-import dev.amble.lib.platform.itemgroup.ItemGroupEvents;
 
 public class PlanetItems extends ItemContainer {
 

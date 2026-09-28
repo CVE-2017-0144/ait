@@ -1,14 +1,14 @@
 package dev.amble.ait.registry.impl;
 
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.hum.DatapackHum;
 import dev.amble.ait.data.hum.Hum;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.sounds.SoundEvents;
 
 public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     private static final HumRegistry instance = new HumRegistry();

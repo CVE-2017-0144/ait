@@ -1,28 +1,27 @@
 package dev.amble.ait.client.models.consoles;
 
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.model.*;
-import net.minecraft.client.model.geom.*;
-import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.FastColor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.amble.ait.api.tardis.TardisComponent;
-import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.animation.console.hudolin.HudolinAnimations;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.tardis.control.impl.pos.IncrementManager;
 import dev.amble.ait.core.tardis.handler.CloakHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.model.*;
+import net.minecraft.client.model.geom.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 
 public class HudolinConsoleModel extends SimpleConsoleModel {
     public final ModelPart console;
@@ -1696,18 +1695,29 @@ public class HudolinConsoleModel extends SimpleConsoleModel {
         matrices.mulPose(Axis.YN.rotationDegrees(180f));
 
         console.render(matrices, vertexConsumer, light, overlay, color);
-        toolbox.render(matrices, vertexConsumer, light, overlay, color);
+        this.renderExtras(matrices, vertexConsumer, light, overlay, color);
 
         matrices.popPose();
+    }
+
+    /** The toolbox is a sibling of the console root, so it is not drawn by the root part. */
+    @Override
+    protected void renderExtras(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+        this.toolbox.render(matrices, vertices, light, overlay, color);
+    }
+
+    @Override
+    protected void applyRootTransform(PoseStack matrices) {
+        super.applyRootTransform(matrices);
+        matrices.mulPose(Axis.YN.rotationDegrees(180f));
     }
 
     @Override
     public void renderWithAnimations(ConsoleBlockEntity console, ClientTardis tardis, ModelPart root, PoseStack matrices,
                                      VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float pAlpha) {
-        float delta = !AITModClient.CONFIG.animateControls ? 1.0f : 0.1f * client.getTimer().getGameTimeDeltaPartialTick(true);
+        float delta = this.controlDelta();
         matrices.pushPose();
-        matrices.translate(0.5f, -1.5f, -0.5f);
-        matrices.mulPose(Axis.YN.rotationDegrees(180f));
+        this.applyRootTransform(matrices);
 
         // Throttle Control
         ModelPart throttle = this.dematleveryay;
@@ -1802,7 +1812,7 @@ public class HudolinConsoleModel extends SimpleConsoleModel {
         hammer.skipDraw = tardis.extra().getConsoleHammer() == null || tardis.extra().getConsoleHammer().isEmpty();
 
         super.renderWithAnimations(console, tardis, root, matrices, vertices, light, overlay, red, green, blue, pAlpha);
-        toolbox.render(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
+        this.renderExtras(matrices, vertices, light, overlay, FastColor.ARGB32.colorFromFloat(pAlpha, red, green, blue));
 
         matrices.popPose();
     }

@@ -1,17 +1,16 @@
 package dev.amble.ait.data.schema.door;
 
 import java.util.Optional;
-
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.world.phys.Vec3;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.tardis.handler.DoorHandler;
 import dev.amble.ait.data.schema.AnimatedFeature;
 import dev.amble.lib.client.bedrock.BedrockAnimationReference;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.phys.Vec3;
 
 public interface AnimatedDoor extends AnimatedFeature {
     default Optional<BedrockAnimationReference> getLeftAnimation() {

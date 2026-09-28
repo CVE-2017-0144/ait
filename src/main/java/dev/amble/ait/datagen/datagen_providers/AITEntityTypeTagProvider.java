@@ -2,12 +2,12 @@ package dev.amble.ait.datagen.datagen_providers;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.tags.EntityTypeTagsProvider;
-import net.minecraft.world.entity.EntityType;
 import dev.amble.ait.core.AITEntityTypes;
 import dev.amble.ait.core.AITTags;
 import dev.amble.lib.platform.datagen.PlatformDataOutput;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.tags.EntityTypeTagsProvider;
+import net.minecraft.world.entity.EntityType;
 
 
 public class AITEntityTypeTagProvider extends EntityTypeTagsProvider {

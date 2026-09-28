@@ -8,6 +8,10 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.tardis.ClientTardis;
+import dev.amble.ait.client.util.OffScreenCull;
+import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -22,21 +26,18 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.core.*;
-import net.minecraft.world.phys.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.tardis.ClientTardis;
-import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 
 public class SaveLoadInteriorScreen extends ConsoleScreen {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -237,21 +238,32 @@ public class SaveLoadInteriorScreen extends ConsoleScreen {
 
         // Render block entities separately (they need immediate drawing)
         if (ENABLE_BLOCK_ENTITIES) {
-            for (BlockPos pos : blockEntityPositions) {
-                BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (blockEntity != null) {
-                    matrices.pushPose();
+            // This preview calls the block entity renderers itself, with the camera arithmetic above
+            // and a matrix stack of its own, while the block entity render dispatcher still holds
+            // whatever camera the last world pass left. The blocks are the real ones in
+            // client.world, so the off screen cull cannot tell this apart from a world pass and
+            // would reject whatever sits behind that stale camera.
+            OffScreenCull.suspend();
 
-                    matrices.translate(
-                            pos.getX() - playerPos.getX(),
-                            pos.getY() - playerPos.getY(),
-                            pos.getZ() - playerPos.getZ()
-                    );
+            try {
+                for (BlockPos pos : blockEntityPositions) {
+                    BlockEntity blockEntity = world.getBlockEntity(pos);
+                    if (blockEntity != null) {
+                        matrices.pushPose();
 
-                    renderBlockEntity(blockEntity, matrices, immediate, delta);
+                        matrices.translate(
+                                pos.getX() - playerPos.getX(),
+                                pos.getY() - playerPos.getY(),
+                                pos.getZ() - playerPos.getZ()
+                        );
 
-                    matrices.popPose();
+                        renderBlockEntity(blockEntity, matrices, immediate, delta);
+
+                        matrices.popPose();
+                    }
                 }
+            } finally {
+                OffScreenCull.resume();
             }
         }
     }

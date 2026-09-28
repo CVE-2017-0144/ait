@@ -16,15 +16,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.item.blueprint.Blueprint;
 import dev.amble.ait.core.item.blueprint.BlueprintItem;
 import dev.amble.ait.core.item.blueprint.BlueprintSchema;
 import dev.amble.ait.core.util.StackUtil;
+import org.jetbrains.annotations.Nullable;
 
 public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     private Blueprint blueprint;
@@ -178,11 +177,6 @@ public class FabricatorBlockEntity extends InteriorLinkableBlockEntity {
     public void onBroken() {
         if (this.hasBlueprint()) {
             this.getBlueprint().ifPresent(blueprint -> {
-                ItemStack stack = AITItems.BLUEPRINT.getDefaultInstance();
-                BlueprintItem.setSchema(stack, blueprint.getSource());
-
-                StackUtil.spawn(this.getLevel(), this.getBlockPos(), stack);
-
                 List<ItemStack> inputs = blueprint.getInsertedItems();
                 StackUtil.scatter(this.getLevel(), this.getBlockPos(), inputs);
             });

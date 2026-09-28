@@ -1,5 +1,14 @@
 package dev.amble.ait.mixin;
 
+import dev.amble.ait.api.ExtraPushableEntity;
+import dev.amble.ait.core.AITDimensions;
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.core.util.SafePosSearch;
+import dev.amble.ait.core.util.WorldUtil;
+import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
+import dev.amble.lib.platform.util.TriState;
+import dev.amble.lib.util.TeleportUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -17,20 +26,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import dev.amble.ait.api.ExtraPushableEntity;
-import dev.amble.ait.core.AITDimensions;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.core.util.SafePosSearch;
-import dev.amble.ait.core.util.WorldUtil;
-import dev.amble.ait.core.world.TardisServerWorld;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
-import dev.amble.lib.platform.util.TriState;
-import dev.amble.lib.util.TeleportUtil;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements ExtraPushableEntity {
 
     @Unique private TriState ait$pushable = TriState.DEFAULT;
+    @Unique private boolean ait$isSearchingVoid;
 
     @Shadow public abstract ItemStack getItemBySlot(EquipmentSlot var1);
 
@@ -83,7 +84,7 @@ public abstract class LivingEntityMixin extends Entity implements ExtraPushableE
     @Inject(method = "onBelowWorld", at = @At("HEAD"))
     public void tickVoid(CallbackInfo ci) {
         if (!this.level().isClientSide() && this.level().dimension() == AITDimensions.TIME_VORTEX_WORLD) {
-            if (WorldUtil.getTravelWorlds().isEmpty())
+            if (this.ait$isSearchingVoid || WorldUtil.getTravelWorlds().isEmpty())
                 return;
 
             LivingEntity entity = (LivingEntity) (Object) this;
@@ -92,8 +93,13 @@ public abstract class LivingEntityMixin extends Entity implements ExtraPushableE
             ServerLevel world = WorldUtil.getTravelWorlds().get(worldIndex);
             CachedDirectedGlobalPos safe = CachedDirectedGlobalPos.create(world, entity.blockPosition(), (byte) 0);
 
-            SafePosSearch.wrapSafe(safe, SafePosSearch.Kind.MEDIAN, true,
-                    result -> TeleportUtil.teleport(entity, world, result.getPos().getCenter(), entity.getYRot()));
+            this.ait$isSearchingVoid = true;
+            SafePosSearch.wrapSafe(safe, SafePosSearch.Kind.MEDIAN, true, result -> {
+                this.ait$isSearchingVoid = false;
+
+                if (entity.isAlive())
+                    TeleportUtil.teleport(entity, world, result.getPos().getCenter(), entity.getYRot());
+            });
         }
     }
 }

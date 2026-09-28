@@ -10,29 +10,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import dev.amble.ait.client.overlays.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.model.HierarchicalModel;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.EndRodParticle;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.state.properties.RotationSegment;
-import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.*;
 import dev.amble.ait.client.boti.BOTICache;
@@ -47,6 +24,8 @@ import dev.amble.ait.client.models.decoration.PaintingFrameModel;
 import dev.amble.ait.client.models.decoration.RiftModel;
 import dev.amble.ait.client.models.decoration.TrenzalorePaintingModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
+import dev.amble.ait.client.overlays.*;
+import dev.amble.ait.client.renderers.EmissiveGeometry;
 import dev.amble.ait.client.renderers.SonicRendering;
 import dev.amble.ait.client.renderers.TardisStar;
 import dev.amble.ait.client.renderers.consoles.ConsoleGeneratorRenderer;
@@ -67,8 +46,10 @@ import dev.amble.ait.client.screens.*;
 import dev.amble.ait.client.sonic.SonicModelLoader;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
+import dev.amble.ait.client.util.ClientRenderPass;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.compat.DependencyChecker;
+import dev.amble.ait.compat.portal.PortalsAPI;
 import dev.amble.ait.core.*;
 import dev.amble.ait.core.blockentities.ConsoleGeneratorBlockEntity;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
@@ -106,9 +87,38 @@ import dev.amble.lib.platform.render.WorldRenderContext;
 import dev.amble.lib.platform.render.WorldRenderEvents;
 import dev.amble.lib.platform.resource.BuiltinPacks;
 import dev.amble.lib.register.AmbleRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.EndRodParticle;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 
 @OnlyIn(Dist.CLIENT)
 public class AITModClient implements ClientModEntrypoint {
+
+    /** Its own logger rather than a prefix on every line, so the profiler output filters cleanly. */
+    private static final Logger PROFILE_LOGGER = LoggerFactory.getLogger("ait-profile");
 
     public static AITClientConfig CONFIG;
     private final Minecraft client = Minecraft.getInstance();
@@ -147,6 +157,11 @@ public class AITModClient implements ClientModEntrypoint {
             ConfigCommand.register(dispatcher);
             DebugCommand.register(dispatcher);
         });
+
+        // Must be registered, or the pass counter never advances and the duplicate-draw guard in
+        // the renderers would let the first draw through and reject every one after it.
+        ClientRenderPass.init();
+        EmissiveGeometry.init();
 
         AITKeyBinds.init();
 
@@ -187,6 +202,18 @@ public class AITModClient implements ClientModEntrypoint {
 
             TardisStar.render(context, tardis);
         });
+
+        if (!FMLEnvironment.production) {
+            AitNetworking.registerClientReceiver(AITMod.PROFILE_CLIENT, (client, handler, buf, responseSender) ->
+                    client.execute(() -> {
+                        // debugClientMetricsStart is what F3+L calls. The recorder stops itself after 10s and hands
+                        // the dump path to this consumer, which is the only way to learn it without a keyboard.
+                        boolean started = client.debugClientMetricsStart(
+                                text -> PROFILE_LOGGER.info(text.getString()));
+
+                        PROFILE_LOGGER.info(started ? "started" : "stopped an active recording");
+                    }));
+        }
 
         AitNetworking.registerClientReceiver(OPEN_SCREEN, (client, handler, buf, responseSender) -> {
             int id = buf.readInt();
@@ -281,10 +308,11 @@ public class AITModClient implements ClientModEntrypoint {
         SonicModelLoader.init();
 
         AitNetworking.registerClientReceiver(AstralMapBlock.OPEN_ASTRAL_MAP, (client, handler, buf, responseSender) -> {
+            BlockPos pos = buf.readBlockPos();
             List<ResourceLocation> ids = buf.readList(FriendlyByteBuf::readResourceLocation);
             client.execute(() -> {
                 AstralMapBlock.structureIds = ids;
-                client.setScreen(new AstralMapScreen());
+                client.setScreen(new AstralMapScreen(pos));
             });
         });
 
@@ -315,7 +343,6 @@ public class AITModClient implements ClientModEntrypoint {
         return switch (id) {
             case 0 -> new MonitorScreen(tardis, console);
             case 1 -> new BlueprintFabricatorScreen();
-            case 2 -> new AstralMapScreen();
             case 3 -> new EnvironmentProjectorScreen(tardis, console);
             default -> null;
         };
@@ -521,15 +548,30 @@ public class AITModClient implements ClientModEntrypoint {
     }
 
     public static boolean skipPaintingBOTI() {
-        return DependencyChecker.hasPortals() || !CONFIG.enableTardisBOTI;
+        return !CONFIG.enableTardisBOTI;
     }
 
     public void exteriorBOTI(WorldRenderContext context) {
-        if (skipBuiltInBOTI()) return;
+        // Counted before the guard on purpose. BOTI disables itself on Macs and on non-Nvidia cards
+        // without Indium, and a counter inside the loop cannot tell that apart from an empty queue.
+        ProfilerFiller profiler = context.world().getProfiler();
+        profiler.incrementCounter("ait_boti_exterior_queued", BOTI.EXTERIOR_RENDER_QUEUE.size());
 
-        if (client.player == null || client.level == null) return;
+        if (skipBuiltInBOTI()) {
+            profiler.incrementCounter("ait_boti_exterior_disabled");
+            BOTI.EXTERIOR_RENDER_QUEUE.clear();
+            return;
+        }
+
+        if (client.player == null || client.level == null) {
+            BOTI.EXTERIOR_RENDER_QUEUE.clear();
+            return;
+        }
+
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
+
+        profiler.push("ait:boti_exterior");
 
         for (ExteriorBlockEntity exterior : BOTI.EXTERIOR_RENDER_QUEUE) {
             if (exterior == null || !exterior.isLinked()) continue;
@@ -546,28 +588,52 @@ public class AITModClient implements ClientModEntrypoint {
 
             if (tardis.door().getLeftRot() > 0 || variant.hasTransparentDoors()) {
                 int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
+                profiler.incrementCounter("ait_boti_exterior_drawn");
+                profiler.incrementCounter("ait_model_build");
                 TardisExteriorBOTI.renderExteriorBoti(exterior, variant, stack, context.consumers(), model,
                         BotiPortalModel.getTexturedModelData().bakeRoot(), light);
+            } else {
+                profiler.incrementCounter("ait_boti_exterior_culled");
             }
 
             stack.popPose();
         }
 
+        profiler.pop();
+
         BOTI.EXTERIOR_RENDER_QUEUE.clear();
     }
 
     public void doorBOTI(WorldRenderContext context) {
-        if (skipBuiltInBOTI()) return;
+        ProfilerFiller profiler = context.world().getProfiler();
+        profiler.incrementCounter("ait_boti_door_queued", BOTI.DOOR_RENDER_QUEUE.size());
 
-        if (client.player == null || client.level == null) return;
+        if (skipBuiltInBOTI()) {
+            profiler.incrementCounter("ait_boti_door_disabled");
+            BOTI.DOOR_RENDER_QUEUE.clear();
+            return;
+        }
+
+        if (client.player == null || client.level == null) {
+            BOTI.DOOR_RENDER_QUEUE.clear();
+            return;
+        }
+
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
 
         ClientTardis tardis = ClientTardisUtil.getCurrentTardis();
-        if (tardis == null) return;
+
+        if (tardis == null) {
+            BOTI.DOOR_RENDER_QUEUE.clear();
+            return;
+        }
 
         ClientExteriorVariantSchema variant = tardis.getExterior().getVariant().getClient();
-        AnimatedModel model = variant.getDoor().model();
+        AnimatedModel model = variant.getDoor().getCachedModel();
+
+        profiler.push("ait:boti_door");
+
         for (DoorBlockEntity door : BOTI.DOOR_RENDER_QUEUE) {
             if (door == null) continue;
             BlockPos pos = door.getBlockPos();
@@ -580,24 +646,49 @@ public class AITModClient implements ClientModEntrypoint {
 
             if (tardis.door().getLeftRot() > 0 || variant.hasTransparentDoors()) {
                 int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
+                profiler.incrementCounter("ait_boti_door_drawn");
+                profiler.incrementCounter("ait_model_build");
                 TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack, context.consumers(),
                         AITMod.id("textures/environment/tardis_sky.png"), model,
                         BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickCounter().getGameTimeDeltaPartialTick(true));
+            } else {
+                profiler.incrementCounter("ait_boti_door_culled");
             }
 
             stack.popPose();
         }
 
+        profiler.pop();
+
         BOTI.DOOR_RENDER_QUEUE.clear();
     }
 
     public void gallifreyanBOTI(WorldRenderContext context) {
-        if (skipPaintingBOTI()) return;
+        if (PortalsAPI.RENDERING_PORTAL.getAsBoolean())
+            return;
 
+        ProfilerFiller profiler = context.world().getProfiler();
+        profiler.incrementCounter("ait_boti_gallifreyan_queued", BOTI.GALLIFREYAN_RENDER_QUEUE.size());
+
+        if (skipPaintingBOTI()) {
+            profiler.incrementCounter("ait_boti_gallifreyan_disabled");
+            BOTI.GALLIFREYAN_RENDER_QUEUE.clear();
+            return;
+        }
+
+        profiler.push("ait:boti_gallifreyan");
+
+        // Built before the queue is known to be non-empty, so this runs every frame even with no
+        // paintings in sight. Counted separately from the per-painting builds to make that visible.
+        profiler.incrementCounter("ait_model_build");
+        profiler.incrementCounter("ait_model_build_eager");
         HierarchicalModel contents = new GallifreyFallsModel(GallifreyFallsModel.getTexturedModelData().bakeRoot());
         ResourceLocation frameTex = GallifreyanPaintingEntityRenderer.GALLIFREY_FRAME_TEXTURE;
         ResourceLocation contentsTex = GallifreyanPaintingEntityRenderer.GALLIFREY_PAINTING_TEXTURE;
-        if (client.player == null || client.level == null) return;
+        if (client.player == null || client.level == null) {
+            profiler.pop();
+            return;
+        }
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
         for (BOTIPaintingEntity painting : BOTI.GALLIFREYAN_RENDER_QUEUE) {
@@ -609,6 +700,7 @@ public class AITModClient implements ClientModEntrypoint {
             stack.mulPose(Axis.XP.rotationDegrees(180f));
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
+            profiler.incrementCounter("ait_model_build");
             PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
             BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
@@ -616,16 +708,36 @@ public class AITModClient implements ClientModEntrypoint {
                             world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
             stack.popPose();
         }
+
+        profiler.pop();
+
         BOTI.GALLIFREYAN_RENDER_QUEUE.clear();
     }
 
     public void trenzaloreBOTI(WorldRenderContext context) {
-        if (skipPaintingBOTI()) return;
+        if (PortalsAPI.RENDERING_PORTAL.getAsBoolean())
+            return;
 
+        ProfilerFiller profiler = context.world().getProfiler();
+        profiler.incrementCounter("ait_boti_trenzalore_queued", BOTI.TRENZALORE_PAINTING_QUEUE.size());
+
+        if (skipPaintingBOTI()) {
+            profiler.incrementCounter("ait_boti_trenzalore_disabled");
+            BOTI.TRENZALORE_PAINTING_QUEUE.clear();
+            return;
+        }
+
+        profiler.push("ait:boti_trenzalore");
+
+        profiler.incrementCounter("ait_model_build");
+        profiler.incrementCounter("ait_model_build_eager");
         HierarchicalModel contents = new TrenzalorePaintingModel(TrenzalorePaintingModel.getTexturedModelData().bakeRoot());
         ResourceLocation frameTex = TrenzalorePaintingEntityRenderer.TRENZALORE_FRAME_TEXTURE;
         ResourceLocation contentsTex = TrenzalorePaintingEntityRenderer.TRENZALORE_PAINTING_TEXTURE;
-        if (client.player == null || client.level == null) return;
+        if (client.player == null || client.level == null) {
+            profiler.pop();
+            return;
+        }
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
         for (BOTIPaintingEntity painting : BOTI.TRENZALORE_PAINTING_QUEUE) {
@@ -637,6 +749,7 @@ public class AITModClient implements ClientModEntrypoint {
             stack.mulPose(Axis.XP.rotationDegrees(180f));
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
+            profiler.incrementCounter("ait_model_build");
             PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
             BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
@@ -644,15 +757,32 @@ public class AITModClient implements ClientModEntrypoint {
                             world.getBrightness(LightLayer.SKY, blockPos)), contents, frameTex, contentsTex);
             stack.popPose();
         }
+
+        profiler.pop();
+
         BOTI.TRENZALORE_PAINTING_QUEUE.clear();
     }
 
     public void riftBOTI(WorldRenderContext context) {
-        if (skipPaintingBOTI()) return;
+        ProfilerFiller profiler = context.world().getProfiler();
+        profiler.incrementCounter("ait_boti_rift_queued", BOTI.RIFT_RENDERING_QUEUE.size());
 
-        if (client.player == null || client.level == null) return;
+        if (skipPaintingBOTI()) {
+            profiler.incrementCounter("ait_boti_rift_disabled");
+            BOTI.RIFT_RENDERING_QUEUE.clear();
+            return;
+        }
+
+        if (client.player == null || client.level == null) {
+            BOTI.RIFT_RENDERING_QUEUE.clear();
+            return;
+        }
+
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
+
+        profiler.push("ait:boti_rift");
+
         for (RiftEntity rift : BOTI.RIFT_RENDERING_QUEUE) {
             if (rift == null) continue;
             Vec3 pos = rift.position();
@@ -662,11 +792,15 @@ public class AITModClient implements ClientModEntrypoint {
             stack.translate(0, 1.5f, 0);
             stack.mulPose(Axis.YP.rotationDegrees(rift.getYRot()));
             stack.mulPose(Axis.XP.rotationDegrees(rift.getXRot()));
+            profiler.incrementCounter("ait_model_build");
             RiftModel riftModel = new RiftModel(RiftModel.getTexturedModelData().bakeRoot());
             BlockPos blockPos = BlockPos.containing(rift.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             RiftBOTI.renderRiftBoti(stack, riftModel, LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos), world.getBrightness(LightLayer.SKY, blockPos)));
             stack.popPose();
         }
+
+        profiler.pop();
+
         BOTI.RIFT_RENDERING_QUEUE.clear();
     }
     public static void resourcepackRegister() {

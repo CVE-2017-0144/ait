@@ -5,6 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.api.tardis.KeyedTardisComponent;
+import dev.amble.ait.api.tardis.TardisEvents;
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
+import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.util.NetworkUtil;
+import dev.amble.ait.data.Exclude;
+import dev.amble.ait.data.schema.exterior.variant.adaptive.AdaptiveVariant;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.drtheo.gaslighter.Gaslighter3000;
 import dev.drtheo.gaslighter.api.FakeBlockEvents;
 import dev.drtheo.gaslighter.impl.FakeStructureWorldAccess;
@@ -24,10 +34,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.level.levelgen.feature.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.*;
 import net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.ChorusPlantFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -37,16 +47,6 @@ import net.minecraft.world.level.levelgen.feature.HugeFungusFeature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.api.tardis.KeyedTardisComponent;
-import dev.amble.ait.api.tardis.TardisEvents;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
-import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.tardis.util.NetworkUtil;
-import dev.amble.ait.data.Exclude;
-import dev.amble.ait.data.schema.exterior.variant.adaptive.AdaptiveVariant;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class ChameleonHandler extends KeyedTardisComponent {
 

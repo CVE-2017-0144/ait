@@ -4,18 +4,17 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.google.gson.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.ApiStatus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
-
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.enummap.ConcurrentEnumMap;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
 
 public class TardisHandlersManager extends TardisComponent implements TardisTickable {
 

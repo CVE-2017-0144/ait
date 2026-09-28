@@ -2,10 +2,6 @@ package dev.amble.ait.core.tardis;
 
 import java.util.Optional;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -13,6 +9,7 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.core.util.StackUtil;
@@ -21,6 +18,10 @@ import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.ait.registry.impl.CategoryRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class TardisExterior extends TardisComponent {
 
@@ -33,7 +34,7 @@ public class TardisExterior extends TardisComponent {
     private ExteriorVariantSchema variant;
 
     static {
-        AitNetworking.registerServerReceiver(CHANGE_EXTERIOR, ServerTardisManager.receiveTardis((tardis, server, player, handler, buf, responseSender) -> {
+        AitNetworking.registerServerReceiver(CHANGE_EXTERIOR, ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
             boolean variantChange = buf.readBoolean();
             ResourceLocation variantValue = buf.readResourceLocation();
 
@@ -46,7 +47,7 @@ public class TardisExterior extends TardisComponent {
 
                 StackUtil.playBreak(player);
             });
-        }));
+        })));
     }
 
     private boolean update(ExteriorVariantSchema variant, boolean variantChange) {

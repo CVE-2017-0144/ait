@@ -99,7 +99,7 @@ public class FlightTardisRenderer extends EntityRenderer<FlightTardisEntity> {
 
             float color = alarms ? 0.3f : 1f;
 
-            model.renderEntity(entity, this.model.root(), matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true)), 0xf000f0, OverlayTexture.NO_OVERLAY, color, color, color, 1);
+            model.renderEntity(entity, this.model.root(), matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission())), 0xf000f0, OverlayTexture.NO_OVERLAY, color, color, color, 1);
         }
 
         BiomeHandler biome = tardis.handler(TardisComponent.Id.BIOME);

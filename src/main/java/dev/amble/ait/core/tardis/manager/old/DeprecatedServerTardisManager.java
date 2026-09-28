@@ -1,6 +1,7 @@
 package dev.amble.ait.core.tardis.manager.old;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -9,19 +10,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
-import dev.drtheo.multidim.MultiDim;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.level.Level;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.WorldWithTardis;
+import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.events.ServerCrashEvent;
 import dev.amble.ait.core.events.WorldSaveEvent;
 import dev.amble.ait.core.net.AitNetworking;
@@ -41,6 +33,16 @@ import dev.amble.ait.data.properties.Value;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.platform.lifecycle.ServerTickEvents;
+import dev.drtheo.multidim.MultiDim;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.level.Level;
 
 public abstract class DeprecatedServerTardisManager extends TardisManager<ServerTardis, MinecraftServer> implements TardisFileManager.TardisLoader<ServerTardis> {
 
@@ -175,14 +177,17 @@ public abstract class DeprecatedServerTardisManager extends TardisManager<Server
         CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
 
         if (exteriorPos != null) {
-            if (tardis.hasWorld()) tardis.world().players().forEach(player
+            if (tardis.hasWorld()) List.copyOf(tardis.world().players()).forEach(player
                     -> TardisUtil.teleportOutside(tardis, player));
 
             Level world = exteriorPos.getWorld();
             BlockPos pos = exteriorPos.getPos();
 
-            world.removeBlock(pos, false);
-            world.removeBlockEntity(pos);
+            if (world.getBlockEntity(pos) instanceof ExteriorBlockEntity exterior && exterior.isLinked()
+                    && exterior.tardis().contains(tardis)) {
+                world.removeBlock(pos, false);
+                world.removeBlockEntity(pos);
+            }
         }
 
         MultiDim.get(server).queueRemove(TardisServerWorld.keyForTardis(tardis));

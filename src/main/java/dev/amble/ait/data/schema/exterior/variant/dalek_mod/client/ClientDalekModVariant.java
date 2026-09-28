@@ -1,6 +1,5 @@
 package dev.amble.ait.data.schema.exterior.variant.dalek_mod.client;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.exteriors.SimpleExteriorModel;
 import dev.amble.ait.client.models.exteriors.advent.DalekModExteriorModel;
@@ -8,6 +7,7 @@ import dev.amble.ait.core.tardis.handler.BiomeHandler;
 import dev.amble.ait.data.datapack.exterior.BiomeOverrides;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 
 public abstract class ClientDalekModVariant extends ClientExteriorVariantSchema {

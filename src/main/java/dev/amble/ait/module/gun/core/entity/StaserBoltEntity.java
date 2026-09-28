@@ -1,7 +1,11 @@
 package dev.amble.ait.module.gun.core.entity;
 
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.devteam.DevTeam;
+import dev.amble.ait.module.gun.core.item.GunItems;
+import dev.amble.ait.module.planet.core.util.ISpaceImmune;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +21,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -24,6 +29,7 @@ import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -31,11 +37,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.devteam.DevTeam;
-import dev.amble.ait.module.gun.core.item.GunItems;
-import dev.amble.ait.module.planet.core.util.ISpaceImmune;
 
 public class StaserBoltEntity extends AbstractArrow implements ISpaceImmune {
     public StaserBoltEntity(EntityType<? extends StaserBoltEntity> entityType, Level world) {

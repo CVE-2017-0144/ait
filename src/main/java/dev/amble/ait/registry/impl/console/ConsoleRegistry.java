@@ -1,9 +1,5 @@
 package dev.amble.ait.registry.impl.console;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.data.datapack.DatapackConsole;
@@ -11,6 +7,10 @@ import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.console.type.*;
 import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.register.datapack.DatapackRegistry;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ConsoleRegistry extends DatapackRegistry<ConsoleTypeSchema> {
     private static final ConsoleRegistry INSTANCE = new ConsoleRegistry();

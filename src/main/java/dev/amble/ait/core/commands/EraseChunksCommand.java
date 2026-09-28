@@ -6,13 +6,13 @@ import static net.minecraft.commands.Commands.literal;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 import dev.drtheo.queue.api.util.block.ChunkEraser;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.server.level.ColumnPos;
 import net.minecraft.world.level.block.Block;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.compat.permissionapi.PermissionAPICompat;
 
 public class EraseChunksCommand {
 

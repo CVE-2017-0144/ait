@@ -2,13 +2,13 @@
 package dev.amble.ait.data.schema.console.variant.hudolin.client;
 
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.HudolinConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.hudolin.HudolinShalkaVariant;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class ClientHudolinShalkaVariant extends ClientConsoleVariantSchema {
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,

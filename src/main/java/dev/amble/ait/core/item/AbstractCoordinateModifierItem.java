@@ -13,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.control.impl.DirectionControl;
 import dev.amble.ait.core.util.ItemNbt;
@@ -22,6 +21,7 @@ import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.data.Waypoint;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
+import org.jetbrains.annotations.Nullable;
 
 // Abstract out the WaypointItem code so if we make anything in future needing coordinate modification we can reuse it - Loqor
 public abstract class AbstractCoordinateModifierItem extends Item {

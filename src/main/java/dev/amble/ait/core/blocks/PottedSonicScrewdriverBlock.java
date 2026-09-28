@@ -23,9 +23,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.blockentities.PottedSonicScrewdriverBlockEntity;
 import dev.amble.ait.core.item.SonicItem;
+import org.jetbrains.annotations.Nullable;
 
 public class PottedSonicScrewdriverBlock extends BaseEntityBlock {
     public static final int MAX_SONICS = 6;

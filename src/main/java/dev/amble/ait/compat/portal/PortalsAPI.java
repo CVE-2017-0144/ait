@@ -1,6 +1,7 @@
 package dev.amble.ait.compat.portal;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 public class PortalsAPI {
 
     public static Optional<VisualizerImpl> VISUALIZER = Optional.empty();
+    public static BooleanSupplier RENDERING_PORTAL = () -> false;
 
     @FunctionalInterface
     public interface VisualizerImpl {

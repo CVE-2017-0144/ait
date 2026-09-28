@@ -7,18 +7,16 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.mixin.server.structure.StructureTemplateAccessor;
 import dev.amble.lib.util.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffset> {
     public static final MultiBlockStructure EMPTY = new MultiBlockStructure();
@@ -72,17 +70,6 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
         Optional<BlockOffset> prev = this.remove(offset.offset);
         this.add(offset);
         return prev;
-    }
-
-    public List<ItemStack> toStacks() {
-        SimpleContainer inv = new SimpleContainer(256);
-        for (BlockOffset blockOffset : this) {
-            for (ItemStack stack : blockOffset.toStacks()) {
-                inv.addItem(stack);
-            }
-        }
-
-        return inv.removeAllItems();
     }
 
     public static MultiBlockStructure testInteriorRendering(ResourceLocation structure) {
@@ -191,14 +178,6 @@ public class MultiBlockStructure extends ArrayList<MultiBlockStructure.BlockOffs
                     "block=" + block +
                     ", offset=" + offset +
                     '}';
-        }
-
-        public List<ItemStack> toStacks() {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (Block block : this.block) {
-                stacks.add(new ItemStack(block));
-            }
-            return stacks;
         }
 
         public static List<BlockOffset> corners(Block block, int x, int y, int z) {

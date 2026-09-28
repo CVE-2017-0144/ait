@@ -1,6 +1,12 @@
 package dev.amble.ait.client.overlays;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.core.item.SonicItem;
+import dev.amble.ait.core.util.ItemNbt;
+import dev.amble.lib.platform.render.HudRenderEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,12 +19,6 @@ import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.core.item.SonicItem;
-import dev.amble.ait.core.util.ItemNbt;
-import dev.amble.lib.platform.render.HudRenderEvents;
 
 public class SonicOverlay implements HudRenderEvents.HudRender {
 

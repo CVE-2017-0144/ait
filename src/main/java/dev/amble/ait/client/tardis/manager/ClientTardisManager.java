@@ -7,9 +7,6 @@ import java.util.function.Consumer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.GsonBuilder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.sounds.ClientSoundManager;
@@ -23,6 +20,9 @@ import dev.amble.ait.registry.impl.TardisComponentRegistry;
 import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> {
 

@@ -1,5 +1,9 @@
 package dev.amble.ait.compat.jei.client;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.item.blueprint.BlueprintItem;
+import dev.amble.ait.core.item.blueprint.BlueprintSchema;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -11,10 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.item.blueprint.BlueprintItem;
-import dev.amble.ait.core.item.blueprint.BlueprintSchema;
 
 public class FabricatorRecipeCategory implements IRecipeCategory<BlueprintSchema> {
 

@@ -3,8 +3,6 @@ package dev.amble.ait.client.boti;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.AnimatedModel;
@@ -30,6 +28,8 @@ import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11;
 
 public class TardisDoorBOTI extends BOTI {
     public static void renderInteriorDoorBoti(ClientTardis tardis, DoorBlockEntity door, ClientExteriorVariantSchema variant, PoseStack stack, MultiBufferSource consumers, ResourceLocation frameTex, AnimatedModel frame, ModelPart mask, int light, float tickDelta) {
@@ -171,7 +171,7 @@ public class TardisDoorBOTI extends BOTI {
                 float green = power ? alarm ? 0.3f : t : 0;
                 float blue = power ? alarm ? 0.3f : u:  0;
 
-                frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer((DependencyChecker.hasIris() ? AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true) : AITRenderLayers.text(variant.emission()))), 0xf000f0, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F, tickDelta);
+                frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer((DependencyChecker.hasIris() ? AITRenderLayers.tardisEmissiveCullZOffset(variant.emission()) : AITRenderLayers.text(variant.emission()))), 0xf000f0, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F, tickDelta);
                 botiProvider.endBatch();
         BOTI_HANDLER.afbo.bindWrite(false);
             }

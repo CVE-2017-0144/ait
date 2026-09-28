@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import com.mojang.datafixers.util.Pair;
+import dev.amble.ait.AITMod;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import org.jetbrains.annotations.NotNull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -14,8 +16,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import dev.amble.ait.AITMod;
-import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 
 /**
  * @author TheBrightSpark, Loqor
@@ -39,11 +39,6 @@ public class AsyncLocatorUtil {
 
         int threads = Runtime.getRuntime().availableProcessors() / 2;
         AITMod.LOGGER.trace("Starting locating executor service with thread pool size of {}", threads);
-
-        if (threads <= 0 && !AITMod.CONFIG.disableSafeguards) {
-            AITMod.LOGGER.error("Failed to start locating executor service: thread pool size is 0 or less - {}. Available Processors {}", threads, Runtime.getRuntime().availableProcessors());
-            return;
-        }
 
         LOCATING_EXECUTOR_SERVICE = Executors.newCachedThreadPool(new ThreadFactory() {
             private static final AtomicInteger poolNum = new AtomicInteger(1);

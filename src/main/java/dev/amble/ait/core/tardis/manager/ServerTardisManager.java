@@ -1,12 +1,10 @@
 package dev.amble.ait.core.tardis.manager;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
@@ -18,19 +16,28 @@ import dev.amble.ait.core.tardis.util.NetworkUtil;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.registry.impl.TardisComponentRegistry;
 import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.platform.lifecycle.ServerTickEvents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 
 public class ServerTardisManager extends DeprecatedServerTardisManager {
 
     private static ServerTardisManager instance;
 
     private final Set<ServerTardis> delta = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> ids = new HashSet<>();
 
     public static void init() {
         instance = new ServerTardisManager();
     }
 
     private ServerTardisManager() {
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> this.ids.addAll(this.fileManager.getTardisList(server)));
+
         TardisEvents.SYNC_TARDIS.register(WorldWithTardis.forSync((player, tardisSet) -> {
             if (this.fileManager.isLocked())
                 return;
@@ -85,6 +92,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
         if (this.isFull()) return null;
 
         ServerTardis result = super.create(builder);
+        this.ids.add(result.getUuid());
         this.sendTardisAll(Set.of(result));
 
         return result;
@@ -194,14 +202,21 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
     }
 
     @Override
+    public void remove(MinecraftServer server, ServerTardis tardis) {
+        super.remove(server, tardis);
+        this.ids.remove(tardis.getUuid());
+    }
+
+    @Override
     public void reset() {
         this.delta.clear();
+        this.ids.clear();
         super.reset();
     }
 
     public boolean isFull() {
         int max = AITMod.CONFIG.maxTardises;
-        return max > 0 && this.lookup.size() >= max;
+        return max > 0 && this.ids.size() >= max;
     }
 
     private static boolean isInvalid(ServerTardis tardis) {

@@ -1,5 +1,13 @@
 package dev.amble.ait.datagen.datagen_providers.loot;
 
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.module.ModuleRegistry;
+import dev.amble.ait.module.planet.core.PlanetBlocks;
+import dev.amble.lib.datagen.loot.AmbleBlockLootTable;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -10,14 +18,6 @@ import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.module.ModuleRegistry;
-import dev.amble.ait.module.planet.core.PlanetBlocks;
-import dev.amble.lib.datagen.loot.AmbleBlockLootTable;
-import dev.amble.lib.platform.datagen.PlatformDataOutput;
-import java.util.concurrent.CompletableFuture;
 
 public class AITBlockLootTables extends AmbleBlockLootTable {
 

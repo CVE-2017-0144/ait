@@ -2,13 +2,6 @@ package dev.amble.ait.core.tardis.handler.travel;
 
 import java.util.UUID;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.animation.v2.AnimationHolder;
@@ -19,6 +12,13 @@ import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.lib.platform.Platform;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 
 public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
     private static final Property<ResourceLocation> DEMAT_FX = new Property<>(Property.IDENTIFIER, "demat_fx", TardisAnimationRegistry.DEFAULT_DEMAT);
@@ -105,6 +105,7 @@ public abstract class AnimatedTravelHandler extends ProgressiveTravelHandler {
         if (!this.getAnimations().isRunning()) {
             if (this.isAnimationInvalidated) {
                 this.animations = null;
+                this.isAnimationInvalidated = false;
             }
         }
 

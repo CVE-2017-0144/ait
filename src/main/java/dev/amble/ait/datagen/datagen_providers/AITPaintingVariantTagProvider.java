@@ -2,13 +2,13 @@ package dev.amble.ait.datagen.datagen_providers;
 
 import java.util.concurrent.CompletableFuture;
 
+import dev.amble.ait.core.AITPaintings;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import dev.amble.ait.core.AITPaintings;
-import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
 public class AITPaintingVariantTagProvider extends TagsProvider<PaintingVariant> {
     public AITPaintingVariantTagProvider(PlatformDataOutput output,

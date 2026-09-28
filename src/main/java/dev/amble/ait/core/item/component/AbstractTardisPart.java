@@ -1,5 +1,14 @@
 package dev.amble.ait.core.item.component;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITTags;
+import dev.amble.ait.core.item.SonicItem;
+import dev.amble.ait.core.item.link.AbstractLinkItem;
+import dev.amble.ait.core.item.sonic.SonicMode;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.util.ItemNbt;
+import dev.amble.ait.core.util.StackUtil;
+import dev.amble.ait.data.schema.MachineRecipeSchema;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.nbt.CompoundTag;
@@ -12,15 +21,6 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITTags;
-import dev.amble.ait.core.item.SonicItem;
-import dev.amble.ait.core.item.link.AbstractLinkItem;
-import dev.amble.ait.core.item.sonic.SonicMode;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.util.ItemNbt;
-import dev.amble.ait.core.util.StackUtil;
-import dev.amble.ait.data.schema.MachineRecipeSchema;
 
 public class AbstractTardisPart extends Item {
 

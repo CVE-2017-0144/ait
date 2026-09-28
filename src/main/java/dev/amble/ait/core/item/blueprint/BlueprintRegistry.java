@@ -1,9 +1,9 @@
 package dev.amble.ait.core.item.blueprint;
 
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.loot.SetBlueprintLootFunction;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 
 
 public class BlueprintRegistry extends SimpleDatapackRegistry<BlueprintSchema> {

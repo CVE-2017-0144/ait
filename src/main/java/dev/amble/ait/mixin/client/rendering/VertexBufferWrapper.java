@@ -13,6 +13,6 @@ public interface VertexBufferWrapper {
     @Accessor
     void setIndexType(VertexFormat.IndexType indexType);
 
-    @Accessor
-    VertexFormat.IndexType getIndexType();
+    @Accessor("indexType")
+    VertexFormat.IndexType ait$getIndexType();
 }

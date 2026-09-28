@@ -3,8 +3,6 @@ package dev.amble.ait.client.boti;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.AITModClient;
@@ -32,6 +30,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11;
 
 public class TardisExteriorBOTI extends BOTI {
     public static void renderExteriorBoti(ExteriorBlockEntity exterior, ClientExteriorVariantSchema variant, PoseStack stack, MultiBufferSource consumers, ExteriorModel frame, ModelPart mask, int light) {
@@ -189,7 +189,7 @@ public class TardisExteriorBOTI extends BOTI {
             float green = power ? alarms ? 0.3f : t : 0;
             float blue = power ? alarms ? 0.3f : u : 0;
 
-            frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true)), LightTexture.FULL_BRIGHT,
+            frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission())), LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY, red, green, blue, 1, true);
             botiProvider.endBatch();
         BOTI_HANDLER.afbo.bindWrite(false);

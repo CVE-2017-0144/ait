@@ -1,6 +1,5 @@
 package dev.amble.ait.core.blockentities;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.link.v2.block.InteriorLinkableBlockEntity;
 import dev.amble.ait.compat.DependencyChecker;
@@ -11,6 +10,7 @@ import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
 import dev.amble.ait.core.item.KeyItem;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.SonicHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class DoorBlockEntity extends InteriorLinkableBlockEntity {
 
@@ -144,7 +145,7 @@ public class DoorBlockEntity extends InteriorLinkableBlockEntity {
 
         if (tardis.sonic().getExteriorSonic() != null) {
             SonicHandler handler = tardis.sonic();
-            if (worldPosition != null) {
+            if (worldPosition != null && (!tardis.stats().security().get() || SecurityControl.hasMatchingKey((ServerPlayer) player, tardis))) {
                 player.getInventory().placeItemBackInInventory(handler.takeExteriorSonic());
                 world.playSound(null, worldPosition, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.BLOCKS, 1F,
                         0.2F);

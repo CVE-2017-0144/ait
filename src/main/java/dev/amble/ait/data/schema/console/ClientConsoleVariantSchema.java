@@ -3,16 +3,17 @@ package dev.amble.ait.data.schema.console;
 import java.lang.reflect.Type;
 
 import com.google.gson.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
-import org.joml.Vector3f;
 import dev.amble.ait.client.models.consoles.ConsoleModel;
 import dev.amble.ait.data.schema.console.variant.hartnell.HartnellVariant;
 import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.console.variant.ConsoleVariantRegistry;
 import dev.amble.lib.api.Identifiable;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class ClientConsoleVariantSchema implements Identifiable {
@@ -51,6 +52,16 @@ public abstract class ClientConsoleVariantSchema implements Identifiable {
     public abstract ResourceLocation texture();
 
     public abstract ResourceLocation emission();
+
+    /**
+     * The layer a console generator draws this variant's hologram on.
+     *
+     * <p>Overridable so a variant can pick its own rather than have the renderer special case it.
+     * The hologram is drawn at partial alpha, so this is a translucent layer by default.
+     */
+    public RenderType hologramLayer(ResourceLocation texture) {
+        return RenderType.entityTranslucentCull(texture);
+    }
 
     @OnlyIn(Dist.CLIENT)
     public abstract ConsoleModel model();

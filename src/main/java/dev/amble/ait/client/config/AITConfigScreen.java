@@ -1,12 +1,12 @@
 package dev.amble.ait.client.config;
 
+import dev.amble.ait.config.AITServerConfig;
 import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import dev.amble.ait.config.AITServerConfig;
 
 public class AITConfigScreen {
 

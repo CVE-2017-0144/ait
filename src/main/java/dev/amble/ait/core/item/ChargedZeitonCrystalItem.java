@@ -14,10 +14,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.util.ItemNbt;
+import org.jetbrains.annotations.Nullable;
 
 public class ChargedZeitonCrystalItem extends Item implements ArtronHolderItem {
     public static final double MAX_FUEL = 5000;

@@ -14,12 +14,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.core.item.ZeitonShardItem;
 import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.module.gun.core.entity.GunEntityTypes;
 import dev.amble.ait.module.gun.core.entity.StaserBoltEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class StaserBoltMagazine extends Item implements ArtronHolderItem {
     public StaserBoltMagazine(Properties settings) {
@@ -50,7 +50,7 @@ public class StaserBoltMagazine extends Item implements ArtronHolderItem {
             if (stack.getItem() instanceof StaserBoltMagazine mag) {
                 double ammo = mag.getCurrentFuel(stack);
                 if (clickType == ClickAction.SECONDARY && mag.getCurrentFuel(stack) < mag.getMaxFuel(stack)) {
-                    int residual = (int) ((ammo + shardCount) - mag.getCurrentFuel(stack));
+                    int residual = (int) Math.min(shardCount, Math.ceil(MAX_FUEL - ammo));
                     mag.setCurrentFuel(Math.min(MAX_FUEL, ammo + shardCount), stack);
                     otherStack.shrink(residual);
                     return true;

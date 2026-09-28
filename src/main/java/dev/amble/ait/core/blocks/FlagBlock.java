@@ -1,6 +1,5 @@
 package dev.amble.ait.core.blocks;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.blockentities.FlagBlockEntity;
 import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
 import net.minecraft.core.BlockPos;
@@ -12,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
 public class FlagBlock extends HorizontalDirectionalBlock implements EntityBlock {

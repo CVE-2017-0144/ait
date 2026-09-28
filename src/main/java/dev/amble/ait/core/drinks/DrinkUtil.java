@@ -20,11 +20,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.item.TardisMatrixItem;
 import dev.amble.ait.core.util.ItemNbt;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public class DrinkUtil {
 

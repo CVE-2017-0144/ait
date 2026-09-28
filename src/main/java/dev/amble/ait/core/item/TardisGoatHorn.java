@@ -4,6 +4,15 @@ import static net.minecraft.world.level.block.entity.BeaconBlockEntity.playSound
 
 import java.util.Iterator;
 import java.util.Optional;
+
+import dev.amble.ait.api.tardis.link.LinkableItem;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.util.ItemNbt;
+import dev.amble.ait.core.util.WorldUtil;
+import dev.amble.ait.data.enummap.EnumSet;
+import dev.amble.ait.data.enummap.Ordered;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -11,13 +20,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.*;
-import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -28,14 +37,6 @@ import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import dev.amble.ait.api.tardis.link.LinkableItem;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.util.ItemNbt;
-import dev.amble.ait.core.util.WorldUtil;
-import dev.amble.ait.data.enummap.EnumSet;
-import dev.amble.ait.data.enummap.Ordered;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 public class TardisGoatHorn extends LinkableItem {
 

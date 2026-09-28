@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.DurableSubSystem;
@@ -23,6 +22,7 @@ import dev.amble.ait.core.engine.block.multi.MultiBlockStructure;
 import dev.amble.ait.core.engine.block.multi.StructureSystemBlockEntity;
 import dev.amble.ait.core.engine.item.SubSystemItem;
 import dev.amble.ait.core.util.StackUtil;
+import dev.amble.ait.core.world.TardisServerWorld;
 
 /**
  * a mutable version of the structure system block entity
@@ -135,8 +135,12 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
     public void onBroken(Level world, BlockPos pos) {
         super.onBroken(world, pos);
 
-        if (world.isClientSide() || this.idSource == null) return;
-        StackUtil.spawn(world, pos, this.idSource.copyAndClear());
+        if (world.isClientSide() || this.idSource == null || this.idSource.isEmpty()) return;
+        ItemStack stack = this.idSource.copyAndClear();
+
+        if (this.isLinked() && this.tardis().get().interiorChanging().addRestorationStack(stack)) return;
+
+        StackUtil.spawn(world, pos, stack);
     }
 
     @Override

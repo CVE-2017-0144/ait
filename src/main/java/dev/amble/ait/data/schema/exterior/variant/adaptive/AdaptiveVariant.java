@@ -1,6 +1,5 @@
 package dev.amble.ait.data.schema.exterior.variant.adaptive;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
 import dev.amble.ait.data.schema.door.impl.AdaptiveDoorVariant;
@@ -8,6 +7,7 @@ import dev.amble.ait.data.schema.exterior.ExteriorVariantSchema;
 import dev.amble.ait.data.schema.exterior.category.AdaptiveCategory;
 import dev.amble.ait.registry.impl.door.DoorRegistry;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class AdaptiveVariant extends ExteriorVariantSchema {
 

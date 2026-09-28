@@ -1,14 +1,14 @@
 package dev.amble.ait.module.gun.client;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.module.gun.core.item.StaserRifleItem;
+import dev.amble.lib.platform.render.HudRenderEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.module.gun.core.item.StaserRifleItem;
-import dev.amble.lib.platform.render.HudRenderEvents;
 
 public class ScopeOverlay implements HudRenderEvents.HudRender {
 

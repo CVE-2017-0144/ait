@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.AITSounds;
@@ -35,6 +34,7 @@ import dev.amble.ait.data.Loyalty;
 import dev.amble.ait.data.enummap.EnumSet;
 import dev.amble.ait.data.enummap.Ordered;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import org.jetbrains.annotations.Nullable;
 
 public class KeyItem extends LinkableItem {
 

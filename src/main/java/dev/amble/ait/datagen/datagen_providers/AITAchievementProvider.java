@@ -3,6 +3,13 @@ package dev.amble.ait.datagen.datagen_providers;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.advancement.TardisCriterions;
+import dev.amble.ait.module.ModuleRegistry;
+import dev.amble.lib.platform.datagen.PlatformAdvancementProvider;
+import dev.amble.lib.platform.datagen.PlatformDataOutput;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRewards;
@@ -12,13 +19,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.advancement.TardisCriterions;
-import dev.amble.ait.module.ModuleRegistry;
-import dev.amble.lib.platform.datagen.PlatformAdvancementProvider;
-import dev.amble.lib.platform.datagen.PlatformDataOutput;
 
 public class AITAchievementProvider extends PlatformAdvancementProvider {
     public AITAchievementProvider(PlatformDataOutput output,

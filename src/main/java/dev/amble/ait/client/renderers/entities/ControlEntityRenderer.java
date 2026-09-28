@@ -1,5 +1,16 @@
 package dev.amble.ait.client.renderers.entities;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.AITModClient;
+import dev.amble.ait.client.models.consoles.ControlModel;
+import dev.amble.ait.client.renderers.SonicRendering;
+import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
+import dev.amble.ait.core.entities.ConsoleControlEntity;
+import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.control.Control;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
@@ -22,17 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.AITModClient;
-import dev.amble.ait.client.models.consoles.ControlModel;
-import dev.amble.ait.client.renderers.SonicRendering;
-import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
-import dev.amble.ait.core.entities.ConsoleControlEntity;
-import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.tardis.control.Control;
 
 @OnlyIn(Dist.CLIENT)
 public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> {

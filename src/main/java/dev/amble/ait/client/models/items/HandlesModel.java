@@ -1,12 +1,16 @@
 package dev.amble.ait.client.models.items;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import dev.amble.ait.AITMod;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.*;
-import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -20,10 +24,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-import dev.amble.ait.AITMod;
 
 public class HandlesModel extends Model {
     public static final ResourceLocation TEXTURE = AITMod.id("textures/blockentities/items/handles.png");

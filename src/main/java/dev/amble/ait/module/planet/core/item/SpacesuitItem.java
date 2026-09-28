@@ -11,12 +11,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.item.RenderableArmorItem;
 import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
+import org.jetbrains.annotations.Nullable;
 
 
 public class SpacesuitItem extends RenderableArmorItem {

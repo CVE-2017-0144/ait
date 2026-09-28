@@ -1,10 +1,10 @@
 package dev.amble.ait.data.schema.door.impl;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.schema.door.DoorSchema;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class ClassicDoorVariant extends DoorSchema {
     public static final ResourceLocation REFERENCE = AITMod.id("door/classic");

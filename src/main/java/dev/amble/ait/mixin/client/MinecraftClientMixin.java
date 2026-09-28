@@ -1,12 +1,12 @@
 package dev.amble.ait.mixin.client;
 
+import dev.amble.ait.api.ClientWorldEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import dev.amble.ait.api.ClientWorldEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 
 @Mixin(Minecraft.class)
 public class MinecraftClientMixin {

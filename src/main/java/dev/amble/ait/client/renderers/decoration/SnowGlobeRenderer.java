@@ -41,7 +41,7 @@ public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockE
         ExteriorModel model = schema.model();
 
         model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityTranslucentCull(schema.texture())), light, overlay, 0xFFFFFFFF);
-        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(schema.emission(), true)), 0xf000f0, overlay, 0xFFFFFFFF);
+        model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(schema.emission())), 0xf000f0, overlay, 0xFFFFFFFF);
         model.render(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutoutNoCullZOffset(schema.overrides().get(BiomeHandler.BiomeType.SNOWY), false)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();

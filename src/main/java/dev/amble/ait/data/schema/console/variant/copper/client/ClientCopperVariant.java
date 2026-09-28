@@ -1,12 +1,13 @@
 package dev.amble.ait.data.schema.console.variant.copper.client;
 
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.models.consoles.CopperConsoleModel;
 import dev.amble.ait.client.models.consoles.SimpleConsoleModel;
 import dev.amble.ait.data.schema.console.ClientConsoleVariantSchema;
 import dev.amble.ait.data.schema.console.variant.copper.CopperVariant;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class ClientCopperVariant extends ClientConsoleVariantSchema {
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -26,6 +27,12 @@ public class ClientCopperVariant extends ClientConsoleVariantSchema {
     @Override
     public ResourceLocation emission() {
         return EMISSION;
+    }
+
+    @Override
+    public RenderType hologramLayer(ResourceLocation texture) {
+        // No back face culling: the copper model has single sided geometry that disappears without it.
+        return RenderType.entityTranslucent(texture);
     }
 
     @Override

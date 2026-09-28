@@ -1,20 +1,14 @@
 package dev.amble.ait.core.tardis.handler;
 
 
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import dev.amble.ait.core.tardis.manager.ServerTardisManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
+import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.ServerTardis;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
+import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.core.world.LandingPadManager;
 import dev.amble.ait.data.Exclude;
@@ -24,6 +18,12 @@ import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
 import dev.amble.ait.data.properties.bool.BoolValue;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.Nullable;
 
 public class LandingPadHandler extends KeyedTardisComponent {
 
@@ -57,7 +57,7 @@ public class LandingPadHandler extends KeyedTardisComponent {
 
             String input = buf.readUtf();
 
-            tardis.landingPad().code().set(input);
+            server.execute(() -> tardis.landingPad().code().set(input));
         })));
     }
 

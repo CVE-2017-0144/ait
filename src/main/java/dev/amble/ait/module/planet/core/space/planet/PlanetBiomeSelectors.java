@@ -1,11 +1,11 @@
 package dev.amble.ait.module.planet.core.space.planet;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.Biome;
 import dev.amble.ait.AITMod;
 import dev.amble.lib.platform.worldgen.BiomeSelector;
 import dev.amble.lib.platform.worldgen.BiomeSelectors;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
 
 // biome modifiers can't see the dimension, match the planet's biome
 public class PlanetBiomeSelectors {

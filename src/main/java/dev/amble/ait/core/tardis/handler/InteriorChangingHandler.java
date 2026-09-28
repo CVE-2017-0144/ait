@@ -3,32 +3,13 @@ package dev.amble.ait.core.tardis.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.amble.ait.core.AITSounds;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
-import dev.drtheo.scheduler.api.TimeUnit;
-import dev.drtheo.scheduler.api.common.Scheduler;
-import dev.drtheo.scheduler.api.common.TaskStage;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.AITDamageTypes;
 import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.advancement.TardisCriterions;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.engine.SubSystem;
@@ -51,7 +32,26 @@ import dev.amble.ait.data.schema.desktop.TardisDesktopSchema;
 import dev.amble.ait.registry.impl.CategoryRegistry;
 import dev.amble.ait.registry.impl.DesktopRegistry;
 import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
+import dev.drtheo.scheduler.api.TimeUnit;
+import dev.drtheo.scheduler.api.common.Scheduler;
+import dev.drtheo.scheduler.api.common.TaskStage;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 public class InteriorChangingHandler extends KeyedTardisComponent implements TardisTickable {
     public static final ResourceLocation CHANGE_DESKTOP = AITMod.id("change_desktop");
@@ -124,15 +124,17 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
                 ServerTardisManager.receiveTardis(SecurityControl.withLoyaltyCheck((tardis, server, player, handler, buf, responseSender) -> {
                     TardisDesktopSchema desktop = DesktopRegistry.getInstance().get(buf.readResourceLocation());
 
-                    if (tardis == null || desktop == null)
-                        return;
+                    server.execute(() -> {
+                        if (tardis == null || desktop == null || !tardis.isUnlocked(desktop))
+                            return;
 
-                    if (tardis.travel().getState() != TravelHandler.State.LANDED)
-                        return;
+                        if (tardis.travel().getState() != TravelHandler.State.LANDED)
+                            return;
 
-                    TardisCriterions.REDECORATE.trigger(player);
-                    tardis.interiorChangingHandler().queueInteriorChange(desktop);
-                    tardis.alarm().enable();
+                        TardisCriterions.REDECORATE.trigger(player);
+                        tardis.interiorChangingHandler().queueInteriorChange(desktop);
+                        tardis.alarm().enable();
+                    });
                 })));
     }
 
@@ -204,19 +206,11 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
 
         if (travel.getState() == TravelHandler.State.FLIGHT && !travel.isCrashing() && !tardis.isGrowth())
             travel.crash();
-
-        restorationChestContents = new ArrayList<>();
-
-        for (SubSystem system : tardis.subsystems()) {
-            if (!system.isReal())
-                continue;
-
-            restorationChestContents.addAll(system.toStacks());
-            AITMod.LOGGER.debug("Storing Subsystem, {} ({}) => {}", system.getId(), system.isEnabled(), system.toStacks());
-        }
     }
 
     private void changeInterior() {
+        restorationChestContents = new ArrayList<>();
+
         tardis.getDesktop().changeInterior(this.getQueuedInterior(), true, true)
                 .thenRun(() -> {
                     this.queued.set(false);
@@ -256,6 +250,14 @@ public class InteriorChangingHandler extends KeyedTardisComponent implements Tar
         BlockPos pos = position.getPos();
 
         world.playSound(null, pos, AITSounds.TARDIS_BLING, SoundSource.BLOCKS, 10.0F, 1.0F);
+    }
+
+    public boolean addRestorationStack(ItemStack stack) {
+        if (restorationChestContents == null || !tardis.getDesktop().isChanging())
+            return false;
+
+        restorationChestContents.add(stack);
+        return true;
     }
 
     private void restoreSubsystemsToConsole() {

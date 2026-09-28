@@ -1,12 +1,12 @@
 package dev.amble.ait.module.planet.core.util;
 
+import dev.amble.ait.module.planet.core.PlanetBlocks;
+import dev.amble.ait.module.planet.core.PlanetItems;
+import dev.amble.lib.platform.registry.PlatformRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
-import dev.amble.ait.module.planet.core.PlanetBlocks;
-import dev.amble.ait.module.planet.core.PlanetItems;
-import dev.amble.lib.platform.registry.PlatformRegistries;
 
 public class PlanetCustomTrades {
     public static void registerCustomTrades() {

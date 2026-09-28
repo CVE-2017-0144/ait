@@ -1,6 +1,5 @@
 package dev.amble.ait.core.blocks.control;
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.blockentities.control.RedstoneControlBlockEntity;
 import dev.amble.ait.core.tardis.Tardis;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class RedstoneControlBlock extends ControlBlock {
     private static final BooleanProperty POWERED = BlockStateProperties.POWERED;

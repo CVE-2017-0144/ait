@@ -1,13 +1,13 @@
 package dev.amble.ait.module;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import dev.amble.ait.module.decoration.DecorationModule;
 import dev.amble.ait.module.gun.GunModule;
 import dev.amble.ait.module.planet.PlanetModule;
 import dev.amble.lib.register.datapack.DatapackRegistry;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 // these arent datapack definable
 public class ModuleRegistry extends DatapackRegistry<Module> {

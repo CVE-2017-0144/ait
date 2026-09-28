@@ -3,6 +3,16 @@ package dev.amble.ait.module;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.datagen.datagen_providers.AITBlockTagProvider;
+import dev.amble.ait.datagen.datagen_providers.AITItemTagProvider;
+import dev.amble.ait.datagen.datagen_providers.AITRecipeProvider;
+import dev.amble.lib.api.Identifiable;
+import dev.amble.lib.container.impl.BlockContainer;
+import dev.amble.lib.container.impl.ItemContainer;
+import dev.amble.lib.datagen.lang.AmbleLanguageProvider;
+import dev.amble.lib.datagen.model.AmbleModelProvider;
+import dev.amble.lib.itemgroup.AItemGroup;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.advancements.Advancement;
@@ -17,16 +27,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.datagen.datagen_providers.AITBlockTagProvider;
-import dev.amble.ait.datagen.datagen_providers.AITItemTagProvider;
-import dev.amble.ait.datagen.datagen_providers.AITRecipeProvider;
-import dev.amble.lib.api.Identifiable;
-import dev.amble.lib.container.impl.BlockContainer;
-import dev.amble.lib.container.impl.ItemContainer;
-import dev.amble.lib.datagen.lang.AmbleLanguageProvider;
-import dev.amble.lib.datagen.model.AmbleModelProvider;
-import dev.amble.lib.itemgroup.AItemGroup;
 
 public abstract class Module implements Identifiable {
     private AItemGroup group;

@@ -3,20 +3,22 @@ package dev.amble.ait.data.schema.door;
 import java.lang.reflect.Type;
 
 import com.google.gson.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
 import dev.amble.ait.client.models.AnimatedModel;
 import dev.amble.ait.data.schema.door.impl.CapsuleDoorVariant;
 import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
 import dev.amble.ait.registry.impl.door.DoorRegistry;
 import dev.amble.lib.api.Identifiable;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class ClientDoorSchema implements Identifiable {
     private final ResourceLocation parent;
     private final ResourceLocation id;
+
+    private AnimatedModel model;
 
     protected ClientDoorSchema(ResourceLocation parent, ResourceLocation id) {
         this.parent = parent;
@@ -52,6 +54,10 @@ public abstract class ClientDoorSchema implements Identifiable {
     // public abstract Identifier texture();
     // public abstract Identifier emission();
     public abstract AnimatedModel model();
+
+    public AnimatedModel getCachedModel() {
+        return this.model != null ? this.model : (this.model = this.model());
+    }
 
     public static Object serializer() {
         return new Serializer();

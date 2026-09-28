@@ -9,6 +9,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.animation.v2.keyframe.AnimationKeyframe;
+import dev.amble.ait.core.tardis.animation.v2.keyframe.KeyframeTracker;
+import dev.amble.lib.AmbleKit;
+import dev.amble.lib.platform.Platform;
+import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
+import dev.amble.lib.platform.resource.ReloadListeners;
+import dev.amble.lib.platform.resource.SimpleReloadListener;
+import dev.amble.lib.util.ServerLifecycleHooks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -20,16 +30,6 @@ import net.minecraft.util.Tuple;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.joml.Vector3f;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.animation.v2.keyframe.AnimationKeyframe;
-import dev.amble.ait.core.tardis.animation.v2.keyframe.KeyframeTracker;
-import dev.amble.lib.AmbleKit;
-import dev.amble.lib.platform.Platform;
-import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
-import dev.amble.lib.platform.resource.ReloadListeners;
-import dev.amble.lib.platform.resource.SimpleReloadListener;
-import dev.amble.lib.util.ServerLifecycleHooks;
 
 
 // TODO - replace this with the better BedrockAnimation stuff when i can be bothered.

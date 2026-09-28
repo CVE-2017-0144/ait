@@ -1,9 +1,9 @@
 package dev.amble.ait.module.planet.core.space.planet;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import dev.amble.ait.AITMod;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 
 public class PlanetRegistry extends SimpleDatapackRegistry<Planet> {
 

@@ -1,7 +1,6 @@
 package dev.amble.ait.client.screens;
 
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.client.sounds.PlayerFollowingLoopingSound;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.core.AITSounds;
@@ -10,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A screen that is opened from a console.

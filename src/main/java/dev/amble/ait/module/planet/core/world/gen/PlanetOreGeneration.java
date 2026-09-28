@@ -1,10 +1,10 @@
 package dev.amble.ait.module.planet.core.world.gen;
 
 
-import net.minecraft.world.level.levelgen.GenerationStep;
 import dev.amble.ait.module.planet.core.space.planet.PlanetBiomeSelectors;
 import dev.amble.ait.module.planet.core.world.PlanetPlacedFeatures;
 import dev.amble.lib.platform.worldgen.BiomeModifications;
+import net.minecraft.world.level.levelgen.GenerationStep;
 
 
 public class PlanetOreGeneration {

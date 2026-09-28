@@ -16,8 +16,8 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.module.planet.core.util.ISpaceImmune;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class BOTIPaintingEntity extends HangingEntity implements ISpaceImmune {
     private static final int WIDTH = 48;

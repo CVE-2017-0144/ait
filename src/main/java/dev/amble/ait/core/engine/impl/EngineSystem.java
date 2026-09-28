@@ -1,15 +1,11 @@
 package dev.amble.ait.core.engine.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisEvents;
 import dev.amble.ait.core.AITBlocks;
@@ -25,6 +21,7 @@ import dev.amble.ait.core.tardis.handler.travel.TravelUtil;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.Exclude;
 import dev.amble.lib.util.ServerLifecycleHooks;
+import org.joml.Vector3f;
 
 public class EngineSystem extends DurableSubSystem {
     @Exclude(strategy = Exclude.Strategy.FILE)
@@ -97,15 +94,6 @@ public class EngineSystem extends DurableSubSystem {
         if (this.durability() <= 5) {
             this.tardis.alarm().enable();
         }
-    }
-
-    @Override
-    public List<ItemStack> toStacks() {
-        List<ItemStack> stacks = new ArrayList<>();
-
-        stacks.add(AITBlocks.ENGINE_BLOCK.asItem().getDefaultInstance());
-
-        return stacks;
     }
 
     public Phaser phaser() {

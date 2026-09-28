@@ -19,7 +19,8 @@ public class CoralBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
         super.loadAdditional(nbt, registries);
-        this.creator = nbt.getUUID("creator");
+        if (nbt.hasUUID("creator"))
+            this.creator = nbt.getUUID("creator");
     }
 
     @Override

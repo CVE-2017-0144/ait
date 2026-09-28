@@ -5,13 +5,13 @@ import static dev.amble.ait.client.renderers.entities.RiftEntityRenderer.CIRCLE_
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import org.lwjgl.opengl.GL11;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.renderers.VortexRender;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import org.lwjgl.opengl.GL11;
 
 public class RiftBOTI extends BOTI {
     public static void renderRiftBoti(PoseStack stack, HierarchicalModel frame, int pack) {

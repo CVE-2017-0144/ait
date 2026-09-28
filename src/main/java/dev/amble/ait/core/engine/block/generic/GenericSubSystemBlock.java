@@ -1,6 +1,5 @@
 package dev.amble.ait.core.engine.block.generic;
 
-import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -18,6 +17,7 @@ import com.google.common.collect.Maps;
 import dev.amble.ait.core.engine.block.SubSystemBlock;
 import dev.amble.ait.core.engine.link.IFluidLink;
 import dev.amble.ait.core.engine.link.block.FluidLinkBlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class GenericSubSystemBlock extends SubSystemBlock {
 

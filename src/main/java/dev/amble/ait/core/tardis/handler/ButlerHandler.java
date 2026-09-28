@@ -1,17 +1,18 @@
 package dev.amble.ait.core.tardis.handler;
 
 import java.util.function.Consumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.data.properties.Property;
 import dev.amble.ait.data.properties.Value;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class ButlerHandler extends KeyedTardisComponent implements ArtronHolderItem, TardisTickable {
 

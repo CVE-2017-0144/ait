@@ -2,11 +2,25 @@ package dev.amble.ait.core.blocks;
 
 import java.util.function.ToIntFunction;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.api.tardis.TardisComponent;
+import dev.amble.ait.compat.DependencyChecker;
+import dev.amble.ait.core.AITBlocks;
+import dev.amble.ait.core.AITItems;
+import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
+import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.handler.BiomeHandler;
+import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
+import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
+import dev.amble.ait.core.util.ShapeUtil;
+import dev.amble.ait.data.ShapeMap;
+import dev.amble.ait.module.planet.core.space.planet.Planet;
+import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
+import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
+import dev.amble.lib.api.ICantBreak;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,6 +39,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -34,6 +49,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -47,21 +63,6 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.api.tardis.TardisComponent;
-import dev.amble.ait.compat.DependencyChecker;
-import dev.amble.ait.core.AITBlocks;
-import dev.amble.ait.core.AITItems;
-import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
-import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.tardis.handler.BiomeHandler;
-import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
-import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
-import dev.amble.ait.core.util.ShapeUtil;
-import dev.amble.ait.module.planet.core.space.planet.Planet;
-import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
-import dev.amble.ait.registry.impl.exterior.ExteriorVariantRegistry;
-import dev.amble.lib.api.ICantBreak;
 
 @SuppressWarnings("deprecation")
 public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, SimpleWaterloggedBlock {
@@ -117,6 +118,11 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
 
         DIAGONAL_SHAPE = shape;
     }
+
+    private static final ShapeMap CUBE_SHAPES = ShapeUtil.rotations(Direction.NORTH, CUBE_NORTH_SHAPE).build();
+    private static final ShapeMap PORTALS_SHAPES = ShapeUtil.rotations(Direction.NORTH, PORTALS_SHAPE).build();
+    private static final ShapeMap DIAGONAL_SHAPES = ShapeUtil.rotations(Direction.NORTH, DIAGONAL_SHAPE).build();
+    private static final ShapeMap PORTALS_DIAGONAL_SHAPES = ShapeUtil.rotations(Direction.NORTH, PORTALS_SHAPE_DIAGONAL).build();
 
     public ExteriorBlock(Properties settings) {
         super(settings.noOcclusion());
@@ -180,7 +186,7 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        VoxelShape normal = this.getNormalShape(state, false);
+        VoxelShape normal = this.getNormalShape(state, true);
 
         if (!(blockEntity instanceof ExteriorBlockEntity exterior))
             return normal;
@@ -253,21 +259,20 @@ public class ExteriorBlock extends Block implements EntityBlock, ICantBreak, Sim
         return Shapes.empty();
     }
 
-    // TODO cache this.
     public VoxelShape getNormalShape(BlockState state, boolean ignorePortals) {
         Direction direction = RotationSegment.convertToDirection(state.getValue(ROTATION))
                 .orElse(null);
 
-        VoxelShape shape;
+        ShapeMap shapes;
 
         if (direction == null) {
-            shape = DependencyChecker.hasPortals() && AITMod.CONFIG.allowPortalsBoti && !ignorePortals ? PORTALS_SHAPE_DIAGONAL : DIAGONAL_SHAPE;
+            shapes = DependencyChecker.hasPortals() && AITMod.CONFIG.allowPortalsBoti && !ignorePortals ? PORTALS_DIAGONAL_SHAPES : DIAGONAL_SHAPES;
             direction = approximateDirection(state.getValue(ROTATION));
         } else {
-            shape = DependencyChecker.hasPortals() && AITMod.CONFIG.allowPortalsBoti && !ignorePortals ? PORTALS_SHAPE : CUBE_NORTH_SHAPE;
+            shapes = DependencyChecker.hasPortals() && AITMod.CONFIG.allowPortalsBoti && !ignorePortals ? PORTALS_SHAPES : CUBE_SHAPES;
         }
 
-        return ShapeUtil.rotate(Direction.NORTH, direction, shape);
+        return shapes.get(direction);
     }
 
     public Direction approximateDirection(int rotation) {

@@ -1,5 +1,12 @@
 package dev.amble.ait.core.advancement;
 
+import dev.amble.ait.AITMod;
+import dev.amble.ait.api.tardis.TardisEvents;
+import dev.amble.ait.core.AITSounds;
+import dev.amble.ait.core.effects.ZeitonHighEffect;
+import dev.amble.ait.core.engine.impl.EngineSystem;
+import dev.amble.ait.core.world.TardisServerWorld;
+import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.common.Scheduler;
 import dev.drtheo.scheduler.api.common.TaskStage;
@@ -8,13 +15,6 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.api.tardis.TardisEvents;
-import dev.amble.ait.core.AITSounds;
-import dev.amble.ait.core.effects.ZeitonHighEffect;
-import dev.amble.ait.core.engine.impl.EngineSystem;
-import dev.amble.ait.core.world.TardisServerWorld;
-import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
 
 public class TardisCriterions {
     public static SimpleCriterion ROOT = SimpleCriterion.create("root").register();

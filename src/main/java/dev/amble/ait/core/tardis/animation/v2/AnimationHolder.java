@@ -2,18 +2,6 @@ package dev.amble.ait.core.tardis.animation.v2;
 
 import java.util.UUID;
 
-import dev.drtheo.queue.api.ActionQueue;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.joml.Math;
-import org.joml.Vector3f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.Disposable;
 import dev.amble.ait.api.tardis.TardisTickable;
@@ -32,6 +20,18 @@ import dev.amble.ait.data.Exclude;
 import dev.amble.ait.data.Loyalty;
 import dev.amble.lib.platform.Platform;
 import dev.amble.lib.util.ServerLifecycleHooks;
+import dev.drtheo.queue.api.ActionQueue;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Math;
+import org.joml.Vector3f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 
 public class AnimationHolder implements TardisTickable, Disposable, Linkable {
     public static final ResourceLocation UPDATE_PACKET = AITMod.id("sync/ext_anim");

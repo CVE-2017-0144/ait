@@ -1,5 +1,9 @@
 package dev.amble.ait.client.renderers.wearables;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.models.wearables.SantaHatModel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.model.PlayerModel;
@@ -14,10 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.models.wearables.SantaHatModel;
 
 @OnlyIn(Dist.CLIENT)
 public class SantaHatFeatureRenderer<T extends LivingEntity, M extends PlayerModel<T>>

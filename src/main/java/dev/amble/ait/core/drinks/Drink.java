@@ -15,10 +15,10 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.joml.Vector3f;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.data.codec.MoreCodec;
 import dev.amble.lib.api.Identifiable;
+import org.joml.Vector3f;
 
 public record Drink(ResourceLocation id, Optional<Boolean> hasCustomColor, Optional<Vector3f> custom_color, List<DatapackPotion> potionInstances) implements Identifiable {
     public static final Codec<Drink> CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(

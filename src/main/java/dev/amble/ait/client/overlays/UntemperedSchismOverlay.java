@@ -1,13 +1,11 @@
 package dev.amble.ait.client.overlays;
 
+import java.awt.*;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.blockentities.UntemperedSchismBlockEntity;
-import dev.amble.ait.core.blocks.ExteriorBlock;
 import dev.amble.ait.core.blocks.UntemperedSchismBlock;
-import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.lib.platform.render.HudRenderEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -16,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import java.awt.*;
 
 public class UntemperedSchismOverlay implements HudRenderEvents.HudRender {
 

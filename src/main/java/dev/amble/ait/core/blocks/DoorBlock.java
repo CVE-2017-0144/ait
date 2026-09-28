@@ -1,11 +1,18 @@
 package dev.amble.ait.core.blocks;
 
+import dev.amble.ait.api.tardis.TardisEvents;
+import dev.amble.ait.core.AITBlockEntityTypes;
+import dev.amble.ait.core.blockentities.DoorBlockEntity;
+import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
+import dev.amble.ait.core.tardis.ServerTardis;
+import dev.amble.ait.core.util.ShapeUtil;
+import dev.amble.ait.data.ShapeMap;
+import dev.amble.lib.data.CachedDirectedGlobalPos;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -17,17 +24,20 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
@@ -36,18 +46,12 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import dev.amble.ait.api.tardis.TardisEvents;
-import dev.amble.ait.core.AITBlockEntityTypes;
-import dev.amble.ait.core.blockentities.DoorBlockEntity;
-import dev.amble.ait.core.blocks.types.HorizontalDirectionalBlock;
-import dev.amble.ait.core.tardis.ServerTardis;
-import dev.amble.ait.core.util.ShapeUtil;
-import dev.amble.lib.data.CachedDirectedGlobalPos;
 
 @SuppressWarnings("deprecation")
 public class DoorBlock extends HorizontalDirectionalBlock implements EntityBlock, SimpleWaterloggedBlock {
 
     public static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 12.1, 16.0, 32.0, 16.0);
+    private static final ShapeMap SHAPES = ShapeUtil.rotations(Direction.NORTH, NORTH_SHAPE).build();
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final IntegerProperty LEVEL_4 = ExteriorBlock.LEVEL_4;
 
@@ -57,7 +61,13 @@ public class DoorBlock extends HorizontalDirectionalBlock implements EntityBlock
             BlockPos exteriorPos = globalPos.getPos();
             Level exteriorWorld = globalPos.getWorld();
 
-            BlockState exteriorState = exteriorWorld.getBlockState(exteriorPos);
+            LevelChunk chunk = exteriorWorld.getChunkSource().getChunkNow(SectionPos.blockToSectionCoord(exteriorPos.getX()),
+                    SectionPos.blockToSectionCoord(exteriorPos.getZ()));
+
+            if (chunk == null)
+                return;
+
+            BlockState exteriorState = chunk.getBlockState(exteriorPos);
             if (!tardis.travel().inFlight() && exteriorState.getBlock() instanceof ExteriorBlock)
                 setDoorLight(tardis.asServer(), exteriorState.getValue(ExteriorBlock.LEVEL_4));
         });
@@ -110,7 +120,7 @@ public class DoorBlock extends HorizontalDirectionalBlock implements EntityBlock
                 door.tardis().get().siege() != null && door.tardis().get().siege().isActive())
             return Shapes.empty();
 
-        return ShapeUtil.rotate(Direction.NORTH, state.getValue(FACING), NORTH_SHAPE);
+        return SHAPES.get(state.getValue(FACING));
     }
 
     @Override

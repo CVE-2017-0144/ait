@@ -1,7 +1,6 @@
 package dev.amble.ait.core.blockentities;
 
 
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.AITBlockEntityTypes;
 import dev.amble.ait.core.AITBlocks;
 import dev.amble.ait.core.engine.SubSystem;
@@ -11,17 +10,15 @@ import dev.amble.ait.core.engine.link.IFluidSource;
 import dev.amble.ait.core.engine.link.ITardisSource;
 import dev.amble.ait.core.engine.link.tracker.FluidNetwork;
 import dev.amble.ait.core.tardis.Tardis;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class EngineBlockEntity extends SubSystemBlockEntity implements ITardisSource {
     private boolean firstTickHandled;
@@ -49,21 +46,8 @@ public class EngineBlockEntity extends SubSystemBlockEntity implements ITardisSo
 
         this.tardis().ifPresent(tardis -> tardis.subsystems().engine().setEnabled(true));
 
-        if (tryPlaceFillBlocks()) {
-            this.rebuildOwnNetwork();
-            return;
-        }
-
-        this.onBroken(world, pos);
-        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-
-        if (placer == null) return;
-
-        Block.popResource(world, pos, AITBlocks.ENGINE_BLOCK.asItem().getDefaultInstance());
-
-        if (!(placer instanceof ServerPlayer player)) return;
-
-        player.displayClientMessage(Component.translatable("tardis.message.engine.no_space").withStyle(ChatFormatting.RED), true);
+        this.tryPlaceFillBlocks();
+        this.rebuildOwnNetwork();
     }
 
     @Override
@@ -131,6 +115,8 @@ public class EngineBlockEntity extends SubSystemBlockEntity implements ITardisSo
 
         // place cable blocks adjacent
         for (Direction dir : Direction.values()) {
+            if (dir == Direction.UP || dir == Direction.DOWN) continue;
+
             BlockPos offset = centre.relative(dir);
             tryRemoveIfMatches(world, offset, AITBlocks.CABLE_BLOCK);
         }

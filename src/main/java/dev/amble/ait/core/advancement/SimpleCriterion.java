@@ -2,7 +2,6 @@ package dev.amble.ait.core.advancement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.ApiStatus;
 import dev.amble.ait.AITMod;
 import java.util.Optional;
 import net.minecraft.advancements.Criterion;
@@ -12,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.ApiStatus;
 
 public class SimpleCriterion extends SimpleCriterionTrigger<SimpleCriterion.Conditions> {
 

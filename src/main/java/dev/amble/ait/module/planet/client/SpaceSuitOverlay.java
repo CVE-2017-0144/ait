@@ -1,12 +1,5 @@
 package dev.amble.ait.module.planet.client;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.config.AITClientConfig;
@@ -15,6 +8,13 @@ import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 import dev.amble.ait.module.planet.core.space.planet.Planet;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 import dev.amble.lib.platform.render.HudRenderEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EquipmentSlot;
 
 public class SpaceSuitOverlay implements HudRenderEvents.HudRender {
 

@@ -42,7 +42,12 @@ public class DimensionControl extends Control {
         }
 
         int index = Math.max(0, WorldUtil.travelWorldIndex(dest.getWorld()));
-        index = leftClick ? (dims.size() + index - 1) % dims.size() : (index + 1) % dims.size();
+
+        if (leftClick) {
+            index = (dims.size() + index - 1) % dims.size();
+        } else {
+            index = (index + 1) % dims.size();
+        }
 
         ServerLevel destWorld = dims.get(index);
 
@@ -51,8 +56,8 @@ public class DimensionControl extends Control {
             BlockPos clampedPos = PosType.clamp(cachedPos.getPos(), 0, destWorld);
             return cachedPos.pos(clampedPos);
         });
-
         messagePlayer(player, destWorld, LockedDimensionRegistry.getInstance().isUnlocked(tardis, destWorld));
+
         return Result.SUCCESS;
     }
 

@@ -5,20 +5,13 @@ import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-
 import dev.amble.ait.AITMod;
-import dev.amble.ait.core.net.AitNetworking;
-import dev.amble.ait.core.tardis.control.impl.SecurityControl;
-import dev.amble.ait.core.tardis.manager.ServerTardisManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.border.WorldBorder;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisTickable;
+import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.tardis.control.impl.SecurityControl;
 import dev.amble.ait.core.tardis.handler.TardisCrashHandler;
+import dev.amble.ait.core.tardis.manager.ServerTardisManager;
 import dev.amble.ait.core.util.SafePosSearch;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.ait.data.Exclude;
@@ -30,6 +23,12 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 import dev.amble.ait.data.properties.integer.IntProperty;
 import dev.amble.ait.data.properties.integer.IntValue;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.border.WorldBorder;
 
 public abstract class TravelHandlerBase extends KeyedTardisComponent implements TardisTickable {
 
@@ -79,7 +78,7 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
 
             if (tardis == null) return;
 
-            tardis.travel().leaveBehind().set(bool);
+            server.execute(() -> tardis.travel().leaveBehind().set(bool));
         })));
     }
 
@@ -218,8 +217,10 @@ public abstract class TravelHandlerBase extends KeyedTardisComponent implements 
         cached.init(TravelHandlerBase.server());
 
         BlockPos pos = cached.getPos();
+        WorldBorder border = cached.getWorld().getWorldBorder();
         WorldBorder targetBorder = new WorldBorder();
-        targetBorder.setSize(cached.getWorld().getWorldBorder().getSize() - 3);
+        targetBorder.setCenter(border.getCenterX(), border.getCenterZ());
+        targetBorder.setSize(border.getSize() - 3);
 
         cached = targetBorder.isWithinBounds(pos) ? cached : cached.pos(targetBorder.clampToBounds(pos.getX(), pos.getY(), pos.getZ()));
 

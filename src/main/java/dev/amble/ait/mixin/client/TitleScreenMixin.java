@@ -11,13 +11,13 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.AITModClient;
+import dev.amble.ait.core.devteam.BetaVerification;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.AITModClient;
-import dev.amble.ait.core.devteam.BetaVerification;
 
 @Mixin(value = TitleScreen.class, priority = 999)
 public abstract class TitleScreenMixin extends Screen {

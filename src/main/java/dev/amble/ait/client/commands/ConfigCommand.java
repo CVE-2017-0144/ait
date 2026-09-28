@@ -4,10 +4,10 @@ import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.config.AITConfigScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
 
 
 public class ConfigCommand {

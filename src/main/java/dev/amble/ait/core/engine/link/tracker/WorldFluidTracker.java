@@ -10,8 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
 import dev.amble.ait.core.engine.link.IFluidLink;
+import org.jetbrains.annotations.Nullable;
 
 public class WorldFluidTracker {
     public static HashMap<Direction, IFluidLink> getConnections(ServerLevel world, BlockPos pos, @Nullable Direction ignore) {

@@ -4,6 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
+import dev.amble.ait.AITMod;
+import dev.amble.ait.client.renderers.AITRenderLayers;
+import dev.amble.ait.module.planet.client.models.CelestialBodyModel;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Camera;
@@ -16,9 +19,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
-import dev.amble.ait.AITMod;
-import dev.amble.ait.client.renderers.AITRenderLayers;
-import dev.amble.ait.module.planet.client.models.CelestialBodyModel;
 
 
 public class CelestialBodyRenderer {

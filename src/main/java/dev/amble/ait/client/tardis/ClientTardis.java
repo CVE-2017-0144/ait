@@ -3,6 +3,7 @@ package dev.amble.ait.client.tardis;
 import java.lang.reflect.Type;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import com.google.gson.InstanceCreator;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.Disposable;
@@ -13,6 +14,7 @@ import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisDesktop;
 import dev.amble.ait.core.tardis.TardisExterior;
+import dev.amble.ait.core.tardis.handler.DoorHandler;
 import dev.amble.ait.data.Exclude;
 
 public class ClientTardis extends Tardis implements Disposable {
@@ -22,6 +24,9 @@ public class ClientTardis extends Tardis implements Disposable {
 
     @Exclude
     private boolean aged = false;
+
+    @Exclude
+    private float leftRot = -1, leftRotO, rightRot, rightRotO;
 
     private ClientTardis(UUID check) {
         super();
@@ -41,6 +46,9 @@ public class ClientTardis extends Tardis implements Disposable {
     public void tick(Minecraft client) {
         this.getHandlers().tick(client);
 
+        if (!client.isPaused())
+            this.tickDoors();
+
         if (ClientTardisUtil.getCurrentTardis() != this)
             return;
 
@@ -49,6 +57,45 @@ public class ClientTardis extends Tardis implements Disposable {
 
         float amount = ClientShakeUtil.getShakeAmount(this) * AITModClient.CONFIG.screenShake;
         ClientShakeUtil.shake(amount);
+    }
+
+    // synced rot lands uneven per tick, lerp per frame
+    private void tickDoors() {
+        DoorHandler door = this.door();
+        float left = door.getSyncedRot(true);
+        float right = door.getSyncedRot(false);
+
+        if (this.leftRot < 0) {
+            this.leftRot = this.leftRotO = left;
+            this.rightRot = this.rightRotO = right;
+            return;
+        }
+
+        this.leftRotO = this.leftRot;
+        this.rightRotO = this.rightRot;
+        this.leftRot = follow(door, this.leftRot, left, door.getDoorState() != DoorHandler.DoorState.CLOSED);
+        this.rightRot = follow(door, this.rightRot, right, door.getDoorState() == DoorHandler.DoorState.BOTH);
+    }
+
+    private static float follow(DoorHandler door, float rot, float synced, boolean opening) {
+        float next = door.calculateRotation(rot, opening);
+        return opening ? Math.max(next, synced) : Math.min(next, synced);
+    }
+
+    // resyncs replace this mid swing
+    public void keepDoorRot(ClientTardis old) {
+        this.leftRot = old.leftRot;
+        this.leftRotO = old.leftRotO;
+        this.rightRot = old.rightRot;
+        this.rightRotO = old.rightRotO;
+    }
+
+    public float getDoorRot(boolean left) {
+        if (this.leftRot < 0)
+            return this.door().getSyncedRot(left);
+
+        float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        return left ? Mth.lerp(delta, this.leftRotO, this.leftRot) : Mth.lerp(delta, this.rightRotO, this.rightRot);
     }
 
     @Override

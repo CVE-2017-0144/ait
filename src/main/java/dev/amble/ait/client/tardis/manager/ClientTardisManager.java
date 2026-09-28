@@ -96,8 +96,10 @@ public class ClientTardisManager extends TardisManager<ClientTardis, Minecraft> 
 
             ClientTardis old = this.lookup.put(tardis);
 
-            if (old != null)
+            if (old != null) {
                 old.age();
+                tardis.keepDoorRot(old);
+            }
 
             for (Consumer<ClientTardis> consumer : this.subscribers.removeAll(uuid)) {
                 consumer.accept(tardis);

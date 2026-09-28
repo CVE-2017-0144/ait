@@ -6,6 +6,7 @@ import dev.amble.ait.api.tardis.TardisTickable;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
+import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.Exclude;
@@ -341,7 +342,7 @@ public class DoorHandler extends KeyedTardisComponent implements TardisTickable 
                     SoundSource.BLOCKS, 0.2F, world.getRandom().nextBoolean() ? 1f : 0.8f);
 
         if (player.isShiftKeyDown() || both) {
-            if (this.isOpen()) {
+            if (this.getDoorState() != DoorState.CLOSED) {
                 this.closeDoors();
             } else {
                 this.openDoors();
@@ -405,11 +406,15 @@ public class DoorHandler extends KeyedTardisComponent implements TardisTickable 
     }
 
     public float getLeftRot() {
-        return this.leftDoorRot.get();
+        return this.tardis() instanceof ServerTardis ? this.leftDoorRot.get() : this.tardis().asClient().getDoorRot(true);
     }
 
     public float getRightRot() {
-        return this.rightDoorRot.get();
+        return this.tardis() instanceof ServerTardis ? this.rightDoorRot.get() : this.tardis().asClient().getDoorRot(false);
+    }
+
+    public float getSyncedRot(boolean left) {
+        return left ? this.leftDoorRot.get() : this.rightDoorRot.get();
     }
 
     /**

@@ -1,7 +1,7 @@
 {
   "sound_event": "ait:tardis/arpalarm_mono",
   "description": {
-    "translate": "jukebox_song.ait.crash"
+    "translate": "item.ait.crash_music_disc.desc"
   },
   "length_in_seconds": 69.0,
   "comparator_output": 1

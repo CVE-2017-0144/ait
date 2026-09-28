@@ -114,7 +114,7 @@ public class RemoteItem extends LinkableItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
         super.appendHoverText(stack, tooltipContext, tooltip, context);
 
-        Tardis tardis = RemoteItem.getTardisStatic(null, stack);
+        Tardis tardis = RemoteItem.getTardisStatic(tooltipContext.level(), stack);
 
         if (tardis == null)
             return;

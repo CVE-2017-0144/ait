@@ -17,14 +17,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -41,9 +40,7 @@ import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import dev.amble.lib.platform.Platform;
 
 @OnlyIn(Dist.CLIENT)
-public final class ClientRegistries {
-
-    private ClientRegistries() {}
+public class ClientRegistries {
 
     public interface DynamicItemRenderer {
         void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices,
@@ -140,7 +137,9 @@ public final class ClientRegistries {
     }
 
     public static void itemColor(ItemColor color, ItemLike... items) {
-        ITEM_COLORS.add(new ItemColorEntry(color, items));
+        // providers return plain rgb, 1.21 draws the tint's alpha byte
+        ITEM_COLORS.add(new ItemColorEntry(
+                (stack, tintIndex) -> FastColor.ARGB32.opaque(color.getColor(stack, tintIndex)), items));
     }
 
     public static KeyMapping keyBinding(KeyMapping mapping) {
@@ -150,9 +149,5 @@ public final class ClientRegistries {
 
     public static void dimensionEffects(ResourceLocation id, DimensionSpecialEffects effects) {
         DIMENSION_EFFECTS.add(new DimensionEffectsEntry(id, effects));
-    }
-
-    public static boolean renderCustomSky(ResourceKey<Level> world, WorldRenderContext context) {
-        return false;
     }
 }

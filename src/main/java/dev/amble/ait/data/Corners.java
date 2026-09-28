@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import com.google.gson.*;
 
 public class Corners {
@@ -15,7 +16,7 @@ public class Corners {
     private final BlockPos second;
 
     public Corners(BlockPos first, BlockPos second) {
-        this.box = AABB.encapsulatingFullBlocks(first, second);
+        this.box = new AABB(Vec3.atLowerCornerOf(first), Vec3.atLowerCornerOf(second));
 
         this.first = first;
         this.second = second;

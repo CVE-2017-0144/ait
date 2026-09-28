@@ -421,7 +421,7 @@ public class TardisUtil {
         BlockPos pos = tardis.getDesktop().getDoorPos().getPos();
 
         return tardis.asServer().world().getEntitiesOfClass(LivingEntity.class,
-                AABB.encapsulatingFullBlocks(pos.north(area).east(area).above(area), pos.south(area).west(area).below(area)), (e) -> true);
+                new AABB(Vec3.atLowerCornerOf(pos.north(area).east(area).above(area)), Vec3.atLowerCornerOf(pos.south(area).west(area).below(area))), (e) -> true);
     }
 
     public static List<Entity> getEntitiesInInterior(Tardis tardis, int area) {
@@ -433,7 +433,7 @@ public class TardisUtil {
         BlockPos pos = directedPos.getPos();
 
         return tardis.asServer().world().getEntitiesOfClass(Entity.class,
-                AABB.encapsulatingFullBlocks(pos.north(area).east(area).above(area), pos.south(area).west(area).below(area)), e -> true);
+                new AABB(Vec3.atLowerCornerOf(pos.north(area).east(area).above(area)), Vec3.atLowerCornerOf(pos.south(area).west(area).below(area))), e -> true);
     }
 
     public static List<LivingEntity> getLivingEntitiesInInterior(ServerTardis tardis) {

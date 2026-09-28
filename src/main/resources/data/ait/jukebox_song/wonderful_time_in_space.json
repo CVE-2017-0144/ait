@@ -1,7 +1,7 @@
 {
   "sound_event": "ait:music/wonderful_time_in_space",
   "description": {
-    "translate": "jukebox_song.ait.wonderful_time_in_space"
+    "translate": "item.ait.wonderful_time_in_space_music_disc.desc"
   },
   "length_in_seconds": 73.0,
   "comparator_output": 1

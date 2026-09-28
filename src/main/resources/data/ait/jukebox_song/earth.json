@@ -1,7 +1,7 @@
 {
   "sound_event": "ait:music/earth_nitrogenez",
   "description": {
-    "translate": "jukebox_song.ait.earth"
+    "translate": "item.ait.earth_music_disc.desc"
   },
   "length_in_seconds": 315.0,
   "comparator_output": 1

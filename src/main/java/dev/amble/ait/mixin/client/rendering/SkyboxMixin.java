@@ -17,7 +17,6 @@ import dev.amble.ait.client.util.SkyboxUtil;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.world.TardisServerWorld;
-import dev.amble.lib.platform.render.ClientRegistries;
 import dev.amble.lib.platform.render.WorldRenderContext;
 import dev.amble.lib.platform.render.WorldRenderEvents;
 import org.jetbrains.annotations.Nullable;
@@ -236,9 +235,6 @@ public abstract class SkyboxMixin {
             ci.cancel();
             return;
         }
-
-        if (context != null && ClientRegistries.renderCustomSky(skyboxWorld, context))
-            ci.cancel();
     }
 
     @Unique private void renderOverworldSky(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera,

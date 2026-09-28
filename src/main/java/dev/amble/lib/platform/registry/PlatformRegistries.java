@@ -29,9 +29,7 @@ import net.neoforged.neoforge.registries.RegistryBuilder;
 
 import dev.amble.lib.platform.Platform;
 
-public final class PlatformRegistries {
-
-    private PlatformRegistries() {}
+public class PlatformRegistries {
 
     private record AttributeEntry(EntityType<? extends LivingEntity> type,
             Supplier<AttributeSupplier.Builder> builder) {}
@@ -64,11 +62,15 @@ public final class PlatformRegistries {
 
         NeoForge.EVENT_BUS.addListener(WandererTradesEvent.class, event -> {
             for (WandererEntry entry : WANDERER_TRADES) {
-                entry.factories().accept(entry.level() == 1 ? event.getGenericTrades() : event.getRareTrades());
+                if (entry.level() == 1)
+                    entry.factories().accept(event.getGenericTrades());
+                else if (entry.level() == 2)
+                    entry.factories().accept(event.getRareTrades());
             }
         });
     }
 
+    // built now, handed over on NewRegistryEvent
     public static <T> MappedRegistry<T> createRegistry(ResourceKey<Registry<T>> key) {
         MappedRegistry<T> registry = (MappedRegistry<T>) new RegistryBuilder<>(key).create();
         REGISTRIES.add(registry);
@@ -91,6 +93,7 @@ public final class PlatformRegistries {
                 new PoiType(states, ticketCount, searchDistance));
     }
 
+    // attributes aren't bound yet in the ctor
     public static void attributes(EntityType<? extends LivingEntity> type,
             Supplier<AttributeSupplier.Builder> builder) {
         ATTRIBUTES.add(new AttributeEntry(type, builder));

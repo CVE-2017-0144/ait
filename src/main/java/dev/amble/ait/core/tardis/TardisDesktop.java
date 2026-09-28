@@ -115,7 +115,7 @@ public class TardisDesktop extends TardisComponent {
             return;
         }
 
-        if (!this.changingDesktop || !this.isServer())
+        if (!this.changingDesktop || !this.isServer() || this.tardis.interiorChangingHandler().queued().get())
             return;
 
         Scheduler.get().runTaskLater(() -> this.changeInterior(this.schema, true, false).execute(),

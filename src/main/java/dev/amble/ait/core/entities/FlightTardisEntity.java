@@ -256,7 +256,7 @@ public class FlightTardisEntity extends LinkableLivingEntity implements PlayerRi
 
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-        return new Vec3(0, 0.5, 0);
+        return new Vec3(0, 0.75, 0);
     }
 
     public float getRotation(float tickDelta) {

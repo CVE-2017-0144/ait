@@ -12,7 +12,7 @@ public class CallbackCheckboxWidget extends Checkbox {
     private final PressAction onPress;
 
     public CallbackCheckboxWidget(int x, int y, int width, int height, Component message, boolean checked, PressAction onPress) {
-        super(x, y, width, message, Minecraft.getInstance().font, checked, (checkbox, value) -> {});
+        super(x, y, Integer.MAX_VALUE, message, Minecraft.getInstance().font, checked, (checkbox, value) -> {});
         this.onPress = onPress;
     }
 

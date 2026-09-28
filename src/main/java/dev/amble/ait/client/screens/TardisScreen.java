@@ -3,12 +3,14 @@ package dev.amble.ait.client.screens;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.tardis.manager.ClientTardisManager;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public abstract class TardisScreen extends Screen {
+    // skip vanilla blur + dim
     @Override
-    protected void renderBlurredBackground(float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
 

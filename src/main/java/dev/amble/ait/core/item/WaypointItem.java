@@ -21,6 +21,6 @@ public class WaypointItem extends AbstractCoordinateModifierItem {
     }
 
     public static void setColor(ItemStack stack, int color) {
-        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true));
+        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color & 0xFFFFFF, true));
     }
 }

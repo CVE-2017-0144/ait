@@ -19,15 +19,19 @@ import dev.amble.ait.data.properties.bool.BoolValue;
 import dev.amble.ait.data.properties.dbl.DoubleProperty;
 import dev.amble.ait.data.properties.dbl.DoubleValue;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,7 +68,7 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
             }
 
             // if holding an axe then break open the door RAHHH
-            if (stack.getItem() instanceof AxeItem axeItem && axeItem.getTier().getAttackDamageBonus() >= 8 && stack.getItem() != Items.STONE_AXE) {
+            if (stack.getItem() instanceof AxeItem axeItem && attackDamage(axeItem) >= 8 && stack.getItem() != Items.STONE_AXE) {
                 if (tardis.siege().isActive())
                     return DoorHandler.InteractionResult.CANCEL;
 
@@ -88,6 +92,14 @@ public class FuelHandler extends KeyedTardisComponent implements ArtronHolder, T
 
             return DoorHandler.InteractionResult.KNOCK;
         });
+    }
+
+    private static double attackDamage(AxeItem axe) {
+        double n = 0;
+        for (ItemAttributeModifiers.Entry e : axe.components().getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers())
+            if (e.matches(Attributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_ID))
+                n += e.modifier().amount();
+        return n;
     }
 
     public FuelHandler() {

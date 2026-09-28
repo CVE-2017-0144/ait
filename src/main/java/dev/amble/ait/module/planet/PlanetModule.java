@@ -18,7 +18,6 @@ import dev.amble.ait.module.planet.core.PlanetBlocks;
 import dev.amble.ait.module.planet.core.PlanetItems;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 import dev.amble.ait.module.planet.core.util.PlanetCustomTrades;
-import dev.amble.ait.module.planet.core.world.gen.PlanetWorldGeneration;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.container.impl.ItemContainer;
@@ -66,8 +65,6 @@ public class PlanetModule extends Module {
         RegistryContainer.register(PlanetItems.class, AITMod.MOD_ID);
         RegistryContainer.register(PlanetBlocks.class, AITMod.MOD_ID);
         RegistryContainer.register(PlanetBlockEntities.class, AITMod.MOD_ID);
-
-        PlanetWorldGeneration.generatePlanetWorldGen();
     }
 
     @Override
@@ -850,6 +847,22 @@ public class PlanetModule extends Module {
             @Override
             public void itemTags(AITItemTagProvider provider) {
                 provider.tag(ItemTags.TRIMMABLE_ARMOR).add(PlanetItems.SPACESUIT_BOOTS).add(PlanetItems.SPACESUIT_LEGGINGS).add(PlanetItems.SPACESUIT_CHESTPLATE).add(PlanetItems.SPACESUIT_HELMET);
+
+                provider.tag(ItemTags.ARMOR_ENCHANTABLE).add(PlanetItems.SPACESUIT_BOOTS, PlanetItems.SPACESUIT_LEGGINGS, PlanetItems.SPACESUIT_CHESTPLATE, PlanetItems.SPACESUIT_HELMET);
+                provider.tag(ItemTags.EQUIPPABLE_ENCHANTABLE).add(PlanetItems.SPACESUIT_BOOTS, PlanetItems.SPACESUIT_LEGGINGS, PlanetItems.SPACESUIT_CHESTPLATE, PlanetItems.SPACESUIT_HELMET);
+                provider.tag(ItemTags.HEAD_ARMOR_ENCHANTABLE).add(PlanetItems.SPACESUIT_HELMET);
+                provider.tag(ItemTags.CHEST_ARMOR_ENCHANTABLE).add(PlanetItems.SPACESUIT_CHESTPLATE);
+                provider.tag(ItemTags.LEG_ARMOR_ENCHANTABLE).add(PlanetItems.SPACESUIT_LEGGINGS);
+                provider.tag(ItemTags.FOOT_ARMOR_ENCHANTABLE).add(PlanetItems.SPACESUIT_BOOTS);
+                provider.tag(ItemTags.SWORD_ENCHANTABLE).add(PlanetItems.MARTIAN_STONE_SWORD);
+                provider.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(PlanetItems.MARTIAN_STONE_SWORD, PlanetItems.MARTIAN_STONE_AXE, PlanetItems.ANORTHOSITE_AXE);
+                provider.tag(ItemTags.MINING_ENCHANTABLE).add(PlanetItems.MARTIAN_STONE_SHOVEL, PlanetItems.MARTIAN_STONE_PICKAXE, PlanetItems.MARTIAN_STONE_AXE, PlanetItems.MARTIAN_STONE_HOE,
+                        PlanetItems.ANORTHOSITE_SHOVEL, PlanetItems.ANORTHOSITE_PICKAXE, PlanetItems.ANORTHOSITE_AXE, PlanetItems.ANORTHOSITE_HOE);
+                provider.tag(ItemTags.MINING_LOOT_ENCHANTABLE).add(PlanetItems.MARTIAN_STONE_SHOVEL, PlanetItems.MARTIAN_STONE_PICKAXE, PlanetItems.MARTIAN_STONE_AXE, PlanetItems.MARTIAN_STONE_HOE,
+                        PlanetItems.ANORTHOSITE_SHOVEL, PlanetItems.ANORTHOSITE_PICKAXE, PlanetItems.ANORTHOSITE_AXE, PlanetItems.ANORTHOSITE_HOE);
+                provider.tag(ItemTags.DURABILITY_ENCHANTABLE).add(PlanetItems.SPACESUIT_BOOTS, PlanetItems.SPACESUIT_LEGGINGS, PlanetItems.SPACESUIT_CHESTPLATE, PlanetItems.SPACESUIT_HELMET,
+                        PlanetItems.MARTIAN_STONE_SWORD, PlanetItems.MARTIAN_STONE_SHOVEL, PlanetItems.MARTIAN_STONE_PICKAXE, PlanetItems.MARTIAN_STONE_AXE, PlanetItems.MARTIAN_STONE_HOE,
+                        PlanetItems.ANORTHOSITE_SWORD, PlanetItems.ANORTHOSITE_SHOVEL, PlanetItems.ANORTHOSITE_PICKAXE, PlanetItems.ANORTHOSITE_AXE, PlanetItems.ANORTHOSITE_HOE);
             }
 
 
@@ -1008,6 +1021,7 @@ public class PlanetModule extends Module {
                         .save(consumer, AITMod.MOD_ID + "/enter_moon");
 
                 // todo - idk how to do this
+                // Advancement findStructure = Advancement.Builder.create().parent(root).display(Blocks.REDSTONE_BLOCK, Text.translatable("advancements.ait.find_planet_structure.title"), Text.translatable("advancements.ait.find_planet_structure.description"), null, AdvancementFrame.CHALLENGE, true, true, true).criterion("planet_structure", TickCriterion.Conditions.createLocation(LocationPredicate.feature(RegistryKey.of(RegistryKeys.STRUCTURE, AITMod.id("cult_structures_overworld"))))).build(consumer, AITMod.MOD_ID + "/find_planet_structure");
             }
         });
     }

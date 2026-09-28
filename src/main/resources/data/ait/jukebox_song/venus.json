@@ -1,7 +1,7 @@
 {
   "sound_event": "ait:music/venus_nitrogenez",
   "description": {
-    "translate": "jukebox_song.ait.venus"
+    "translate": "item.ait.venus_music_disc.desc"
   },
   "length_in_seconds": 342.0,
   "comparator_output": 1

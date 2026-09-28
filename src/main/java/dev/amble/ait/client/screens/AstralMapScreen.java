@@ -28,7 +28,7 @@ import org.lwjgl.glfw.GLFW;
 @OnlyIn(Dist.CLIENT)
 public class AstralMapScreen extends Screen {
     @Override
-    protected void renderBlurredBackground(float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
 
@@ -171,7 +171,7 @@ public class AstralMapScreen extends Screen {
         private boolean shouldHover;
 
         public AstralMapListWidget(int width, int height, int top, int bottom, int elementHeight) {
-            super(AstralMapScreen.this.minecraft, width, height, top, elementHeight);
+            super(AstralMapScreen.this.minecraft, width, bottom - top, top, elementHeight);
 
             this.refreshEntries();
             this.replaceEntries(this.entries);
@@ -241,6 +241,14 @@ public class AstralMapScreen extends Screen {
         }
 
         @Override
+        protected void renderListBackground(GuiGraphics context) {
+        }
+
+        @Override
+        protected void renderListSeparators(GuiGraphics context) {
+        }
+
+        @Override
         public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
             // Adjust for scrollbar width
             this.setX(this.getMaxScroll() > 0 ? -5 : 0);
@@ -249,7 +257,7 @@ public class AstralMapScreen extends Screen {
                 this.lastMouseX = mouseX;
                 this.lastMouseY = mouseY;
             }
-            super.render(context, mouseX, mouseY, delta);
+            super.renderWidget(context, mouseX, mouseY, delta);
             // Avoid the mouse switching focus when searching if it isn't moving
             this.shouldHover = (mouseX != this.lastMouseX || mouseY != this.lastMouseY);
             this.lastMouseX = mouseX;

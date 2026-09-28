@@ -1,11 +1,7 @@
 package dev.amble.lib.platform.loot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
@@ -13,9 +9,7 @@ import net.neoforged.neoforge.event.LootTableLoadEvent;
 import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
-public final class LootEvents {
-
-    private LootEvents() {}
+public class LootEvents {
 
     public interface Modify {
         void modify(ResourceKey<LootTable> id, LootTable.Builder table, boolean builtin,
@@ -31,21 +25,16 @@ public final class LootEvents {
 
     static {
         NeoForge.EVENT_BUS.addListener(LootTableLoadEvent.class, event -> {
-            LootTable.Builder collector = LootTable.lootTable();
-
-            MODIFY.invoker().modify(event.getKey(), collector, true, event.getRegistries());
-
-            List<LootPool> added = collector.build().pools;
-
-            if (added.isEmpty())
+            // a table another listener removed is the shared EMPTY instance
+            if (event.getTable() == LootTable.EMPTY)
                 return;
 
-            LootTable original = event.getTable();
-            List<LootPool> pools = new ArrayList<>(original.pools);
-            pools.addAll(added);
+            LootTable.Builder collector = LootTable.lootTable();
 
-            event.setTable(new LootTable(original.paramSet, original.randomSequence, pools,
-                    original.functions));
+            // neoforge has no table source, every loaded table counts as builtin
+            MODIFY.invoker().modify(event.getKey(), collector, true, event.getRegistries());
+
+            collector.build().pools.forEach(event.getTable()::addPool);
         });
     }
 }

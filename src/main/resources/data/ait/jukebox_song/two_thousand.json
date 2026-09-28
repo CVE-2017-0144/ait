@@ -1,7 +1,7 @@
 {
   "sound_event": "ait:music/two_thousand",
   "description": {
-    "translate": "jukebox_song.ait.two_thousand"
+    "translate": "item.ait.two_thousand_music_disc.desc"
   },
   "length_in_seconds": 169.0,
   "comparator_output": 1

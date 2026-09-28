@@ -1,6 +1,5 @@
 package dev.amble.ait.datagen.datagen_providers;
 
-
 import java.util.concurrent.CompletableFuture;
 
 import dev.amble.ait.core.AITBlocks;
@@ -38,6 +37,16 @@ public class AITItemTagProvider extends IntrinsicHolderTagsProvider<Item> {
                 .add(AITItems.VENUS_MUSIC_DISC)
                 .add(AITItems.CRASH_MUSIC_DISC)
                 .add(AITItems.STAGE_4_MUSIC_DISC);
+
+        tag(ItemTags.DYEABLE).add(AITItems.WAYPOINT_CARTRIDGE);
+
+        tag(ItemTags.SWORD_ENCHANTABLE).add(AITItems.HAMMER);
+        tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(AITItems.HAMMER);
+        tag(ItemTags.ARMOR_ENCHANTABLE).add(AITItems.RESPIRATOR, AITItems.FACELESS_RESPIRATOR);
+        tag(ItemTags.HEAD_ARMOR_ENCHANTABLE).add(AITItems.RESPIRATOR, AITItems.FACELESS_RESPIRATOR);
+        tag(ItemTags.EQUIPPABLE_ENCHANTABLE).add(AITItems.RESPIRATOR, AITItems.FACELESS_RESPIRATOR);
+        tag(ItemTags.DURABILITY_ENCHANTABLE).add(AITItems.REMOTE_ITEM, AITItems.REPAIR_TOOL, AITItems.HAMMER, AITItems.RESPIRATOR,
+                AITItems.FACELESS_RESPIRATOR, AITItems.HYPERCUBE, AITItems.HAZANDRA);
 
         tag(AITTags.Items.CLUSTER_MAX_HARVESTABLES).add(AITItems.ZEITON_SHARD);
 

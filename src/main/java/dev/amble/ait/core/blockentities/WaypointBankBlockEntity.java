@@ -197,7 +197,7 @@ public class WaypointBankBlockEntity extends InteriorLinkableBlockEntity {
             if (!ItemNbt.get(stack).contains(WaypointItem.POS_KEY))
                 return null;
 
-            int color = WaypointItem.getColor(stack);
+            int color = WaypointItem.getColor(stack) & 0xFFFFFF;
             Waypoint waypoint = Waypoint.fromStack(stack);
 
             return new WaypointData(color, waypoint);

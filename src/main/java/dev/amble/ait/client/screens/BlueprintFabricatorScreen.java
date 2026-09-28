@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class BlueprintFabricatorScreen extends Screen {
     @Override
-    protected void renderBlurredBackground(float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
 

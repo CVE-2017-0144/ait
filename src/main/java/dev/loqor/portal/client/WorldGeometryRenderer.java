@@ -20,6 +20,7 @@ import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.world.TardisServerWorld;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
@@ -405,6 +406,7 @@ public class WorldGeometryRenderer {
         LevelLightEngine lightingProvider = world.getLightEngine();
         BlockPos.MutableBlockPos lightPos = new BlockPos.MutableBlockPos();
         List<SectionPos> ready = new ArrayList<>(batch.size());
+        List<Long2ObjectFunction<ModelData>> modelData = new ArrayList<>(batch.size());
         long lightDeadline = System.nanoTime() + LIGHT_BUDGET_NANOS;
         int scanned = 0;
         for (; scanned < batch.size(); scanned++) {
@@ -420,6 +422,8 @@ public class WorldGeometryRenderer {
                     for (int z = startZ; z <= startZ + 15; z++)
                         lightingProvider.checkBlock(lightPos.set(x, y, z));
             ready.add(sectionPos);
+            modelData.add(world.getModelDataManager().snapshotSectionRegion(sectionPos.x(), sectionPos.y(), sectionPos.z(),
+                    sectionPos.x(), sectionPos.y(), sectionPos.z()));
 
             if (System.nanoTime() >= lightDeadline)
                 break;
@@ -450,7 +454,7 @@ public class WorldGeometryRenderer {
                 }
 
                 try {
-                    results.add(buildSection(world, sectionPos, builderSet(slot), blockRenderManager, random, checkBehindPortal));
+                    results.add(buildSection(world, sectionPos, modelData.get(slot), builderSet(slot), blockRenderManager, random, checkBehindPortal));
                 } catch (Throwable t) {
                     resetBuilderSet(slot);
 
@@ -1060,7 +1064,7 @@ public class WorldGeometryRenderer {
                 && blockPos.getZ() <= centerPos.getZ() + renderDistance;
     }
 
-    private SectionResult buildSection(Level world, SectionPos sectionPos, Map<RenderType, ByteBufferBuilder> buffers,
+    private SectionResult buildSection(Level world, SectionPos sectionPos, Long2ObjectFunction<ModelData> modelData, Map<RenderType, ByteBufferBuilder> buffers,
                                        BlockRenderDispatcher blockRenderManager, RandomSource random, boolean checkBehindPortal) {
 
         int startX = sectionPos.minBlockX();
@@ -1130,9 +1134,10 @@ public class WorldGeometryRenderer {
 
                     if (state.getRenderShape() != RenderShape.INVISIBLE) {
                         BakedModel model = blockRenderManager.getBlockModel(state);
+                        ModelData data = model.getModelData(world, mutablePos, state, modelData.get(mutablePos.asLong()));
                         random.setSeed(state.getSeed(mutablePos));
 
-                        for (RenderType blockLayer : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+                        for (RenderType blockLayer : model.getRenderTypes(state, random, data)) {
                             BufferBuilder builder = builders.get(blockLayer);
                             usedLayers.add(blockLayer);
 
@@ -1143,7 +1148,7 @@ public class WorldGeometryRenderer {
                             matrices.translate(relX, relY, relZ);
 
                             blockRenderManager.renderBatched(state, mutablePos, world, matrices, builder, true, random,
-                                    ModelData.EMPTY, blockLayer);
+                                    data, blockLayer);
 
                             matrices.popPose();
                         }

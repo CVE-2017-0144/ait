@@ -42,6 +42,14 @@ public class WorldListWidget extends AbstractSelectionList<WorldListWidget.World
     }
 
     @Override
+    protected void renderListBackground(GuiGraphics context) {
+    }
+
+    @Override
+    protected void renderListSeparators(GuiGraphics context) {
+    }
+
+    @Override
     public void updateWidgetNarration(NarrationElementOutput builder) {
         WorldEntry selected = this.getSelected();
         if (selected != null) {

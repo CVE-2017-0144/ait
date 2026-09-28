@@ -8,6 +8,7 @@ import dev.amble.lib.datagen.util.AutomaticModel;
 import dev.amble.lib.datagen.util.NoBlockDrop;
 import dev.amble.lib.datagen.util.PickaxeMineable;
 import dev.amble.lib.item.AItemSettings;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
@@ -64,8 +65,13 @@ public class PlanetBlocks extends BlockContainer {
     public static final Block MARTIAN_STONE_BUTTON = new ButtonBlock(BlockSetType.STONE, 10,
             BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BUTTON));
 
+    public static final BlockSetType MARTIAN_STONE_SET = BlockSetType.register(new BlockSetType("ait:martian_stone", true, true, false,
+            BlockSetType.PressurePlateSensitivity.EVERYTHING, SoundType.STONE, SoundEvents.IRON_DOOR_CLOSE, SoundEvents.IRON_DOOR_OPEN,
+            SoundEvents.IRON_TRAPDOOR_CLOSE, SoundEvents.IRON_TRAPDOOR_OPEN, SoundEvents.STONE_PRESSURE_PLATE_CLICK_OFF,
+            SoundEvents.STONE_PRESSURE_PLATE_CLICK_ON, SoundEvents.STONE_BUTTON_CLICK_OFF, SoundEvents.STONE_BUTTON_CLICK_ON));
+
     @PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-    public static final Block MARTIAN_STONE_PRESSURE_PLATE  = new PressurePlateBlock(BlockSetType.STONE,
+    public static final Block MARTIAN_STONE_PRESSURE_PLATE  = new PressurePlateBlock(MARTIAN_STONE_SET,
             BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_PRESSURE_PLATE));
 
         // Ores
@@ -175,7 +181,7 @@ public class PlanetBlocks extends BlockContainer {
 
         // Sand
 
-    public static final Block MARTIAN_SAND = new ColoredFallingBlock(new ColorRGBA(0xC2A184),
+    public static final Block MARTIAN_SAND = new ColoredFallingBlock(new ColorRGBA(0xFF000000),
             BlockBehaviour.Properties.ofFullCopy(Blocks.SAND));
 
         // Martian Sandstone
@@ -365,7 +371,7 @@ public class PlanetBlocks extends BlockContainer {
 
         // Sand (Regolith)
 
-    public static final Block REGOLITH = new ColoredFallingBlock(new ColorRGBA(0xC2A184),
+    public static final Block REGOLITH = new ColoredFallingBlock(new ColorRGBA(0xFF000000),
             BlockBehaviour.Properties.ofFullCopy(Blocks.SAND));
 
         // Sandstone

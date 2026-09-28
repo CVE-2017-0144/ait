@@ -20,7 +20,7 @@ import net.minecraft.world.level.ChunkPos;
 
 public class LandingPadScreen extends Screen {
     @Override
-    protected void renderBlurredBackground(float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,

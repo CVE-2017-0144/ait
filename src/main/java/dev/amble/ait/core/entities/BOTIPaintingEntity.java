@@ -63,7 +63,7 @@ public abstract class BOTIPaintingEntity extends HangingEntity implements ISpace
     protected AABB calculateBoundingBox(BlockPos pos, Direction direction) {
         double half = 0.46875;
         double x = pos.getX() + 0.5 - direction.getStepX() * half;
-        double y = pos.getY() + 0.5;
+        double y = pos.getY() + 1.0;
         double z = pos.getZ() + 0.5 - direction.getStepZ() * half;
 
         double w = (direction.getAxis() == Direction.Axis.Z ? WIDTH : 1.0) / 32.0;

@@ -52,8 +52,23 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
             this.sendTardisAll(player, tardisSet);
         }));
 
-        NeoForge.EVENT_BUS.addListener(ChunkWatchEvent.Sent.class,
-                event -> TardisEvents.SYNC_TARDIS.invoker().sync(event.getPlayer(), event.getPos()));
+        // ip's sendChunk copy too, level can be another world
+        NeoForge.EVENT_BUS.addListener(ChunkWatchEvent.Sent.class, event -> {
+            ServerPlayer player = event.getPlayer();
+
+            if (event.getLevel() == player.level()) {
+                TardisEvents.SYNC_TARDIS.invoker().sync(player, event.getPos());
+                return;
+            }
+
+            if (this.fileManager.isLocked() || !(event.getLevel() instanceof WorldWithTardis world) || !world.ait$hasLookup())
+                return;
+
+            Set<ServerTardis> tardisSet = world.ait$lookup().get(event.getPos());
+
+            if (tardisSet != null)
+                this.sendTardisAll(player, tardisSet);
+        });
 
         ServerConnectionEvents.JOIN.register((player, server)
                 -> this.sendTardisAll(player, NetworkUtil.findLinkedItems(player)));

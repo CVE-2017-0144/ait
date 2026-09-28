@@ -9,23 +9,26 @@ public class BOTIInit {
     public RenderTarget afbo;
 
     public void setupFramebuffer() {
+
+
         Window window = Minecraft.getInstance().getWindow();
 
         if (afbo == null || afbo.width != window.getWidth() || afbo.height != window.getHeight()) {
-            afbo = new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX);;
+            if (afbo != null)
+                afbo.destroyBuffers();
+
+            afbo = new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX);
         }
 
         afbo.bindWrite(false);
         afbo.checkStatus();
 
-        if (!AITRenderHelper.getIsStencilEnabled(afbo)) {
-            AITRenderHelper.setIsStencilEnabled(afbo, true);
-        }
+        if (!afbo.isStencilEnabled())
+            afbo.enableStencil();
     }
 
     public void endFBO() {
         afbo.clear(Minecraft.ON_OSX);
         afbo.unbindWrite();
     }
-
 }

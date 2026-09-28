@@ -291,6 +291,11 @@ public class AITModClient implements ClientModEntrypoint {
         ClientEvents.JOIN.register((client) -> BOTI.tryWarn(client));
         ClientEvents.DISCONNECT.register((client) -> BOTICache.clear());
 
+        ClientEvents.END_CLIENT_TICK.register(client -> {
+            if (client.level != null && client.level.getGameTime() % 200 == 0)
+                BOTICache.prune();
+        });
+
         AitGravity.clientInit();
         BOTIDataS2CPacket.init();
         BOTISyncS2CPacket.init();

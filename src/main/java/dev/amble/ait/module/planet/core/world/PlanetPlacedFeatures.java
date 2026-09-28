@@ -37,7 +37,7 @@ public class PlanetPlacedFeatures {
         register(context, MARTIAN_COAL_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.MARTIAN_COAL_ORE),
                 PlanetOrePlacement.modifiersWithCount(12,
                         HeightRangePlacement.uniform(VerticalAnchor.absolute(-80), VerticalAnchor.absolute(80))));
-        register(context, MARTIAN_COPPER_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.MARTIAN_COAL_ORE),
+        register(context, MARTIAN_COPPER_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.MARTIAN_COPPER_ORE),
                 PlanetOrePlacement.modifiersWithCount(12,
                         HeightRangePlacement.uniform(VerticalAnchor.absolute(-80), VerticalAnchor.absolute(80))));
         register(context, MARTIAN_IRON_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.MARTIAN_IRON_ORE),
@@ -64,7 +64,7 @@ public class PlanetPlacedFeatures {
         register(context, ANORTHOSITE_COAL_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.ANORTHOSITE_COAL_ORE),
                 PlanetOrePlacement.modifiersWithCount(12,
                         HeightRangePlacement.uniform(VerticalAnchor.absolute(-80), VerticalAnchor.absolute(80))));
-        register(context, ANORTHOSITE_COPPER_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.ANORTHOSITE_COAL_ORE),
+        register(context, ANORTHOSITE_COPPER_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.ANORTHOSITE_COPPER_ORE),
                 PlanetOrePlacement.modifiersWithCount(12,
                         HeightRangePlacement.uniform(VerticalAnchor.absolute(-80), VerticalAnchor.absolute(80))));
         register(context, ANORTHOSITE_IRON_ORE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(PlanetConfiguredFeatures.ANORTHOSITE_IRON_ORE),

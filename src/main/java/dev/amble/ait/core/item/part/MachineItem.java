@@ -27,6 +27,9 @@ public class MachineItem extends Item {
 
     @Override
     public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction clickType, Player player) {
+        if (!player.level().isClientSide())
+            return false;
+
         if (clickType != ClickAction.SECONDARY)
             return false;
 
@@ -52,7 +55,6 @@ public class MachineItem extends Item {
         machine.shrink(1);
     }
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void disassemble(ServerPlayer player, ItemStack machine, MachineRecipeSchema recipe) {
         machine.shrink(1);
 

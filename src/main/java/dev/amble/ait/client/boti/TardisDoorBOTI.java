@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
+import dev.amble.ait.AITMod;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.AnimatedModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
@@ -13,6 +14,7 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
+import dev.amble.ait.core.blocks.DoorBlock;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
@@ -35,6 +37,10 @@ public class TardisDoorBOTI extends BOTI {
 
         if (client.level == null
                 || client.player == null) return;
+
+        if (!BOTI.cameraInFrontOf(door.getBlockPos(),
+                door.getBlockState().getValue(DoorBlock.FACING).toYRot()))
+            return;
 
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));
@@ -78,14 +84,21 @@ public class TardisDoorBOTI extends BOTI {
         }
 
         if (tardis.travel().getState() == TravelHandlerBase.State.LANDED) {
-            RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
-                    RenderType.debugFilledBox() : RenderType.endGateway();
-            float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-            mask.render(stack, botiProvider.getBuffer(whichOne), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2]));
+            int far = BOTICache.skyColor(door.getBlockPos());
+            int fill = AITModClient.CONFIG.greenScreenBOTI
+                    ? FastColor.ARGB32.colorFromFloat(1, 0, 1, 0)
+                    : far != -1
+                            ? 0xFF000000 | far
+                            : FastColor.ARGB32.colorFromFloat(1, (float) skyColor.x,
+                                    (float) skyColor.y, (float) skyColor.z);
+
+            mask.render(stack, botiProvider.getBuffer(RenderType.entityCutoutNoCull(AITMod.id("textures/boti/blank.png"))),
+                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, fill);
         } else {
             mask.render(stack, botiProvider.getBuffer(RenderType.entityTranslucentCull(frameTex)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         }
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
         copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
@@ -94,6 +107,11 @@ public class TardisDoorBOTI extends BOTI {
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
+
+        if (tardis.travel().getState() == TravelHandlerBase.State.LANDED) {
+            float facing = door.getBlockState().getValue(DoorBlock.FACING).toYRot();
+            BOTICache.render(tardis.getUuid(), door.getBlockPos(), facing + 180f, facing, true, stack);
+        }
 
         stack.pushPose();
         float delta = client.getTimer().getGameTimeDeltaPartialTick(true) + client.player.tickCount;
@@ -116,6 +134,7 @@ public class TardisDoorBOTI extends BOTI {
             stack.pop();*/
         }
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
 
         if (!tardis.getExterior().getCategory().equals(CategoryRegistry.GEOMETRIC)) {
@@ -126,6 +145,7 @@ public class TardisDoorBOTI extends BOTI {
             // TODO: use DoorRenderer/ClientLightUtil instead.
             frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, tickDelta);
             botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
             stack.popPose();
 
             stack.pushPose();
@@ -153,6 +173,7 @@ public class TardisDoorBOTI extends BOTI {
 
                 frame.renderWithAnimations(tardis, door, frame.root(), stack, botiProvider.getBuffer((DependencyChecker.hasIris() ? AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true) : AITRenderLayers.text(variant.emission()))), 0xf000f0, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F, tickDelta);
                 botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
             }
             stack.popPose();
         }

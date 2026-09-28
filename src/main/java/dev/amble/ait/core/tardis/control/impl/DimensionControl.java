@@ -1,7 +1,6 @@
 package dev.amble.ait.core.tardis.control.impl;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -17,7 +16,6 @@ import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.control.Control;
 import dev.amble.ait.core.tardis.control.impl.pos.PosType;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandler;
-import dev.amble.ait.core.tardis.util.AsyncLocatorUtil;
 import dev.amble.ait.core.util.WorldUtil;
 import dev.amble.lib.data.CachedDirectedGlobalPos;
 
@@ -43,26 +41,18 @@ public class DimensionControl extends Control {
             return Result.FAILURE;
         }
 
-        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-            int index = Math.max(0, WorldUtil.travelWorldIndex(dest.getWorld()));
+        int index = Math.max(0, WorldUtil.travelWorldIndex(dest.getWorld()));
+        index = leftClick ? (dims.size() + index - 1) % dims.size() : (index + 1) % dims.size();
 
-            if (leftClick) {
-                index = (dims.size() + index - 1) % dims.size();
-            } else {
-                index = (index + 1) % dims.size();
-            }
+        ServerLevel destWorld = dims.get(index);
 
-            return dims.get(index);
-        }).thenAccept(destWorld -> {
-            travel.destination(cached -> {
-                CachedDirectedGlobalPos cachedPos = cached.world(destWorld);
-                BlockPos clampedPos = PosType.clamp(cachedPos.getPos(), 0, destWorld);
-                return cachedPos.pos(clampedPos);
-            });
-            messagePlayer(player, destWorld, LockedDimensionRegistry.getInstance().isUnlocked(tardis, destWorld));
+        travel.destination(cached -> {
+            CachedDirectedGlobalPos cachedPos = cached.world(destWorld);
+            BlockPos clampedPos = PosType.clamp(cachedPos.getPos(), 0, destWorld);
+            return cachedPos.pos(clampedPos);
         });
 
-        AsyncLocatorUtil.LOCATING_EXECUTOR_SERVICE.submit(() -> future);
+        messagePlayer(player, destWorld, LockedDimensionRegistry.getInstance().isUnlocked(tardis, destWorld));
         return Result.SUCCESS;
     }
 

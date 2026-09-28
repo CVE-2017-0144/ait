@@ -22,12 +22,12 @@ public abstract class BakedModelManagerMixin implements BakedModelEditor {
 
     @Override
     public BakedModel ait$getModel(ResourceLocation identifier) {
-        return this.getModel(ModelResourceLocation.inventory(identifier));
+        return this.getModel(ModelResourceLocation.standalone(identifier));
     }
 
     @Override
     public void ait$setModel(ResourceLocation identifier, BakedModel model) {
-        this.bakedRegistry.put(ModelResourceLocation.inventory(identifier), model);
+        this.bakedRegistry.put(ModelResourceLocation.standalone(identifier), model);
     }
 
     @Override

@@ -7,6 +7,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class BlueprintFabricatorScreen extends Screen {
+    @Override
+    protected void renderBlurredBackground(float delta) {
+    }
+
 
     private static final ResourceLocation TEXTURE = AITMod.id("textures/gui/blueprinting_deck.png");
     int backgroundHeight = 166;

@@ -58,6 +58,7 @@ import dev.amble.ait.core.likes.ItemOpinionRegistry;
 import dev.amble.ait.core.lock.LockedDimensionRegistry;
 import dev.amble.ait.core.loot.SetBlueprintLootFunction;
 import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.portal.PortalPairs;
 import dev.amble.ait.core.sounds.flight.FlightSoundRegistry;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.animation.v2.blockbench.BlockbenchParser;
@@ -211,6 +212,7 @@ public class AITMod implements ModEntrypoint {
 
         WorldUtil.init();
         TardisUtil.init();
+        PortalPairs.init();
         BOTIChunkRequestC2SPacket.init();
 
         ServerTardisManager.init();

@@ -7,6 +7,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public abstract class TardisScreen extends Screen {
+    @Override
+    protected void renderBlurredBackground(float delta) {
+    }
+
 
     private final TardisRef ref;
 

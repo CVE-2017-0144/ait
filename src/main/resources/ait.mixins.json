@@ -13,6 +13,7 @@
     "client.experimental_screen.LevelSummaryMixin",
     "client.rendering.EntityMixin",
     "gravity.EntityGravityMixin",
+    "gravity.LivingEntityGravityMixin",
     "lookup.EntityTrackingSectionAccessor",
     "lookup.SectionedEntityCacheAccessor",
     "lookup.SimpleEntityLookupAccessor",
@@ -51,8 +52,6 @@
     "client.rendering.PlayerEntityRendererMixin",
     "client.rendering.SkyboxMixin",
     "client.rendering.VertexBufferWrapper",
-    "client.rendering.framebuffer.MixinMainFramebufferTarget",
-    "client.rendering.framebuffer.MixinRenderFramebufferTarget",
     "client.sonic.SonicItemRendererMixin",
     "client.sonic.SonicModelLoaderWrapperMixin"
   ],

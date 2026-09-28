@@ -6,13 +6,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 
 public class MultiBlockStructureRenderer {
@@ -68,7 +72,14 @@ public class MultiBlockStructureRenderer {
     }
 
     private void renderCulledBlocks(BlockState state, BlockPos pos, BlockAndTintGetter view, PoseStack matrices, MultiBufferSource provider) {
-        client.getBlockRenderer().renderBatched(state, pos, view, matrices, provider.getBuffer(ItemBlockRenderTypes.getChunkRenderType(state)), true, client.level.random);
+        BakedModel model = client.getBlockRenderer().getBlockModel(state);
+        RandomSource random = client.level.random;
+        random.setSeed(state.getSeed(pos));
+
+        for (RenderType layer : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+            client.getBlockRenderer().renderBatched(state, pos, view, matrices, provider.getBuffer(layer), true,
+                    random, ModelData.EMPTY, layer);
+        }
     }
 
     private void renderBlockEntities(BlockEntity entity,  PoseStack matrices, MultiBufferSource provider) {
@@ -94,7 +105,16 @@ public class MultiBlockStructureRenderer {
     }
 
     private void renderBlock(BlockState state, BlockPos pos, BlockAndTintGetter view, PoseStack matrices, MultiBufferSource provider) {
-        client.getBlockRenderer().getModelRenderer().tesselateBlock(view, client.getBlockRenderer().getBlockModel(state), state, pos, matrices, provider.getBuffer(ItemBlockRenderTypes.getChunkRenderType(state)), false, client.level.random, state.getSeed(pos), OverlayTexture.NO_OVERLAY);
+        BakedModel model = client.getBlockRenderer().getBlockModel(state);
+        RandomSource random = client.level.random;
+        long seed = state.getSeed(pos);
+        random.setSeed(seed);
+
+        for (RenderType layer : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+            client.getBlockRenderer().getModelRenderer().tesselateBlock(view, model, state, pos, matrices,
+                    provider.getBuffer(layer), false, random, seed, OverlayTexture.NO_OVERLAY,
+                    ModelData.EMPTY, layer);
+        }
     }
 
     private Block getBlock(MultiBlockStructure.AllowedBlocks block) {

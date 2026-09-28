@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "ait:item/geiger_counter"
+        "layer0": "ait:blockentities/items/geiger_counter"
     },
     "display": {
         "thirdperson_righthand": {

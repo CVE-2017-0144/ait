@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "ait:item/backup_circuit",
-		"particle": "backup_circuit"
+		"particle": "ait:item/backup_circuit"
 	},
 	"elements": [
 		{

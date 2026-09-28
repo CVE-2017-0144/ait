@@ -49,6 +49,19 @@ neoForge {
             client()
         }
 
+        clientDebug {
+            client()
+
+            systemProperties.putAll([
+                    'mixin.debug'                   : 'true',
+                    'mixin.debug.export'            : 'true',
+                    'mixin.debug.countInjections'   : 'true',
+                    'mixin.checks'                  : 'true',
+                    'neoforge.logging.console.level': 'debug',
+                    'neoforge.logging.markers'      : 'REGISTRIES,LOADING,NETWORK',
+            ])
+        }
+
         server {
             server()
         }

@@ -53,13 +53,8 @@ public class MultiDimLoadFix {
 
         // handles situations where a tardis is inside a tardis
         if (TardisServerWorld.isTardisDimension(pos.getDimension())) {
-            ServerLevel targetWorld;
-            if (pos.getDimension().equals(key)) {
-                targetWorld = loadedWorld;
-            } else {
-                targetWorld = this.ait$loadTardisFromWorld(
-                    server, pos.getDimension());
-            }
+            ServerLevel targetWorld = pos.getDimension().equals(key)
+                    ? loadedWorld : server.getLevel(pos.getDimension());
 
             if (targetWorld != null) {
                 pos.init(server);

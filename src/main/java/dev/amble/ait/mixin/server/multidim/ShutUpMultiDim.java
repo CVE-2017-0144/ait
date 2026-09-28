@@ -1,6 +1,7 @@
 package dev.amble.ait.mixin.server.multidim;
 
 import dev.drtheo.multidim.MultiDim;
+import dev.drtheo.multidim.api.MultiDimServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -17,6 +18,7 @@ public class ShutUpMultiDim {
 
     @Redirect(method = "addOrLoad(Ldev/drtheo/multidim/api/WorldBlueprint;Lnet/minecraft/resources/ResourceKey;Z)Ldev/drtheo/multidim/api/MultiDimServerWorld;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"))
     public ServerLevel shutUp(MinecraftServer instance, ResourceKey<Level> key) {
-        return null;
+        // plain null rebuilds loaded worlds, bare getLevel recurses via MultiDimLoadFix
+        return ((MultiDimServer) instance).multidim$hasWorld(key) ? instance.getLevel(key) : null;
     }
 }

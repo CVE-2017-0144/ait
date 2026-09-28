@@ -7,6 +7,9 @@ import java.util.Set;
 import dev.drtheo.queue.api.ActionQueue;
 import dev.drtheo.queue.api.util.block.ChunkEraser;
 import dev.drtheo.queue.api.util.structure.QueuedStructureTemplate;
+import dev.drtheo.scheduler.api.TimeUnit;
+import dev.drtheo.scheduler.api.common.Scheduler;
+import dev.drtheo.scheduler.api.common.TaskStage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
@@ -90,11 +93,17 @@ public class TardisDesktop extends TardisComponent {
 
     @Override
     public void postInit(InitContext ctx) {
-        if (!ctx.created())
+        if (ctx.created()) {
+            // must be done in postInit, because it accesses door and alarm handlers
+            this.changeInterior(schema, false, false).execute();
+            return;
+        }
+
+        if (!this.changingDesktop || !this.isServer())
             return;
 
-        // must be done in postInit, because it accesses door and alarm handlers
-        this.changeInterior(schema, false, false).execute();
+        Scheduler.get().runTaskLater(() -> this.changeInterior(this.schema, true, false).execute(),
+                TaskStage.END_SERVER_TICK, TimeUnit.TICKS, 1);
     }
 
     public TardisDesktopSchema getSchema() {

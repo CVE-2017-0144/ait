@@ -17,7 +17,7 @@ public class ItemStackSerializer implements JsonSerializer<ItemStack>, JsonDeser
 
     @Override
     public JsonElement serialize(ItemStack src, Type typeOfSrc, JsonSerializationContext context) {
-        return context.serialize(src.save(registries()));
+        return context.serialize(src.saveOptional(registries()));
     }
 
     private static HolderLookup.Provider registries() {

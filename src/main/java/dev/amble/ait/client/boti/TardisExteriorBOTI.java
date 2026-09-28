@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
+import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
@@ -41,6 +42,10 @@ public class TardisExteriorBOTI extends BOTI {
             return;
 
         ClientTardis tardis = exterior.tardis().get().asClient();
+
+        if (!BOTI.cameraInFrontOf(exterior.getBlockPos(), RotationSegment
+                .convertToDegrees(exterior.getBlockState().getValue(ExteriorBlock.ROTATION)) + 180f))
+            return;
 
         stack.pushPose();
 
@@ -89,11 +94,18 @@ public class TardisExteriorBOTI extends BOTI {
             stack.popPose();
         }
 
-        RenderType whichOne = AITModClient.CONFIG.greenScreenBOTI ?
-                RenderType.debugFilledBox() : RenderType.endGateway();
-        float[] colorsForGreenScreen = AITModClient.CONFIG.greenScreenBOTI ? new float[]{0, 1, 0, 1} : new float[] {(float) skyColor.x, (float) skyColor.y, (float) skyColor.z};
-        mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2]));
+        int far = BOTICache.skyColor(exterior.getBlockPos());
+        int fill = AITModClient.CONFIG.greenScreenBOTI
+                ? FastColor.ARGB32.colorFromFloat(1, 0, 1, 0)
+                : far != -1
+                        ? 0xFF000000 | far
+                        : FastColor.ARGB32.colorFromFloat(1, (float) skyColor.x, (float) skyColor.y,
+                                (float) skyColor.z);
+
+        mask.render(stack, botiProvider.getBuffer(RenderType.entityCutoutNoCull(AITMod.id("textures/boti/blank.png"))),
+                light, OverlayTexture.NO_OVERLAY, fill);
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
 
         copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
@@ -104,10 +116,12 @@ public class TardisExteriorBOTI extends BOTI {
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
+        float exteriorDegrees = RotationSegment
+                .convertToDegrees(exterior.getBlockState().getValue(ExteriorBlock.ROTATION));
+
         if (tardis.door().isOpen())
-            BOTICache.render(tardis.getUuid(), exterior.getBlockPos(),
-                    RotationSegment.convertToDegrees(exterior.getBlockState().getValue(ExteriorBlock.ROTATION)),
-                    stack);
+            BOTICache.render(tardis.getUuid(), exterior.getBlockPos(), exteriorDegrees, exteriorDegrees,
+                    false, stack);
 
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));
@@ -119,6 +133,7 @@ public class TardisExteriorBOTI extends BOTI {
 
         frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(variant.texture())), light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, true);
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
 
         stack.pushPose();
@@ -138,6 +153,7 @@ public class TardisExteriorBOTI extends BOTI {
                         light, OverlayTexture.NO_OVERLAY, 1, 1F, 1.0F, 1.0F, true);
         }
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
 
         stack.pushPose();
@@ -176,6 +192,7 @@ public class TardisExteriorBOTI extends BOTI {
             frame.renderDoors(tardis, exterior, frame.root(), stack, botiProvider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(variant.emission(), true)), LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY, red, green, blue, 1, true);
             botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         }
         stack.popPose();
 

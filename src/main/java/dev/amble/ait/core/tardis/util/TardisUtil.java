@@ -32,6 +32,7 @@ import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -45,6 +46,7 @@ import dev.amble.ait.core.AITTags;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.entities.FlightTardisEntity;
 import dev.amble.ait.core.net.AitNetworking;
+import dev.amble.ait.core.portal.PortalPairs;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.core.tardis.TardisDesktop;
@@ -275,6 +277,8 @@ public class TardisUtil {
                 ? TardisUtil.offsetInteriorDoorPos(directed)
                 : TardisUtil.offsetDoorPosition(directed).add(0, 0.125, 0);
 
+        warmUp(world, pos);
+
         world.getServer().execute(() -> {
             if (entity.getVehicle() instanceof FlightTardisEntity)
                 return;
@@ -308,6 +312,20 @@ public class TardisUtil {
                 Scheduler.get().runTaskLater(() -> pushable.ait$setPushBehaviour(TriState.DEFAULT),
                         TaskStage.END_SERVER_TICK, TimeUnit.SECONDS, 3);
         });
+    }
+
+    private static void warmUp(ServerLevel world, BlockPos pos) {
+        if (PortalPairs.openAt(world, pos) != null)
+            return;
+
+        int x = SectionPos.blockToSectionCoord(pos.getX());
+        int z = SectionPos.blockToSectionCoord(pos.getZ());
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                world.getChunk(x + dx, z + dz, ChunkStatus.FULL, true);
+            }
+        }
     }
 
     public static Vec3 offset(Vec3 vec, DirectedBlockPos direction, double value) {

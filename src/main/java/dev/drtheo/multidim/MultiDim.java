@@ -91,6 +91,9 @@ public class MultiDim {
     }
 
     private boolean tickDeleteWorld(ServerLevel world) {
+        if (world == null)
+            return true;
+
         if (!this.prepareForUnload(world))
             return false;
 
@@ -99,6 +102,9 @@ public class MultiDim {
     }
 
     private boolean tickUnloadWorld(ServerLevel world) {
+        if (world == null)
+            return true;
+
         if (!this.prepareForUnload(world))
             return false;
 
@@ -172,7 +178,10 @@ public class MultiDim {
     }
 
     public void queueUnload(ResourceKey<Level> key) {
-        this.toUnload.add(this.server.getLevel(key));
+        ServerLevel world = this.server.getLevel(key);
+
+        if (world != null)
+            this.toUnload.add(world);
     }
 
     private void unload(ResourceKey<Level> key) {
@@ -192,7 +201,10 @@ public class MultiDim {
     }
 
     public void queueRemove(ResourceKey<Level> key) {
-        this.toDelete.add(this.server.getLevel(key));
+        ServerLevel world = this.server.getLevel(key);
+
+        if (world != null)
+            this.toDelete.add(world);
     }
 
     private void remove(ResourceKey<Level> key) {

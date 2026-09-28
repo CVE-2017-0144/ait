@@ -2,14 +2,12 @@ package dev.amble.ait.registry.impl;
 
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.sounds.SoundEvents;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.sounds.ClientSoundManager;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.data.hum.DatapackHum;
 import dev.amble.ait.data.hum.Hum;
-import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class HumRegistry extends SimpleDatapackRegistry<Hum> {
@@ -31,7 +29,6 @@ public class HumRegistry extends SimpleDatapackRegistry<Hum> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

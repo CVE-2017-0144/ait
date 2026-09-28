@@ -41,6 +41,7 @@ import dev.amble.ait.module.planet.core.PlanetBlocks;
 import dev.amble.ait.module.planet.core.PlanetItems;
 import dev.amble.ait.module.planet.core.space.planet.PlanetRegistry;
 import dev.amble.ait.module.planet.core.util.PlanetCustomTrades;
+import dev.amble.ait.module.planet.core.world.gen.PlanetWorldGeneration;
 import dev.amble.lib.container.RegistryContainer;
 import dev.amble.lib.container.impl.BlockContainer;
 import dev.amble.lib.container.impl.ItemContainer;
@@ -65,6 +66,8 @@ public class PlanetModule extends Module {
         RegistryContainer.register(PlanetItems.class, AITMod.MOD_ID);
         RegistryContainer.register(PlanetBlocks.class, AITMod.MOD_ID);
         RegistryContainer.register(PlanetBlockEntities.class, AITMod.MOD_ID);
+
+        PlanetWorldGeneration.generatePlanetWorldGen();
     }
 
     @Override

@@ -2,13 +2,14 @@ package dev.drtheo.scheduler.api.common;
 
 import dev.amble.lib.platform.lifecycle.ServerLifecycleEvents;
 import dev.amble.lib.platform.lifecycle.ServerTickEvents;
+import dev.amble.lib.platform.lifecycle.ServerWorldEvents;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.drtheo.scheduler.api.task.*;
 import net.minecraft.Util;
 import net.minecraft.server.level.ServerLevel;
 import java.util.Deque;
-import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -20,8 +21,8 @@ public class Scheduler {
 
     protected final Deque<Task<?>> endServerTickTasks = new ConcurrentLinkedDeque<>();
     protected final Deque<Task<?>> startServerTickTasks = new ConcurrentLinkedDeque<>();
-    protected final IdentityHashMap<ServerLevel, Deque<Task<?>>> startWorldTickTasks = new IdentityHashMap<>();
-    protected final IdentityHashMap<ServerLevel, Deque<Task<?>>> endWorldTickTasks = new IdentityHashMap<>();
+    protected final Map<ServerLevel, Deque<Task<?>>> startWorldTickTasks = new ConcurrentHashMap<>();
+    protected final Map<ServerLevel, Deque<Task<?>>> endWorldTickTasks = new ConcurrentHashMap<>();
 
     private static Scheduler self;
 
@@ -30,6 +31,11 @@ public class Scheduler {
         ServerTickEvents.END_WORLD_TICK.register(world -> tickMap(world, endWorldTickTasks));
         ServerTickEvents.END_SERVER_TICK.register(server -> endServerTickTasks.removeIf(Task::tick));
         ServerTickEvents.END_SERVER_TICK.register(server -> startServerTickTasks.removeIf(Task::tick));
+
+        ServerWorldEvents.UNLOAD.register((server, world) -> {
+            this.startWorldTickTasks.remove(world);
+            this.endWorldTickTasks.remove(world);
+        });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             this.endServerTickTasks.clear();

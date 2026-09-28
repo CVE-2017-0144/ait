@@ -49,7 +49,7 @@ public final class WorldRenderEvents {
                 AFTER_SETUP.invoker().render(wrap(event));
             else if (stage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
                 BEFORE_ENTITIES.invoker().render(wrap(event));
-            else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES)
+            else if (stage == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
                 AFTER_ENTITIES.invoker().render(wrap(event));
             else if (stage == RenderLevelStageEvent.Stage.AFTER_LEVEL)
                 END.invoker().render(wrap(event));

@@ -21,7 +21,7 @@ public abstract class HeadFeatureRendererMixin<T extends LivingEntity, M extends
         super(context);
     }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("HEAD"), cancellable = true, require = 1)
     public void ait$render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i,
             T livingEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci) {
         if (livingEntity.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof RenderableArmorItem armor && armor.hasCustomRendering()) {

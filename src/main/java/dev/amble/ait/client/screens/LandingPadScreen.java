@@ -19,6 +19,10 @@ import dev.amble.ait.core.tardis.util.TardisUtil;
 import dev.amble.ait.data.landing.LandingPadRegion;
 
 public class LandingPadScreen extends Screen {
+    @Override
+    protected void renderBlurredBackground(float delta) {
+    }
+
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/landing_marker_gui.png");
     private final BlockPos pos;

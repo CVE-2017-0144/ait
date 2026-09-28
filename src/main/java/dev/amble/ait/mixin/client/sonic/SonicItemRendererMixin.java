@@ -45,7 +45,7 @@ public class SonicItemRendererMixin {
 
     @Unique private BakedModel getOrMissing(ResourceLocation id) {
         BakedModel model = this.itemModelShaper.getModelManager().getModel(
-                ModelResourceLocation.inventory(id)
+                ModelResourceLocation.standalone(id)
         );
 
         if (model == null)

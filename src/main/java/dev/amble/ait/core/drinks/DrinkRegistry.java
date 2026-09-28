@@ -3,9 +3,7 @@ package dev.amble.ait.core.drinks;
 import java.util.List;
 import java.util.Optional;
 
-import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
-import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class DrinkRegistry extends SimpleDatapackRegistry<Drink> {
@@ -25,7 +23,6 @@ public class DrinkRegistry extends SimpleDatapackRegistry<Drink> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

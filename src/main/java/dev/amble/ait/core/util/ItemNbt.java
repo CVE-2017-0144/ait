@@ -7,9 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-public final class ItemNbt {
-
-    private ItemNbt() {}
+public class ItemNbt {
 
     public static CompoundTag get(ItemStack stack) {
         return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
@@ -20,11 +18,11 @@ public final class ItemNbt {
         return data == null ? null : data.copyTag();
     }
 
-    public static boolean has(ItemStack stack) {
-        return stack.has(DataComponents.CUSTOM_DATA);
-    }
-
     public static void set(ItemStack stack, CompoundTag tag) {
+        // EMPTY is shared, set() would leak into every empty slot
+        if (stack.isEmpty())
+            return;
+
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 

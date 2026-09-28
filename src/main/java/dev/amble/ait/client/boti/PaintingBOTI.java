@@ -34,6 +34,7 @@ public class PaintingBOTI extends BOTI {
 
         model.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.entityCutout(frameTexture)), light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
 
         stack.translate(0, 0, -0.125);
 
@@ -50,6 +51,7 @@ public class PaintingBOTI extends BOTI {
         stack.pushPose();
         frame.renderWithFbo(stack, botiProvider, 0xf000f0, OverlayTexture.NO_OVERLAY, 0, 0, 0, 1, frameTexture);
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         BOTI.copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
 
         BOTI_HANDLER.afbo.bindWrite(false);
@@ -65,6 +67,7 @@ public class PaintingBOTI extends BOTI {
         paintingContents.renderToBuffer(stack, botiProvider.getBuffer(AITRenderLayers.getBotiInterior(paintingContentsTexture)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         RenderSystem.disableCull();
         botiProvider.endBatch();
+        BOTI_HANDLER.afbo.bindWrite(false);
         stack.popPose();
 
         client.getMainRenderTarget().bindWrite(true);

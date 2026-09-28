@@ -65,7 +65,7 @@ public class PottedSonicScrewdriverBlockEntity extends BlockEntity {
 
         ListTag list = new ListTag();
         for (ItemStack stack : this.sonics)
-            list.add(stack.save(registries));
+            list.add(stack.saveOptional(registries));
 
         nbt.put("Sonics", list);
     }

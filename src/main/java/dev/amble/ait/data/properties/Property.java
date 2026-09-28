@@ -117,6 +117,8 @@ public class Property<T> {
         return result;
     });
 
-    public static final PropertyType.Nullable<ItemStack> ITEM_STACK = new PropertyType.Nullable<>(ItemStack.class, (buf, stack) -> ItemStack.STREAM_CODEC.encode(buf, stack),
-            ItemStack.STREAM_CODEC::decode);
+    // emptied slots hold EMPTY, the plain codec won't encode it
+    public static final PropertyType.Nullable<ItemStack> ITEM_STACK = new PropertyType.Nullable<>(ItemStack.class,
+            (buf, stack) -> ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack),
+            ItemStack.OPTIONAL_STREAM_CODEC::decode);
 }

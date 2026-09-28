@@ -1,7 +1,7 @@
 package dev.amble.ait.core.tardis.manager;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +24,7 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
 
     private static ServerTardisManager instance;
 
-    private final Set<ServerTardis> delta = new HashSet<>();
+    private final Set<ServerTardis> delta = ConcurrentHashMap.newKeySet();
 
     public static void init() {
         instance = new ServerTardisManager();

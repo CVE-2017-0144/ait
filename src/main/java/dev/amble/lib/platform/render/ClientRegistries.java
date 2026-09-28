@@ -36,6 +36,7 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
 
 import dev.amble.lib.platform.Platform;
 
@@ -131,7 +132,11 @@ public final class ClientRegistries {
     }
 
     public static void blockRenderLayer(Block block, RenderType layer) {
-        ItemBlockRenderTypes.TYPE_BY_BLOCK.put(block, layer);
+        // setRenderLayer asserts client loading, datagen never sets that
+        if (DatagenModLoader.isRunningDataGen())
+            return;
+
+        ItemBlockRenderTypes.setRenderLayer(block, layer);
     }
 
     public static void itemColor(ItemColor color, ItemLike... items) {

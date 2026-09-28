@@ -27,5 +27,8 @@ public class SonicModelLoader {
         });
 
         toLoad = result;
+
+        // after init(), the model event fires later
+        ModelLoading.addModels(result);
     }
 }

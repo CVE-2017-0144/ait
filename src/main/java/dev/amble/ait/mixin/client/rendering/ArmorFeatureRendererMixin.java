@@ -21,9 +21,10 @@ public abstract class ArmorFeatureRendererMixin<T extends LivingEntity, M extend
         super(context);
     }
 
-    @Inject(at = @At("HEAD"), method = "renderArmorPiece", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/model/HumanoidModel;FFFFFF)V", cancellable = true, require = 1)
     private void ait$renderArmor(PoseStack matrices, MultiBufferSource vertexConsumers, T entity, EquipmentSlot slot,
-            int light, A model, CallbackInfo ci) {
+            int light, A model, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks,
+            float netHeadYaw, float headPitch, CallbackInfo ci) {
         if (entity.getItemBySlot(slot).getItem() instanceof RenderableArmorItem armor && armor.hasCustomRendering())
             ci.cancel();
     }

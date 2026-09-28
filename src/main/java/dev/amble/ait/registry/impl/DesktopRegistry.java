@@ -2,13 +2,11 @@ package dev.amble.ait.registry.impl;
 
 import java.util.Random;
 
-import net.minecraft.server.packs.PackType;
 import dev.amble.ait.core.tardis.Tardis;
 import dev.amble.ait.data.datapack.DatapackDesktop;
 import dev.amble.ait.data.schema.desktop.DefaultCaveDesktop;
 import dev.amble.ait.data.schema.desktop.DevDesktop;
 import dev.amble.ait.data.schema.desktop.TardisDesktopSchema;
-import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.DatapackRegistry;
 import dev.amble.lib.register.unlockable.UnlockableRegistry;
 
@@ -24,7 +22,6 @@ public class DesktopRegistry extends UnlockableRegistry<TardisDesktopSchema> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
 

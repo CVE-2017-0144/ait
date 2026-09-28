@@ -1,9 +1,9 @@
 package dev.amble.ait.core.tardis;
 
 import java.lang.reflect.Type;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import com.google.gson.InstanceCreator;
@@ -29,7 +29,7 @@ public class ServerTardis extends Tardis {
     private boolean removed;
 
     @Exclude
-    private final Set<TardisComponent> delta = new HashSet<>(32);
+    private final Set<TardisComponent> delta = ConcurrentHashMap.newKeySet(32);
 
     @Exclude
     private TardisServerWorld world;

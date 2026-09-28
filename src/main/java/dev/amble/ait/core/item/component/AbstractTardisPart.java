@@ -90,6 +90,10 @@ public class AbstractTardisPart extends Item {
                                                                                                             // stack is
                                                                                                             // the
                                                                                                             // cursor
+        // doClick runs both sides, disassemble() is client only
+        if (!player.level().isClientSide())
+            return false;
+
         ItemStack machine = slot.getItem();
 
         if (clickType != ClickAction.SECONDARY)
@@ -154,7 +158,6 @@ public class AbstractTardisPart extends Item {
         AitNetworking.send(ATTACH, data);
     }
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void disassemble(ServerPlayer player, ItemStack machine, MachineRecipeSchema recipe) {
         machine.shrink(1);
 

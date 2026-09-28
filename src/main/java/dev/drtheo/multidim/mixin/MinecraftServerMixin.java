@@ -27,6 +27,10 @@ public abstract class MinecraftServerMixin implements MultiDimServer {
     @Shadow @Final
     protected LevelStorageSource.LevelStorageAccess storageSource;
 
+    // neoforge ticks a cached level array, only rebuilt by this
+    @Shadow
+    public abstract void markWorldsDirty();
+
     @Shadow
     @Final
     @Mutable
@@ -45,6 +49,7 @@ public abstract class MinecraftServerMixin implements MultiDimServer {
         newMap.put(world.dimension(), world);
 
         this.levels = newMap;
+        this.markWorldsDirty();
     }
 
     @Override
@@ -68,6 +73,7 @@ public abstract class MinecraftServerMixin implements MultiDimServer {
         }
 
         this.levels = newMap;
+        this.markWorldsDirty();
 
         return oldMap.get(key);
     }

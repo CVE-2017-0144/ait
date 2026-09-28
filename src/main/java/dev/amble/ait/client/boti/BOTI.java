@@ -4,7 +4,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -34,10 +36,18 @@ public class BOTI {
         EXTERIOR_RENDER_QUEUE.clear();
     }
 
+    public static boolean cameraInFrontOf(BlockPos doorway, float outwardYaw) {
+        Vec3 camera = client.gameRenderer.getMainCamera().getPosition();
+        Vec3 toCamera = camera.subtract(doorway.getCenter());
+
+        double radians = Math.toRadians(outwardYaw);
+
+        return toCamera.x * -Math.sin(radians) + toCamera.z * Math.cos(radians) > 0.5;
+    }
+
     public static void copyFramebuffer(RenderTarget src, RenderTarget dest) {
-        GlStateManager._glBindFramebuffer(GlConst.GL_READ_FRAMEBUFFER, src.frameBufferId);
-        GlStateManager._glBindFramebuffer(GlConst.GL_DRAW_FRAMEBUFFER, dest.frameBufferId);
-        GlStateManager._glBlitFrameBuffer(0, 0, src.width, src.height, 0, 0, dest.width, dest.height, GlConst.GL_DEPTH_BUFFER_BIT | GlConst.GL_COLOR_BUFFER_BIT, GlConst.GL_NEAREST);
+        copyColor(src, dest);
+        copyDepth(src, dest);
     }
 
     public static void copyColor(RenderTarget src, RenderTarget dest) {

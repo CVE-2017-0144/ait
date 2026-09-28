@@ -12,9 +12,7 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import dev.amble.lib.platform.Platform;
 
 @OnlyIn(Dist.CLIENT)
-public final class ModelLoading {
-
-    private ModelLoading() {}
+public class ModelLoading {
 
     private static Collection<ResourceLocation> pending;
 
@@ -26,7 +24,8 @@ public final class ModelLoading {
                 if (pending == null)
                     return;
 
-                pending.forEach(id -> event.register(ModelResourceLocation.inventory(id)));
+                // standalone is the only variant neoforge takes, BakedModelManagerMixin reads it back
+                pending.forEach(id -> event.register(ModelResourceLocation.standalone(id)));
             });
     }
 

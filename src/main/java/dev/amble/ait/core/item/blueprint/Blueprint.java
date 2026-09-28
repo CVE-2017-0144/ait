@@ -104,7 +104,7 @@ public class Blueprint {
 
         ListTag list = new ListTag();
         for (ItemStack stack : requirements) {
-            list.add(stack.save(registries));
+            list.add(stack.saveOptional(registries));
         }
         nbt.put("requirements", list);
 

@@ -96,7 +96,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         nbt.putString("variant", this.getVariant().id().toString());
         ContainerHelper.saveAllItems(nbt, this.inventory, registries);
         if (this.sonicScrewdriver != null) {
-            nbt.put("sonic_screwdriver", this.sonicScrewdriver.save(registries));
+            nbt.put("sonic_screwdriver", this.sonicScrewdriver.saveOptional(registries));
         }
 
         CompoundTag controlNbt = new CompoundTag();
@@ -426,7 +426,7 @@ public class ConsoleBlockEntity extends AbstractConsoleBlockEntity implements Bl
         if (ServerLifecycleHooks.get().getTickCount() % 10 != 0)
             return;
 
-        if (sonicScrewdriver != null) {
+        if (!sonicScrewdriver.isEmpty()) {
             if (this.hasMaxFuel(sonicScrewdriver))
                 return;
 

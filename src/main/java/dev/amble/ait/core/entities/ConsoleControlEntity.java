@@ -260,7 +260,8 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
 
     @Override
     public EntityDimensions getDimensions(Pose pose) {
-        if (true)
+        // entityData is still null while Entity's ctor runs
+        if (this.entityData != null)
             return EntityDimensions.scalable(this.getControlWidth(), this.getControlHeight());
 
         return super.getDimensions(pose);
@@ -483,10 +484,11 @@ public class ConsoleControlEntity extends LinkableDummyEntity {
         }
 
         if (state == DurabilityStates.JAMMED) {
-            if (hasMallet && random.nextIntBetweenInclusive(0, 5) < 2)
-                tardis.subsystems().engine().removeDurability(random.nextIntBetweenInclusive(0, 7));
+            if (!hasMallet)
+                return false;
 
-            return false;
+            if (random.nextIntBetweenInclusive(0, 5) < 2)
+                tardis.subsystems().engine().removeDurability(random.nextIntBetweenInclusive(0, 7));
         }
 
         if (state == DurabilityStates.SPARKY && random.nextIntBetweenInclusive(0, 20) < 10) {

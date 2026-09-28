@@ -19,8 +19,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
@@ -32,8 +34,17 @@ public class BOTIVBO implements AutoCloseable {
         return this.buffers.isEmpty();
     }
 
-    public void bake(BOTISnapshot snapshot) {
+    public int layerCount() {
+        return this.buffers.size();
+    }
+
+    public void bake(BOTISnapshot snapshot, byte rotation, boolean fromInside) {
         this.close();
+
+        double yaw = Math.toRadians(RotationSegment.convertToDegrees(rotation));
+        double sign = fromInside ? -1 : 1;
+        double keepX = sign * -Math.sin(yaw);
+        double keepZ = sign * Math.cos(yaw);
 
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         BOTISnapshotView view = new BOTISnapshotView(snapshot);
@@ -54,14 +65,23 @@ public class BOTIVBO implements AutoCloseable {
                         if (state.isAir() || state.getRenderShape() != RenderShape.MODEL)
                             continue;
 
-                        if (ItemBlockRenderTypes.getChunkRenderType(state) != layer)
+                        if (x * keepX + z * keepZ <= 0)
                             continue;
 
                         cursor.set(x, y, z);
+                        random.setSeed(state.getSeed(cursor));
+
+                        if (!dispatcher.getBlockModel(state)
+                                .getRenderTypes(state, random, ModelData.EMPTY).contains(layer))
+                            continue;
+
                         pose.pushPose();
                         pose.translate(x, y, z);
-                        dispatcher.renderBatched(state, cursor, view, pose, builder, true, random);
+                        dispatcher.renderBatched(state, cursor, view, pose, builder, true, random,
+                                ModelData.EMPTY, layer);
                         pose.popPose();
+
+
 
                         any = true;
                     }
@@ -95,6 +115,8 @@ public class BOTIVBO implements AutoCloseable {
         for (Map.Entry<RenderType, VertexBuffer> entry : this.buffers.entrySet()) {
             RenderType layer = entry.getKey();
             layer.setupRenderState();
+
+            BOTI.BOTI_HANDLER.afbo.bindWrite(false);
 
             ShaderInstance shader = RenderSystem.getShader();
 

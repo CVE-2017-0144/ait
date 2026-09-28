@@ -1,9 +1,7 @@
 package dev.amble.ait.core.sounds.flight;
 
-import net.minecraft.server.packs.PackType;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITSounds;
-import dev.amble.lib.platform.resource.ReloadListeners;
 import dev.amble.lib.register.datapack.SimpleDatapackRegistry;
 
 public class FlightSoundRegistry extends SimpleDatapackRegistry<FlightSound> {
@@ -24,7 +22,6 @@ public class FlightSoundRegistry extends SimpleDatapackRegistry<FlightSound> {
     public void onCommonInit() {
         super.onCommonInit();
         this.defaults();
-        ReloadListeners.register(PackType.CLIENT_RESOURCES, this);
     }
 
     @Override

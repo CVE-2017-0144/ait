@@ -26,6 +26,10 @@ import dev.amble.lib.platform.Platform;
 
 @OnlyIn(Dist.CLIENT)
 public class AstralMapScreen extends Screen {
+    @Override
+    protected void renderBlurredBackground(float delta) {
+    }
+
 
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/gui/astral_map.png");

@@ -144,7 +144,7 @@ public class GenericStructureSystemBlockEntity extends StructureSystemBlockEntit
         super.saveAdditional(nbt, registries);
 
         if (this.idSource != null) {
-            nbt.put("SourceStack", this.idSource.save(registries));
+            nbt.put("SourceStack", this.idSource.saveOptional(registries));
         }
     }
 

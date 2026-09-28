@@ -68,7 +68,7 @@ public class TardisPortal extends Portal {
     private boolean isCurrent() {
         Tardis tardis = this.tardis != null ? this.tardis.get() : null;
 
-        if (tardis == null || !(tardis.handler(PortalsHandler.ID) instanceof PortalsHandler portalsHandler))
+        if (tardis == null || tardis.asServer().isRemoved() || !(tardis.handler(PortalsHandler.ID) instanceof PortalsHandler portalsHandler))
             return false;
 
         EntityRef<TardisPortal> extPortal = portalsHandler.getExteriorRef();

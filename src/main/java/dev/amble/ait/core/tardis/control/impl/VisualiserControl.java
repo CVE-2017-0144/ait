@@ -4,6 +4,7 @@ import static dev.amble.ait.core.engine.SubSystem.Id.GRAVITATIONAL;
 
 import dev.amble.ait.AITMod;
 import dev.amble.ait.compat.DependencyChecker;
+import dev.amble.ait.compat.portal.PortalsAPI;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.engine.SubSystem;
 import dev.amble.ait.core.tardis.Tardis;
@@ -40,7 +41,11 @@ public class VisualiserControl extends Control {
         if (!AITMod.CONFIG.rwfEnabled) {
             if (!tardis.travel().isLanded()) return Result.FAILURE;
 
-            return Result.FAILURE;
+            return PortalsAPI.VISUALIZER.map(visualizer -> {
+                CachedDirectedGlobalPos pos = tardis.travel().position();
+                visualizer.open(player, pos.getWorld(), pos.getPos().above((int) Math.ceil(tardis.getExterior().getVariant().portalHeight()) + 1));
+                return Result.SUCCESS;
+            }).orElse(Result.FAILURE);
         }
 
         if (!player.isCreative()) {

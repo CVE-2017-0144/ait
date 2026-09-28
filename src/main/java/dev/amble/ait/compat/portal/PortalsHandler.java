@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import qouteall.imm_ptl.core.api.PortalAPI;
-import qouteall.imm_ptl.core.chunk_loading.NewChunkTrackingGraph;
+import qouteall.imm_ptl.core.chunk_loading.ImmPtlChunkTracking;
 import qouteall.imm_ptl.core.portal.Portal;
 import qouteall.imm_ptl.core.portal.PortalManipulation;
 import qouteall.imm_ptl.core.render.PortalEntityRenderer;
@@ -250,7 +250,7 @@ public class PortalsHandler extends KeyedTardisComponent {
         //portal.renderingMergable = true;w
         // closed door = invisible + no tp, ip won't let you interact through it anyway
         portal.setInteractable(AITMod.CONFIG.allowPortalsInteraction);
-        portal.hasCrossPortalCollision = false;
+        portal.setCrossPortalCollisionEnabled(false);
         portal.setIsVisible(open);
         portal.setTeleportable(open);
         portal.level().addFreshEntity(portal);
@@ -283,7 +283,7 @@ public class PortalsHandler extends KeyedTardisComponent {
 
     private static void updateLoading(Portal portal) {
         for (ServerPlayer player : ((ServerLevel) portal.level()).getChunkSource().chunkMap.getPlayersWatching(portal))
-            NewChunkTrackingGraph.getPlayerInfo(player).shouldUpdateImmediately = true;
+            ImmPtlChunkTracking.getPlayerInfo(player).shouldUpdateImmediately = true;
     }
 
     private static void removePortal(Portal portal) {

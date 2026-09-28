@@ -7,7 +7,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 public class DependencyChecker {
 
-    private static final boolean HAS_PORTALS = doesModExist("imm_ptl_core");
+    private static final boolean HAS_PORTALS = doesModExist("immersive_portals_core");
     private static final boolean HAS_GRAVITY = true;
     private static final boolean HAS_IRIS = doesModExist("iris");
     private static final boolean HAS_INDIUM = doesModExist("indium");

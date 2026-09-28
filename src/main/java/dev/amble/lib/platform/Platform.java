@@ -6,6 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.LoadingModList;
 
 public final class Platform {
 
@@ -22,7 +23,11 @@ public final class Platform {
     }
 
     public static boolean isModLoaded(String modId) {
-        return ModList.get() != null && ModList.get().isLoaded(modId);
+        // mixin plugins ask before the ModList exists
+        if (ModList.get() == null)
+            return LoadingModList.get().getModFileById(modId) != null;
+
+        return ModList.get().isLoaded(modId);
     }
 
     public static boolean isClient() {

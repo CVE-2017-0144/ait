@@ -12,6 +12,9 @@
     "artron.ServerWorldMixin",
     "client.experimental_screen.LevelSummaryMixin",
     "client.rendering.EntityMixin",
+    "compat.portals.MultiDimMixin",
+    "compat.portals.ServerTeleportationManagerMixin",
+    "compat.portals.TardisServerWorldMixin",
     "gravity.EntityGravityMixin",
     "gravity.LivingEntityGravityMixin",
     "lookup.EntityTrackingSectionAccessor",
@@ -60,7 +63,13 @@
     "client.rendering.VertexBufferWrapper",
     "client.rendering.WorldRendererBotiMixin",
     "client.sonic.SonicItemRendererMixin",
-    "client.sonic.SonicModelLoaderWrapperMixin"
+    "client.sonic.SonicModelLoaderWrapperMixin",
+    "compat.portals.BlockManipulationClientMixin",
+    "compat.portals.ClientTeleportationManagerMixin",
+    "compat.portals.ClientWorldLoaderAccessor",
+    "compat.portals.DimIdSyncPacketMixin",
+    "compat.portals.PortalDataMixin",
+    "compat.portals.SectionRenderDispatcherMixin"
   ],
   "injectors": {
     "defaultRequire": 1

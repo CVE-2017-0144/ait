@@ -1,6 +1,5 @@
 package dev.amble.ait.mixin.compat.portals;
 
-import dev.amble.ait.compat.portal.PortalsDimSync;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.world.TardisServerWorld;
 import dev.drtheo.multidim.api.MultiDimServerWorld;
@@ -10,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import qouteall.q_misc_util.dimension.DimensionIntId;
 
 @Mixin(TardisServerWorld.class)
 public class TardisServerWorldMixin {
@@ -26,11 +26,12 @@ public class TardisServerWorldMixin {
         aitportals$handleWorld(instance);
     }
 
-    @Unique private static void aitportals$handleWorld(MultiDimServerWorld world) {
+    @Unique private static MultiDimServerWorld aitportals$handleWorld(MultiDimServerWorld world) {
         // may happen if this is called during #load and the world doesn't exist!
         if (world == null)
-            return;
+            return null;
 
-        PortalsDimSync.sync(world.getServer());
+        DimensionIntId.onServerDimensionChanged(world.getServer());
+        return world;
     }
 }

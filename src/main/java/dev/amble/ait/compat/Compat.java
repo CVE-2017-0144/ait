@@ -4,6 +4,7 @@ package dev.amble.ait.compat;
 import dev.amble.ait.api.AITModInitializer;
 import dev.amble.ait.compat.gravity.GravityHandler;
 import dev.amble.ait.compat.iris.IrisCompat;
+import dev.amble.ait.compat.portal.PortalsHandler;
 import dev.amble.lib.platform.ClientModEntrypoint;
 
 public class Compat implements AITModInitializer, ClientModEntrypoint {
@@ -13,12 +14,17 @@ public class Compat implements AITModInitializer, ClientModEntrypoint {
         if (DependencyChecker.hasGravity())
             GravityHandler.init();
 
+        if (DependencyChecker.hasPortals())
+            PortalsHandler.init();
     }
 
     @Override
     public void onInitializeClient() {
         if (DependencyChecker.hasGravity())
             GravityHandler.clientInit();
+
+        if (DependencyChecker.hasPortals())
+            PortalsHandler.clientInit();
 
         if (DependencyChecker.hasIris())
             IrisCompat.clientInit();

@@ -24,18 +24,17 @@ public class RiftBOTI extends BOTI {
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));
 
-        client.getMainRenderTarget().unbindWrite();
+        BOTI.BotiCompositeState composite = BOTI.beginBotiComposite();
+        int winW = composite.viewport[2];
+        int winH = composite.viewport[3];
 
         BOTI_HANDLER.setupFramebuffer();
 
-        BOTI.copyFramebuffer(client.getMainRenderTarget(), BOTI_HANDLER.afbo);
+        BOTI.copyFramebufferFromFbo(composite.drawFbo, winW, winH, BOTI_HANDLER.afbo);
 
         MultiBufferSource.BufferSource portalProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
 
-        // Enable stencil testing and clear the stencil buffer
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        GL11.glStencilMask(0xFF);
-        GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
+        BOTI.resetStencilByDraw();
         GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 
@@ -46,10 +45,10 @@ public class RiftBOTI extends BOTI {
         frame.renderToBuffer(stack, portalProvider.getBuffer(RenderType.entityTranslucentCull(CIRCLE_TEXTURE)), 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         portalProvider.endBatch();
         stack.popPose();
-        copyDepth(BOTI_HANDLER.afbo, client.getMainRenderTarget());
+        BOTI.copyDepthToFbo(BOTI_HANDLER.afbo, composite.drawFbo, winW, winH);
 
         BOTI_HANDLER.afbo.bindWrite(false);
-        GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+        BOTI.resetDepthByDraw();
 
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
@@ -78,13 +77,8 @@ public class RiftBOTI extends BOTI {
 
         stack.popPose();
 
-        client.getMainRenderTarget().bindWrite(true);
-
-        BOTI.copyColor(BOTI_HANDLER.afbo, client.getMainRenderTarget());
-
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
-
-        RenderSystem.depthMask(true);
+        BOTI.copyColorToFbo(BOTI_HANDLER.afbo, composite.drawFbo, winW, winH);
+        BOTI.endBotiComposite(composite);
 
         stack.popPose();
     }

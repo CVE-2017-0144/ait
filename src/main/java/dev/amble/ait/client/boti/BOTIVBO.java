@@ -1,138 +1,83 @@
 package dev.amble.ait.client.boti;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import dev.amble.ait.core.tardis.util.network.BOTISnapshot;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.amble.ait.mixin.client.rendering.VertexBufferWrapper;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RotationSegment;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import org.joml.Matrix4f;
 
-@OnlyIn(Dist.CLIENT)
-public class BOTIVBO implements AutoCloseable {
+public class BOTIVBO {
+    public static final VertexFormat format = DefaultVertexFormat.BLOCK;
+    public final Map<RenderType, ByteBufferBuilder> bufferBuilders = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new ByteBufferBuilder(renderLayer.bufferSize())));
+    public final Map<RenderType, VertexBuffer> vbo = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderLayer -> renderLayer, renderLayer -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
 
-    private final Map<RenderType, VertexBuffer> buffers = new HashMap<>();
-
-    public boolean isEmpty() {
-        return this.buffers.isEmpty();
+    public BOTIVBO() {
+        this.init();
+    }
+    public VertexBuffer get(RenderType layer) {
+        return this.vbo.get(layer);
     }
 
-    public int layerCount() {
-        return this.buffers.size();
+    public VertexBuffer getVBO(RenderType layer) {
+        return this.vbo.getOrDefault(layer, this.vbo.get(RenderType.solid()));
     }
 
-    public void bake(BOTISnapshot snapshot, byte rotation, boolean fromInside) {
-        this.close();
+    public ByteBufferBuilder getBufferBuilder(RenderType layer) {
+        return this.bufferBuilders.get(layer);
+    }
 
-        double yaw = Math.toRadians(RotationSegment.convertToDegrees(rotation));
-        double sign = fromInside ? -1 : 1;
-        double keepX = sign * -Math.sin(yaw);
-        double keepZ = sign * Math.cos(yaw);
-
-        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        BOTISnapshotView view = new BOTISnapshotView(snapshot);
-        RandomSource random = RandomSource.create();
-        PoseStack pose = new PoseStack();
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-
+    public void init() {
         for (RenderType layer : RenderType.chunkBufferLayers()) {
-            ByteBufferBuilder allocation = new ByteBufferBuilder(layer.bufferSize());
-            BufferBuilder builder = new BufferBuilder(allocation, layer.mode(), layer.format());
-            boolean any = false;
-
-            for (int y = -BOTISnapshot.BELOW; y <= BOTISnapshot.ABOVE; y++) {
-                for (int z = -BOTISnapshot.RADIUS_XZ; z <= BOTISnapshot.RADIUS_XZ; z++) {
-                    for (int x = -BOTISnapshot.RADIUS_XZ; x <= BOTISnapshot.RADIUS_XZ; x++) {
-                        BlockState state = snapshot.get(x, y, z);
-
-                        if (state.isAir() || state.getRenderShape() != RenderShape.MODEL)
-                            continue;
-
-                        if (x * keepX + z * keepZ <= 0)
-                            continue;
-
-                        cursor.set(x, y, z);
-                        random.setSeed(state.getSeed(cursor));
-
-                        if (!dispatcher.getBlockModel(state)
-                                .getRenderTypes(state, random, ModelData.EMPTY).contains(layer))
-                            continue;
-
-                        pose.pushPose();
-                        pose.translate(x, y, z);
-                        dispatcher.renderBatched(state, cursor, view, pose, builder, true, random,
-                                ModelData.EMPTY, layer);
-                        pose.popPose();
-
-
-
-                        any = true;
-                    }
-                }
-            }
-
-            MeshData mesh = any ? builder.build() : null;
-
-            if (mesh == null) {
-                allocation.close();
-                continue;
-            }
-
-            VertexBuffer buffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-            buffer.bind();
-            buffer.upload(mesh);
-            VertexBuffer.unbind();
-            allocation.close();
-
-            this.buffers.put(layer, buffer);
+            this.bufferBuilders.put(layer, new ByteBufferBuilder(layer.bufferSize()));
+            this.vbo.put(layer, new VertexBuffer(VertexBuffer.Usage.STATIC));
         }
     }
 
-    public void draw(PoseStack stack) {
-        if (this.buffers.isEmpty())
+    public void begin(RenderType layer) {
+        this.getVBO(layer).bind();
+    }
+
+    public void reset(RenderType layer) {
+        this.bufferBuilders.get(layer).clear();
+        this.bufferBuilders.get(layer).discard();
+    }
+
+    public void upload(RenderType layer) {
+        MeshData builtBuffer = new BufferBuilder(this.getBufferBuilder(layer), layer.mode(), format).build();
+        if (builtBuffer == null)
             return;
-
-        Matrix4f modelView = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(stack.last().pose());
-        Matrix4f projection = RenderSystem.getProjectionMatrix();
-
-        for (Map.Entry<RenderType, VertexBuffer> entry : this.buffers.entrySet()) {
-            RenderType layer = entry.getKey();
-            layer.setupRenderState();
-
-            BOTI.BOTI_HANDLER.afbo.bindWrite(false);
-
-            ShaderInstance shader = RenderSystem.getShader();
-
-            if (shader != null) {
-                entry.getValue().bind();
-                entry.getValue().drawWithShader(modelView, projection, shader);
-                VertexBuffer.unbind();
-            }
-
-            layer.clearRenderState();
-        }
+        this.getVBO(layer).upload(builtBuffer);
     }
 
-    @Override
-    public void close() {
-        this.buffers.values().forEach(VertexBuffer::close);
-        this.buffers.clear();
+    public void unbind(RenderType layer) {
+        this.getBufferBuilder(layer).discard();
+        this.getBufferBuilder(layer).clear();
+        VertexBuffer.unbind();
+    }
+
+    public void draw() {
+        this.vbo.forEach((layer, vbo) -> {
+            /*if (((VertexBufferWrapper) this.getVBO(layer)).getIndexType() == null) {
+                return; // Skip drawing if there's no index type
+            }*/
+            this.begin(layer);
+            format.setupBufferState();
+            layer.setupRenderState();
+            ((VertexBufferWrapper) this.getVBO(layer)).setMode(layer.mode());
+            ((VertexBufferWrapper) this.getVBO(layer)).setIndexType(VertexFormat.IndexType.SHORT);
+            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
+            this.getVBO(layer).draw();
+            layer.clearRenderState();
+            format.clearBufferState();
+            VertexBuffer.unbind();
+        });
     }
 }

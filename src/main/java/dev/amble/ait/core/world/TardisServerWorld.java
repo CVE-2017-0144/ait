@@ -7,7 +7,6 @@ import java.util.function.BooleanSupplier;
 
 import dev.amble.ait.AITMod;
 import dev.amble.ait.core.AITDimensions;
-import dev.amble.ait.core.portal.PortalPairs;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.lib.util.ServerLifecycleHooks;
 import dev.drtheo.multidim.MultiDim;
@@ -58,7 +57,6 @@ public class TardisServerWorld extends MultiDimServerWorld {
                 !MultiDim.get(this.getServer()).isWorldUnloaded(this)
                 || this.tardis.interiorChanging().queued().get()
                 || this.tardis.getDesktop().isChanging()
-                || PortalPairs.isOpen(this.tardis)
         );
     }
 

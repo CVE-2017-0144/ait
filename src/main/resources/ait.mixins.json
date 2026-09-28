@@ -36,6 +36,8 @@
     "server.structure.StructureTemplateAccessor"
   ],
   "client": [
+    "client.ClientChunkCacheBotiMixin",
+    "client.ClientLevelBotiMixin",
     "client.DefaultLogoMixin",
     "client.GameRendererMixin",
     "client.ItemRendererMixin",
@@ -51,10 +53,12 @@
     "client.rendering.DebugRendererMixin",
     "client.rendering.HeadFeatureRendererMixin",
     "client.rendering.HeldItemRendererMixin",
+    "client.rendering.ParticleManagerMixin",
     "client.rendering.ModelPartAccessor",
     "client.rendering.PlayerEntityRendererMixin",
     "client.rendering.SkyboxMixin",
     "client.rendering.VertexBufferWrapper",
+    "client.rendering.WorldRendererBotiMixin",
     "client.sonic.SonicItemRendererMixin",
     "client.sonic.SonicModelLoaderWrapperMixin"
   ],

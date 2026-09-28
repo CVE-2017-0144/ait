@@ -4,15 +4,17 @@ import static dev.amble.ait.AITMod.*;
 import static dev.amble.ait.core.AITItems.isUnlockedOnThisDay;
 import static dev.amble.ait.core.item.TardisMatrixItem.colorToInt;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.boti.*;
-import dev.amble.ait.client.boti.BOTICache;
 import dev.amble.ait.client.commands.ConfigCommand;
 import dev.amble.ait.client.commands.DebugCommand;
 import dev.amble.ait.client.config.AITClientConfig;
@@ -65,8 +67,6 @@ import dev.amble.ait.core.gravity.AitGravity;
 import dev.amble.ait.core.item.*;
 import dev.amble.ait.core.net.AitNetworking;
 import dev.amble.ait.core.tardis.Tardis;
-import dev.amble.ait.core.tardis.util.network.s2c.BOTIDataS2CPacket;
-import dev.amble.ait.core.tardis.util.network.s2c.BOTISyncS2CPacket;
 import dev.amble.ait.core.util.ItemNbt;
 import dev.amble.ait.data.schema.console.ConsoleTypeSchema;
 import dev.amble.ait.data.schema.exterior.ClientExteriorVariantSchema;
@@ -78,6 +78,7 @@ import dev.amble.ait.registry.impl.console.variant.ClientConsoleVariantRegistry;
 import dev.amble.ait.registry.impl.door.ClientDoorRegistry;
 import dev.amble.ait.registry.impl.exterior.ClientExteriorVariantRegistry;
 import dev.amble.lib.platform.ClientModEntrypoint;
+import dev.amble.lib.platform.Platform;
 import dev.amble.lib.platform.clientlifecycle.ClientEvents;
 import dev.amble.lib.platform.clientlifecycle.ClientInputEvents;
 import dev.amble.lib.platform.command.Commands;
@@ -87,9 +88,11 @@ import dev.amble.lib.platform.render.WorldRenderContext;
 import dev.amble.lib.platform.render.WorldRenderEvents;
 import dev.amble.lib.platform.resource.BuiltinPacks;
 import dev.amble.lib.register.AmbleRegistries;
+import dev.loqor.portal.client.PortalDataManager;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +103,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.EndRodParticle;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -112,6 +117,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 @OnlyIn(Dist.CLIENT)
@@ -122,6 +128,7 @@ public class AITModClient implements ClientModEntrypoint {
 
     public static AITClientConfig CONFIG;
     private final Minecraft client = Minecraft.getInstance();
+    private TardisExteriorBOTI exteriorBoti;
 
     @Override
     public void onInitializeClient() {
@@ -139,6 +146,19 @@ public class AITModClient implements ClientModEntrypoint {
         );
 
         ClientTardisManager.init();
+
+        if (Minecraft.ON_OSX) {
+            Platform.modBus().addListener(RegisterShadersEvent.class, event -> {
+                try {
+                    event.registerShader(new ShaderInstance(event.getResourceProvider(),
+                                    ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID, "copy_depth"),
+                                    DefaultVertexFormat.POSITION_TEX),
+                            program -> BOTI.COPY_DEPTH_PROGRAM = program);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        }
 
         ModuleRegistry.instance().onClientInit();
 
@@ -181,6 +201,9 @@ public class AITModClient implements ClientModEntrypoint {
             WorldRenderEvents.END.register(this::gallifreyanBOTI);
             WorldRenderEvents.END.register(this::trenzaloreBOTI);
             WorldRenderEvents.END.register(this::riftBOTI);
+
+            WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.GbufferInjectionProbe::run);
+            WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.ExteriorGbufferInjection::run);
         } else {
             WorldRenderEvents.AFTER_ENTITIES.register(this::exteriorBOTI);
             WorldRenderEvents.AFTER_ENTITIES.register(this::doorBOTI);
@@ -189,7 +212,7 @@ public class AITModClient implements ClientModEntrypoint {
             WorldRenderEvents.AFTER_ENTITIES.register(this::riftBOTI);
         }
 
-        WorldRenderEvents.END.register(context -> BOTI.clearAll());
+        ClientEvents.CLIENT_STARTED.register(client -> AITRenderHelper.setIsStencilEnabled(client.getMainRenderTarget(), true));
 
         // @TODO idk why but this gets rid of other important stuff, not sure
         ClientRegistries.dimensionEffects(AITDimensions.MARS.location(), new MarsSkyProperties());
@@ -301,6 +324,8 @@ public class AITModClient implements ClientModEntrypoint {
 
         ClientTardisUtil.init();
 
+        PortalDataManager.init();
+
         WorldRenderEvents.END.register((context) -> SonicRendering.getInstance().renderWorld(context));
         HudRenderEvents.HUD.register((context, delta) -> SonicRendering.getInstance()
                 .renderGui(context, delta.getGameTimeDeltaPartialTick(true)));
@@ -317,16 +342,8 @@ public class AITModClient implements ClientModEntrypoint {
         });
 
         ClientEvents.JOIN.register((client) -> BOTI.tryWarn(client));
-        ClientEvents.DISCONNECT.register((client) -> BOTICache.clear());
-
-        ClientEvents.END_CLIENT_TICK.register(client -> {
-            if (client.level != null && client.level.getGameTime() % 200 == 0)
-                BOTICache.prune();
-        });
 
         AitGravity.clientInit();
-        BOTIDataS2CPacket.init();
-        BOTISyncS2CPacket.init();
 
         BetaVerification.init();
     }
@@ -568,6 +585,9 @@ public class AITModClient implements ClientModEntrypoint {
             return;
         }
 
+        if (exteriorBoti == null)
+            exteriorBoti = new TardisExteriorBOTI();
+
         ClientLevel world = client.level;
         PoseStack stack = context.matrixStack();
 
@@ -590,7 +610,7 @@ public class AITModClient implements ClientModEntrypoint {
                 int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
                 profiler.incrementCounter("ait_boti_exterior_drawn");
                 profiler.incrementCounter("ait_model_build");
-                TardisExteriorBOTI.renderExteriorBoti(exterior, variant, stack, context.consumers(), model,
+                exteriorBoti.renderExteriorBoti(exterior, variant, stack, AITMod.id("textures/environment/tardis_sky.png"), model,
                         BotiPortalModel.getTexturedModelData().bakeRoot(), light);
             } else {
                 profiler.incrementCounter("ait_boti_exterior_culled");
@@ -631,12 +651,16 @@ public class AITModClient implements ClientModEntrypoint {
 
         ClientExteriorVariantSchema variant = tardis.getExterior().getVariant().getClient();
         AnimatedModel model = variant.getDoor().getCachedModel();
+        Frustum frustum = context.frustum();
 
         profiler.push("ait:boti_door");
 
         for (DoorBlockEntity door : BOTI.DOOR_RENDER_QUEUE) {
             if (door == null) continue;
             BlockPos pos = door.getBlockPos();
+
+            if (frustum != null && !frustum.isVisible(new AABB(pos).inflate(2.0)))
+                continue;
 
             stack.pushPose();
             stack.translate(0.5, 0, 0.5);
@@ -648,7 +672,7 @@ public class AITModClient implements ClientModEntrypoint {
                 int light = LightTexture.pack(world.getBrightness(LightLayer.BLOCK, pos), world.getBrightness(LightLayer.SKY, pos));
                 profiler.incrementCounter("ait_boti_door_drawn");
                 profiler.incrementCounter("ait_model_build");
-                TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack, context.consumers(),
+                TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack,
                         AITMod.id("textures/environment/tardis_sky.png"), model,
                         BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickCounter().getGameTimeDeltaPartialTick(true));
             } else {

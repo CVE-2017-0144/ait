@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,7 +86,7 @@ public class MultiDim {
         ServerLevel overworld = this.server.overworld();
         Vec3 spawnPos = overworld.getSharedSpawnPos().getCenter();
 
-        for (ServerPlayer player : world.players()) {
+        for (ServerPlayer player : List.copyOf(world.players())) {
             player.teleportTo(overworld, spawnPos.x(), spawnPos.y(), spawnPos.z(), player.getYRot(), player.getXRot());
         }
     }

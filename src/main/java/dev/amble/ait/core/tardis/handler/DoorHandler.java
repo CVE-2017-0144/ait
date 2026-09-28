@@ -219,7 +219,7 @@ public class DoorHandler extends KeyedTardisComponent implements TardisTickable 
     }
 
     public boolean isOpen() {
-        return this.doorState.get() != DoorState.CLOSED;
+        return !isClosed();
     }
 
     public boolean isClosed() {

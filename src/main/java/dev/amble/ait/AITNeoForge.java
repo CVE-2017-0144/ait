@@ -22,15 +22,18 @@ import dev.amble.plushies.client.PlushiesClient;
 import dev.drtheo.multidim.MultiDimMod;
 import dev.drtheo.scheduler.SchedulerMod;
 import dev.drtheo.scheduler.client.SchedulerClientMod;
+import dev.loqor.portal.BiggerOnTheInside;
 
 @Mod(AITMod.MOD_ID)
 public final class AITNeoForge {
 
     public AITNeoForge(IEventBus modBus, ModContainer container) {
+        // first, the shims read it
         Platform.setModBus(modBus);
         BiomeModifications.init();
         AitNetworking.init();
 
+        // libs before the mod
         RegistryFreeze.withRegistriesUnfrozen(() -> {
             new SchedulerMod().onInitialize();
             new MultiDimMod().onInitialize();
@@ -38,8 +41,10 @@ public final class AITNeoForge {
             new Plushies().onInitialize();
             new AITMod().onInitialize();
             new PermissionAPICompat().onInitialize();
+            new BiggerOnTheInside().onInitialize();
         });
 
+        // datagen registers tabs after the freeze
         modBus.addListener(GatherDataEvent.class, event -> RegistryFreeze.withRegistriesUnfrozen(
                 () -> new AITModDataGenerator()
                         .onInitializeDataGenerator(new PlatformDataGenerator(event, AITMod.MOD_ID))));
@@ -48,9 +53,8 @@ public final class AITNeoForge {
             RegistryFreeze.withRegistriesUnfrozen(() -> Client.init(container));
     }
 
-    private static final class Client {
-
-        private Client() {}
+    // keeps client classes off the server
+    private static class Client {
 
         static void init(ModContainer container) {
             AITModMenu.register(container);

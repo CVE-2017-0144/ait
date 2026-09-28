@@ -14,8 +14,6 @@ import net.minecraft.client.renderer.RenderType;
 @OnlyIn(Dist.CLIENT)
 public class AITBufferBuilderStorage extends RenderBuffers {
 
-    private static final int BOTI_BUFFER_SIZE = 786432;
-
     private final SequencedMap<RenderType, ByteBufferBuilder> botiBuilder = Util
             .make(new Object2ObjectLinkedOpenHashMap<>(), map -> put(map, AITRenderLayers.getBoti()));
 
@@ -23,7 +21,7 @@ public class AITBufferBuilderStorage extends RenderBuffers {
             .immediateWithBuffers(this.botiBuilder, new ByteBufferBuilder(256));
 
     public AITBufferBuilderStorage() {
-        super(BOTI_BUFFER_SIZE);
+        super(1);
     }
 
     private static void put(Object2ObjectLinkedOpenHashMap<RenderType, ByteBufferBuilder> builderStorage,

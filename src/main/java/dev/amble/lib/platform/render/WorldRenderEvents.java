@@ -20,18 +20,16 @@ import dev.amble.lib.platform.event.Event;
 import dev.amble.lib.platform.event.EventFactory;
 
 @OnlyIn(Dist.CLIENT)
-public final class WorldRenderEvents {
-
-    private WorldRenderEvents() {}
+public class WorldRenderEvents {
 
     public interface Render {
         void render(WorldRenderContext context);
     }
 
     private static Event<Render> event() {
-        return EventFactory.createArrayBacked(Render.class, callbacks -> context -> {
-            for (Render callback : callbacks) {
-                callback.render(context);
+        return EventFactory.createArrayBacked(Render.class, cbs -> context -> {
+            for (Render cb : cbs) {
+                cb.render(context);
             }
         });
     }
@@ -53,7 +51,7 @@ public final class WorldRenderEvents {
             }
             else if (stage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
                 BEFORE_ENTITIES.invoker().render(wrap(event));
-            else if (stage == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
+            else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES)
                 AFTER_ENTITIES.invoker().render(wrap(event));
             else if (stage == RenderLevelStageEvent.Stage.AFTER_LEVEL)
                 END.invoker().render(wrap(event));

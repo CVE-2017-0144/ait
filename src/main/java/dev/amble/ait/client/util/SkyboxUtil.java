@@ -45,6 +45,8 @@ public class SkyboxUtil extends LevelRenderer {
     private static final ResourceLocation TARDIS_SKY = AITMod.id("textures/environment/tardis_sky.png");
     private static final ResourceLocation SUN = AITMod.id("textures/environment/tardis_star.png");
 
+    public static Tardis PORTAL_SKY_TARDIS = null;
+
     public static final Quaternionf[] LOOKUP = new Quaternionf[]{null, Axis.XP.rotationDegrees(90.0f),
             Axis.XP.rotationDegrees(-90.0f), Axis.XP.rotationDegrees(180.0f),
             Axis.ZP.rotationDegrees(90.0f), Axis.ZP.rotationDegrees(-90.0f), null};

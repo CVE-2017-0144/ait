@@ -15,17 +15,17 @@ base {
 }
 
 repositories {
-    maven { url = "https://api.modrinth.com/maven" }
-
     // YACL
-    maven { url = 'https://maven.isxander.dev/releases' }
+    maven { url 'https://maven.isxander.dev/releases' }
+
+    maven { url "https://api.modrinth.com/maven" }
 
     // JEI
-    maven { url = "https://maven.blamejared.com/" }
+    maven { url "https://maven.blamejared.com/" }
 
     // LambDynamicLights
     maven {
-        url = "https://maven.gegy.dev"
+        url "https://maven.gegy.dev"
 
         content {
             includeGroup "dev.lambdaurora.lambdynamiclights"
@@ -49,21 +49,11 @@ neoForge {
             client()
         }
 
-        clientDebug {
-            client()
-
-            systemProperties.putAll([
-                    'mixin.debug'                   : 'true',
-                    'mixin.debug.export'            : 'true',
-                    'mixin.debug.countInjections'   : 'true',
-                    'mixin.checks'                  : 'true',
-                    'neoforge.logging.console.level': 'debug',
-                    'neoforge.logging.markers'      : 'REGISTRIES,LOADING,NETWORK',
-            ])
-        }
-
+        // The client keeps the default run/ so an existing setup still applies. The dedicated server
+        // needs its own, or the two race on run/logs/latest.log and run/debug/profiling/.
         server {
             server()
+            gameDirectory = project.file('run/server')
         }
 
         data {
@@ -102,6 +92,7 @@ sourceSets {
 }
 
 dependencies {
+    // exp4j needs the dev run classpath too, jarJar alone isn't enough
     implementation "net.objecthunter:exp4j:${project.exp4j_version}"
     jarJar(implementation("net.objecthunter:exp4j:[${project.exp4j_version},)") {
         version { prefer project.exp4j_version }
@@ -110,6 +101,7 @@ dependencies {
 
     implementation "com.google.code.gson:gson:${project.gson_version}"
 
+    // amblekit (cc0) + multidim/scheduler/queue (lgpl-3.0) are vendored, lombok is for amblekit's withers
     compileOnly "org.projectlombok:lombok:${project.lombok_version}"
     annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
 
@@ -120,6 +112,8 @@ dependencies {
     runtimeOnly "mezz.jei:jei-${project.minecraft_version}-neoforge:${project.jei_version}"
 
     compileOnly "maven.modrinth:iris:1.8.12+1.21.1-neoforge"
+
+    compileOnly "maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge"
 
 }
 
@@ -148,7 +142,6 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
     it.options.release = 21
-    it.options.compilerArgs << "-Xmaxerrs" << "100000"
 }
 
 java {

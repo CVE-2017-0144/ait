@@ -102,5 +102,6 @@ public abstract class AbstractCoordinateModifierItem extends Item {
             cached = CachedDirectedGlobalPos.create(TardisServerWorld.OVERWORLD, cached.getPos(), cached.getRotation());
         }
         nbt.put(POS_KEY, cached.toNbt());
+        ItemNbt.set(stack, nbt);
     }
 }

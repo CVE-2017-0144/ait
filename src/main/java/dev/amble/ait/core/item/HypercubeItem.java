@@ -97,7 +97,7 @@ public class HypercubeItem extends Item {
     }
 
     public static void setCall(ItemStack stack, DistressCall call) {
-        ItemNbt.get(stack).put(DISTRESS_CALL_KEY, call.toNbt());
+        ItemNbt.edit(stack, tag -> tag.put(DISTRESS_CALL_KEY, call.toNbt()));
 
         stack.remove(DataComponents.CUSTOM_NAME);
     }

@@ -169,6 +169,7 @@ public class DrinkUtil {
             nbtList.add(statusEffectInstance.save());
         }
         nbtCompound.put(CUSTOM_DRINK_EFFECTS_KEY, nbtList);
+        ItemNbt.set(stack, nbtCompound);
         return stack;
     }
 

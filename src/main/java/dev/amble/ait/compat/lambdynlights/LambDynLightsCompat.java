@@ -15,5 +15,6 @@ public class LambDynLightsCompat implements DynamicLightsInitializer {
     }
 
     @Override
+    @SuppressWarnings("removal")
     public void onInitializeDynamicLights(ItemLightSourceManager itemLightSourceManager) { }
 }

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import dev.amble.ait.AITMod;
+import dev.amble.ait.compat.DependencyChecker;
 import dev.drtheo.portal.PacketProxyPlayer;
 import dev.drtheo.portal.PortalInitS2CPacket;
 import dev.drtheo.portal.WrappedPacketS2CPacket;
@@ -62,7 +63,7 @@ public class BiggerOnTheInside implements ModEntrypoint {
 
     private static final int TICKING_RADIUS = 2;
 
-    private static final int MAX_PAYLOAD_SIZE = 1048576;
+    private static final int MAX_PAYLOAD_SIZE = 1 << 20;
 
     private static final Map<UUID, ProxyEntry> PROXIES = new HashMap<>();
 
@@ -79,6 +80,10 @@ public class BiggerOnTheInside implements ModEntrypoint {
 
     @Override
     public void onInitialize() {
+        // ip owns chunk/entity tracking for every server player, proxies would get nothing
+        if (DependencyChecker.hasPortals())
+            return;
+
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
         ServerTickEvents.END_SERVER_TICK.register(server -> sendChunks());
         ServerLifecycleEvents.SERVER_STOPPING.register(this::clearAll);

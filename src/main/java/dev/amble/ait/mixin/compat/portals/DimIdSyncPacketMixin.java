@@ -1,6 +1,5 @@
 package dev.amble.ait.mixin.compat.portals;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,9 +20,10 @@ import net.minecraft.world.level.Level;
 @Mixin(value = MiscNetworking.DimIdSyncPacket.class, remap = false)
 public class DimIdSyncPacketMixin {
 
+    // ip on neo has no dimlib, nothing refreshes client levels
     @Inject(method = "handleOnNetworkingThread", at = @At("TAIL"))
     private void updateLevels(CallbackInfo ci) {
-        Set<ResourceKey<Level>> dims = new HashSet<>(DimensionIntId.clientRecord.getDimIdSet());
+        Set<ResourceKey<Level>> dims = DimensionIntId.clientRecord.getDimIdSet();
 
         ((IEClientPacketListener_Misc) Minecraft.getInstance().getConnection()).ip_setLevels(dims);
         NeoForge.EVENT_BUS.post(new DimensionEvents.CLIENT_DIMENSION_UPDATE_EVENT(List.copyOf(dims)));

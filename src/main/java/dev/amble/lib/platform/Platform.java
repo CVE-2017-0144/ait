@@ -8,9 +8,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.LoadingModList;
 
-public final class Platform {
-
-    private Platform() {}
+public class Platform {
 
     private static IEventBus modBus;
 
@@ -24,18 +22,11 @@ public final class Platform {
 
     public static boolean isModLoaded(String modId) {
         // mixin plugins ask before the ModList exists
-        if (ModList.get() == null)
-            return LoadingModList.get().getModFileById(modId) != null;
-
-        return ModList.get().isLoaded(modId);
+        return LoadingModList.get().getModFileById(modId) != null;
     }
 
     public static boolean isClient() {
         return FMLEnvironment.dist == Dist.CLIENT;
-    }
-
-    public static boolean isServer() {
-        return !isClient();
     }
 
     public static Optional<String> modName(String modId) {

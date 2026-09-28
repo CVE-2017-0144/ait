@@ -55,6 +55,10 @@ Contributors:
 description = """
 Adventures In Time - Apparatus Vivi. Living machine. TARDIS from Doctor Who. Whatever you call it, it grows with you. It learns with you, and flies the way you fly. Sure, you might be the pilot, but despite that, it does with that what it may."""
 
+[modproperties.ait]
+"yumi:entrypoints" = { "lambdynlights:initializer" = "dev.amble.ait.compat.lambdynlights.LambDynLightsCompat" }
+
+# libs before ait, it expects their registries and schedulers up
 [[mixins]]
 config = "queue.mixins.json"
 

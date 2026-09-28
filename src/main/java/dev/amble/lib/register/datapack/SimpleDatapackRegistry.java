@@ -59,20 +59,8 @@ public abstract class SimpleDatapackRegistry<T extends Identifiable> extends Dat
         if (!this.sync)
             return;
 
-        AitNetworking.registerClientReceiver(this.packet, (client, handler, buf, responseSender) -> {
-            RegistryFriendlyByteBuf copy = new RegistryFriendlyByteBuf(buf.copy(), buf.registryAccess());
-            client.execute(() -> {
-                try {
-                    // skip if we've since disconnected/reconnected so stale server data
-                    // can't repopulate the registry after the fact
-                    if (client.getConnection() != handler)
-                        return;
-                    this.readFromServer(copy);
-                } finally {
-                    copy.release();
-                }
-            });
-        });
+        // already on client thread, another execute lands after the recipes packet
+        AitNetworking.registerClientReceiver(this.packet, (client, handler, buf, responseSender) -> this.readFromServer(buf));
 
         ClientEvents.DISCONNECT.register((client) -> {
             this.clearCache();

@@ -17,7 +17,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.amble.ait.AITMod;
-import dev.amble.ait.core.util.ItemNbt;
+import dev.amble.ait.core.AITDataComponents;
 import dev.amble.ait.module.planet.core.item.SpacesuitItem;
 import dev.amble.lib.api.Identifiable;
 import dev.amble.lib.util.ServerLifecycleHooks;
@@ -44,7 +44,7 @@ public record Planet(ResourceLocation dimension, float gravity, boolean hasOxyge
     public static double getOxygenInTank(LivingEntity entity) {
         ItemStack chestplate = entity.getItemBySlot(EquipmentSlot.CHEST);
         if (chestplate.getItem() instanceof SpacesuitItem) {
-            return ItemNbt.get(chestplate).getDouble(SpacesuitItem.OXYGEN_KEY);
+            return chestplate.getOrDefault(AITDataComponents.OXYGEN, 0.0);
         }
         return 0.0D;
     }

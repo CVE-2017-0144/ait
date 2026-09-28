@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import dev.amble.ait.core.AITDataComponents;
 import dev.amble.ait.core.AITItems;
 import dev.amble.ait.core.tardis.handler.StatsHandler;
 import dev.amble.ait.core.util.ItemNbt;
@@ -26,23 +27,19 @@ public class TardisMatrixItem extends Item {
     public static ItemStack randomize() {
         ItemStack stack = new ItemStack(AITItems.TARDIS_MATRIX);
         CompoundTag nbt = ItemNbt.get(stack);
-        nbt.putInt("r", (int) (Math.random() * 256));
-        ItemNbt.set(stack, nbt);
-        nbt.putInt("g", (int) (Math.random() * 256));
-        ItemNbt.set(stack, nbt);
-        nbt.putInt("b", (int) (Math.random() * 256));
-        ItemNbt.set(stack, nbt);
+        stack.set(AITDataComponents.R, (int) (Math.random() * 256));
+        stack.set(AITDataComponents.G, (int) (Math.random() * 256));
+        stack.set(AITDataComponents.B, (int) (Math.random() * 256));
         nbt.putString("name", StatsHandler.getRandomName());
         ItemNbt.set(stack, nbt);
         return stack;
     }
 
     public int[] getColor(ItemStack stack) {
-        CompoundTag nbt = ItemNbt.get(stack);
-        if (!nbt.contains("r") && !nbt.contains("g") && !nbt.contains("b")) {
+        if (!stack.has(AITDataComponents.R) && !stack.has(AITDataComponents.G) && !stack.has(AITDataComponents.B)) {
             return new int[]{255, 255, 255};
         }
-        return new int[]{nbt.getInt("r"), nbt.getInt("g"), nbt.getInt("b")};
+        return new int[]{stack.getOrDefault(AITDataComponents.R, 0), stack.getOrDefault(AITDataComponents.G, 0), stack.getOrDefault(AITDataComponents.B, 0)};
     }
 
     public static int colorToInt(int r, int g, int b) {

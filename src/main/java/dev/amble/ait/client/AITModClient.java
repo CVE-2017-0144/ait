@@ -210,6 +210,7 @@ public class AITModClient implements ClientModEntrypoint {
             WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.ExteriorGbufferInjection::run);
         }
 
+        // portal blits need a matching depth-stencil
         ClientEvents.CLIENT_STARTED.register(client -> AITRenderHelper.setIsStencilEnabled(client.getMainRenderTarget(), true));
 
         // @TODO idk why but this gets rid of other important stuff, not sure
@@ -405,8 +406,8 @@ public class AITModClient implements ClientModEntrypoint {
     public static void siegeItemPredicate() {
         ItemProperties.register(AITItems.HAMMER, ResourceLocation.parse("bricked"),
                 (itemStack, clientWorld, livingEntity, integer) -> {
-                    if (ItemNbt.get(itemStack).contains(SiegeTardisItem.CURRENT_TEXTURE_KEY)) {
-                        return ItemNbt.get(itemStack).getInt(SiegeTardisItem.CURRENT_TEXTURE_KEY);
+                    if (itemStack.has(AITDataComponents.SIEGE_CURRENT_TEXTURE)) {
+                        return itemStack.getOrDefault(AITDataComponents.SIEGE_CURRENT_TEXTURE, 0);
                     }
                     return 0.0f;
                 });
@@ -503,6 +504,7 @@ public class AITModClient implements ClientModEntrypoint {
         ClientRegistries.entityRenderer(AITEntityTypes.GALLIFREY_FALLS_PAINTING_ENTITY_TYPE, GallifreyanPaintingEntityRenderer::new);
         ClientRegistries.entityRenderer(AITEntityTypes.TRENZALORE_PAINTING_ENTITY_TYPE, TrenzalorePaintingEntityRenderer::new);
 //        if (isUnlockedOnThisDay(Calendar.DECEMBER, 26)) {
+//            EntityRendererRegistry.register(AITEntityTypes.COBBLED_SNOWBALL_TYPE, FlyingItemEntityRenderer::new);
 //        }
         ClientRegistries.entityRenderer(AITEntityTypes.RIFT_ENTITY, RiftEntityRenderer::new);
     }
@@ -836,7 +838,7 @@ public class AITModClient implements ClientModEntrypoint {
     public static void resourcepackRegister() {
 
         // Register builtin resourcepacks (thank you addie for your help)
-        BuiltinPacks.register(AITMod.MOD_ID, id("aitmenu"), true);
-        BuiltinPacks.register(AITMod.MOD_ID, id("bushy_leaves"), false);
+        BuiltinPacks.register(id("aitmenu"), true);
+        BuiltinPacks.register(id("bushy_leaves"), false);
     }
 }

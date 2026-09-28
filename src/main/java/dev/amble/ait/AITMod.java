@@ -195,6 +195,7 @@ public class AITMod implements ModEntrypoint {
         AITArgumentTypes.register();
         AITSounds.init();
         AITDimensions.init();
+        AITDataComponents.init();
 
         CustomTrades.register();
 
@@ -369,8 +370,8 @@ public class AITMod implements ModEntrypoint {
 
         LootEvents.MODIFY.register((id, tableBuilder, builtin, registries) -> {
             if (builtin
-                    && (id == BuiltInLootTables.NETHER_BRIDGE || id == BuiltInLootTables.DESERT_PYRAMID
-                    || id == BuiltInLootTables.VILLAGE_ARMORER || id == BuiltInLootTables.RUINED_PORTAL)
+                    && (id.equals(BuiltInLootTables.NETHER_BRIDGE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
+                    || id.equals(BuiltInLootTables.VILLAGE_ARMORER) || id.equals(BuiltInLootTables.RUINED_PORTAL))
                     || id.equals(BuiltInLootTables.END_CITY_TREASURE) || id.equals(BuiltInLootTables.SHIPWRECK_MAP)
                     || id.equals(BuiltInLootTables.ABANDONED_MINESHAFT) || id.equals(BuiltInLootTables.VILLAGE_CARTOGRAPHER)
                     || id.equals(BuiltInLootTables.VILLAGE_TOOLSMITH) || id.equals(BuiltInLootTables.SHIPWRECK_TREASURE)
@@ -378,7 +379,7 @@ public class AITMod implements ModEntrypoint {
                     || id.equals(BuiltInLootTables.BURIED_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY)
                     || id.equals(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY) || id.equals(BuiltInLootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY)
                     || id.equals(BuiltInLootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY) || id.equals(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE)
-                    || id.equals(BuiltInLootTables.FISHING_TREASURE) || id == BuiltInLootTables.DESERT_PYRAMID
+                    || id.equals(BuiltInLootTables.FISHING_TREASURE) || id.equals(BuiltInLootTables.DESERT_PYRAMID)
                     || id.equals(BuiltInLootTables.SIMPLE_DUNGEON) || id.equals(BuiltInLootTables.STRONGHOLD_LIBRARY)) {
 
 

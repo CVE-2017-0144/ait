@@ -10,11 +10,9 @@ import net.neoforged.neoforge.event.AddPackFindersEvent;
 
 import dev.amble.lib.platform.Platform;
 
-public final class BuiltinPacks {
+public class BuiltinPacks {
 
-    private BuiltinPacks() {}
-
-    public static void register(String modId, ResourceLocation id, boolean enabledByDefault) {
+    public static void register(ResourceLocation id, boolean enabledByDefault) {
         IEventBus modBus = Platform.modBus();
 
         if (modBus == null)
@@ -24,6 +22,7 @@ public final class BuiltinPacks {
             if (event.getPackType() != PackType.CLIENT_RESOURCES)
                 return;
 
+            // neoforge wants the jar-root path
             event.addPackFinders(ResourceLocation.fromNamespaceAndPath(id.getNamespace(),
                             "resourcepacks/" + id.getPath()), PackType.CLIENT_RESOURCES,
                     Component.translatable("resourcePack." + id.getPath() + ".name"),

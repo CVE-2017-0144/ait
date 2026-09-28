@@ -6,6 +6,7 @@ import dev.amble.ait.api.AITUseActions;
 import dev.amble.ait.api.ArtronHolderItem;
 import dev.amble.ait.api.tardis.link.LinkableItem;
 import dev.amble.ait.client.sounds.ClientSoundManager;
+import dev.amble.ait.core.AITDataComponents;
 import dev.amble.ait.core.AITSounds;
 import dev.amble.ait.core.blockentities.ArtronCollectorBlockEntity;
 import dev.amble.ait.core.item.sonic.SonicMode;
@@ -49,14 +50,12 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
         ItemStack stack = new ItemStack(this);
         CompoundTag nbt = ItemNbt.get(stack);
 
-        nbt.putInt(MODE_KEY, -1);
-        ItemNbt.set(stack, nbt);
+        stack.set(AITDataComponents.MODE, -1);
         nbt.putDouble(FUEL_KEY, getMaxFuel(stack));
         ItemNbt.set(stack, nbt);
 
         if (SonicRegistry.DEFAULT != null)
-            nbt.putString(SONIC_TYPE, SonicRegistry.DEFAULT.id().toString());
-            ItemNbt.set(stack, nbt);
+            stack.set(AITDataComponents.SONIC_TYPE, SonicRegistry.DEFAULT.id().toString());
 
         return stack;
     }
@@ -191,19 +190,15 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     public static SonicMode mode(ItemStack stack) {
-        CompoundTag nbtCompound = ItemNbt.get(stack);
-        return SonicMode.Modes.getAndWrap(nbtCompound.getInt(MODE_KEY));
+        return SonicMode.Modes.getAndWrap(stack.getOrDefault(AITDataComponents.MODE, 0));
     }
 
     public static void setMode(ItemStack stack, SonicMode mode) {
-        CompoundTag nbtCompound = ItemNbt.get(stack);
-        nbtCompound.putInt(MODE_KEY, mode.index());
-        ItemNbt.set(stack, nbtCompound);
+        stack.set(AITDataComponents.MODE, mode.index());
     }
 
     public static SonicSchema schema(ItemStack stack) {
-        CompoundTag nbt = ItemNbt.get(stack);
-        String rawId = nbt.getString(SONIC_TYPE);
+        String rawId = stack.getOrDefault(AITDataComponents.SONIC_TYPE, "");
 
         if (rawId == null)
             return SonicRegistry.DEFAULT;
@@ -215,9 +210,7 @@ public class SonicItem extends LinkableItem implements ArtronHolderItem {
     }
 
     public static void setSchema(ItemStack stack, ResourceLocation id) {
-        CompoundTag nbt = ItemNbt.get(stack);
-        nbt.putString(SONIC_TYPE, id.toString());
-        ItemNbt.set(stack, nbt);
+        stack.set(AITDataComponents.SONIC_TYPE, id.toString());
     }
 
     public static void setSchema(ItemStack stack, SonicSchema schema) {

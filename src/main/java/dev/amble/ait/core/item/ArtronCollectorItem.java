@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -13,9 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import dev.amble.ait.core.AITDataComponents;
 import dev.amble.ait.core.blockentities.ConsoleBlockEntity;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
-import dev.amble.ait.core.util.ItemNbt;
 import org.jetbrains.annotations.Nullable;
 
 public class ArtronCollectorItem extends Item {
@@ -30,40 +29,29 @@ public class ArtronCollectorItem extends Item {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = new ItemStack(this);
-        CompoundTag nbt = ItemNbt.get(stack);
-        nbt.putDouble(AU_LEVEL, 0);
-        ItemNbt.set(stack, nbt);
+        stack.set(AITDataComponents.AU_LEVEL, 0.0);
         return super.getDefaultInstance();
     }
 
     public static UUID getUuid(ItemStack stack) {
-        CompoundTag nbt = ItemNbt.get(stack);
-
-        if (nbt.contains(UUID_KEY))
-            return nbt.getUUID(UUID_KEY);
-        nbt.putUUID(UUID_KEY, UUID.randomUUID());
-        ItemNbt.set(stack, nbt);
-        return nbt.getUUID(UUID_KEY);
+        if (stack.has(AITDataComponents.ITEM_UUID))
+            return stack.get(AITDataComponents.ITEM_UUID);
+        stack.set(AITDataComponents.ITEM_UUID, UUID.randomUUID());
+        return stack.get(AITDataComponents.ITEM_UUID);
     }
 
     public static double getFuel(ItemStack stack) {
-        CompoundTag nbt = ItemNbt.get(stack);
-
-        if (nbt.contains(AU_LEVEL))
-            return nbt.getDouble(AU_LEVEL);
-        nbt.putDouble(AU_LEVEL, 0);
-        ItemNbt.set(stack, nbt);
+        if (stack.has(AITDataComponents.AU_LEVEL))
+            return stack.getOrDefault(AITDataComponents.AU_LEVEL, 0.0);
+        stack.set(AITDataComponents.AU_LEVEL, 0.0);
         return 0d;
     }
 
     public static double addFuel(ItemStack stack, double fuel) {
-        CompoundTag nbt = ItemNbt.get(stack);
         double currentFuel = getFuel(stack);
-        nbt.putDouble(AU_LEVEL, getFuel(stack) <= COLLECTOR_MAX_FUEL ? getFuel(stack) + fuel : COLLECTOR_MAX_FUEL);
-        ItemNbt.set(stack, nbt);
+        stack.set(AITDataComponents.AU_LEVEL, getFuel(stack) <= COLLECTOR_MAX_FUEL ? getFuel(stack) + fuel : COLLECTOR_MAX_FUEL);
         if (getFuel(stack) > COLLECTOR_MAX_FUEL)
-            nbt.putDouble(AU_LEVEL, COLLECTOR_MAX_FUEL);
-            ItemNbt.set(stack, nbt);
+            stack.set(AITDataComponents.AU_LEVEL, (double) COLLECTOR_MAX_FUEL);
         if (getFuel(stack) == COLLECTOR_MAX_FUEL)
             return fuel - (COLLECTOR_MAX_FUEL - currentFuel);
         return 0;
@@ -75,8 +63,6 @@ public class ArtronCollectorItem extends Item {
         Level world = context.getLevel();
         BlockPos clickedPos = context.getClickedPos();
         ItemStack cellItemStack = context.getItemInHand();
-        CompoundTag nbt = ItemNbt.get(cellItemStack);
-
         if (world.isClientSide())
             return InteractionResult.SUCCESS;
 
@@ -85,17 +71,15 @@ public class ArtronCollectorItem extends Item {
                 if (exterior.tardis().isEmpty())
                     return InteractionResult.FAIL;
 
-                double residual = exterior.tardis().get().addFuel(nbt.getDouble(AU_LEVEL));
-                nbt.putDouble(AU_LEVEL, residual);
-                ItemNbt.set(cellItemStack, nbt);
+                double residual = exterior.tardis().get().addFuel(cellItemStack.getOrDefault(AITDataComponents.AU_LEVEL, 0.0));
+                cellItemStack.set(AITDataComponents.AU_LEVEL, residual);
                 return InteractionResult.CONSUME;
             } else if (world.getBlockEntity(clickedPos) instanceof ConsoleBlockEntity console) {
                 if (console.tardis().isEmpty())
                     return InteractionResult.FAIL;
 
-                double residual = console.tardis().get().addFuel(nbt.getDouble(AU_LEVEL));
-                nbt.putDouble(AU_LEVEL, residual);
-                ItemNbt.set(cellItemStack, nbt);
+                double residual = console.tardis().get().addFuel(cellItemStack.getOrDefault(AITDataComponents.AU_LEVEL, 0.0));
+                cellItemStack.set(AITDataComponents.AU_LEVEL, residual);
                 return InteractionResult.CONSUME;
             }
             return InteractionResult.FAIL;
@@ -106,8 +90,7 @@ public class ArtronCollectorItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag context) {
-        CompoundTag tag = ItemNbt.get(stack);
-        String text = tag.contains(AU_LEVEL) ? "" + tag.getDouble(AU_LEVEL) : "0.0";
+        String text = stack.has(AITDataComponents.AU_LEVEL) ? "" + stack.getOrDefault(AITDataComponents.AU_LEVEL, 0.0) : "0.0";
         tooltip.add(Component.literal(text + " / " + COLLECTOR_MAX_FUEL + ".0").withStyle(ChatFormatting.BLUE));
     }
 }

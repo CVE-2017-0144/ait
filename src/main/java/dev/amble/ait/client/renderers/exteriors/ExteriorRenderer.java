@@ -49,6 +49,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.*;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEntityRenderer<T> {
@@ -430,5 +431,10 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
     @Override
     public boolean shouldRender(ExteriorBlockEntity exteriorBlockEntity, Vec3 vec3d) {
         return Vec3.atCenterOf(exteriorBlockEntity.getBlockPos()).multiply(1.0, 0.0, 1.0).closerThan(vec3d.multiply(1.0, 0.0, 1.0), this.getViewDistance());
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

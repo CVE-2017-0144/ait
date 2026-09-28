@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.world.phys.AABB;
 public class PowerConverterRenderer<T extends PowerConverterBlock.BlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -41,5 +41,10 @@ public class PowerConverterRenderer<T extends PowerConverterBlock.BlockEntity> i
         this.model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

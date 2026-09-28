@@ -30,8 +30,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-
 public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntityRenderer<T> {
 
     private ClientConsoleVariantSchema variant;
@@ -290,5 +290,10 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
     @Override
     public boolean shouldRender(ConsoleBlockEntity consoleBlockEntity, Vec3 vec3d) {
         return Vec3.atCenterOf(consoleBlockEntity.getBlockPos()).multiply(1.0, 0.0, 1.0).closerThan(vec3d.multiply(1.0, 0.0, 1.0), this.getViewDistance());
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

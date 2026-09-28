@@ -8,10 +8,10 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.amble.ait.core.blockentities.PottedSonicScrewdriverBlockEntity;
-
 public class PottedSonicScrewdriverRenderer implements BlockEntityRenderer<PottedSonicScrewdriverBlockEntity> {
     private static final float SCALE = 0.5f;
     private static final float BASE_Y = 4f / 16f;
@@ -43,5 +43,10 @@ public class PottedSonicScrewdriverRenderer implements BlockEntityRenderer<Potte
             itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getLevel(), 0);
             matrices.popPose();
         }
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(PottedSonicScrewdriverBlockEntity blockEntity) {
+        return AABB.INFINITE;
     }
 }

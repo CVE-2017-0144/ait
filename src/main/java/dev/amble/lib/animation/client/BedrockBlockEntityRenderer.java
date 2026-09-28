@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-
+import net.minecraft.world.phys.AABB;
 @OnlyIn(Dist.CLIENT)
 public class BedrockBlockEntityRenderer<T extends BlockEntity & AnimatedBlockEntity> implements BlockEntityRenderer<T> {
 
@@ -56,5 +56,10 @@ public class BedrockBlockEntityRenderer<T extends BlockEntity & AnimatedBlockEnt
 		}
 		return this.model = new BedrockEntityModel<>(ref.get().orElseThrow(() ->
 				new IllegalStateException("BedrockModel " + ref.id() + " not found for block entity " + entity)));
+	}
+
+	@Override
+	public AABB getRenderBoundingBox(T blockEntity) {
+		return AABB.INFINITE;
 	}
 }

@@ -11,8 +11,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import org.joml.Vector3f;
-
 public class GenericSubSystemRenderer<T extends GenericStructureSystemBlockEntity> implements BlockEntityRenderer<T> {
     private final GenericSubSystemModel model;
     private static final Minecraft client = Minecraft.getInstance();
@@ -52,5 +52,10 @@ public class GenericSubSystemRenderer<T extends GenericStructureSystemBlockEntit
         }
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

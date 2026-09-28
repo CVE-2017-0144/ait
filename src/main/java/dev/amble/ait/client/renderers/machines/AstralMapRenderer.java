@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-
+import net.minecraft.world.phys.AABB;
 public class AstralMapRenderer<T extends AstralMapBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -54,5 +54,10 @@ public class AstralMapRenderer<T extends AstralMapBlockEntity> implements BlockE
 
         this.model.void_cube.render(matrices, vertexConsumers.getBuffer(RenderType.endGateway()), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

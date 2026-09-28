@@ -20,7 +20,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.FormattedCharSequence;
-
+import net.minecraft.world.phys.AABB;
 public class WaypointBankBlockEntityRenderer<T extends WaypointBankBlockEntity> implements BlockEntityRenderer<T> {
 
     private static final Font textRenderer = Minecraft.getInstance().font;
@@ -147,5 +147,10 @@ public class WaypointBankBlockEntityRenderer<T extends WaypointBankBlockEntity> 
 
     private static BakedModel cartridgeModel() {
         return Minecraft.getInstance().getModelManager().getModel(WAYPOINT);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

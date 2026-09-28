@@ -24,7 +24,6 @@
     "lookup.WorldInvoker",
     "networking.ServerPlayerEntityMixin",
     "networking.ServerWorldMixin",
-    "networking.ThreadedAnvilChunkStorageMixin",
     "rwf.DismountEntityMixin",
     "rwf.LivingEntityAccessor",
     "server.BedInTardisMixin",

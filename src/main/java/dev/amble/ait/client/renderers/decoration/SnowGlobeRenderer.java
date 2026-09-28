@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 
 public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockEntityRenderer<T> {
     public static final ResourceLocation SNOW_GLOBE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -46,5 +47,10 @@ public class SnowGlobeRenderer<T extends SnowGlobeBlockEntity> implements BlockE
 
         matrices.popPose();
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

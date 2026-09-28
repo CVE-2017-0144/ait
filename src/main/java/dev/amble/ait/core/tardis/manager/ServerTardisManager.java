@@ -23,6 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.ChunkWatchEvent;
 
 public class ServerTardisManager extends DeprecatedServerTardisManager {
 
@@ -49,6 +51,9 @@ public class ServerTardisManager extends DeprecatedServerTardisManager {
 
             this.sendTardisAll(player, tardisSet);
         }));
+
+        NeoForge.EVENT_BUS.addListener(ChunkWatchEvent.Sent.class,
+                event -> TardisEvents.SYNC_TARDIS.invoker().sync(event.getPlayer(), event.getPos()));
 
         ServerConnectionEvents.JOIN.register((player, server)
                 -> this.sendTardisAll(player, NetworkUtil.findLinkedItems(player)));

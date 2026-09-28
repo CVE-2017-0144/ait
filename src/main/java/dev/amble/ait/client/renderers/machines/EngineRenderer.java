@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.AABB;
 import org.joml.Vector3f;
-
 // Made with Blockbench 4.8.3
 // Exported for Minecraft version 1.17+ for Yarn
 // Paste this class into your mod and generate all required imports
@@ -57,5 +57,10 @@ public class EngineRenderer<T extends EngineBlockEntity> implements BlockEntityR
         }
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

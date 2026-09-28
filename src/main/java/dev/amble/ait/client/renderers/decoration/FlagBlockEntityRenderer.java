@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.world.phys.AABB;
 public class FlagBlockEntityRenderer<T extends FlagBlockEntity> implements BlockEntityRenderer<T> {
     public static final ResourceLocation FLAG_TEXTURE = AITMod.id("textures/blockentities/decoration/us_flag.png");
 
@@ -31,5 +31,10 @@ public class FlagBlockEntityRenderer<T extends FlagBlockEntity> implements Block
         matrices.mulPose(Axis.YP.rotationDegrees(k));
         flagModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutoutNoCull(FLAG_TEXTURE)), light, overlay, 0xFFFFFFFF);
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

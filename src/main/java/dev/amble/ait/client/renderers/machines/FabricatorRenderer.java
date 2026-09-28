@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
@@ -118,5 +119,10 @@ public class FabricatorRenderer<T extends FabricatorBlockEntity> implements Bloc
         renderer.drawInBatch8xOutline(text.getVisualOrderText(), 0, 40, 0x60eaf0, 0x108fb3,
                 matrices.last().pose(), vertexConsumers, 0xF000F0);
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

@@ -24,7 +24,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.world.phys.AABB;
 public class WallMonitorRenderer<T extends WallMonitorBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation PLAQUE_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -139,5 +139,10 @@ public class WallMonitorRenderer<T extends WallMonitorBlockEntity> implements Bl
                 matrices.last().pose(), vertexConsumers, 0xF000F0);
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

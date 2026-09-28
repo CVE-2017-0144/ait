@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-
+import net.minecraft.world.phys.AABB;
 public class FoodMachineRenderer<T extends FoodMachineBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -49,4 +49,8 @@ public class FoodMachineRenderer<T extends FoodMachineBlockEntity> implements Bl
         matrices.popPose();
     }
 
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
+    }
 }

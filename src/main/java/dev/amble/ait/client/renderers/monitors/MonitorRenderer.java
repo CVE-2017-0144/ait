@@ -27,7 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-
+import net.minecraft.world.phys.AABB;
 public class MonitorRenderer<T extends MonitorBlockEntity> implements BlockEntityRenderer<T> {
 
 
@@ -142,5 +142,10 @@ public class MonitorRenderer<T extends MonitorBlockEntity> implements BlockEntit
                     matrices.last().pose(), vertexConsumers, 0xF000F0);
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

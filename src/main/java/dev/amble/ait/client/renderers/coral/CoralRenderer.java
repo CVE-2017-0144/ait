@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.world.phys.AABB;
 public class CoralRenderer<T extends CoralBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation CORAL_GROWTH_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -48,5 +48,10 @@ public class CoralRenderer<T extends CoralBlockEntity> implements BlockEntityRen
             case 5, 6, 7 -> coralModel.six;
             default -> coralModel.one;
         };
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

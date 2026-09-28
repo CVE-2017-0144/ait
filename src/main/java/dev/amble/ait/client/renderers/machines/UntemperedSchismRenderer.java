@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.world.phys.AABB;
 public class UntemperedSchismRenderer<T extends UntemperedSchismBlockEntity> implements BlockEntityRenderer<T> {
 
     public static final ResourceLocation UNTEMPERED_SCHISM_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
@@ -41,5 +41,10 @@ public class UntemperedSchismRenderer<T extends UntemperedSchismBlockEntity> imp
         this.untemperedSchismModel.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityTranslucent(UNTEMPERED_SCHISM_TEXTURE)), light, overlay, 0xFFFFFFFF);
 
         matrices.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(T blockEntity) {
+        return AABB.INFINITE;
     }
 }

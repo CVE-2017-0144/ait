@@ -27,6 +27,10 @@ public class PortalDataManager {
     private static final Map<UUID, PortalData> map = new HashMap<>();
 
     private static final Map<UUID, PortalParticleManager> particles = new HashMap<>();
+    private static final Map<UUID, Long> lastPacket = new HashMap<>();
+
+    // longer than the server's 30s grace
+    private static final long STALE_NANOS = 60_000_000_000L;
     private static final RandomSource random = RandomSource.create();
 
     public static void init() {
@@ -50,7 +54,14 @@ public class PortalDataManager {
             long idleReclaimNanos = (long) (dev.amble.ait.client.AITModClient.CONFIG != null
                     ? dev.amble.ait.client.AITModClient.CONFIG.botiIdleReclaimSeconds : 10) * 1_000_000_000L;
 
+            long now = System.nanoTime();
+
             for (PortalData data : new ArrayList<>(map.values())) {
+                if (now - lastPacket.getOrDefault(data.id(), now) > STALE_NANOS) {
+                    free(data.id());
+                    continue;
+                }
+
                 step(data, "chunk updates", d -> d.world().pollLightUpdates());
 
                 step(data, "clock", d -> d.world().tickTime());
@@ -127,6 +138,7 @@ public class PortalDataManager {
 
         free(id);
         map.put(id, PortalData.create(id, dimension, dimensionType));
+        lastPacket.put(id, System.nanoTime());
     }
 
     public static void reset() {
@@ -135,6 +147,7 @@ public class PortalDataManager {
 
         map.clear();
         particles.clear();
+        lastPacket.clear();
         BOTI.LAST_RENDERED_DOOR.clear();
         BOTI.LAST_RENDERED_EXTERIOR.clear();
     }
@@ -145,6 +158,7 @@ public class PortalDataManager {
             data.close();
 
         particles.remove(id);
+        lastPacket.remove(id);
     }
 
     public static PortalParticleManager particles(UUID id) {
@@ -170,6 +184,7 @@ public class PortalDataManager {
         }
 
         try {
+            lastPacket.put(id, System.nanoTime());
             PortalData data = handle0(id, packet);
             PortalEvents.UPDATE.invoker().onPortalUpdate(data);
         } catch (Exception var3) {

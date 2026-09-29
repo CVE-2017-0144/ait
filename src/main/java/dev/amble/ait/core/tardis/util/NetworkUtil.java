@@ -121,7 +121,8 @@ public class NetworkUtil {
             return result;
 
         ChunkPos chunkPos = new ChunkPos(exteriorPos.getPos());
-        return Stream.concat(result, PlayerLookup.tracking(exteriorPos.getWorld(), chunkPos).stream());
+        // ip counts insiders as tracking the exterior too
+        return Stream.concat(result, PlayerLookup.tracking(exteriorPos.getWorld(), chunkPos).stream()).distinct();
     }
 
     /**

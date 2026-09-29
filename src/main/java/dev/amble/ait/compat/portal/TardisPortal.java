@@ -1,15 +1,19 @@
 package dev.amble.ait.compat.portal;
 
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import dev.amble.ait.api.tardis.link.v2.TardisRef;
 import dev.amble.ait.client.AITModClient;
+import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
 import dev.amble.ait.core.tardis.Tardis;
+import dev.amble.ait.core.tardis.handler.DoorHandler;
 import dev.amble.ait.core.util.EntityRef;
 import qouteall.imm_ptl.core.portal.Portal;
 
@@ -18,6 +22,9 @@ public class TardisPortal extends Portal {
     public static EntityType<TardisPortal> ENTITY_TYPE = createPortalEntityType(TardisPortal::new);
 
     private TardisRef tardis;
+
+    private ExteriorBlockEntity exterior;
+    private boolean lookedUp;
 
     public TardisPortal(Tardis tardis, Level world) {
         this(ENTITY_TYPE, world);
@@ -31,7 +38,26 @@ public class TardisPortal extends Portal {
     // ip calls this server side too (isInteractableBy) and there's no AITModClient on a dedi
     @Override
     public boolean isVisible() {
-        return super.isVisible() && (!this.level().isClientSide() || AITModClient.CONFIG.allowPortalsBoti);
+        return super.isVisible() && (!this.level().isClientSide() || AITModClient.CONFIG.allowPortalsBoti && !this.doorsNearlyShut());
+    }
+
+    // leaves cross the portal plane right before shut
+    private boolean doorsNearlyShut() {
+        if (!this.lookedUp || this.exterior != null && this.exterior.isRemoved()) {
+            // can run before the spawn data
+            if (this.getAxisW() == null)
+                return false;
+
+            this.lookedUp = true;
+            Vec3 pos = this.getOriginPos().subtract(this.getNormal().scale(0.5)).subtract(0, this.getHeight() / 2, 0);
+            this.exterior = this.level().getBlockEntity(BlockPos.containing(pos)) instanceof ExteriorBlockEntity be ? be : null;
+        }
+
+        if (this.exterior == null || !this.exterior.isLinked())
+            return false;
+
+        DoorHandler door = this.exterior.tardis().get().door();
+        return door.getLeftRot() < 0.15f && door.getRightRot() < 0.15f;
     }
 
     @Override

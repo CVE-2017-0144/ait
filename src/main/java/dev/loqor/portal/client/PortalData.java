@@ -380,7 +380,7 @@ public record PortalData(UUID id, LevelRenderer renderer, ClientLevel world, Wor
         Holder<DimensionType> typeEntry = old.registryAccess()
                 .registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(dimensionType);
 
-        LevelRenderer worldRenderer = new LevelRenderer(
+        LevelRenderer worldRenderer = new PortalLevelRenderer(
                 client,
                 client.getEntityRenderDispatcher(),
                 client.getBlockEntityRenderDispatcher(),

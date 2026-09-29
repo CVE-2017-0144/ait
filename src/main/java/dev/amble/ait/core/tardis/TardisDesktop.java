@@ -51,6 +51,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.status.ChunkType;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -205,11 +206,13 @@ public class TardisDesktop extends TardisComponent {
         }
 
         QueuedStructureTemplate template = new QueuedTardisStructureTemplate(optional.get(), tardis);
+        BoundingBox box = optional.get().getBoundingBox(SETTINGS, BlockPos.containing(corners.getBox().getCenter()));
 
         Optional<ActionQueue> optionalQueue = template.place(world, BlockPos.containing(corners.getBox().getCenter()),
                 BlockPos.containing(corners.getBox().getCenter()), SETTINGS, world.getRandom(), Block.UPDATE_KNOWN_SHAPE);
 
-        optionalQueue.ifPresentOrElse(queue -> queue.thenRun(
+        // nothing holds these, the interior unloads them mid generation
+        optionalQueue.ifPresentOrElse(queue -> queue.firstRun(() -> this.holdChunks(world, box)).thenRun(
                         () -> AITMod.LOGGER.warn("Time taken to generate interior: {}ms",
                                 System.currentTimeMillis() - start)),
                 () -> AITMod.LOGGER.error("Failed to generate interior for {}",
@@ -273,6 +276,21 @@ public class TardisDesktop extends TardisComponent {
             this.consolePos.clear();
             this.doorPos = null;
         });
+    }
+
+    private void holdChunks(ServerLevel world, BoundingBox box) {
+        if (this.heldChunks == null)
+            this.heldChunks = new ArrayList<>();
+
+        ServerChunkCache chunks = world.getChunkSource();
+
+        for (int x = SectionPos.blockToSectionCoord(box.minX()); x <= SectionPos.blockToSectionCoord(box.maxX()); x++) {
+            for (int z = SectionPos.blockToSectionCoord(box.minZ()); z <= SectionPos.blockToSectionCoord(box.maxZ()); z++) {
+                ChunkPos pos = new ChunkPos(x, z);
+                chunks.addRegionTicket(CHANGING_TICKET, pos, 0, pos);
+                this.heldChunks.add(pos);
+            }
+        }
     }
 
     private static void include(int[] bounds, ChunkPos pos) {

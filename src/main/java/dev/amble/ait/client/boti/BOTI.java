@@ -183,6 +183,7 @@ public class BOTI {
         int drawFbo;
         final int[] viewport = new int[4];
         boolean stencilEnabled;
+        int stencilFunc, stencilRef, stencilValueMask, stencilWriteMask, stencilFail, stencilZFail, stencilZPass;
         boolean depthMask;
     }
 
@@ -190,7 +191,15 @@ public class BOTI {
         BotiCompositeState s = new BotiCompositeState();
         s.drawFbo = currentDrawFbo();
         GL11.glGetIntegerv(GL11.GL_VIEWPORT, s.viewport);
+        // immersive portals clips its portal views with this, it has to come back as it was
         s.stencilEnabled = GL11.glIsEnabled(GL11.GL_STENCIL_TEST);
+        s.stencilFunc = GL11.glGetInteger(GL11.GL_STENCIL_FUNC);
+        s.stencilRef = GL11.glGetInteger(GL11.GL_STENCIL_REF);
+        s.stencilValueMask = GL11.glGetInteger(GL11.GL_STENCIL_VALUE_MASK);
+        s.stencilWriteMask = GL11.glGetInteger(GL11.GL_STENCIL_WRITEMASK);
+        s.stencilFail = GL11.glGetInteger(GL11.GL_STENCIL_FAIL);
+        s.stencilZFail = GL11.glGetInteger(GL11.GL_STENCIL_PASS_DEPTH_FAIL);
+        s.stencilZPass = GL11.glGetInteger(GL11.GL_STENCIL_PASS_DEPTH_PASS);
         s.depthMask = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK);
         return s;
     }
@@ -198,10 +207,13 @@ public class BOTI {
     public static void endBotiComposite(BotiCompositeState s) {
         GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, s.drawFbo);
         RenderSystem.viewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
-        GL11.glStencilMask(0xFF);
-        GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        if (!s.stencilEnabled) GL11.glDisable(GL11.GL_STENCIL_TEST);
+        GL11.glStencilMask(s.stencilWriteMask);
+        GL11.glStencilFunc(s.stencilFunc, s.stencilRef, s.stencilValueMask);
+        GL11.glStencilOp(s.stencilFail, s.stencilZFail, s.stencilZPass);
+        if (s.stencilEnabled)
+            GL11.glEnable(GL11.GL_STENCIL_TEST);
+        else
+            GL11.glDisable(GL11.GL_STENCIL_TEST);
         RenderSystem.depthMask(s.depthMask);
         RenderSystem.enableCull();
     }

@@ -3,13 +3,14 @@
 The manifest is scenario, dump path, then the perf-verify line recorded at profile time, so a
 row can be checked against the state it was actually measured in.
 """
+import os
 import sys
 
 sys.path.insert(0, "scripts/perf")
 from parse_dump import parse
 
 rows = []
-for line in open("scripts/perf/manifest.tsv", encoding="utf8"):
+for line in open(os.path.join(os.environ.get("MANIFEST_DIR", "run/debug/perf"), "manifest.tsv"), encoding="utf8"):
     parts = line.rstrip("\n").split("\t")
     if len(parts) < 2:
         continue

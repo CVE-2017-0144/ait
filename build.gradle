@@ -53,6 +53,7 @@ neoForge {
         // needs its own, or the two race on run/logs/latest.log and run/debug/profiling/.
         server {
             server()
+            programArgument '--nogui'
             gameDirectory = project.file('run/server')
         }
 

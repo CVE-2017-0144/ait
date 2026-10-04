@@ -26,7 +26,7 @@ class Versioning {
 
     static final String BUILD_RELEASE = "release"
     static final String BUILD_LOCAL = "local"
-    static final String BUILD = "dev"
+    static final String BUILD = "build"
 
     static Optional<String> getBranch() {
         return CI.branch()

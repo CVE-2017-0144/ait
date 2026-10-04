@@ -110,7 +110,8 @@ def main():
         f.write(new + '\n')
     ps.append(os.path.relpath(MARKER, sync.ROOT).replace(os.sep, '/'))
     sh('git', 'add', '-A', '--pathspec-from-file=-', '--pathspec-file-nul', input='\0'.join(ps))
-    name, mail = sh('git', 'log', '-1', '--format=%an%n%ae').split('\n')[:2]
+    who = [l.split('\x1f') for l in sh('git', 'log', '--format=%cn%x1f%ce').splitlines()]
+    name, mail = next(w for w in who if w[0] != 'GitHub')
     sh('git', '-c', f'user.name={name}', '-c', f'user.email={mail}', 'commit', '-qm', f'sync upstream {b9}..{n9}')
     head = f'sync/{n9}'
     sh('git', 'push', '-fq', 'origin', f'HEAD:refs/heads/{head}')

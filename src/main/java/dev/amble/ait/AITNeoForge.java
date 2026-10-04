@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
 
 import dev.amble.ait.client.AITModClient;
 import dev.amble.ait.client.config.AITModMenu;
@@ -49,7 +50,8 @@ public final class AITNeoForge {
                 () -> new AITModDataGenerator()
                         .onInitializeDataGenerator(new PlatformDataGenerator(event, AITMod.MOD_ID))));
 
-        if (Platform.isClient())
+        // fabric never runs client init in datagen, there is no Minecraft yet
+        if (Platform.isClient() && !DatagenModLoader.isRunningDataGen())
             RegistryFreeze.withRegistriesUnfrozen(() -> Client.init(container));
     }
 

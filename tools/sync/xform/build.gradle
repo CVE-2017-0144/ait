@@ -1,0 +1,23 @@
+plugins {
+    id "application"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("org.openrewrite:rewrite-bom:8.90.4")
+    implementation "org.openrewrite:rewrite-java"
+    implementation "org.openrewrite:rewrite-java-17"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = "port.xform.Main"
+}

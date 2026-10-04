@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
 license = "LGPL-3.0"
-issueTrackerURL = "https://github.com/amblelabs/ait/issues"
+issueTrackerURL = "https://github.com/CVE-2017-0144/ait/issues"
 
 [[mods]]
 modId = "ait"

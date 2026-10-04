@@ -15,7 +15,6 @@ jobs:
     permissions:
       actions: write
     env:
-      GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
       GH_REPO: ${{ github.repository }}
     steps:
       - name: only ours
@@ -25,11 +24,11 @@ jobs:
           gh workflow list --all --json id,path,state -q '.[] | select(.state == "active") | "\(.id) \(.path)"' | while read -r id path; do
             case "$path" in
               .github/workflows/upstream.yml|.github/workflows/neoforge.yml) ;;
-              *) gh workflow disable "$id" ;;
+              *) gh workflow disable "$id" || true ;;
             esac
           done
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: neoforge
           fetch-depth: 0
@@ -37,6 +36,8 @@ jobs:
 
       - name: mirror
         id: up
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
           git fetch -q --no-tags https://github.com/amblelabs/ait.git main
           git push -q origin FETCH_HEAD:refs/heads/main
@@ -47,16 +48,17 @@ jobs:
           python3 tools/sync/pr.py "$from" "$to" --check >> "$GITHUB_OUTPUT"
 
       - if: steps.up.outputs.run == '1'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
 
       - if: steps.up.outputs.run == '1'
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - if: steps.up.outputs.run == '1'
         env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
           FROM: ${{ steps.up.outputs.from }}
           TO: ${{ steps.up.outputs.to }}
         run: python3 tools/sync/pr.py "$FROM" "$TO"

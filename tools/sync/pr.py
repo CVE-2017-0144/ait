@@ -132,7 +132,7 @@ def main():
             for p, k in items:
                 d = change(sha, p)
                 if d and size + len(d) < BODY:
-                    body += ['', f'<details><summary>{p}</summary>', '', '```diff', d, '```', '', '</details>']
+                    body += ['', f'<details><summary>{p}</summary>', '', '````diff', d, '````', '', '</details>']
                     size += len(d)
             key = f'upstream {sha[:9]}'
             n, still = issue(key, f'{key}: {title}'[:250], '\n'.join(body) + '\n', ['upstream'] + sorted({k for _, k in items}))
@@ -151,15 +151,17 @@ def main():
         txt += ['', 'by hand: ' + ' '.join(f'#{n}' for n in left)]
     txt += [''] + [f'closes #{n}' for n in cl]
     body = '\n'.join(txt) + '\n'
+    if len(body) > BODY:
+        body = '\n'.join(txt[:1] + [f'{len(lines)} commits, see the issues'] + txt[2 + len(lines):]) + '\n'
 
-    prs = json.loads(gh('pr', 'list', '--state', 'open', '--json', 'number,headRefName'))
+    prs = json.loads(gh('pr', 'list', '--state', 'open', '--json', 'number,headRefName,isCrossRepository'))
     mine = next((p['number'] for p in prs if p['headRefName'] == head), None)
     if mine:
         gh('pr', 'edit', str(mine), '--body-file', '-', input=body)
     else:
         mine = num(gh('pr', 'create', '--base', 'neoforge', '--head', head, '--title', f'sync upstream {b9}..{n9}', '--body-file', '-', input=body))
     for p in prs:
-        if p['headRefName'].startswith('sync/') and p['number'] != mine:
+        if p['headRefName'].startswith('sync/') and not p['isCrossRepository'] and p['number'] != mine:
             gh('pr', 'close', str(p['number']), '--comment', f'superseded by #{mine}', '--delete-branch')
 
 

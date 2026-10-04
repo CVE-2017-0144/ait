@@ -30,9 +30,6 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - if: startsWith(github.ref, 'refs/tags/')
-        run: echo GIT_BRANCH=release >> "$GITHUB_ENV"
-
       - run: ./gradlew runData
 
       - run: ./gradlew build
@@ -98,4 +95,11 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" *.jar --title "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          jar=$(ls *.jar | grep -v sources)
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$jar" --clobber
+          else
+            pre=; case "$GITHUB_REF_NAME" in *-*) pre=--prerelease ;; esac
+            gh release create "$GITHUB_REF_NAME" "$jar" --title "$GITHUB_REF_NAME" --generate-notes $pre
+          fi

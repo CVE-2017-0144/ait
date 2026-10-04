@@ -13,13 +13,13 @@ Port bugs go here, not upstream. If it happens on Fabric too, it's an upstream b
 
 ### Download
 
-Tagged builds are under [releases](https://github.com/CVE-2017-0144/ait/releases), every push to `neoforge` builds on [actions](https://github.com/CVE-2017-0144/ait/actions/workflows/neoforge.yml).
+Builds are on [releases](https://github.com/CVE-2017-0144/ait/releases) and [actions](https://github.com/CVE-2017-0144/ait/actions/workflows/neoforge.yml). While the port is in beta those are dev builds, beta locked like upstream's, so only AmbleLabs beta testers can play them.
 
-Needs NeoForge 21.1.x (MC 1.21.1) and [YACL](https://modrinth.com/mod/yacl) 3.8+. [Immersive Portals](https://modrinth.com/mod/immersiveportals) 6.0.7 is optional, with it the doors are real portals. Works with the NeoForge builds of [Sodium](https://modrinth.com/mod/sodium) and [Iris](https://modrinth.com/mod/iris).
+Needs NeoForge 21.1.x (MC 1.21.1) and [YACL](https://modrinth.com/mod/yacl) 3.8+. [Immersive Portals](https://modrinth.com/mod/immersive-portals-neoforge) 6.0.7 is optional, with it the doors are real portals. Works with the NeoForge builds of [Sodium](https://modrinth.com/mod/sodium) and [Iris](https://modrinth.com/mod/iris).
 
 ### Building
 
-Java 21, `./gradlew build`, the jar ends up in `build/libs`.
+Java 21, `./gradlew runData build`, the jar ends up in `build/libs`.
 
 ### Upstream
 

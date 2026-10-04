@@ -36,10 +36,14 @@ jobs:
 
       - run: python3 tools/sync/test_sync.py
 
-      - uses: actions/upload-artifact@v7
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v7
         with:
           name: ait
-          path: build/libs/*.jar
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          retention-days: 1
 
       - name: server
         run: |
@@ -86,7 +90,11 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:
+      actions: write
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -98,16 +106,20 @@ jobs:
           name: ait
           path: dist
 
-      - env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          jar=$(ls dist/*.jar | grep -v sources)
+      - run: |
+          jar=$(ls dist/*.jar)
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" "$jar" --clobber
           else
             git fetch -q --force --tags origin
             python3 tools/notes.py "$GITHUB_REF_NAME" > notes.md
-            pre=; case "$GITHUB_REF_NAME" in *-*) pre=--prerelease ;; esac
-            gh release create "$GITHUB_REF_NAME" "$jar" --title "$GITHUB_REF_NAME" --notes-file notes.md $pre
+            case "$GITHUB_REF_NAME" in
+              *dev*) how=--draft ;;
+              *-*) how=--prerelease ;;
+              *) how= ;;
+            esac
+            gh release create "$GITHUB_REF_NAME" "$jar" --title "$GITHUB_REF_NAME" --notes-file notes.md $how
           fi
+
+      - if: always()
+        run: gh api "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/artifacts" -q '.artifacts[].id' | while read -r id; do gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id"; done

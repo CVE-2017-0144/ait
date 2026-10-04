@@ -88,18 +88,26 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
       - uses: actions/download-artifact@v8
         with:
           name: ait
+          path: dist
 
       - env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          jar=$(ls *.jar | grep -v sources)
+          jar=$(ls dist/*.jar | grep -v sources)
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" "$jar" --clobber
           else
+            git fetch -q --force --tags origin
+            python3 tools/notes.py "$GITHUB_REF_NAME" > notes.md
             pre=; case "$GITHUB_REF_NAME" in *-*) pre=--prerelease ;; esac
-            gh release create "$GITHUB_REF_NAME" "$jar" --title "$GITHUB_REF_NAME" --generate-notes $pre
+            gh release create "$GITHUB_REF_NAME" "$jar" --title "$GITHUB_REF_NAME" --notes-file notes.md $pre
           fi

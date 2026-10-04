@@ -15,7 +15,7 @@ Port bugs go here, not upstream. If it happens on Fabric too, it's an upstream b
 
 Tagged builds are under [releases](https://github.com/CVE-2017-0144/ait/releases), every push to `neoforge` builds on [actions](https://github.com/CVE-2017-0144/ait/actions/workflows/neoforge.yml).
 
-Needs NeoForge 21.1 and [YACL](https://modrinth.com/mod/yacl) 3.8+. [Immersive Portals](https://modrinth.com/mod/immersiveportals) 6.0.7 is optional, with it the doors are real portals. Sodium and Iris work.
+Needs NeoForge 21.1.x (MC 1.21.1) and [YACL](https://modrinth.com/mod/yacl) 3.8+. [Immersive Portals](https://modrinth.com/mod/immersiveportals) 6.0.7 is optional, with it the doors are real portals. Works with the NeoForge builds of [Sodium](https://modrinth.com/mod/sodium) and [Iris](https://modrinth.com/mod/iris).
 
 ### Building
 

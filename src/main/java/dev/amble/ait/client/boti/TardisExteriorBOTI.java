@@ -54,6 +54,12 @@ public class TardisExteriorBOTI extends BOTI {
 
         BOTI.LAST_RENDERED_EXTERIOR.put(tardis.getUuid(), exterior);
 
+        // the gbuffer injection draws it, this only keeps the view and sections current
+        if (DependencyChecker.isIrisShaderPackInUse()) {
+            renderInterior(tardis, false);
+            return;
+        }
+
         stack.pushPose();
 
         // Split into framebuffer work and geometry work. A single zone around the whole portal cannot
@@ -123,46 +129,7 @@ public class TardisExteriorBOTI extends BOTI {
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
-        PortalData interior = PortalDataManager.get(Portals.interiorId(tardis.getUuid()));
-        if (interior != null && interior.world() != null && tardis.getDesktop() != null) {
-            try {
-                WorldGeometryRenderer geometry = interior.geometry();
-
-                DirectedBlockPos interiorDoor = tardis.getDesktop().getDoorPos();
-                BlockPos interiorDoorPos = interiorDoor.getPos();
-                Direction interiorFacing = interiorDoor.toMinecraftDirection().getOpposite();
-                geometry.setDoorFacing(interiorFacing);
-
-                CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
-                Direction exteriorFacing = Direction.fromYRot(exteriorPos.getRotationDegrees()).getOpposite();
-                Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-
-                float deltaYaw = interiorFacing.toYRot() - (tardis.travel().position().getRotationDegrees());
-
-                BlockPos extBlock = exteriorPos.getPos();
-                Vec3 exteriorDoorCenter = new Vec3(extBlock.getX() + 0.5, extBlock.getY() + 1.0, extBlock.getZ() + 0.5);
-                Vec3 rel = camera.getPosition().subtract(exteriorDoorCenter);
-
-                double rad = Math.toRadians(deltaYaw);
-                double cos = Math.cos(rad);
-                double sin = Math.sin(rad);
-                Vec3 relRotated = new Vec3(rel.x * cos - rel.z * sin, rel.y, rel.x * sin + rel.z * cos);
-                Vec3 eyeRelToCenter = new Vec3(0.5, 1.0, 0.5).add(relRotated);
-
-                float portalYaw = camera.getYRot() + deltaYaw;
-                float portalPitch = camera.getXRot();
-
-                SkyboxUtil.PORTAL_SKY_TARDIS = tardis;
-                try {
-                    geometry.render(Portals.interiorId(tardis.getUuid()), interior.world(), interiorDoorPos,
-                            eyeRelToCenter, portalYaw, portalPitch, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), true);
-                } finally {
-                    SkyboxUtil.PORTAL_SKY_TARDIS = null;
-                }
-            } catch (Throwable t) {
-                AITMod.LOGGER.error("Failed to render exterior BOTI interior", t);
-            }
-        }
+        renderInterior(tardis, true);
 
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));
@@ -255,6 +222,49 @@ public class TardisExteriorBOTI extends BOTI {
         profiler.pop();
 
         stack.popPose();
+    }
+
+    private static void renderInterior(ClientTardis tardis, boolean draw) {
+        PortalData interior = PortalDataManager.get(Portals.interiorId(tardis.getUuid()));
+        if (interior != null && interior.world() != null && tardis.getDesktop() != null) {
+            try {
+                WorldGeometryRenderer geometry = interior.geometry();
+
+                DirectedBlockPos interiorDoor = tardis.getDesktop().getDoorPos();
+                BlockPos interiorDoorPos = interiorDoor.getPos();
+                Direction interiorFacing = interiorDoor.toMinecraftDirection().getOpposite();
+                geometry.setDoorFacing(interiorFacing);
+
+                CachedDirectedGlobalPos exteriorPos = tardis.travel().position();
+                Direction exteriorFacing = Direction.fromYRot(exteriorPos.getRotationDegrees()).getOpposite();
+                Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+
+                float deltaYaw = interiorFacing.toYRot() - (tardis.travel().position().getRotationDegrees());
+
+                BlockPos extBlock = exteriorPos.getPos();
+                Vec3 exteriorDoorCenter = new Vec3(extBlock.getX() + 0.5, extBlock.getY() + 1.0, extBlock.getZ() + 0.5);
+                Vec3 rel = camera.getPosition().subtract(exteriorDoorCenter);
+
+                double rad = Math.toRadians(deltaYaw);
+                double cos = Math.cos(rad);
+                double sin = Math.sin(rad);
+                Vec3 relRotated = new Vec3(rel.x * cos - rel.z * sin, rel.y, rel.x * sin + rel.z * cos);
+                Vec3 eyeRelToCenter = new Vec3(0.5, 1.0, 0.5).add(relRotated);
+
+                float portalYaw = camera.getYRot() + deltaYaw;
+                float portalPitch = camera.getXRot();
+
+                SkyboxUtil.PORTAL_SKY_TARDIS = tardis;
+                try {
+                    geometry.render(Portals.interiorId(tardis.getUuid()), interior.world(), interiorDoorPos,
+                            eyeRelToCenter, portalYaw, portalPitch, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), true, draw);
+                } finally {
+                    SkyboxUtil.PORTAL_SKY_TARDIS = null;
+                }
+            } catch (Throwable t) {
+                AITMod.LOGGER.error("Failed to render exterior BOTI interior", t);
+            }
+        }
     }
 
     public static void drawExteriorApertureMask(ClientTardis tardis, ClientExteriorVariantSchema variant, PoseStack stack) {

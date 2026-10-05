@@ -239,7 +239,7 @@ public class TardisDoorBOTI extends BOTI {
                 float portalPitch = camera.getXRot();
 
                 geometry.render(tardis.getUuid(), portalData.world(), exteriorBlockPos, eyeRelToCenter,
-                        portalYaw, portalPitch, tickDelta, true);
+                        portalYaw, portalPitch, tickDelta, true, true);
             } catch (Throwable t) {
                 AITMod.LOGGER.error("Failed to render door BOTI interior", t);
             }

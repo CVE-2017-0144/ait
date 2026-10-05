@@ -202,7 +202,7 @@ public class WorldGeometryRenderer {
     }
 
     public void render(UUID id, ClientLevel portalWorld, BlockPos centerPos, Vec3 eyeRelToCenter,
-                       float portalYaw, float portalPitch, float tickDelta, boolean checkBehindPortal) {
+                       float portalYaw, float portalPitch, float tickDelta, boolean checkBehindPortal, boolean draw) {
         this.centerPos = centerPos;
         this.lastRenderNanos = System.nanoTime();
 
@@ -247,6 +247,12 @@ public class WorldGeometryRenderer {
             this.lastExteriorFogColor = updateExteriorFog(portalWorld, eyeWorldPos, portalYaw, portalPitch, tickDelta, Math.min(client.options.getEffectiveRenderDistance(), this.renderDistance()));
         } catch (Exception e) {
             AITMod.LOGGER.error("BOTI: failed to compute exterior fog", e);
+        }
+
+        if (!draw) {
+            RenderSystem.setProjectionMatrix(originalProjection, VertexSorting.DISTANCE_TO_ORIGIN);
+            restoreFog(client, tickDelta, previousFogColor, previousFogStart, previousFogEnd, previousFogShape);
+            return;
         }
 
         if (!dev.amble.ait.compat.DependencyChecker.isIrisShaderPackInUse()) {
@@ -299,17 +305,21 @@ public class WorldGeometryRenderer {
             lightmap.tick();
             lightmap.updateLightTexture(tickDelta);
 
-            try {
-                FogRenderer.setupColor(mainCamera, tickDelta, previousLightmapWorld,
-                        client.options.getEffectiveRenderDistance(), gameRenderer.getDarkenWorldAmount(tickDelta));
-            } catch (Exception e) {
-                AITMod.LOGGER.error("BOTI: failed to restore interior fog", e);
-            }
-            RenderSystem.setShaderFogColor(previousFogColor[0], previousFogColor[1], previousFogColor[2], previousFogColor[3]);
-            RenderSystem.setShaderFogStart(previousFogStart);
-            RenderSystem.setShaderFogEnd(previousFogEnd);
-            RenderSystem.setShaderFogShape(previousFogShape);
+            restoreFog(client, tickDelta, previousFogColor, previousFogStart, previousFogEnd, previousFogShape);
         }
+    }
+
+    private static void restoreFog(Minecraft client, float tickDelta, float[] color, float start, float end, FogShape shape) {
+        try {
+            FogRenderer.setupColor(client.gameRenderer.getMainCamera(), tickDelta, client.level,
+                    client.options.getEffectiveRenderDistance(), client.gameRenderer.getDarkenWorldAmount(tickDelta));
+        } catch (Exception e) {
+            AITMod.LOGGER.error("BOTI: failed to restore interior fog", e);
+        }
+        RenderSystem.setShaderFogColor(color[0], color[1], color[2], color[3]);
+        RenderSystem.setShaderFogStart(start);
+        RenderSystem.setShaderFogEnd(end);
+        RenderSystem.setShaderFogShape(shape);
     }
 
     private void runPass(String name, Runnable pass) {

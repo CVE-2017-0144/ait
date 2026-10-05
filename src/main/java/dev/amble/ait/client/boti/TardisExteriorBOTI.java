@@ -55,7 +55,7 @@ public class TardisExteriorBOTI extends BOTI {
 
         // the gbuffer injection draws it, this only keeps the view and sections current
         if (DependencyChecker.isIrisShaderPackInUse()) {
-            renderInterior(tardis, false);
+            renderInterior(tardis, false, null);
             return;
         }
 
@@ -114,6 +114,7 @@ public class TardisExteriorBOTI extends BOTI {
         mask.render(stack, botiProvider.getBuffer(whichOne), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1, colorsForGreenScreen[0], colorsForGreenScreen[1], colorsForGreenScreen[2]));
         botiProvider.endBatch();
         profiler.incrementCounter("ait_boti_draw_flush");
+        float[] aperture = BOTI.apertureRect(mask, stack);
         stack.popPose();
 
         profiler.popPush("ait:boti_ext_fbo_depth");
@@ -128,7 +129,7 @@ public class TardisExteriorBOTI extends BOTI {
         GL11.glStencilMask(0x00);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 
-        renderInterior(tardis, true);
+        renderInterior(tardis, true, aperture);
 
         stack.pushPose();
         stack.mulPose(Axis.YP.rotationDegrees(180));
@@ -223,7 +224,7 @@ public class TardisExteriorBOTI extends BOTI {
         stack.popPose();
     }
 
-    private static void renderInterior(ClientTardis tardis, boolean draw) {
+    private static void renderInterior(ClientTardis tardis, boolean draw, float[] aperture) {
         PortalData interior = PortalDataManager.get(Portals.interiorId(tardis.getUuid()));
         if (interior != null && interior.world() != null && tardis.getDesktop() != null) {
             try {
@@ -255,6 +256,7 @@ public class TardisExteriorBOTI extends BOTI {
 
                 SkyboxUtil.PORTAL_SKY_TARDIS = tardis;
                 try {
+                    geometry.setCullRect(aperture);
                     geometry.render(Portals.interiorId(tardis.getUuid()), interior.world(), interiorDoorPos,
                             eyeRelToCenter, portalYaw, portalPitch, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), true, draw);
                 } finally {

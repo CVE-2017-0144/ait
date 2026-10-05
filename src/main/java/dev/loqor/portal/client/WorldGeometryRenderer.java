@@ -129,6 +129,7 @@ public class WorldGeometryRenderer {
     private Matrix4f portalProjection = new Matrix4f();
     private Matrix4f portalRot = new Matrix4f();
     private Frustum frustum = null;
+    private float[] cullRect;
 
     private Camera lastPortalCamera = null;
     private ClientLevel lastPortalWorld = null;
@@ -225,7 +226,7 @@ public class WorldGeometryRenderer {
         this.portalRot = portalRot;
         this.portalView = buildPortalView(portalRot, eyeRelToCenter);
 
-        this.frustum = new Frustum(portalRot, portalProjection);
+        this.frustum = new Frustum(portalRot, cullProjection());
         this.frustum.prepare(eyeRelToCenter.x, eyeRelToCenter.y, eyeRelToCenter.z);
 
         pumpBuilds(portalWorld, checkBehindPortal);
@@ -599,6 +600,22 @@ public class WorldGeometryRenderer {
         double dy = pos.minBlockY() + 8 - centerPos.getY();
         double dz = pos.minBlockZ() + 8 - centerPos.getZ();
         return dx * dx + dy * dy + dz * dz;
+    }
+
+    // the stencil keeps only what's seen through the aperture, so cull to its screen rect
+    public void setCullRect(float[] ndc) {
+        this.cullRect = ndc;
+    }
+
+    private Matrix4f cullProjection() {
+        float[] r = this.cullRect;
+        this.cullRect = null;
+
+        if (r == null)
+            return portalProjection;
+
+        return new Matrix4f().scale(2f / (r[2] - r[0]), 2f / (r[3] - r[1]), 1f)
+                .translate(-(r[0] + r[2]) / 2f, -(r[1] + r[3]) / 2f, 0f).mul(portalProjection);
     }
 
     private boolean isInFrustum(AABB box) {

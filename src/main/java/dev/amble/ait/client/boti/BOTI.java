@@ -17,6 +17,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
@@ -31,6 +32,7 @@ import dev.amble.ait.core.entities.BOTIPaintingEntity;
 import dev.amble.ait.core.entities.RiftEntity;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -272,6 +274,40 @@ public class BOTI {
 
     public static void writeNearDepthInStencilRegion() {
         drawFullscreenQuad(false, true, 0.0);
+    }
+
+    // where the aperture mask lands on screen, in ndc. null if any of it is behind the eye or it fills the screen
+    public static float[] apertureRect(ModelPart mask, PoseStack stack) {
+        Matrix4f clip = new Matrix4f(RenderSystem.getProjectionMatrix()).mul(RenderSystem.getModelViewMatrix());
+        float[] r = {Float.MAX_VALUE, Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+        boolean[] behind = {false};
+        Vector4f v = new Vector4f();
+
+        mask.visit(stack, (pose, path, index, cube) -> {
+            for (int i = 0; i < 8; i++) {
+                v.set(((i & 1) == 0 ? cube.minX : cube.maxX) / 16f, ((i & 2) == 0 ? cube.minY : cube.maxY) / 16f,
+                        ((i & 4) == 0 ? cube.minZ : cube.maxZ) / 16f, 1f);
+                pose.pose().transform(v);
+                clip.transform(v);
+
+                if (v.w < 1.0E-3f) {
+                    behind[0] = true;
+                    return;
+                }
+
+                float x = v.x / v.w, y = v.y / v.w;
+                r[0] = Math.min(r[0], x);
+                r[1] = Math.min(r[1], y);
+                r[2] = Math.max(r[2], x);
+                r[3] = Math.max(r[3], y);
+            }
+        });
+
+        float pad = 0.02f;
+        if (behind[0] || r[0] > r[2] || r[0] - pad <= -1f && r[1] - pad <= -1f && r[2] + pad >= 1f && r[3] + pad >= 1f)
+            return null;
+
+        return new float[]{Math.max(-1f, r[0] - pad), Math.max(-1f, r[1] - pad), Math.min(1f, r[2] + pad), Math.min(1f, r[3] + pad)};
     }
 
     public static void blitInStencilRegion(RenderTarget src) {

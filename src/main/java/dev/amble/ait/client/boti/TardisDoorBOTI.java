@@ -86,11 +86,11 @@ public class TardisDoorBOTI extends BOTI {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
-    public static void drawDoorApertureMask(ClientTardis tardis, DoorBlockEntity door, PoseStack stack) {
-        drawDoorApertureMask(tardis, door, stack, false);
+    public static float[] drawDoorApertureMask(ClientTardis tardis, DoorBlockEntity door, PoseStack stack) {
+        return drawDoorApertureMask(tardis, door, stack, false);
     }
 
-    public static void drawDoorApertureMask(ClientTardis tardis, DoorBlockEntity door, PoseStack stack, boolean writeDepth) {
+    public static float[] drawDoorApertureMask(ClientTardis tardis, DoorBlockEntity door, PoseStack stack, boolean writeDepth) {
         ClientExteriorVariantSchema variant = tardis.getExterior().getVariant().getClient();
         ExteriorVariantSchema parent = variant.parent();
         Vector3f scale = tardis.travel().getScale();
@@ -115,12 +115,14 @@ public class TardisDoorBOTI extends BOTI {
         maskPart.render(stack, maskProvider.getBuffer(RenderType.debugFilledBox()),
                 0xf000f0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         maskProvider.endBatch();
+        float[] rect = BOTI.apertureRect(maskPart, stack);
         stack.popPose();
 
         if (writeDepth)
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.depthMask(true);
+        return rect;
     }
 
     public static void renderInteriorDoorBoti(ClientTardis tardis, DoorBlockEntity door, ClientExteriorVariantSchema variant, PoseStack stack, ResourceLocation frameTex, AnimatedModel frame, ModelPart mask, int light, float tickDelta) {
@@ -174,7 +176,7 @@ public class TardisDoorBOTI extends BOTI {
             overlayProjection.set(RenderSystem.getProjectionMatrix());
         }
 
-        drawDoorApertureMask(tardis, door, stack);
+        float[] aperture = drawDoorApertureMask(tardis, door, stack);
 
         RenderSystem.depthMask(true);
         stack.pushPose();
@@ -237,6 +239,7 @@ public class TardisDoorBOTI extends BOTI {
                 float portalYaw = camera.getYRot() + deltaYaw;
                 float portalPitch = camera.getXRot();
 
+                geometry.setCullRect(aperture);
                 geometry.render(tardis.getUuid(), portalData.world(), exteriorBlockPos, eyeRelToCenter,
                         portalYaw, portalPitch, tickDelta, true, true);
             } catch (Throwable t) {

@@ -25,6 +25,8 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 public class FallingTardisRenderer extends EntityRenderer<FallingTardisEntity> {
 
+    private SiegeModeModel siege;
+
     public FallingTardisRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
@@ -66,7 +68,10 @@ public class FallingTardisRenderer extends EntityRenderer<FallingTardisEntity> {
         boolean siege = tardis.siege().isActive();
 
         if (siege) {
-            model = new SiegeModeModel(SiegeModeModel.getTexturedModelData().bakeRoot());
+            if (this.siege == null)
+                this.siege = new SiegeModeModel(SiegeModeModel.getTexturedModelData().bakeRoot());
+
+            model = this.siege;
             texture = tardis.siege().texture().get();
         }
 

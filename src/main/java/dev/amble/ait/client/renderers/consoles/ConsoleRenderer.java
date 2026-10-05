@@ -36,6 +36,8 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
 
     private ClientConsoleVariantSchema variant;
     private ConsoleModel model;
+    private HartnellConsoleModel unlinked;
+    private HandlesModel handles;
 
     public ConsoleRenderer(BlockEntityRendererProvider.Context ctx) {
     }
@@ -75,7 +77,10 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             matrices.pushPose();
             matrices.translate(0.5, 1.5, 0.5);
             matrices.mulPose(Axis.XP.rotationDegrees(180f));
-            HartnellConsoleModel model = new HartnellConsoleModel(HartnellConsoleModel.getTexturedModelData().bakeRoot());
+            if (this.unlinked == null)
+                this.unlinked = new HartnellConsoleModel(HartnellConsoleModel.getTexturedModelData().bakeRoot());
+
+            HartnellConsoleModel model = this.unlinked;
             model.renderToBuffer(matrices, vertexConsumers.getBuffer(RenderType.entityCutout(ClientConsoleVariantRegistry.HARTNELL.texture())), light, overlay, 0xFFFFFFFF);
             RenderType layer = AITRenderLayers.tardisEmissiveCullZOffset(ClientConsoleVariantRegistry.HARTNELL.emission());
             model.renderToBuffer(matrices, vertexConsumers.getBuffer(layer), 0xf000f0, overlay, 0xFFFFFFFF);
@@ -191,7 +196,10 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             matrices.mulPose(Axis.YN.rotationDegrees(variant.handlesRotations()[0]));
             matrices.mulPose(Axis.XP.rotationDegrees(variant.handlesRotations()[1]));
             matrices.scale(0.6f, 0.6f, 0.6f);
-            HandlesModel handlesModel = new HandlesModel(HandlesModel.getTexturedModelData().bakeRoot());
+            if (this.handles == null)
+                this.handles = new HandlesModel(HandlesModel.getTexturedModelData().bakeRoot());
+
+            HandlesModel handlesModel = this.handles;
             //handlesModel.setAngles(matrices, ModelTransformationMode.GROUND, false);
             handlesModel.handles.getChild("stalk").xRot = 45f;
             handlesModel.handles.getChild("stalk").getChild("head").xRot = -0.25f;

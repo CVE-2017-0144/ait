@@ -13,6 +13,7 @@ import dev.amble.lib.platform.render.WorldRenderContext;
 import org.joml.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -28,6 +29,14 @@ public class TardisStar {
     public static final ResourceLocation TARDIS_STAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(AITMod.MOD_ID,
             "textures/environment/eye_of_harmony.png");
     private static final float HALF_SQRT_3 = (float) (Math.sqrt(3.0) / 2.0);
+    private static ModelPart star;
+
+    private static ModelPart star() {
+        if (star == null)
+            star = TardisStarModel.getTexturedModelData().bakeRoot();
+
+        return star;
+    }
 
     public static void render(WorldRenderContext context, Tardis tardis) {
         if (DependencyChecker.hasPortals() && !TardisServerWorld.isTardisDimension(context.world()))
@@ -67,10 +76,10 @@ public class TardisStar {
         matrixStack.mulPose(Axis.YP
                 .rotationDegrees(delta));
 
-        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(0.5f, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1));
+        star().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(0.5f, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1, tardis.isGrowth() ? 0.1f : 1));
 
         matrixStack.scale(0.9f, 0.9f, 0.9f);
-        TardisStarModel.getTexturedModelData().bakeRoot().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 1, tardis.isGrowth() ? 0.2f : 1, tardis.isGrowth() ? 0f : 1));
+        star().render(matrixStack, provider.getBuffer(AITRenderLayers.tardisEmissiveCullZOffset(TARDIS_STAR_TEXTURE)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 1, tardis.isGrowth() ? 0.2f : 1, tardis.isGrowth() ? 0f : 1));
 
         profiler.pop();
     }

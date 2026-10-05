@@ -40,6 +40,7 @@ public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRende
 
     private ClientExteriorVariantSchema variant;
     private AnimatedModel<DoorBlockEntity> model;
+    private CapsuleDoorModel unlinked;
 
     public DoorRenderer(BlockEntityRendererProvider.Context ctx) {
     }
@@ -70,7 +71,10 @@ public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRende
             matrices.scale(1, 1, 1);
             matrices.mulPose(Axis.YN.rotationDegrees(k + 180));
             matrices.mulPose(Axis.XP.rotationDegrees(180f));
-            CapsuleDoorModel doorModel = new CapsuleDoorModel(CapsuleDoorModel.getTexturedModelData().bakeRoot());
+            if (this.unlinked == null)
+                this.unlinked = new CapsuleDoorModel(CapsuleDoorModel.getTexturedModelData().bakeRoot());
+
+            CapsuleDoorModel doorModel = this.unlinked;
             doorModel.renderToBuffer(matrices, vertexConsumers.getBuffer(AITRenderLayers.entityCutout(ClientExteriorVariantRegistry.CAPSULE_DEFAULT.texture())), light, overlay, 0xFFFFFFFF);
             matrices.popPose();
             return;

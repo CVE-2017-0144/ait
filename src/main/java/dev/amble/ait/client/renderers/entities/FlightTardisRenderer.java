@@ -29,6 +29,7 @@ public class FlightTardisRenderer extends EntityRenderer<FlightTardisEntity> {
 
     private ExteriorModel model;
     private ClientExteriorVariantSchema variant;
+    private ShieldsModel shields;
 
     public FlightTardisRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -115,7 +116,10 @@ public class FlightTardisRenderer extends EntityRenderer<FlightTardisEntity> {
             matrices.pushPose();
 
             float delta = ((tickDelta + entity.tickCount) * 0.03f);
-            ShieldsModel shieldsModel = new ShieldsModel(ShieldsModel.getTexturedModelData().bakeRoot());
+            if (this.shields == null)
+                this.shields = new ShieldsModel(ShieldsModel.getTexturedModelData().bakeRoot());
+
+            ShieldsModel shieldsModel = this.shields;
             VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderType.energySwirl(ResourceLocation.parse("textures/misc/forcefield.png"), delta % 1.0F, (delta * 0.1F) % 1.0F));
             shieldsModel.renderToBuffer(matrices, vertexConsumer, maxLight, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1f, 0f, 0.25f, 0.5f));
             matrices.popPose();

@@ -104,6 +104,9 @@ public class WorldGeometryRenderer {
 
     private CompletableFuture<Void> buildFuture = null;
 
+    private SectionPos relighting;
+    private int relightY;
+
     private volatile boolean closed = false;
 
     private final List<Map<RenderType, ByteBufferBuilder>> builderPool = new ArrayList<>();
@@ -421,6 +424,29 @@ public class WorldGeometryRenderer {
         return batch;
     }
 
+    // one section can take 10+ ms, so it goes a layer at a time and resumes next frame
+    private boolean relight(LevelLightEngine light, BlockPos.MutableBlockPos pos, SectionPos section, long deadline) {
+        if (!section.equals(relighting)) {
+            relighting = section;
+            relightY = 0;
+        }
+
+        int startX = section.minBlockX(), startY = section.minBlockY(), startZ = section.minBlockZ();
+        while (relightY < 16) {
+            int y = startY + relightY++;
+            for (int x = startX; x <= startX + 15; x++)
+                for (int z = startZ; z <= startZ + 15; z++)
+                    light.checkBlock(pos.set(x, y, z));
+            light.runLightUpdates();
+
+            if (relightY < 16 && System.nanoTime() >= deadline)
+                return false;
+        }
+
+        relighting = null;
+        return true;
+    }
+
     private void dispatchBuild(Level world, List<SectionPos> batch, boolean checkBehindPortal) {
         if (closed)
             return;
@@ -438,12 +464,10 @@ public class WorldGeometryRenderer {
                 continue;
             }
 
-            int startX = sectionPos.minBlockX(), startY = sectionPos.minBlockY(), startZ = sectionPos.minBlockZ();
-            for (int x = startX; x <= startX + 15; x++)
-                for (int y = startY; y <= startY + 15; y++)
-                    for (int z = startZ; z <= startZ + 15; z++)
-                        lightingProvider.checkBlock(lightPos.set(x, y, z));
-            lightingProvider.runLightUpdates();
+            if (!relight(lightingProvider, lightPos, sectionPos, lightDeadline)) {
+                dirtySections.add(sectionPos);
+                break;
+            }
             ready.add(sectionPos);
             modelData.add(world.getModelDataManager().snapshotSectionRegion(sectionPos.x(), sectionPos.y(), sectionPos.z(),
                     sectionPos.x(), sectionPos.y(), sectionPos.z()));

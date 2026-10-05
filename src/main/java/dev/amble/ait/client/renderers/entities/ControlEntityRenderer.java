@@ -86,7 +86,7 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
         matrices.pushPose();
         matrices.translate(0.0f, f, 0.0f);
         matrices.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        matrices.scale(-0.0075f, -0.0075f, 0.0075f);
+        matrices.scale(0.0075f, -0.0075f, 0.0075f);
 
         Matrix4f matrix4f = matrices.last().pose();
         HitResult hitresult = Minecraft.getInstance().hitResult;

@@ -110,7 +110,7 @@ public class ConsoleGeneratorRenderer<T extends ConsoleGeneratorBlockEntity> imp
         matrices.pushPose();
         matrices.translate(0.5F, 2.75F, 0.5F);
         matrices.mulPose(this.dispatcher.cameraOrientation());
-        matrices.scale(-0.1F, -0.1F, 0.1F);
+        matrices.scale(0.1F, -0.1F, 0.1F);
 
         Component type = Component.translatable("console.ait.variant_label").append(entity.getConsoleVariant().text());
         Font textRenderer = Minecraft.getInstance().font;

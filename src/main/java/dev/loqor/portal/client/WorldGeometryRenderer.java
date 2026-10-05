@@ -443,6 +443,7 @@ public class WorldGeometryRenderer {
                 for (int y = startY; y <= startY + 15; y++)
                     for (int z = startZ; z <= startZ + 15; z++)
                         lightingProvider.checkBlock(lightPos.set(x, y, z));
+            lightingProvider.runLightUpdates();
             ready.add(sectionPos);
             modelData.add(world.getModelDataManager().snapshotSectionRegion(sectionPos.x(), sectionPos.y(), sectionPos.z(),
                     sectionPos.x(), sectionPos.y(), sectionPos.z()));
@@ -456,7 +457,6 @@ public class WorldGeometryRenderer {
         if (ready.isEmpty())
             return;
 
-        lightingProvider.runLightUpdates();
         final List<SectionPos> buildBatch = ready;
 
         CompletableFuture<Void> applied = new CompletableFuture<>();

@@ -33,6 +33,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -565,6 +566,11 @@ public class WorldGeometryRenderer {
         return dx * dx + dy * dy + dz * dz;
     }
 
+    private boolean isInFrustum(AABB box) {
+        return frustum == null || box.isInfinite()
+                || frustum.isVisible(box.move(-centerPos.getX(), -centerPos.getY(), -centerPos.getZ()));
+    }
+
     private boolean isSectionVisible(SectionPos pos) {
         if (frustum == null)
             return true;
@@ -993,6 +999,11 @@ public class WorldGeometryRenderer {
                 if ((blockEntity instanceof DoorBlockEntity || blockEntity instanceof ExteriorBlockEntity) && cameraBox.contains(blockPos.getCenter()))
                     continue;
 
+                BlockEntityRenderer<BlockEntity> renderer = dispatcher.getRenderer(blockEntity);
+
+                if (renderer == null || !this.isInFrustum(renderer.getRenderBoundingBox(blockEntity)))
+                    continue;
+
                 matrices.pushPose();
                 matrices.translate(
                         blockPos.getX() - centerPos.getX(),
@@ -1028,6 +1039,9 @@ public class WorldGeometryRenderer {
 
             for (Entity entity : portalWorld.entitiesForRendering()) {
                 if (entity == null || !isWithinRenderBounds(entity.blockPosition()))
+                    continue;
+
+                if (!this.isInFrustum(entity.getBoundingBoxForCulling()))
                     continue;
 
                 double x = Mth.lerp(tickDelta, entity.xOld, entity.getX()) - centerPos.getX();

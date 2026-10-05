@@ -68,7 +68,8 @@
     "client.sonic.SonicModelLoaderWrapperMixin",
     "compat.portals.BlockManipulationClientMixin",
     "compat.portals.ClientTeleportationManagerMixin",
-    "compat.portals.DimIdSyncPacketMixin"
+    "compat.portals.DimIdSyncPacketMixin",
+    "compat.portals.IrisPortalRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

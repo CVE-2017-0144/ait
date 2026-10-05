@@ -76,32 +76,28 @@ public class ControlEntityRenderer extends EntityRenderer<ConsoleControlEntity> 
         if (tardis == null)
             return;
 
-        Control control = entity.getControl();
-        Component label = control != null ? control.getName(tardis) : name;
-
-        Font textRenderer = this.getFont();
-        float h = (float) -textRenderer.width(label) / 2;
-        float f = entity.getBbHeight() + 0.5f - 0.3f;
-
-        matrices.pushPose();
-        matrices.translate(0.0f, f, 0.0f);
-        matrices.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        matrices.scale(0.0075f, -0.0075f, 0.0075f);
-
-        Matrix4f matrix4f = matrices.last().pose();
         HitResult hitresult = Minecraft.getInstance().hitResult;
 
-        if (hitresult != null) {
-            boolean isPlayerLookingWithSonic = isPlayerLookingAtControlWithSonic(hitresult, entity);
+        if (hitresult != null && isPlayerLookingAtControlWithSonic(hitresult, entity)) {
+            Control control = entity.getControl();
+            Component label = control != null ? control.getName(tardis) : name;
+
+            Font textRenderer = this.getFont();
+            float h = (float) -textRenderer.width(label) / 2;
+            float f = entity.getBbHeight() + 0.5f - 0.3f;
+
+            matrices.pushPose();
+            matrices.translate(0.0f, f, 0.0f);
+            matrices.mulPose(this.entityRenderDispatcher.cameraOrientation());
+            matrices.scale(0.0075f, -0.0075f, 0.0075f);
+
+            Matrix4f matrix4f = matrices.last().pose();
             FormattedCharSequence nameOrdered = label.getVisualOrderText();
+            textRenderer.drawInBatch8xOutline(nameOrdered, h, 0f, 0xF0F0F0, 0x000000,
+                    matrix4f, vertexConsumers, 0xFF);
 
-            if (isPlayerLookingWithSonic) {
-                textRenderer.drawInBatch8xOutline(nameOrdered, h, 0f, 0xF0F0F0, 0x000000,
-                        matrix4f, vertexConsumers, 0xFF);
-            }
+            matrices.popPose();
         }
-
-        matrices.popPose();
 
         if (hitresult == null)
             return;

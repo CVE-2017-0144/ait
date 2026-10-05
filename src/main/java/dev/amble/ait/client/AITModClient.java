@@ -20,7 +20,6 @@ import dev.amble.ait.client.commands.DebugCommand;
 import dev.amble.ait.client.config.AITClientConfig;
 import dev.amble.ait.client.data.ClientLandingManager;
 import dev.amble.ait.client.models.AnimatedModel;
-import dev.amble.ait.client.models.boti.BotiPortalModel;
 import dev.amble.ait.client.models.decoration.GallifreyFallsModel;
 import dev.amble.ait.client.models.decoration.PaintingFrameModel;
 import dev.amble.ait.client.models.decoration.RiftModel;
@@ -618,7 +617,7 @@ public class AITModClient implements ClientModEntrypoint {
                 profiler.incrementCounter("ait_boti_exterior_drawn");
                 profiler.incrementCounter("ait_model_build");
                 exteriorBoti.renderExteriorBoti(exterior, variant, stack, AITMod.id("textures/environment/tardis_sky.png"), model,
-                        BotiPortalModel.getTexturedModelData().bakeRoot(), light);
+                        BOTI.portalMask(), light);
             } else {
                 profiler.incrementCounter("ait_boti_exterior_culled");
             }
@@ -681,7 +680,7 @@ public class AITModClient implements ClientModEntrypoint {
                 profiler.incrementCounter("ait_model_build");
                 TardisDoorBOTI.renderInteriorDoorBoti(tardis, door, variant, stack,
                         AITMod.id("textures/environment/tardis_sky.png"), model,
-                        BotiPortalModel.getTexturedModelData().bakeRoot(), light, context.tickCounter().getGameTimeDeltaPartialTick(true));
+                        BOTI.portalMask(), light, context.tickCounter().getGameTimeDeltaPartialTick(true));
             } else {
                 profiler.incrementCounter("ait_boti_door_culled");
             }
@@ -707,12 +706,12 @@ public class AITModClient implements ClientModEntrypoint {
             return;
         }
 
+        if (BOTI.GALLIFREYAN_RENDER_QUEUE.isEmpty())
+            return;
+
         profiler.push("ait:boti_gallifreyan");
 
-        // Built before the queue is known to be non-empty, so this runs every frame even with no
-        // paintings in sight. Counted separately from the per-painting builds to make that visible.
         profiler.incrementCounter("ait_model_build");
-        profiler.incrementCounter("ait_model_build_eager");
         HierarchicalModel contents = new GallifreyFallsModel(GallifreyFallsModel.getTexturedModelData().bakeRoot());
         ResourceLocation frameTex = GallifreyanPaintingEntityRenderer.GALLIFREY_FRAME_TEXTURE;
         ResourceLocation contentsTex = GallifreyanPaintingEntityRenderer.GALLIFREY_PAINTING_TEXTURE;
@@ -732,7 +731,7 @@ public class AITModClient implements ClientModEntrypoint {
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
             profiler.incrementCounter("ait_model_build");
-            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+            PaintingFrameModel frame = BOTI.paintingFrame();
             BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
                     LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
@@ -758,10 +757,12 @@ public class AITModClient implements ClientModEntrypoint {
             return;
         }
 
+        if (BOTI.TRENZALORE_PAINTING_QUEUE.isEmpty())
+            return;
+
         profiler.push("ait:boti_trenzalore");
 
         profiler.incrementCounter("ait_model_build");
-        profiler.incrementCounter("ait_model_build_eager");
         HierarchicalModel contents = new TrenzalorePaintingModel(TrenzalorePaintingModel.getTexturedModelData().bakeRoot());
         ResourceLocation frameTex = TrenzalorePaintingEntityRenderer.TRENZALORE_FRAME_TEXTURE;
         ResourceLocation contentsTex = TrenzalorePaintingEntityRenderer.TRENZALORE_PAINTING_TEXTURE;
@@ -781,7 +782,7 @@ public class AITModClient implements ClientModEntrypoint {
             stack.mulPose(Axis.YP.rotationDegrees(painting.getVisualRotationYInDegrees()));
             stack.translate(0, -0.5f, 0.5);
             profiler.incrementCounter("ait_model_build");
-            PaintingFrameModel frame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+            PaintingFrameModel frame = BOTI.paintingFrame();
             BlockPos blockPos = BlockPos.containing(painting.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             PaintingBOTI.renderBOTIPainting(stack, frame,
                     LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos),
@@ -824,7 +825,7 @@ public class AITModClient implements ClientModEntrypoint {
             stack.mulPose(Axis.YP.rotationDegrees(rift.getYRot()));
             stack.mulPose(Axis.XP.rotationDegrees(rift.getXRot()));
             profiler.incrementCounter("ait_model_build");
-            RiftModel riftModel = new RiftModel(RiftModel.getTexturedModelData().bakeRoot());
+            RiftModel riftModel = BOTI.rift();
             BlockPos blockPos = BlockPos.containing(rift.getLightProbePosition(client.getTimer().getGameTimeDeltaPartialTick(true)));
             RiftBOTI.renderRiftBoti(stack, riftModel, LightTexture.pack(world.getBrightness(LightLayer.BLOCK, blockPos), world.getBrightness(LightLayer.SKY, blockPos)));
             stack.popPose();

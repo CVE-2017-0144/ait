@@ -20,7 +20,7 @@ public class PaintingBOTI extends BOTI {
         if (client.level == null
                 || client.player == null) return;
 
-        PaintingFrameModel model = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+        PaintingFrameModel model = BOTI.paintingFrame();
 
         stack.pushPose();
 

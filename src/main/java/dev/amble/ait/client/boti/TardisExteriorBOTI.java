@@ -6,7 +6,6 @@ import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.TardisComponent;
 import dev.amble.ait.client.AITModClient;
-import dev.amble.ait.client.models.boti.BotiPortalModel;
 import dev.amble.ait.client.models.exteriors.ExteriorModel;
 import dev.amble.ait.client.renderers.AITRenderLayers;
 import dev.amble.ait.client.tardis.ClientTardis;
@@ -286,7 +285,7 @@ public class TardisExteriorBOTI extends BOTI {
         }
 
         MultiBufferSource.BufferSource maskProvider = AIT_BUF_BUILDER_STORAGE.getBotiVertexConsumer();
-        ModelPart maskPart = BotiPortalModel.getTexturedModelData().bakeRoot();
+        ModelPart maskPart = BOTI.portalMask();
 
         stack.pushPose();
         stack.translate(vec.x, -vec.y - parent.portalHeight() / 2f, vec.z);

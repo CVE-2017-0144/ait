@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -20,6 +21,9 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.amble.ait.client.AITModClient;
+import dev.amble.ait.client.models.boti.BotiPortalModel;
+import dev.amble.ait.client.models.decoration.PaintingFrameModel;
+import dev.amble.ait.client.models.decoration.RiftModel;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
@@ -41,6 +45,30 @@ public class BOTI {
     public static Queue<ExteriorBlockEntity> EXTERIOR_RENDER_QUEUE = new LinkedList<>();
     public static final Map<UUID, ExteriorBlockEntity> LAST_RENDERED_EXTERIOR = new HashMap<>();
     private static boolean HAS_BEEN_WARNED = false;
+    private static ModelPart portalMask;
+    private static PaintingFrameModel paintingFrame;
+    private static RiftModel rift;
+
+    public static ModelPart portalMask() {
+        if (portalMask == null)
+            portalMask = BotiPortalModel.getTexturedModelData().bakeRoot();
+
+        return portalMask;
+    }
+
+    public static PaintingFrameModel paintingFrame() {
+        if (paintingFrame == null)
+            paintingFrame = new PaintingFrameModel(PaintingFrameModel.getTexturedModelData().bakeRoot());
+
+        return paintingFrame;
+    }
+
+    public static RiftModel rift() {
+        if (rift == null)
+            rift = new RiftModel(RiftModel.getTexturedModelData().bakeRoot());
+
+        return rift;
+    }
 
     public static int currentDrawFbo() {
         return GL11.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING);

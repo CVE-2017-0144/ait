@@ -144,6 +144,10 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
             return;
         }
 
+        // ip skips its portal clipping for block entities when iris is loaded
+        if (DependencyChecker.hasIris() && this.awesomeIPEmissionHack(tardis))
+            return;
+
         if (tardis.travel().getAlpha() > 0) {
             profiler.incrementCounter("ait_exterior_drawn");
             this.renderExterior(profiler, tardis, entity, tickDelta, matrices, vertexConsumers, light, overlay);

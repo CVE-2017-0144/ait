@@ -18,6 +18,8 @@ import dev.amble.lib.platform.lifecycle.ServerConnectionEvents;
 import dev.amble.lib.platform.render.ClientRegistries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -48,6 +50,12 @@ public class PortalsHandler extends KeyedTardisComponent {
 
     public static void init() {
         Registry.register(BuiltInRegistries.ENTITY_TYPE, AITMod.id("ip_portal"), TardisPortal.ENTITY_TYPE);
+
+        // saved portals reach clients as they load, ip crashes ticking one into a dim the client doesn't know yet
+        NeoForge.EVENT_BUS.addListener(EntityJoinLevelEvent.class, event -> {
+            if (event.getEntity() instanceof TardisPortal portal && event.getLevel() instanceof ServerLevel level)
+                level.getServer().getLevel(portal.getDestDim());
+        });
 
         if (!AITMod.CONFIG.allowPortalsBoti) return;
 

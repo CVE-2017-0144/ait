@@ -28,12 +28,14 @@ public abstract class OcclusionCullerMixin {
 
     @ModifyVariable(method = "findVisible", at = @At("HEAD"), argsOnly = true)
     private boolean portalStart(boolean useOcclusionCulling, @Local(argsOnly = true) Viewport viewport) {
-        boolean caveCulling = PortalRendering.shouldEnableSodiumCaveCulling();
         this.startPoint = null;
         tolerantFrustum = false;
 
+        // ip's version returned false here too, which turned sodium's cave culling off for the main view
         if (!PortalRendering.isRendering())
-            return caveCulling;
+            return useOcclusionCulling;
+
+        boolean caveCulling = PortalRendering.shouldEnableSodiumCaveCulling();
 
         Portal portal = PortalRendering.getRenderingPortal();
         Vec3 camera = CHelper.getCurrentCameraPos();

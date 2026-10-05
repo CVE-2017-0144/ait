@@ -38,13 +38,17 @@ public class AITMixinPlugin implements IMixinConfigPlugin {
             return DependencyChecker.hasPortals();
 
         if (id.equals("ipsodium"))
-            return DependencyChecker.hasPortals() && hasSodium08();
+            return DependencyChecker.hasPortals() && sodium() != null && (!mixinClassName.endsWith(".ViewportMixin") || hasSodium08());
 
         return true;
     }
 
+    private static ModFileInfo sodium() {
+        return LoadingModList.get().getModFileById("sodium");
+    }
+
     public static boolean hasSodium08() {
-        ModFileInfo sodium = LoadingModList.get().getModFileById("sodium");
+        ModFileInfo sodium = sodium();
         return sodium != null && sodium.getMods().get(0).getVersion().compareTo(new DefaultArtifactVersion("0.8")) >= 0;
     }
 

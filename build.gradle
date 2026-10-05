@@ -23,6 +23,9 @@ repositories {
     // JEI
     maven { url "https://maven.blamejared.com/" }
 
+    // MixinSquared
+    maven { url "https://maven.bawnorton.com/releases" }
+
     // LambDynamicLights
     maven {
         url "https://maven.gegy.dev"
@@ -91,6 +94,11 @@ dependencies {
         version { prefer project.exp4j_version }
     })
     additionalRuntimeClasspath "net.objecthunter:exp4j:${project.exp4j_version}"
+
+    compileOnly "com.github.bawnorton.mixinsquared:mixinsquared-common:${project.mixinsquared_version}"
+    jarJar(implementation("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:[${project.mixinsquared_version},)") {
+        version { prefer project.mixinsquared_version }
+    })
 
     implementation "com.google.code.gson:gson:${project.gson_version}"
 

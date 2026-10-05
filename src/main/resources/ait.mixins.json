@@ -66,6 +66,8 @@
     "client.rendering.WorldRendererBotiMixin",
     "client.sonic.SonicItemRendererMixin",
     "client.sonic.SonicModelLoaderWrapperMixin",
+    "compat.ipsodium.OcclusionCullerMixin",
+    "compat.ipsodium.ViewportMixin",
     "compat.portals.BlockManipulationClientMixin",
     "compat.portals.ClientTeleportationManagerMixin",
     "compat.portals.DimIdSyncPacketMixin",

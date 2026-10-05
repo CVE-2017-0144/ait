@@ -2,6 +2,7 @@ package dev.amble.ait.client.boti;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.client.AITModClient;
@@ -33,10 +34,59 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 public class TardisDoorBOTI extends BOTI {
+    private static final Matrix4f overlayPose = new Matrix4f();
+    private static final Matrix4f overlayView = new Matrix4f();
+    private static final Matrix4f overlayProjection = new Matrix4f();
+    private static ClientTardis overlayTardis;
+    private static DoorBlockEntity overlayDoor;
+
+    // iris composites later, doorway goes on top, depth tested to keep the hand
+    public static void drawShaderOverlay() {
+        ClientTardis tardis = overlayTardis;
+        overlayTardis = null;
+
+        if (tardis == null || !DependencyChecker.isIrisShaderPackInUse())
+            return;
+
+        Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+
+        GL11.glEnable(GL11.GL_STENCIL_TEST);
+        GL11.glStencilMask(0xFF);
+        GL11.glClearStencil(0);
+        GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
+        GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
+        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+
+        Matrix4f projection = new Matrix4f(RenderSystem.getProjectionMatrix());
+        VertexSorting sorting = RenderSystem.getVertexSorting();
+        RenderSystem.setProjectionMatrix(overlayProjection, sorting);
+        Matrix4fStack view = RenderSystem.getModelViewStack();
+        view.pushMatrix();
+        view.set(overlayView);
+        RenderSystem.applyModelViewMatrix();
+
+        PoseStack stack = new PoseStack();
+        stack.last().pose().set(overlayPose);
+        drawDoorApertureMask(tardis, overlayDoor, stack);
+
+        view.popMatrix();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.setProjectionMatrix(projection, sorting);
+
+        GL11.glStencilMask(0x00);
+        GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
+        BOTI.blitInStencilRegion(BOTI_HANDLER.afbo);
+
+        GL11.glStencilMask(0xFF);
+        GL11.glDisable(GL11.GL_STENCIL_TEST);
+    }
+
     public static void drawDoorApertureMask(ClientTardis tardis, DoorBlockEntity door, PoseStack stack) {
         drawDoorApertureMask(tardis, door, stack, false);
     }
@@ -80,8 +130,6 @@ public class TardisDoorBOTI extends BOTI {
         Minecraft client = Minecraft.getInstance();
         if (client.level == null || client.player == null) return;
 
-        BOTI.LAST_RENDERED_DOOR.put(tardis.getUuid(), door);
-
         PortalData portalData = PortalDataManager.get(tardis.getUuid());
         boolean landed = tardis.travel().getState() == TravelHandlerBase.State.LANDED;
 
@@ -118,6 +166,14 @@ public class TardisDoorBOTI extends BOTI {
         BOTI.resetStencilByDraw();
         GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+
+        if (DependencyChecker.isIrisShaderPackInUse()) {
+            overlayTardis = tardis;
+            overlayDoor = door;
+            overlayPose.set(stack.last().pose());
+            overlayView.set(RenderSystem.getModelViewMatrix());
+            overlayProjection.set(RenderSystem.getProjectionMatrix());
+        }
 
         drawDoorApertureMask(tardis, door, stack);
 

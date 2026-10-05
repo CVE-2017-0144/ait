@@ -36,7 +36,6 @@ public class BOTI {
     public static BOTIInit BOTI_HANDLER = new BOTIInit();
     public static AITBufferBuilderStorage AIT_BUF_BUILDER_STORAGE = new AITBufferBuilderStorage();
     public static Queue<DoorBlockEntity> DOOR_RENDER_QUEUE = new LinkedList<>();
-    public static final Map<UUID, DoorBlockEntity> LAST_RENDERED_DOOR = new HashMap<>();
     public static Queue<BOTIPaintingEntity> GALLIFREYAN_RENDER_QUEUE = new LinkedList<>();
     public static Queue<BOTIPaintingEntity> TRENZALORE_PAINTING_QUEUE = new LinkedList<>();
     public static Queue<ExteriorBlockEntity> EXTERIOR_RENDER_QUEUE = new LinkedList<>();
@@ -245,6 +244,41 @@ public class BOTI {
 
     public static void writeNearDepthInStencilRegion() {
         drawFullscreenQuad(false, true, 0.0);
+    }
+
+    public static void blitInStencilRegion(RenderTarget src) {
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.depthMask(false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableBlend();
+        RenderSystem.disableCull();
+
+        Matrix4f prevProjection = new Matrix4f(RenderSystem.getProjectionMatrix());
+        VertexSorting prevSorter = RenderSystem.getVertexSorting();
+        RenderSystem.setProjectionMatrix(IDENTITY_MATRIX, VertexSorting.DISTANCE_TO_ORIGIN);
+        Matrix4fStack modelView = RenderSystem.getModelViewStack();
+        modelView.pushMatrix();
+        modelView.identity();
+        RenderSystem.applyModelViewMatrix();
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, src.getColorTextureId());
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        builder.addVertex(-1.0f, -1.0f, 0.0f).setUv(0.0f, 0.0f);
+        builder.addVertex(1.0f, -1.0f, 0.0f).setUv(1.0f, 0.0f);
+        builder.addVertex(1.0f, 1.0f, 0.0f).setUv(1.0f, 1.0f);
+        builder.addVertex(-1.0f, 1.0f, 0.0f).setUv(0.0f, 1.0f);
+        BufferUploader.drawWithShader(builder.buildOrThrow());
+
+        modelView.popMatrix();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.setProjectionMatrix(prevProjection, prevSorter);
+
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
     }
 
     public static void fillColorInStencilRegion(float r, float g, float b) {

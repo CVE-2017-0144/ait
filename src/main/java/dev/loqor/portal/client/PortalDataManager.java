@@ -148,7 +148,6 @@ public class PortalDataManager {
         map.clear();
         particles.clear();
         lastPacket.clear();
-        BOTI.LAST_RENDERED_DOOR.clear();
         BOTI.LAST_RENDERED_EXTERIOR.clear();
     }
 

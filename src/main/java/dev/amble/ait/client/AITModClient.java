@@ -206,7 +206,6 @@ public class AITModClient implements ClientModEntrypoint {
                     this.renderBOTI(context);
             });
 
-            WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.GbufferInjectionProbe::run);
             WorldRenderEvents.AFTER_ENTITIES.register(dev.amble.ait.client.boti.iris.ExteriorGbufferInjection::run);
         }
 

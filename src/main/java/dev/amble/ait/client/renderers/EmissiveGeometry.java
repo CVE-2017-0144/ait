@@ -52,7 +52,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
  * <p>Parts are skipped by clearing {@link ModelPart#visible}, because {@code ModelPart.render}
  * returns on that before touching its cuboids or its children. Only the highest parts whose whole
  * subtree is unlit are cleared, so the per-frame cost is a walk of a short array rather than of
- * every part.
+ * every part. A part that is drawn for a lit child but has no lit quad of its own gets
+ * {@link ModelPart#skipDraw} instead, which skips its cuboids and still draws its children.
  *
  * <p>The cull is computed for {@link #hideUnlit}'s root, while the pass also draws whatever
  * {@code renderExtras} adds. Today that is only Hudolin's toolbox, a sibling of the root and so
@@ -80,7 +81,9 @@ public final class EmissiveGeometry {
     // Weakly keyed: getCachedModel never clears its field, but a datapack sync can rebuild the
     // variant registry and hand out new schemas with new trees, and holding the old roots would leak
     // them. ModelPart does not override equals, so this is identity keyed either way.
-    private static final Map<ModelPart, Map<ResourceLocation, ModelPart[]>> FRONTIERS = new WeakHashMap<>();
+    private static final Map<ModelPart, Map<ResourceLocation, Cull>> FRONTIERS = new WeakHashMap<>();
+
+    private static final Cull NO_CULL = new Cull(NOTHING, NOTHING);
 
     /**
      * Clears the unlit parts of {@code root} for a single draw. The caller must
@@ -89,29 +92,36 @@ public final class EmissiveGeometry {
      */
     public static Scope hideUnlit(ModelPart root, ResourceLocation emission) {
         if (root == null || emission == null)
-            return new Scope(NOTHING, NO_STATE);
+            return new Scope(NO_CULL, NO_STATE, NO_STATE);
 
         try {
-            ModelPart[] frontier = frontierFor(root, emission);
+            Cull cull = frontierFor(root, emission);
 
-            if (frontier.length == 0)
-                return new Scope(NOTHING, NO_STATE);
+            if (cull == NO_CULL)
+                return new Scope(NO_CULL, NO_STATE, NO_STATE);
 
-            boolean[] previous = new boolean[frontier.length];
+            boolean[] visible = new boolean[cull.hide().length];
+            boolean[] skipped = new boolean[cull.skip().length];
 
-            for (int i = 0; i < frontier.length; i++) {
-                ModelPart part = frontier[i];
-                previous[i] = part.visible;
+            for (int i = 0; i < visible.length; i++) {
+                ModelPart part = cull.hide()[i];
+                visible[i] = part.visible;
                 part.visible = false;
             }
 
-            return new Scope(frontier, previous);
+            for (int i = 0; i < skipped.length; i++) {
+                ModelPart part = cull.skip()[i];
+                skipped[i] = part.skipDraw;
+                part.skipDraw = true;
+            }
+
+            return new Scope(cull, visible, skipped);
         } catch (Throwable t) {
             // Drawing everything is always correct, and this runs inside the caller's matrix push, so
             // letting anything escape would corrupt the matrix stack rather than lose a little speed.
             AITMod.LOGGER.warn("Could not work out what to cull for {}, drawing all of it", emission, t);
             MASKS.put(emission, null);
-            return new Scope(NOTHING, NO_STATE);
+            return new Scope(NO_CULL, NO_STATE, NO_STATE);
         }
     }
 
@@ -161,40 +171,49 @@ public final class EmissiveGeometry {
     /** Restores what {@link #hideUnlit} cleared, to what it was rather than to visible. */
     public static final class Scope {
 
-        private final ModelPart[] hidden;
-        private final boolean[] previous;
+        private final Cull cull;
+        private final boolean[] visible;
+        private final boolean[] skipped;
 
-        private Scope(ModelPart[] hidden, boolean[] previous) {
-            this.hidden = hidden;
-            this.previous = previous;
+        private Scope(Cull cull, boolean[] visible, boolean[] skipped) {
+            this.cull = cull;
+            this.visible = visible;
+            this.skipped = skipped;
         }
 
         public void restore() {
             // Backwards, so that if one part ever appeared twice the first value written wins and the
             // part is not left hidden for every later pass.
-            for (int i = this.previous.length - 1; i >= 0; i--) {
-                this.hidden[i].visible = this.previous[i];
+            for (int i = this.visible.length - 1; i >= 0; i--) {
+                this.cull.hide()[i].visible = this.visible[i];
+            }
+
+            for (int i = this.skipped.length - 1; i >= 0; i--) {
+                this.cull.skip()[i].skipDraw = this.skipped[i];
             }
         }
     }
 
-    private static ModelPart[] frontierFor(ModelPart root, ResourceLocation emission) {
-        Map<ResourceLocation, ModelPart[]> byTexture = FRONTIERS.computeIfAbsent(root, key -> new HashMap<>());
-        ModelPart[] cached = byTexture.get(emission);
+    private record Cull(ModelPart[] hide, ModelPart[] skip) {
+    }
+
+    private static Cull frontierFor(ModelPart root, ResourceLocation emission) {
+        Map<ResourceLocation, Cull> byTexture = FRONTIERS.computeIfAbsent(root, key -> new HashMap<>());
+        Cull cached = byTexture.get(emission);
 
         if (cached != null)
             return cached;
 
-        ModelPart[] frontier = buildFrontier(root, emission);
-        byTexture.put(emission, frontier);
-        return frontier;
+        Cull cull = buildFrontier(root, emission);
+        byTexture.put(emission, cull);
+        return cull;
     }
 
-    private static ModelPart[] buildFrontier(ModelPart root, ResourceLocation emission) {
+    private static Cull buildFrontier(ModelPart root, ResourceLocation emission) {
         Mask mask = maskFor(emission);
 
         if (mask == null)
-            return NOTHING;
+            return NO_CULL;
 
         Map<ModelPart, Boolean> memo = new IdentityHashMap<>();
 
@@ -202,11 +221,12 @@ public final class EmissiveGeometry {
             // Nothing in the model can light up against this texture. Either it is the wrong texture
             // for this model or the read is wrong, and hiding the root would delete the glow outright.
             AITMod.LOGGER.warn("{} lights no part of this model, not culling", emission);
-            return NOTHING;
+            return NO_CULL;
         }
 
         List<ModelPart> frontier = new ArrayList<>();
-        collect(root, mask, memo, frontier);
+        List<ModelPart> skip = new ArrayList<>();
+        collect(root, mask, memo, frontier, skip);
 
         if (AITMod.LOGGER.isDebugEnabled()) {
             long hidden = frontier.stream().mapToLong(part -> part.getAllParts().count()).sum();
@@ -214,17 +234,23 @@ public final class EmissiveGeometry {
                     emission, frontier.size(), root.getAllParts().count() - hidden, root.getAllParts().count());
         }
 
-        return frontier.isEmpty() ? NOTHING : frontier.toArray(ModelPart[]::new);
+        if (frontier.isEmpty() && skip.isEmpty())
+            return NO_CULL;
+
+        return new Cull(frontier.toArray(ModelPart[]::new), skip.toArray(ModelPart[]::new));
     }
 
-    private static void collect(ModelPart part, Mask mask, Map<ModelPart, Boolean> memo, List<ModelPart> out) {
+    private static void collect(ModelPart part, Mask mask, Map<ModelPart, Boolean> memo, List<ModelPart> out, List<ModelPart> skip) {
         if (!subtreeLit(part, mask, memo)) {
             out.add(part);
             return;
         }
 
+        if (!((ModelPartAccessor) (Object) part).ait$cuboids().isEmpty() && !ownQuadsLit(part, mask))
+            skip.add(part);
+
         for (ModelPart child : children(part)) {
-            collect(child, mask, memo, out);
+            collect(child, mask, memo, out, skip);
         }
     }
 

@@ -242,11 +242,13 @@ public class ConsoleRenderer<T extends ConsoleBlockEntity> implements BlockEntit
             // to be put back before anything else draws it.
             EmissiveGeometry.Scope unlit = EmissiveGeometry.hideUnlit(model.root(), variant.emission());
 
-            model.renderGeometryOnly(tardis, entity, model.root(),
-                    matrices, emissive, 0xf000f0, overlay,
-                    1, 1, 1, 1, tickDelta);
-
-            unlit.restore();
+            try {
+                model.renderGeometryOnly(tardis, entity, model.root(),
+                        matrices, emissive, 0xf000f0, overlay,
+                        1, 1, 1, 1, tickDelta);
+            } finally {
+                unlit.restore();
+            }
         }
         matrices.popPose();
     }

@@ -59,6 +59,7 @@
     "client.rendering.HeldItemRendererMixin",
     "client.rendering.ParticleManagerMixin",
     "client.rendering.GameRendererBotiMixin",
+    "client.rendering.LayerDefinitionMixin",
     "client.rendering.ModelPartAccessor",
     "client.rendering.PlayerEntityRendererMixin",
     "client.rendering.SkyboxMixin",

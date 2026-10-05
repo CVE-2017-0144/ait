@@ -682,7 +682,7 @@ public class WorldGeometryRenderer {
     }
 
     private void drawLayer(RenderType layer, List<Map<RenderType, VertexBuffer>> visible) {
-        int target = GlStateManager.getBoundFramebuffer();
+        int target = boundTarget();
         layer.setupRenderState();
         restoreTarget(target);
 
@@ -697,6 +697,11 @@ public class WorldGeometryRenderer {
         VertexBuffer.unbind();
         layer.clearRenderState();
         restoreTarget(target);
+    }
+
+    // only fabulous rebinds, and the query stalls the pipeline
+    private static int boundTarget() {
+        return Minecraft.useShaderTransparency() ? GlStateManager.getBoundFramebuffer() : 0;
     }
 
     private static void restoreTarget(int target) {
@@ -996,7 +1001,7 @@ public class WorldGeometryRenderer {
 
         dispatcher.prepare(portalWorld, portalCamera, client.hitResult);
 
-        int target = GlStateManager.getBoundFramebuffer();
+        int target = boundTarget();
         PoseStack matrices = new PoseStack();
         AABB cameraBox = new AABB(portalCamera.getBlockPosition());
 
@@ -1042,7 +1047,7 @@ public class WorldGeometryRenderer {
 
         dispatcher.prepare(portalWorld, portalCamera, client.crosshairPickEntity);
 
-        int target = GlStateManager.getBoundFramebuffer();
+        int target = boundTarget();
         RenderSystem.polygonOffset(-1.0f, -10.0f);
         RenderSystem.enablePolygonOffset();
         try {
@@ -1084,7 +1089,7 @@ public class WorldGeometryRenderer {
 
         Minecraft client = Minecraft.getInstance();
 
-        int target = GlStateManager.getBoundFramebuffer();
+        int target = boundTarget();
         manager.render(client.gameRenderer.lightTexture(), portalCamera, tickDelta);
         immediate.endBatch();
         restoreTarget(target);

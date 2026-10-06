@@ -278,6 +278,7 @@ public class BiggerOnTheInside implements ModEntrypoint {
             return true;
         }
         entry.viewers = viewerIds;
+        replayMissed(portalId, viewers, entry.missedEntities);
 
         broadcastTime(portalId, viewers, interior);
         maybeBroadcastWeather(portalId, viewers, interior, entry);
@@ -313,10 +314,11 @@ public class BiggerOnTheInside implements ModEntrypoint {
         BlockPos[] posRef = { doorPos };
 
         boolean[] dirtyRef = { false };
+        List<Packet<?>> missedEntities = new ArrayList<>();
 
         PacketProxyPlayer proxy = new PacketProxyPlayer(interior);
         proxy.setPos(doorPos.getX(), doorPos.getY(), doorPos.getZ());
-        proxy.setPacketListener(packet -> forwardInteriorIfInRange(portalId, tardis, posRef[0], dirtyRef, packet));
+        proxy.setPacketListener(packet -> forwardInteriorIfInRange(portalId, tardis, posRef[0], dirtyRef, missedEntities, packet));
 
         interior.addFreshEntity(proxy);
         proxy.sendChunks();
@@ -332,6 +334,7 @@ public class BiggerOnTheInside implements ModEntrypoint {
         ProxyEntry entry = new ProxyEntry(portalId, proxy, interior, posRef, doorPos, viewerIds, rain, thunder);
         entry.graceDeadline = System.currentTimeMillis() + INTERIOR_GRACE_MS;
         entry.worldDirtyRef = dirtyRef;
+        entry.missedEntities = missedEntities;
         return entry;
     }
 
@@ -410,7 +413,7 @@ public class BiggerOnTheInside implements ModEntrypoint {
     }
 
     private static void forwardInteriorIfInRange(UUID portalId, ServerTardis tardis, BlockPos center,
-                                                 boolean[] dirtyRef, Packet<?> packet) {
+                                                 boolean[] dirtyRef, List<Packet<?>> missedEntities, Packet<?> packet) {
         if (isChunkPacketOutOfRange(packet, center))
             return;
         if (!shouldForward(packet))
@@ -420,10 +423,21 @@ public class BiggerOnTheInside implements ModEntrypoint {
         if (viewers.isEmpty()) {
             if (isWorldChange(packet))
                 dirtyRef[0] = true;
+            else if (isEntityChange(packet))
+                missedEntities.add(packet);
             return;
         }
 
+        replayMissed(portalId, viewers, missedEntities);
         broadcast(portalId, viewers, packet);
+    }
+
+    // spawns and removals nobody was watching, or a quick re-look keeps ghosts
+    private static void replayMissed(UUID portalId, List<ServerPlayer> viewers, List<Packet<?>> missed) {
+        for (Packet<?> packet : missed)
+            broadcast(portalId, viewers, packet);
+
+        missed.clear();
     }
 
     private static boolean isWorldChange(Packet<?> packet) {
@@ -431,6 +445,12 @@ public class BiggerOnTheInside implements ModEntrypoint {
                 || packet instanceof ClientboundSectionBlocksUpdatePacket
                 || packet instanceof ClientboundLevelChunkWithLightPacket
                 || packet instanceof ClientboundForgetLevelChunkPacket;
+    }
+
+    private static boolean isEntityChange(Packet<?> packet) {
+        return packet instanceof ClientboundBundlePacket
+                || packet instanceof ClientboundAddEntityPacket
+                || packet instanceof ClientboundRemoveEntitiesPacket;
     }
 
     private static boolean isChunkPacketOutOfRange(Packet<?> packet, BlockPos extPos) {
@@ -604,6 +624,7 @@ public class BiggerOnTheInside implements ModEntrypoint {
         long graceDeadline;
 
         boolean[] worldDirtyRef;
+        List<Packet<?>> missedEntities;
 
         ProxyEntry(UUID tardisId, PacketProxyPlayer proxy, ServerLevel world,
                    BlockPos[] posRef, BlockPos pos, Set<UUID> viewers,

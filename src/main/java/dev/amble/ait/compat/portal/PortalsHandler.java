@@ -3,6 +3,7 @@ package dev.amble.ait.compat.portal;
 import dev.amble.ait.AITMod;
 import dev.amble.ait.api.tardis.KeyedTardisComponent;
 import dev.amble.ait.api.tardis.TardisEvents;
+import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.core.AITDimensions;
 import dev.amble.ait.core.tardis.ServerTardis;
 import dev.amble.ait.core.tardis.handler.travel.TravelHandlerBase;
@@ -20,6 +21,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -27,6 +29,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import qouteall.imm_ptl.core.CHelper;
+import qouteall.imm_ptl.core.IPGlobal;
 import qouteall.imm_ptl.core.api.PortalAPI;
 import qouteall.imm_ptl.core.chunk_loading.ImmPtlChunkTracking;
 import qouteall.imm_ptl.core.portal.Portal;
@@ -35,6 +39,7 @@ import qouteall.imm_ptl.core.render.PortalEntityRenderer;
 import qouteall.imm_ptl.core.render.context_management.PortalRendering;
 import qouteall.q_misc_util.MiscNetworking;
 import qouteall.q_misc_util.my_util.DQuaternion;
+import qouteall.q_misc_util.my_util.Plane;
 
 public class PortalsHandler extends KeyedTardisComponent {
 
@@ -123,6 +128,30 @@ public class PortalsHandler extends KeyedTardisComponent {
 
         PortalVisualizerUtil.clientInit();
         PortalsAPI.RENDERING_PORTAL = PortalRendering::isRendering;
+
+        // ip drops its portal clip for block entities when iris is loaded
+        PortalsAPI.CLIP_PLANE = (level, out) -> {
+            // boti draws its own copies of these in a portal pass too
+            if (!IPGlobal.enableClippingMechanism || !DependencyChecker.hasIris() || !PortalRendering.isRendering()
+                    || level != Minecraft.getInstance().level)
+                return false;
+
+            Plane plane = PortalRendering.getActiveClippingPlane();
+
+            if (plane == null)
+                return false;
+
+            Vec3 cam = CHelper.getCurrentCameraPos();
+            Vec3 at = plane.pos();
+            Vec3 n = plane.normal();
+            out[0] = at.x - cam.x;
+            out[1] = at.y - cam.y;
+            out[2] = at.z - cam.z;
+            out[3] = n.x;
+            out[4] = n.y;
+            out[5] = n.z;
+            return true;
+        };
 
         if (TardisPortal.ENTITY_TYPE != null)
             ClientRegistries.entityRenderer(TardisPortal.ENTITY_TYPE, PortalEntityRenderer::new);

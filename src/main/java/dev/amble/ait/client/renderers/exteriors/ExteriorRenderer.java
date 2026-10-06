@@ -16,6 +16,7 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientRenderPass;
 import dev.amble.ait.client.util.ClientTardisUtil;
 import dev.amble.ait.client.util.OffScreenCull;
+import dev.amble.ait.client.util.PlaneClip;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.compat.iris.IrisCompat;
 import dev.amble.ait.core.blockentities.ExteriorBlockEntity;
@@ -61,6 +62,7 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
     private static final ShieldsModel SHIELDS_MODEL = new ShieldsModel(
             ShieldsModel.getTexturedModelData().bakeRoot());
 
+    private final PlaneClip clip = new PlaneClip();
     private ClientExteriorVariantSchema variant;
     private ExteriorModel model;
 
@@ -144,9 +146,7 @@ public class ExteriorRenderer<T extends ExteriorBlockEntity> implements BlockEnt
             return;
         }
 
-        // ip skips its portal clipping for block entities when iris is loaded
-        if (DependencyChecker.hasIris() && this.awesomeIPEmissionHack(tardis))
-            return;
+        vertexConsumers = this.clip.wrap(vertexConsumers, entity.getLevel());
 
         if (tardis.travel().getAlpha() > 0) {
             profiler.incrementCounter("ait_exterior_drawn");

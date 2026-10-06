@@ -13,6 +13,7 @@ import dev.amble.ait.client.tardis.ClientTardis;
 import dev.amble.ait.client.util.ClientRenderPass;
 import dev.amble.ait.client.util.DyeColorUtil;
 import dev.amble.ait.client.util.OffScreenCull;
+import dev.amble.ait.client.util.PlaneClip;
 import dev.amble.ait.compat.DependencyChecker;
 import dev.amble.ait.compat.iris.IrisCompat;
 import dev.amble.ait.core.blockentities.DoorBlockEntity;
@@ -38,6 +39,7 @@ import org.joml.Vector3f;
 
 public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRenderer<T> {
 
+    private final PlaneClip clip = new PlaneClip();
     private ClientExteriorVariantSchema variant;
     private AnimatedModel<DoorBlockEntity> model;
     private CapsuleDoorModel unlinked;
@@ -83,6 +85,9 @@ public class DoorRenderer<T extends DoorBlockEntity> implements BlockEntityRende
         profiler.push("door");
 
         ClientTardis tardis = entity.tardis().get().asClient();
+
+        vertexConsumers = this.clip.wrap(vertexConsumers, entity.getLevel());
+
         if (!tardis.siege().isActive())
             this.renderDoor(profiler, tardis, entity, matrices, vertexConsumers, light, overlay, tickDelta);
 

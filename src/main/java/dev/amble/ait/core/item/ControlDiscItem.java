@@ -22,7 +22,6 @@ import dev.amble.lib.data.CachedDirectedGlobalPos;
 import dev.amble.lib.data.DirectedGlobalPos;
 import org.jetbrains.annotations.Nullable;
 
-
 public class ControlDiscItem extends AbstractCoordinateModifierItem {
 
     public static final String CAN_CONTAIN_PLAYERS = "can_contain_players";
@@ -33,34 +32,33 @@ public class ControlDiscItem extends AbstractCoordinateModifierItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-        // if (world.isClient()) return TypedActionResult.consume(user.getMainHandStack()); //<-- Not sure if it being on either is an issue or not - Loqor
-        ItemStack offhand = user.getOffhandItem();
-        ItemStack mainhand = user.getMainHandItem();
-
         if (TardisServerWorld.isTardisDimension(world)) {
             user.displayClientMessage(Component.translatable("ait.control_disc.unusable_in_tardis_world"), true);
-            return InteractionResultHolder.fail(user.getMainHandItem());
+            return InteractionResultHolder.fail(user.getItemInHand(hand));
         }
-        if (offhand.getItem() instanceof SonicItem sonic) {
-            if (sonic.isLinked(offhand)) {
-                SonicMode mode = SonicItem.mode(offhand);
-                if (mode.equals(SonicMode.Modes.INTERACTION) && AbstractCoordinateModifierItem.getPos(mainhand) == null) {
-                    CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(world.dimension(),
-                            user.blockPosition(), DirectedGlobalPos.getGeneralizedRotation(user.getMotionDirection()));
-                    AbstractCoordinateModifierItem.setPos(user.getMainHandItem(), targetPos);
-                    ControlDiscItem.setCanContainPlayers(mainhand, true);
-                    user.playSound(AITSounds.DING, 1f, 1f);
-                    user.displayClientMessage(Component.translatable("ait.control_disc.set_position")
-                            .append(Component.literal(" > " + targetPos)
-                                    .withStyle(ChatFormatting.BLUE)), true);
-                } else if (mode.equals(SonicMode.Modes.OVERLOAD) && AbstractCoordinateModifierItem.getPos(mainhand) != null) {
-                    ControlDiscItem.setCanContainPlayers(mainhand, !ControlDiscItem.canContainPlayers(mainhand));
-                    user.playSound(AITSounds.DING, 1f, 0.1f);
-                    user.displayClientMessage(Component.translatable("ait.control_disc.can_contain_players.toggle", ControlDiscItem.canContainPlayers(mainhand))
-                                    .withStyle(ChatFormatting.BLUE), true);
-                }
+
+        ItemStack discStack = user.getItemInHand(hand);
+        ItemStack otherStack = user.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+
+        if (otherStack.getItem() instanceof SonicItem sonic && sonic.isLinked(otherStack)) {
+            SonicMode mode = SonicItem.mode(otherStack);
+            if (mode.equals(SonicMode.Modes.INTERACTION) && AbstractCoordinateModifierItem.getPos(discStack) == null) {
+                CachedDirectedGlobalPos targetPos = CachedDirectedGlobalPos.create(world.dimension(),
+                        user.blockPosition(), DirectedGlobalPos.getGeneralizedRotation(user.getMotionDirection()));
+                AbstractCoordinateModifierItem.setPos(discStack, targetPos);
+                ControlDiscItem.setCanContainPlayers(discStack, true);
+                user.playSound(AITSounds.DING, 1f, 1f);
+                user.displayClientMessage(Component.translatable("ait.control_disc.set_position")
+                        .append(Component.literal(" > " + targetPos)
+                                .withStyle(ChatFormatting.BLUE)), true);
+            } else if (mode.equals(SonicMode.Modes.OVERLOAD) && AbstractCoordinateModifierItem.getPos(discStack) != null) {
+                ControlDiscItem.setCanContainPlayers(discStack, !ControlDiscItem.canContainPlayers(discStack));
+                user.playSound(AITSounds.DING, 1f, 0.1f);
+                user.displayClientMessage(Component.translatable("ait.control_disc.can_contain_players.toggle", ControlDiscItem.canContainPlayers(discStack))
+                                .withStyle(ChatFormatting.BLUE), true);
             }
         }
+
         return super.use(world, user, hand);
     }
 
